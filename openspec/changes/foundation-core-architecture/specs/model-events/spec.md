@@ -8,6 +8,16 @@ one coherent mechanism.
 
 ## ADDED Requirements
 
+### Requirement: A gesture is captured by the backend and resolved into one action
+
+A backend SHALL capture a raw user gesture and the library SHALL resolve that
+gesture into exactly one semantic action before any mutation is applied, so
+that the same gesture never produces two divergent mutations.
+
+#### Scenario: One gesture, one action
+- **WHEN** a backend captures a raw user gesture
+- **THEN** the gesture is resolved into a single semantic action before any mutation is applied
+
 ### Requirement: Interaction is expressed as a semantic action
 
 Every user interaction that the library interprets SHALL be expressed as a
