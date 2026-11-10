@@ -25,11 +25,19 @@ support, the build SHALL fail with an explicit error naming the missing
 capability.
 
 #### Scenario: Events requested on a static backend
-- **WHEN** a user registers a callback on a figure whose backend does not support events
+- **WHEN** a user configures a figure that registers a callback, on a backend that does not support events
 - **THEN** the build fails with an error naming the unsupported capability and the backend
 
 #### Scenario: Streaming requested on a static backend
-- **WHEN** a user attaches a streaming source to a figure whose backend does not support streaming
+- **WHEN** a user configures a figure with a streaming source, on a backend that does not support streaming
+- **THEN** the build fails with an error naming the unsupported capability
+
+#### Scenario: Scripting requested on a backend without scripting
+- **WHEN** a user configures a figure that registers a script, on a backend that does not support scripting
+- **THEN** the build fails with an error naming the unsupported capability and the backend
+
+#### Scenario: In-place update requested on a backend without it
+- **WHEN** a user configures a figure that requires in-place update, on a backend that does not support it
 - **THEN** the build fails with an error naming the unsupported capability
 
 ### Requirement: Backends support in-place update
