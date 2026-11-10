@@ -5,6 +5,11 @@
 > The normative, testable form of the requirements lives in the OpenSpec
 > capabilities under `openspec/specs/`; this document explains the product,
 > the principles behind it and the roadmap.
+>
+> Section map: references in `AGENTS.md` and `openspec/config.yaml` that use
+> the numbering of the pre-foundation draft resolve as follows — workspace and
+> crate layout: §4.2; naming and prefix rules: §3.8; representation parity:
+> §3.3; acceptance criteria: §9; roadmap: §6.
 
 ## 1. Vision
 
@@ -72,6 +77,12 @@ more than one representation accepts dense, sparse and streaming input on every
 public operation, dispatches on the representation exactly once per operation,
 never densifies a sparse input and never blocks the render thread on a stream.
 
+The single exception is an artist whose mathematics genuinely requires
+full-data geometry. Such an artist rejects a streaming view up front with an
+explicit unsupported-representation error naming a documented alternative path
+— typically a windowed or aggregated view — and the change that introduces it
+states why the exception applies and names that path.
+
 ### 3.4 Rust is the brain
 
 Events always travel up to the Rust runtime; mutations always travel down as
@@ -101,8 +112,31 @@ Cargo feature. The core requires no async runtime.
 ### 3.8 Consistency over cleverness
 
 Same names, same prefixes, same shapes across the whole surface: `SV` for
-public types, `sv_` for free functions and modules, no abbreviations except
-the project prefix.
+public types and traits, `sv_` for free functions, variables and public
+modules, no abbreviations except the project prefix. Methods — functions inside
+an `impl` block — carry no prefix.
+
+### 3.9 Mechanical organization of the source
+
+The source layout is decided by rule, not by taste:
+
+- A `.rs` file longer than 200 lines becomes a standardized folder module
+  (`mod.rs`, `builder.rs`, `core_implementation.rs`, `fitting_logic.rs`,
+  `*_tests.rs`).
+- A folder `mod.rs` is a pure dispatcher: it declares submodules and
+  re-exports their public items, and holds no implementation logic.
+- Tests live in companion `*_tests.rs` modules beside the implementation, with
+  mock data in borrowed slices and synthetic streams; there is no global
+  `tests/` directory.
+- Any inline `#[cfg(test)]` block sits at the end of its file, so the
+  implementation reads top-down.
+
+### 3.10 Asynchrony without blocking
+
+The core requires no async runtime. Heavy computation runs on `rayon`, I/O and
+stream updates on `Tokio`, and no CPU-bound work ever blocks an async thread.
+Iteration over data uses `.map()` / `azip!()` / `par_azip!()` rather than
+manual index loops.
 
 ## 4. Capability catalogue
 
@@ -120,7 +154,8 @@ Figure ── owns ── Artists (one per series / mark type)
 ```
 
 Figures are built through builders; direct constructors are private. Every
-builder exposes `backend(...)` and `execution_mode(...)`.
+builder exposes `backend(...)` and `execution_mode(...)`; the execution mode
+defaults to `Automatic`, while the backend has no automatic variant at all.
 
 ### 4.2 Rendering backends
 
