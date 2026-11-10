@@ -10,7 +10,7 @@
 - [x] 2.1 Verify that each of the ten capability specs has a purpose section, requirements written with normative wording, and at least one scenario per requirement, by running `openspec validate "foundation-core-architecture" --strict`
 - [x] 2.2 Verify that the scenarios of `data-view-boundary` cover dense, sparse and streaming input for every artist operation that accepts more than one representation, by reviewing the scenario list against the requirement text
 - [x] 2.3 Verify that `backend-selection` and `backend-capabilities` together forbid an automatic backend and require an explicit failure for every unsupported capability combination
-- [ ] 2.4 Verify that `model-events` and `event-payloads` together describe the full pipeline gesture, action, mutation and event, with a scenario for the cascade budget and for the three-dimensional payload
+- [x] 2.4 Verify that `model-events` and `event-payloads` together describe the full pipeline gesture, action, mutation and event, with a scenario for the cascade budget and for the three-dimensional payload
 
 ## 3. Repository wiring
 
