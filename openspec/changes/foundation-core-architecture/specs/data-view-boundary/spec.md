@@ -50,6 +50,17 @@ available at that moment.
 - **WHEN** an operation reads a streaming representation while no new data has arrived
 - **THEN** the operation returns with the currently available data instead of waiting
 
+### Requirement: Source adaptors cover the documented data systems
+
+The library SHALL provide adaptors that expose borrowed slices, `ndarray`
+arrays, sparse index-and-value storage, standard-library channels, arbitrary
+streams, Polars frames and DataFusion record batches through the public source
+contract.
+
+#### Scenario: Adaptor produces a view
+- **WHEN** a user attaches one of the documented adaptors to an artist
+- **THEN** the adaptor presents the data as one of the three representations, without copying it into an owned array
+
 ### Requirement: Representation parity across artists
 
 An artist that mathematically tolerates more than one representation SHALL

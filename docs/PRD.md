@@ -140,6 +140,21 @@ manual index loops.
 
 ## 4. Capability catalogue
 
+Every capability named in this catalogue is governed by a durable OpenSpec
+capability, and every OpenSpec capability of this change has its home here.
+The mapping is:
+
+| Section | OpenSpec capability |
+|---|---|
+| §4.1 The figure model | shared substrate, not a capability of its own — `model-events`, `layout-engine`, `ui-kit`, `theming`, `scripting`, `backend-selection` |
+| §4.2 Rendering backends | `backend-selection`, `backend-capabilities` |
+| §4.3 Data sources | `data-view-boundary` |
+| §4.4 Events, actions and scripting | `model-events`, `event-payloads`, `scripting` |
+| §4.5 Theming and palettes | `theming` |
+| §4.6 Layout and responsiveness | `layout-engine` |
+| §4.7 The interactive UI kit | `ui-kit` |
+| §4.8 Dashboards | `dashboard` |
+
 ### 4.1 The figure model
 
 ```
