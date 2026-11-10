@@ -9,7 +9,8 @@
 > Section map: references in `AGENTS.md` and `openspec/config.yaml` that use
 > the numbering of the pre-foundation draft resolve as follows — workspace and
 > crate layout: §4.2; naming and prefix rules: §3.8; representation parity:
-> §3.3; acceptance criteria: §9; roadmap: §6.
+> §3.3; acceptance criteria: §9; roadmap: §6, whose Phase 0 is the
+> foundation and whose Phase 1 creates the workspace.
 
 ## 1. Vision
 
