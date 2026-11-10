@@ -3,7 +3,7 @@
 ## 1. Product requirements document
 
 - [x] 1.1 Write `docs/PRD.md` with the vision, the architectural principles, the capability catalogue (backends, data sources, script engines, UI kit), the phased roadmap and the open decisions, and verify that every architectural principle named in `AGENTS.md` and `openspec/config.yaml` appears in it
-- [ ] 1.2 Verify that `docs/PRD.md` contains no reference to capabilities that are not described in `openspec/changes/foundation-core-architecture/specs/`, by cross-checking every capability name mentioned in the document against the spec directories
+- [x] 1.2 Verify that `docs/PRD.md` contains no reference to capabilities that are not described in `openspec/changes/foundation-core-architecture/specs/`, by cross-checking every capability name mentioned in the document against the spec directories
 
 ## 2. Capability specifications
 
