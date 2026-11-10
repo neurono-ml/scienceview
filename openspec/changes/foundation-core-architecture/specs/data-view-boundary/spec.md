@@ -70,6 +70,20 @@ accept dense, sparse and streaming inputs on every public operation.
 - **WHEN** a user calls the same public operation with dense, sparse and streaming inputs
 - **THEN** each call succeeds and produces the same rendered result within the documented tolerance
 
+### Requirement: Multi-series operations accept every representation combination
+
+An operation that receives more than one series SHALL accept every combination
+of dense, sparse and streaming series, after validating that the series have
+matching lengths.
+
+#### Scenario: Every combination of series representations
+- **WHEN** a user calls a multi-series operation with series drawn from dense, sparse and streaming sources, in any combination
+- **THEN** the operation succeeds and produces the same rendered result within the documented tolerance
+
+#### Scenario: Mismatched series lengths
+- **WHEN** a user calls a multi-series operation with series of different lengths
+- **THEN** the operation fails with an error stating the mismatched lengths, before any series is read
+
 ### Requirement: Static-only exceptions are explicit
 
 When the mathematics of an artist genuinely requires full-data geometry, the
