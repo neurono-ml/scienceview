@@ -92,8 +92,9 @@ Requires Rust 1.85+, edition 2024.
 
 - Book (API, usage examples with tool-generated figures, every function): <https://neurono-ml.github.io/scienceview>
 - API reference: <https://docs.rs/scienceview>
+- Product requirements and architectural principles: see [`docs/PRD.md`](docs/PRD.md).
 - Sister project `sciencekit`: <https://github.com/neurono-ml/sciencekit> ([docs](https://neurono-ml.github.io/sciencekit/))
-- Product source of truth and contributor workflow: see [`AGENTS.md`](AGENTS.md).
+- Contributor workflow: see [`AGENTS.md`](AGENTS.md).
 
 ## License
 
