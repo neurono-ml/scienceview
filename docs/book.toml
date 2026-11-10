@@ -5,6 +5,6 @@ language = "en"
 src = "src"
 
 [output.html]
-site-url = "https://andreclaudino.github.io/scienceview/"
-git-repository-url = "https://github.com/andreclaudino/scienceview"
-edit-url-template = "https://github.com/andreclaudino/scienceview/edit/docs/documentations/docs/src/{path}"
+site-url = "https://neurono-ml.github.io/scienceview/"
+git-repository-url = "https://github.com/neurono-ml/scienceview"
+edit-url-template = "https://github.com/neurono-ml/scienceview/edit/docs/documentations/docs/src/{path}"

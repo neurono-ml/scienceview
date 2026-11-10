@@ -10,7 +10,8 @@ Instructions for agents working in this repository. Product source of truth: `do
 ## Overview
 
 - `scienceview`: Rust visualization library covering the capabilities of the most popular Python plotting libraries, with the same styling and interactivity, plus streaming data updates.
-- Freshly initialized repo: no Cargo workspace yet. Roadmap Phase 0 (PRD §12) creates the workspace with `scienceview_*` sub-crates under `crates/`.
+- Canonical location: `github.com/neurono-ml/scienceview`, pages at `https://neurono-ml.github.io/scienceview`. Sister project: [`sciencekit`](https://github.com/neurono-ml/sciencekit) ([docs](https://neurono-ml.github.io/sciencekit/)) — `sciencekit` learns the models, `scienceview` draws them.
+- Freshly initialized repo: no Cargo workspace yet. Roadmap Phase 0 (PRD §12) creates the workspace with `scienceview_*` sub-crates under `crates/` — one crate per rendering backend, all commanded by the `SVRenderBackend` trait.
 - Target toolchain: Rust 1.85, edition 2024. The PRD prevails over `docs/handoff.md`, which contains obsolete decisions (e.g., MSRV 1.64).
 - `graphify-out/` holds the codebase knowledge graph — architecture/file-relationship questions must go through the graphify skill (`/graphify`) before manual exploration.
 
@@ -48,14 +49,14 @@ Instructions for agents working in this repository. Product source of truth: `do
 - Use the `/opsx-propose`, `/opsx-apply`, `/opsx-archive` commands (`.opencode/commands/`); the `openspec` CLI is installed.
 - Create changes in separate groups:
   1. figure/artist implementation;
-  2. changes for the different rendering backends (native OS embedded components, HTML with JavaScript, WebAssembly, terminal TUI) and shared styling/interactivity kernels;
+  2. changes for the different rendering backends (self-contained SVG, HTML, WebAssembly, terminal TUI, React/Vue.js/Angular components, Rust-native Tauri/Dioxus targets) and shared styling/interactivity kernels;
   3. documentation changes.
 - Alternate rendering backends and Python bindings come as associated/separate changes, only after the figure/artist is ready and validated on Native.
 
 ## Code conventions (from the PRD)
 
 - Builder pattern mandatory; direct constructors private. Every builder exposes `execution_mode(SVExecutionMode::...)` defaulting to `Automatic`.
-- **Backend is an explicit builder parameter (spec `backend-selection`).** Every figure/artist builder exposes `backend(SVBackendKind)` defaulting to `Automatic`; the backend stays a runtime value, never a type parameter — the figure's only type parameter is the scalar `SVFloat`, and only when its configuration carries scalar values. Every public operation (`render`, `update`, `save`, `show`) records the configured kind in its observability span — never a hardcoded value. `build` transfers the kind into the built figure, whose own operations record it. Dispatch from kind to concrete `SVRenderBackend` happens per operation, never in `build()`. The parameter is carried even by figures whose rendering never touches heavy work (e.g. static labels run only text layout) — uniformity of the selection surface is the point. Supported kinds cover the four compile targets: native OS embedded components, HTML with JavaScript, WebAssembly, and terminal TUI — `Automatic` resolves per target.
+- **Backend is an explicit builder parameter (spec `backend-selection`) — no automatic backend.** Every figure/artist builder exposes `backend(...)` taking an `SVBackendKind` value (`Svg`, `Html`, `Tui`, `Native`, `Wasm`, `React`, `Vue`, `Angular`, `Tauri`, `Dioxus`); there is no `Automatic` variant and the call is required — the rendering form is always a deliberate choice. Each backend is a Cargo feature (`render-svg`, `render-html`, `render-tui`, `render-native`, `render-react`, `render-vue`, `render-angular`, `render-tauri`, `render-dioxus`, `wasm`) mapping 1:1 to a workspace crate under `crates/scienceview_*`; enabling a feature only makes the backend available, it never selects one. Rendering is commanded by the `SVRenderBackend` trait, so new backends — including third-party crates — plug in without touching the core. The backend stays a runtime value, never a type parameter — the figure's only type parameter is the scalar `SVFloat`, and only when its configuration carries scalar values. Every public operation (`render`, `update`, `save`, `show`) records the configured kind in its observability span — never a hardcoded value. `build` transfers the kind into the built figure, whose own operations record it. Dispatch from kind to concrete `SVRenderBackend` happens per operation, never in `build()`. The parameter is carried even by figures whose rendering never touches heavy work (e.g. static labels run only text layout) — uniformity of the selection surface is the point.
 - **No abbreviations** in any Rust name, with a single exception: the project prefix `sv`/`SV`. Examples: `maximum_number_of_points`, not `max_pts`; `tick_label_count`, not `n_ticks`.
 - **Mandatory prefix on public items** (full rule in PRD §3.4): structs and traits use `SV` + PascalCase (`SVFigure`, `SVLinePlot`); free-scope public functions (outside `impl`), variables and public modules use `sv_` + snake_case (`sv_create_figure`). Methods — functions inside `impl` blocks of structs or traits — get no prefix. Crates always keep the full name (`scienceview`, `scienceview_*`).
 - Zero-copy on public APIs: `ArrayView`/`CowArray`/sparse views (`sprs`) and borrowed streaming chunks, never `Array` by value.
@@ -65,7 +66,7 @@ Instructions for agents working in this repository. Product source of truth: `do
 - Tests live in companion `*_tests.rs` modules beside the implementation; mock data in borrowed slices (plus `ndarray` under `data-ndarray`) and synthetic streams. Never inline nor a global `tests/` directory.
 - Tests sit at the end: any inline `#[cfg(test)]` block (implementation and tests in the same file) MUST be at the end of the file so the implementation reads top-down; a companion `*_tests.rs` module is declared at the end of its `mod.rs`.
 - Iterative evolution per figure/artist, no skipped steps: naive → tests → performance (SIMD/data layout) → streaming/live-update.
-- Acceptance of every implementation (PRD §8.7): renders with small and large data, under concurrency, exports the figure (native/HTML/WASM/TUI) and exercises the streaming update path with render metrics.
+- Acceptance of every implementation (PRD §8.7): renders with small and large data, under concurrency, exports the figure (SVG/HTML/WASM/TUI/React/Vue/Angular/Tauri/Dioxus) and exercises the streaming update path with render metrics.
 - CPU never blocks async threads (rayon for compute, Tokio for I/O and stream updates); iteration via `.map()`/`azip!()`/`par_azip!()`, never manual index loops.
 
 ## Documentation
@@ -85,7 +86,8 @@ Instructions for agents working in this repository. Product source of truth: `do
 - **Documentation agents:** instructions and component catalog in `docs/src/documentation-guide.md`.
 - **Publishing:** the GitHub Actions workflow (`.github/workflows/deploy-documentation.yml`) builds and deploys the book to GitHub Pages on every push to `docs/documentations`. Run `mdbook build docs` locally before pushing.
 - **Sitemap is generated, never hand-edited:** `docs/scripts/postbuild.mjs` regenerates `sitemap.xml` from every rendered chapter on each Pages deploy. Any documentation change that adds, renames, or removes a page under `docs/src/` (and registers it in `SUMMARY.md`) is automatically reflected in the sitemap — never commit a hand-written `sitemap.xml`. If the published site URL changes, update `BASE_URL` in `docs/scripts/postbuild.mjs` and `site-url` in `docs/book.toml` together.
-- **README:** keep `README.md` up to date, small, pointing to the documentation, with the expected badges for a Rust project hosted on GitHub (CI status, crates.io, docs.rs, Rust version).
+- **README and mdBook show code plus tool-generated figures.** Every usage example in `README.md` and `docs/src/` pairs its code with the figure that code produces. Figures live under `docs/src/assets/` as SVGs generated by running the repo's own examples (`cargo run --example <name>`), never hand-drawn — the CI `figures` job reruns the examples and fails on any diff, so checked-in figures can never drift from real tool output. New examples add their program under `examples/` and their figure under `docs/src/assets/` in the same change.
+- **README:** keep `README.md` up to date and small, pointing to the documentation, with the expected badges for a Rust project hosted on GitHub (CI status, crates.io, docs.rs, Rust version) — plus runnable code examples and their tool-generated figures (see rule above).
 
 ## Agent skill
 

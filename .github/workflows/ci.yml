@@ -72,6 +72,25 @@ jobs:
       - name: cargo test --examples
         run: cargo test --examples
 
+  figures:
+    name: Figures (tool-generated, no drift)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install Rust 1.85 toolchain
+        uses: dtolnay/rust-toolchain@1.85
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Regenerate figures with the tool itself
+        run: |
+          cargo run --example line_plot_svg
+          cargo run --example bar_chart_svg
+      - name: Checked-in figures must match tool output
+        run: git diff --exit-code -- docs/src/assets
+
   msrv:
     name: MSRV gate (exact 1.85)
     runs-on: ubuntu-latest

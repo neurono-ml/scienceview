@@ -5,8 +5,8 @@ edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 description = "Scientific visualization for Rust: builder-style figures with styling, interactivity and streaming updates across native, HTML, WebAssembly and terminal targets."
-repository = "https://github.com/andreclaudino/scienceview"
-homepage = "https://andreclaudino.github.io/scienceview"
+repository = "https://github.com/neurono-ml/scienceview"
+homepage = "https://neurono-ml.github.io/scienceview"
 documentation = "https://docs.rs/scienceview"
 keywords = ["visualization", "plotting", "charts", "streaming", "tui"]
 categories = ["visualization", "science"]
@@ -15,19 +15,32 @@ categories = ["visualization", "science"]
 name = "scienceview"
 path = "src/lib.rs"
 
+# Every rendering backend is a Cargo feature and maps 1:1 to a workspace
+# crate under crates/scienceview_* (see PRD §3.1). Enabling a feature only
+# makes the backend available; selecting it is always explicit through
+# `backend(...)` on the figure/artist builder — there is no automatic
+# backend. Rendering is commanded by the `SVRenderBackend` trait, so new
+# backends (including third-party crates) plug in without touching the core.
 [features]
-default = ["render-svg"]
+default = []
 # Borrowed slices are the core data model; ndarray views are opt-in.
 data-ndarray = ["dep:ndarray"]
 # Opt-in JSON serialization of the figure specification.
 spec-serde = ["dep:serde", "dep:serde_json"]
 # Self-contained renderers with no system or GPU dependencies.
 render-svg = []
-render-html = ["render-svg"]
+render-html = []
 # Terminal renderer.
 render-tui = ["dep:ratatui", "dep:crossterm"]
 # From-scratch interactive renderer: CPU pixels (softbuffer) in a native window (winit).
 render-native = ["dep:winit", "dep:softbuffer"]
+# Web framework component renderers.
+render-react = []
+render-vue = []
+render-angular = []
+# Rust-native interactive renderers.
+render-tauri = []
+render-dioxus = []
 # Live updates over standard-library channels; no async runtime in core.
 streaming = []
 # Live updates over Tokio watch channels.

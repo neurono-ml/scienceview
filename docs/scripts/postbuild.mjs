@@ -6,7 +6,7 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BASE_URL = "https://andreclaudino.github.io/scienceview";
+const BASE_URL = "https://neurono-ml.github.io/scienceview";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = join(HERE, "..", "src");
 const OUT = join(HERE, "..", "book", "sitemap.xml");
