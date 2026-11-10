@@ -12,3 +12,26 @@ background.
 Every chapter is grounded in the real code and specs: the companion
 `*_tests.rs` modules are the executable source of truth walked through as
 examples.
+
+## Chapters
+
+| Chapter | File | Subject |
+|---|---|---|
+| 1 | `ch01-product-foundation.md` | The product foundation: the two audiences, the trait/enum split, the four-stage interaction pipeline, and the open decisions |
+
+Chapters 2 to 11 are planned, one per capability of the
+`foundation-core-architecture` change — `backend-selection`,
+`data-view-boundary`, `model-events`, `event-payloads`,
+`backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
+`dashboard` — and are written as the corresponding implementation changes
+land, so that each one can walk through real code and real companion tests.
+The plan lives in
+`openspec/changes/foundation-core-architecture/documentation-plan.md`.
+
+## Diagrams
+
+Diagrams are always Mermaid or SVG, colourful and harmonized with the mdBook
+theme; ASCII-art diagrams are forbidden. A diagram is authored as Mermaid
+source and rendered to SVG, and the SVG is checked in under
+`docs/src/development-explained/assets/` so the book renders without a
+JavaScript dependency.
