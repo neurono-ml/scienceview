@@ -9,7 +9,8 @@ context: |
   https://neurono-ml.github.io/scienceview. Sister project: sciencekit
   (github.com/neurono-ml/sciencekit, docs at https://neurono-ml.github.io/sciencekit/) —
   sciencekit learns the models, scienceview draws them.
-  Product source of truth: docs/PRD.md.
+  Product source of truth: docs/PRD.md (relative to this file: ../docs/PRD.md;
+  from the repository root: docs/PRD.md).
   Language: all durable artifacts (code, docs, specs, commits, issues, PRs, README,
   CHANGELOG) are written in English — international open-source project; only the live
   conversation may use the operator's language.
