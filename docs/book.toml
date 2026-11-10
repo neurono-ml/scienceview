@@ -1,0 +1,10 @@
+[book]
+title = "scienceview"
+authors = ["The scienceview contributors"]
+language = "en"
+src = "src"
+
+[output.html]
+site-url = "https://andreclaudino.github.io/scienceview/"
+git-repository-url = "https://github.com/andreclaudino/scienceview"
+edit-url-template = "https://github.com/andreclaudino/scienceview/edit/docs/documentations/docs/src/{path}"

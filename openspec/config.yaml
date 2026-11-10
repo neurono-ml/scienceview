@@ -1,0 +1,119 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  Project: scienceview — visualization library in Rust covering the capabilities of the most
+  popular Python plotting libraries, with the same styling and interactivity, plus streaming
+  data updates.
+  Product source of truth: docs/PRD.md.
+  Language: all durable artifacts (code, docs, specs, commits, issues, PRs, README,
+  CHANGELOG) are written in English — international open-source project; only the live
+  conversation may use the operator's language.
+  Tech stack: Rust (MSRV 1.85, edition 2024), Cargo workspace with scienceview_* sub-crates in crates/
+  (see PRD §3.1); dependency-light core (thiserror, tracing; data as borrowed slices; live updates
+  over standard-library channels), every capability behind Cargo features — data-ndarray, spec-serde
+  (serde/serde_json), render-svg/render-html (self-contained, zero extra dependencies), render-tui
+  (ratatui/crossterm), render-native (from-scratch CPU renderer on winit/softbuffer), streaming-tokio,
+  wasm (wasm-bindgen/web-sys); the four compile targets are native OS embedded components, HTML with
+  JavaScript, WebAssembly, and terminal TUI.
+  Conventions: builder pattern mandatory; every figure/artist builder exposes
+  execution_mode(SVExecutionMode::...) defaulting to Automatic AND backend(SVBackendKind)
+  defaulting to Automatic (spec backend-selection — carried even when the rendering needs no heavy
+  work; figure stays non-generic apart from an optional SVFloat scalar; every operation records
+  the configured kind in its span; build transfers it into the figure; dispatch happens per
+  operation, never in build()); full names without abbreviations
+  (maximum_number_of_points, not max_pts), single exception the project prefix
+  sv/SV; public items must be prefixed — structs/traits with SV +
+  PascalCase (SVFigure, SVLinePlot), free functions (outside impl),
+  variables and public modules with sv_ + snake_case (sv_create_figure);
+  methods (functions inside impl blocks of structs or traits) get no prefix;
+  zero-copy on public APIs
+  (ArrayView/CowArray/sprs views and borrowed streaming chunks); representation parity (spec data-view-boundary,
+  normative): an artist that tolerates more than one representation accepts dense,
+  sparse and streaming inputs on every operation, dispatches once per operation, never
+  densifies a sparse input and never blocks the render thread on a stream; a static-only exception
+  is allowed only when the mathematics needs full-data geometry, the kernel rejects streaming with
+  UnsupportedRepresentation and the artist still serves streaming through a documented alternative path
+  (typically a windowed/aggregated view); a .rs file >200 lines becomes a standardized folder module
+  (mod.rs, builder.rs, core_implementation.rs, *_tests.rs); tests in companion modules
+  *_tests.rs beside the implementation (mock data in borrowed slices, plus ndarray under data-ndarray,
+  and synthetic streams; never inline nor global tests/).
+  Tests sit at the end: any inline `#[cfg(test)]` block (implementation and tests
+  in the same file) MUST be at the end of the file so the implementation reads
+  top-down; a companion `*_tests.rs` module is declared at the end of its `mod.rs`.
+  Workflow: no commits on main; every change has two coexisting worktrees — code in
+  temporary/worktrees/<type>/<change-name> (branch <type>/<change-name>) and openspec
+  definitions in temporary/worktrees/<type>/<change-name>-openspec (branch
+  <type>/<change-name>-openspec) — that evolve in parallel and are merged into main via
+  separate PRs in any order (agile: code does not wait for the openspec planning PR, and
+  vice versa); opening a change also creates the matching GitHub
+  issue in English as an ADR (Y-statement for simple decisions, Nygard format otherwise — see
+  https://adr.github.io/adr-templates/, draft with the architecture-decision-records skill), referenced in
+  the PR and closed deterministically via closing keywords (Closes/Fixes/Resolves #n); TDD mandatory via
+  tdd skill; final review by an independent agent validating spec acceptance before the code PR; merged changes
+  update CHANGELOG.md (English, keep-a-changelog 1.1.0).
+  Scratch artifacts: every temporary file (experiments, validation screenshots, throwaway scripts,
+  probes) goes to temporary/YYYY-MM-DD if generic or temporary/YYYY-MM-DD/<change-name> if related
+  to a change; never in tracked directories, never committed.
+
+rules:
+  proposal:
+    - >-
+      Plan changes in separate groups: (1) figure/artist implementation, (2) changes for the different rendering backends (native OS embedded components, HTML with JavaScript, WebAssembly, terminal TUI) and shared styling/interactivity kernels, (3) documentation changes.
+    - >-
+      Small changes with minimal scope; alternate rendering backends and Python bindings are separate associated changes, created after the figure/artist is ready on Native.
+    - >-
+      Include acceptance criteria from PRD §8.7/§10.3: small and large data, concurrency, figure export + streaming update + render metrics.
+    - >-
+      Every new or touched figure/artist complies with spec `backend-selection`: builder exposes `backend(SVBackendKind)` defaulting to Automatic, operations record the configured kind, built figures carry it.
+    - >-
+      Write every artifact (proposal, specs, tasks, design) in English.
+
+  tasks:
+    - >-
+      Every task must be implemented using the tdd skill: test first, confirmed failure, minimal implementation, refactoring keeping tests green.
+    - >-
+      Tests live in companion *_tests.rs modules beside the implementation; mock data in borrowed slices (plus ndarray under data-ndarray) and synthetic streams.
+    - >-
+      Mandatory iterative evolution: naive → tests → performance (SIMD/data layout) → streaming/live-update; no step may be skipped.
+    - >-
+      Documentation changes must keep sitemap.xml current: it is regenerated from every rendered chapter by docs/scripts/postbuild.mjs on each GitHub Pages deploy, so never commit a hand-written sitemap.xml — adding, renaming, or removing a page under docs/src/ (registered in SUMMARY.md) is enough. If the published site URL changes, update BASE_URL in docs/scripts/postbuild.mjs together with site-url in docs/book.toml.
+
+operations:
+  apply:
+    guidance:
+      - >-
+        Implement in git worktree temporary/worktrees/<type>/<change-name> on branch <type>/<change-name> (type ∈ feat|bugfix|chore|docs). Never commit to main.
+      - >-
+        Commit one commit per task as each task completes, scoped to that task's changes only; keep the commit history 1:1 with openspec/changes/<change-name>/tasks.md.
+      - >-
+        As each task completes, also update and commit the change's openspec/ files in the -openspec worktree (mark the task - [x] in tasks.md, update touched spec/design artifacts) on branch <type>/<change-name>-openspec, so the openspec worktree stays in lockstep with the code worktree.
+      - >-
+        When the change's apply finishes (all tasks done), push BOTH worktrees — the code branch and the -openspec branch — and open or update both PRs (code PR and openspec PR), each referencing the ADR issue via closing keywords.
+      - >-
+        Before pushing the code branch, run the CI gates locally and fix any failures: cargo fmt --all --check (formatting), cargo clippy --workspace --all-targets (static analysis, warnings as errors) and cargo test --workspace (tests + doctests). Never push a branch whose local gates fail, so the PR's CI check does not fail on formatting.
+      - >-
+        Write every temporary artifact (experiments, validation screenshots, throwaway scripts, probes) under temporary/YYYY-MM-DD if generic, or temporary/YYYY-MM-DD/<change-name> if related to this change; never commit them.
+      - >-
+        When opening the change, create the matching GitHub issue in English formatted as an ADR — Y-statement template for simple decisions, Nygard format for more complete ones (https://adr.github.io/adr-templates/); draft the text with the architecture-decision-records skill.
+      - >-
+        Reference the corresponding issue(s) in the PR description with closing keywords (Closes/Fixes/Resolves #n) so GitHub closes them deterministically when the PR merges.
+      - >-
+        Commit this change's openspec/ definitions on branch <type>/<change-name>-openspec, in worktree temporary/worktrees/<type>/<change-name>-openspec.
+      - >-
+        Develop the code branch and the openspec branch in parallel; each is merged into main via its own PR, in any order. Code does NOT wait for the openspec planning PR to merge (agile), and vice versa.
+      - >-
+        Each code change is accompanied by a documentation change that updates the mdBook (docs/src/) for the new behavior, on its own doc branch whose PR merges into docs/documentations; create the doc branch and PR alongside the code change.
+      - >-
+        Every code change that introduces, changes, or fixes behavior must also update the `Development Explained` textbook under docs/src/development-explained/ (a doc change on a branch merged into docs/documentations): new features/figures/artists/kernels/methods get a NEW chapter registered in SUMMARY.md under the `## Development Explained` part; fixes and refactors EDIT the existing chapter covering that behavior. Ground the chapter in the real code, specs and the companion *_tests.rs modules. See AGENTS.md → Documentation.
+      - >-
+        Use the tdd skill for each task.
+      - >-
+        When all tasks are done, trigger review by an independent agent validating that the spec was effectively met before opening the code PR.
+  archive:
+    guidance:
+      - >-
+        Each change has two branches (code and openspec) merged into main via separate PRs, in any order. When the change's PRs are merged, the opencode agent on GitHub runs sync + archive of the change.
+      - >-
+        Every finished and merged change must update CHANGELOG.md, in English, following https://keepachangelog.com/en/1.1.0/. The snippet between releases in the changelog is used to describe the released version.

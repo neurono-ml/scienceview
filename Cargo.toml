@@ -1,0 +1,50 @@
+[package]
+name = "scienceview"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+description = "Scientific visualization for Rust: builder-style figures with styling, interactivity and streaming updates across native, HTML, WebAssembly and terminal targets."
+repository = "https://github.com/andreclaudino/scienceview"
+homepage = "https://andreclaudino.github.io/scienceview"
+documentation = "https://docs.rs/scienceview"
+keywords = ["visualization", "plotting", "charts", "streaming", "tui"]
+categories = ["visualization", "science"]
+
+[lib]
+name = "scienceview"
+path = "src/lib.rs"
+
+[features]
+default = ["render-svg"]
+# Borrowed slices are the core data model; ndarray views are opt-in.
+data-ndarray = ["dep:ndarray"]
+# Opt-in JSON serialization of the figure specification.
+spec-serde = ["dep:serde", "dep:serde_json"]
+# Self-contained renderers with no system or GPU dependencies.
+render-svg = []
+render-html = ["render-svg"]
+# Terminal renderer.
+render-tui = ["dep:ratatui", "dep:crossterm"]
+# From-scratch interactive renderer: CPU pixels (softbuffer) in a native window (winit).
+render-native = ["dep:winit", "dep:softbuffer"]
+# Live updates over standard-library channels; no async runtime in core.
+streaming = []
+# Live updates over Tokio watch channels.
+streaming-tokio = ["dep:tokio"]
+# WebAssembly canvas target for the from-scratch renderer.
+wasm = ["dep:wasm-bindgen", "dep:web-sys"]
+
+[dependencies]
+thiserror = "2"
+tracing = "0.1"
+ndarray = { version = "0.17", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
+serde_json = { version = "1", optional = true }
+ratatui = { version = "0.30", optional = true }
+crossterm = { version = "0.29", optional = true }
+winit = { version = "0.30", optional = true }
+softbuffer = { version = "0.4", optional = true }
+tokio = { version = "1", optional = true, default-features = false, features = ["sync"] }
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3", optional = true }
