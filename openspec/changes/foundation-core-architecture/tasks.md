@@ -15,7 +15,7 @@
 ## 3. Repository wiring
 
 - [x] 3.1 Reference the new product requirements document from `README.md` and from `openspec/config.yaml`, and verify that the links resolve
-- [ ] 3.2 Add the product requirements document to the documentation plan for the companion documentation change, listing the chapters to be written for the development-explained book, and verify the chapter list covers the ten capabilities
+- [x] 3.2 Add the product requirements document to the documentation plan for the companion documentation change, listing the chapters to be written for the development-explained book, and verify the chapter list covers the ten capabilities
 
 ## Workflow follow-up
 
