@@ -3,7 +3,7 @@
 ## Axes and ticks
 
 - [x] Write failing tests for tick derivation and label formatting.
-- [ ] Implement axes, ticks and grid.
+- [x] Implement axes, ticks and grid.
 
 ## Legend
 
