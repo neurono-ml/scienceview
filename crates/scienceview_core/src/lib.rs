@@ -101,6 +101,8 @@
 
 #[path = "data/mod.rs"]
 pub mod sv_data;
+#[path = "layout/mod.rs"]
+pub mod sv_layout;
 #[path = "window/mod.rs"]
 pub mod sv_window;
 
