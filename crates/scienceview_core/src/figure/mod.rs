@@ -19,6 +19,8 @@ pub use execution_mode::SVExecutionMode;
 pub use representation::SVDataRepresentation;
 
 #[cfg(test)]
+mod data_binding_tests;
+#[cfg(test)]
 mod figure_builder_tests;
 #[cfg(test)]
 mod figure_concurrency_tests;

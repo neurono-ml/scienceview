@@ -59,7 +59,7 @@ fn the_data_binding_is_carried_into_the_figure() {
     let values = [1.0, 2.0, 3.0, 4.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::sparse(&values, 40))
+        .data_source(SVDataBinding::sparse(&values, 40).expect("the point count covers the values"))
         .backend(SVBackendKind::Tui)
         .build()
         .expect("the configuration is complete");
@@ -107,7 +107,9 @@ fn a_streaming_binding_is_rejected_by_an_export_only_backend() {
     let values = [1.0, 2.0];
 
     let error = SVFigureBuilder::new()
-        .data_source(SVDataBinding::streaming(&values, 2))
+        .data_source(
+            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
+        )
         .backend(SVBackendKind::Svg)
         .build()
         .map(|_figure| ())
@@ -148,7 +150,9 @@ fn a_supported_combination_builds() {
     let values = [1.0, 2.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::streaming(&values, 2))
+        .data_source(
+            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
+        )
         .backend(SVBackendKind::Native)
         .requires_events()
         .requires_in_place_update()

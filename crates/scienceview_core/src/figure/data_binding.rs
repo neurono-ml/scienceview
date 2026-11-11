@@ -6,6 +6,7 @@
 //! never learns which representation it was given until it dispatches.
 
 use super::representation::SVDataRepresentation;
+use crate::sv_error::SVError;
 
 /// Borrowed figure data and the representation it arrived in.
 ///
@@ -21,19 +22,27 @@ pub struct SVDataBinding<'values> {
 impl<'values> SVDataBinding<'values> {
     /// A dense binding: the values are contiguous.
     pub fn dense(values: &'values [f64]) -> Self {
-        Self::with_point_count(SVDataRepresentation::Dense, values, values.len())
+        Self {
+            representation: SVDataRepresentation::Dense,
+            values,
+            point_count: values.len(),
+        }
     }
 
     /// A sparse binding: the values are present values, `point_count` is the
     /// logical length of the series.
     ///
-    /// The logical length is never smaller than the values actually present.
-    pub fn sparse(values: &'values [f64], point_count: usize) -> Self {
+    /// The logical length is never smaller than the values actually present: a
+    /// smaller count is rejected with [`SVError::InconsistentPointCount`].
+    pub fn sparse(values: &'values [f64], point_count: usize) -> Result<Self, SVError> {
         Self::with_point_count(SVDataRepresentation::Sparse, values, point_count)
     }
 
     /// A streaming binding: the values are a snapshot of the current window.
-    pub fn streaming(values: &'values [f64], point_count: usize) -> Self {
+    ///
+    /// The logical length is never smaller than the values actually present: a
+    /// smaller count is rejected with [`SVError::InconsistentPointCount`].
+    pub fn streaming(values: &'values [f64], point_count: usize) -> Result<Self, SVError> {
         Self::with_point_count(SVDataRepresentation::Streaming, values, point_count)
     }
 
@@ -41,12 +50,19 @@ impl<'values> SVDataBinding<'values> {
         representation: SVDataRepresentation,
         values: &'values [f64],
         point_count: usize,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, SVError> {
+        if point_count < values.len() {
+            return Err(SVError::InconsistentPointCount {
+                point_count,
+                value_count: values.len(),
+            });
+        }
+
+        Ok(Self {
             representation,
             values,
-            point_count: point_count.max(values.len()),
-        }
+            point_count,
+        })
     }
 
     /// The representation the values arrived in.

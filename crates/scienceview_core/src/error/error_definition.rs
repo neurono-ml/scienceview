@@ -64,4 +64,15 @@ pub enum SVError {
         /// What is wrong and how to fix it.
         message: String,
     },
+
+    /// The logical point count is smaller than the values present.
+    #[error(
+        "the logical point count {point_count} is smaller than the {value_count} values present"
+    )]
+    InconsistentPointCount {
+        /// The logical number of marks the caller declared.
+        point_count: usize,
+        /// The number of values actually supplied.
+        value_count: usize,
+    },
 }
