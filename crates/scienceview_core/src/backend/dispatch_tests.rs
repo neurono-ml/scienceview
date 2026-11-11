@@ -38,22 +38,6 @@ impl SVCallRecorder {
     pub fn provider_lookups(&self) -> usize {
         self.provided.load(Ordering::SeqCst)
     }
-
-    pub fn render_calls(&self) -> usize {
-        self.rendered.load(Ordering::SeqCst)
-    }
-
-    pub fn update_calls(&self) -> usize {
-        self.updated.load(Ordering::SeqCst)
-    }
-
-    pub fn save_calls(&self) -> usize {
-        self.saved.load(Ordering::SeqCst)
-    }
-
-    pub fn show_calls(&self) -> usize {
-        self.shown.load(Ordering::SeqCst)
-    }
 }
 
 /// A backend that renders nothing but records being called.
@@ -156,7 +140,8 @@ fn an_unregistered_kind_is_reported_as_unavailable() {
     let registry = registry_with_recording_backend(&recorder);
 
     let error = sv_resolve_render_backend(&registry, SVBackendKind::Native)
-        .expect_err("no native backend is registered");
+        .err()
+        .expect("no native backend is registered");
 
     assert_eq!(
         error,
@@ -182,7 +167,8 @@ fn a_provider_that_answers_with_the_wrong_kind_is_rejected() {
     registry.register(Arc::new(SVMisbehavingProvider));
 
     let error = sv_resolve_render_backend(&registry, SVBackendKind::Tui)
-        .expect_err("the provider answered with a different kind");
+        .err()
+        .expect("the provider answered with a different kind");
 
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }
