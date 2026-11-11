@@ -1,9 +1,10 @@
 //! Companion tests for the open ingestion trait and the source schema.
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
-    SVReactivity, SVSourceSchema,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVReactivity,
+    SVSourceSchema,
 };
+use crate::sv_error::SVError;
 
 /// A third-party source: it only knows the public trait.
 struct ThirdPartySource {
@@ -18,13 +19,13 @@ impl SVDataSource for ThirdPartySource {
         )])
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         if name == "temperature" {
             Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(
                 &self.values,
             )))
         } else {
-            Err(SVDataError::ColumnNotFound {
+            Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             })
         }
@@ -59,7 +60,7 @@ fn a_missing_column_is_reported_by_name() {
 
     assert_eq!(
         source.column("humidity").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "humidity".to_owned()
         })
     );

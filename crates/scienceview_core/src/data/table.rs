@@ -1,10 +1,10 @@
 //! A named, multi-column static source built through a validating builder.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
-    SVSourceSchema,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
 };
 
 /// A static source made of named columns that share one logical length.
@@ -57,10 +57,10 @@ impl SVDataSource for SVDataTable<'_> {
         SVSourceSchema::from_columns(&self.descriptors)
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         match self.values(name) {
             Some(values) => Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(values))),
-            None => Err(SVDataError::ColumnNotFound {
+            None => Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             }),
         }
@@ -107,16 +107,16 @@ impl<'a> SVDataTableBuilder<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::DuplicateColumnName`] for a repeated name and
-    /// [`SVDataError::MismatchedLengths`] for a column whose length differs
+    /// Returns [`SVError::DuplicateColumnName`] for a repeated name and
+    /// [`SVError::MismatchedLengths`] for a column whose length differs
     /// from the first one, before any column is read.
-    pub fn build(self) -> Result<SVDataTable<'a>, SVDataError> {
+    pub fn build(self) -> Result<SVDataTable<'a>, SVError> {
         for (position, descriptor) in self.descriptors.iter().enumerate() {
             let repeated = self.descriptors[..position]
                 .iter()
                 .any(|earlier| earlier.name() == descriptor.name());
             if repeated {
-                return Err(SVDataError::DuplicateColumnName {
+                return Err(SVError::DuplicateColumnName {
                     name: descriptor.name().to_owned(),
                 });
             }
@@ -125,7 +125,7 @@ impl<'a> SVDataTableBuilder<'a> {
         if let Some(expected) = self.columns.first().map(|values| values.len()) {
             for (descriptor, values) in self.descriptors.iter().zip(self.columns.iter()) {
                 if values.len() != expected {
-                    return Err(SVDataError::MismatchedLengths {
+                    return Err(SVError::MismatchedLengths {
                         name: descriptor.name().to_owned(),
                         expected,
                         actual: values.len(),

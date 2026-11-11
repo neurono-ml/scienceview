@@ -1,12 +1,13 @@
 //! A column backed by a borrowed `sprs` sparse vector.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 
 use sprs::CsVecViewI;
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
-    SVSourceSchema, SVSparseView,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
+    SVSparseView,
 };
 
 /// A static, single-column source over an `sprs` sparse vector.
@@ -51,9 +52,9 @@ impl SVDataSource for SVSparseColumn<'_> {
         SVSourceSchema::from_columns(std::slice::from_ref(&self.descriptor))
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         if name != self.descriptor.name() {
-            return Err(SVDataError::ColumnNotFound {
+            return Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             });
         }

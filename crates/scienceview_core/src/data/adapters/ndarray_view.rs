@@ -1,12 +1,12 @@
 //! A column backed by a borrowed `ndarray` view.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 
 use ndarray::ArrayView1;
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
-    SVSourceSchema,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
 };
 
 /// A static, single-column source over an `ndarray` view.
@@ -52,16 +52,16 @@ impl SVDataSource for SVNdarrayColumn<'_> {
         SVSourceSchema::from_columns(std::slice::from_ref(&self.descriptor))
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         if name != self.descriptor.name() {
-            return Err(SVDataError::ColumnNotFound {
+            return Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             });
         }
 
         match self.values.as_slice() {
             Some(values) => Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(values))),
-            None => Err(SVDataError::NonContiguousView {
+            None => Err(SVError::NonContiguousView {
                 origin: "ndarray",
                 alternative: "call `.to_owned()` on the array and pass the contiguous buffer as a borrowed slice",
             }),

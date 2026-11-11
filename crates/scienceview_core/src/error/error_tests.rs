@@ -6,7 +6,7 @@
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_error::SVError;
-use crate::sv_figure::SVDataRepresentation;
+use crate::sv_data::SVRepresentation;
 
 #[test]
 fn the_missing_backend_error_names_the_requirement() {
@@ -39,11 +39,13 @@ fn the_unsupported_capability_error_names_backend_and_capability() {
 #[test]
 fn the_unsupported_representation_error_names_an_alternative_path() {
     let error = SVError::UnsupportedRepresentation {
-        representation: SVDataRepresentation::Streaming,
-        alternative_path: "a windowed view",
+        operation: "dense_values",
+        representation: SVRepresentation::Streaming,
+        alternative: "a windowed view",
     };
     let message = error.to_string();
 
+    assert!(message.contains("dense_values"), "message was: {message}");
     assert!(message.contains("Streaming"), "message was: {message}");
     assert!(
         message.contains("a windowed view"),

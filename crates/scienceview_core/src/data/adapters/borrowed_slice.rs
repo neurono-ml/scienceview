@@ -1,10 +1,10 @@
 //! A column backed by a borrowed slice of `f64`.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
-    SVSourceSchema,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
 };
 
 /// A static, single-column source over a borrowed slice.
@@ -49,11 +49,11 @@ impl SVDataSource for SVSliceColumn<'_> {
         SVSourceSchema::from_columns(std::slice::from_ref(&self.descriptor))
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         if name == self.descriptor.name() {
             Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(self.values)))
         } else {
-            Err(SVDataError::ColumnNotFound {
+            Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             })
         }

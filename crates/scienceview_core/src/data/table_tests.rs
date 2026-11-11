@@ -1,6 +1,7 @@
 //! Companion tests for the multi-column table and its validating builder.
 
-use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVDataTable};
+use crate::sv_data::{SVColumnRole, SVDataSource, SVDataTable};
+use crate::sv_error::SVError;
 
 const LATITUDE: [f64; 3] = [10.0, 20.0, 30.0];
 const TEMPERATURE: [f64; 3] = [1.0, 2.0, 3.0];
@@ -50,7 +51,7 @@ fn columns_of_different_lengths_are_rejected_before_any_read() {
 
     assert_eq!(
         error,
-        SVDataError::MismatchedLengths {
+        SVError::MismatchedLengths {
             name: "temperature".to_owned(),
             expected: 3,
             actual: 2
@@ -68,7 +69,7 @@ fn duplicate_column_names_are_rejected() {
 
     assert_eq!(
         error,
-        SVDataError::DuplicateColumnName {
+        SVError::DuplicateColumnName {
             name: "value".to_owned()
         }
     );
@@ -88,7 +89,7 @@ fn a_missing_table_column_is_reported() {
 
     assert_eq!(
         table.column("missing").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "missing".to_owned()
         })
     );

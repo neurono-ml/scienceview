@@ -1,13 +1,13 @@
 //! A live column fed by a Tokio channel, without an async runtime in the core.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 use std::sync::Mutex;
 
 use tokio::sync::mpsc::Receiver;
 
 use crate::sv_data::{
-    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVDataError, SVDataSource, SVReactivity,
-    SVSourceSchema,
+    SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVDataSource, SVReactivity, SVSourceSchema,
 };
 use crate::sv_window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock};
 
@@ -29,13 +29,13 @@ impl<'a> SVTokioChannelColumn<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::InvalidWindowCapacity`] when the policy allows no
+    /// Returns [`SVError::InvalidWindowCapacity`] when the policy allows no
     /// sample.
     pub fn new(
         name: impl Into<Cow<'a, str>>,
         receiver: Receiver<f64>,
         policy: SVWindowPolicy,
-    ) -> Result<Self, SVDataError> {
+    ) -> Result<Self, SVError> {
         Ok(Self {
             descriptor: SVColumnDescriptor::new(name, SVColumnRole::Y),
             receiver: Mutex::new(receiver),
@@ -47,13 +47,13 @@ impl<'a> SVTokioChannelColumn<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::InvalidWindowCapacity`] when the capacity is
+    /// Returns [`SVError::InvalidWindowCapacity`] when the capacity is
     /// zero.
     pub fn with_capacity(
         name: impl Into<Cow<'a, str>>,
         receiver: Receiver<f64>,
         capacity: usize,
-    ) -> Result<Self, SVDataError> {
+    ) -> Result<Self, SVError> {
         Self::new(name, receiver, SVWindowPolicy::drop_oldest(capacity))
     }
 
@@ -88,9 +88,9 @@ impl SVDataSource for SVTokioChannelColumn<'_> {
         SVReactivity::EventDriven
     }
 
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
         if name != self.descriptor.name() {
-            return Err(SVDataError::ColumnNotFound {
+            return Err(SVError::ColumnNotFound {
                 name: name.to_owned(),
             });
         }

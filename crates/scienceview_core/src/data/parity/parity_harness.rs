@@ -1,8 +1,7 @@
 //! The parity harness every kernel adopts.
 
-use crate::sv_data::{
-    SVColumnView, SVDataError, SVRepresentationTolerance, SVSparseView, SVStreamingView,
-};
+use crate::sv_data::{SVColumnView, SVRepresentationTolerance, SVSparseView, SVStreamingView};
+use crate::sv_error::SVError;
 use crate::sv_window::SVRollingWindow;
 
 /// Proves that a kernel produces the same output for the three representations.
@@ -93,7 +92,7 @@ impl<'a> SVRepresentationParityHarness<'a> {
     ///
     /// Returns the validation failure of [`SVSparseView::new`], which cannot
     /// happen for storage derived from a dense slice.
-    pub fn sparse_view(&self) -> Result<SVSparseView<'_>, SVDataError> {
+    pub fn sparse_view(&self) -> Result<SVSparseView<'_>, SVError> {
         SVSparseView::new(
             &self.sparse_indices,
             &self.sparse_values,

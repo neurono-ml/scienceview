@@ -1,11 +1,12 @@
 //! Companion tests for the standard-library channel adapter.
 
+use crate::sv_error::SVError;
 use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::sv_data::adapters::SVChannelColumn;
-use crate::sv_data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
+use crate::sv_data::{SVDataSource, SVReactivity, SVRepresentation};
 
 #[test]
 fn a_read_drains_every_sample_already_available() {
@@ -72,7 +73,7 @@ fn a_channel_source_rejects_an_unknown_column() {
 
     assert_eq!(
         source.column("other").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "other".to_owned()
         })
     );
@@ -84,7 +85,7 @@ fn a_channel_source_rejects_a_zero_capacity() {
 
     assert_eq!(
         SVChannelColumn::with_capacity("value", receiver, 0).err(),
-        Some(SVDataError::InvalidWindowCapacity { capacity: 0 })
+        Some(SVError::InvalidWindowCapacity { capacity: 0 })
     );
 }
 

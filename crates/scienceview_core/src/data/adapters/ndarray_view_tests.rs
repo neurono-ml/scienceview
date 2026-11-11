@@ -1,9 +1,10 @@
 //! Companion tests for the `ndarray` adapter.
 
+use crate::sv_error::SVError;
 use ndarray::{Array1, Array2, array};
 
 use crate::sv_data::adapters::SVNdarrayColumn;
-use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
+use crate::sv_data::{SVColumnRole, SVDataSource, SVRepresentation};
 
 #[test]
 fn an_ndarray_view_is_borrowed_without_copying() {
@@ -46,7 +47,7 @@ fn a_non_contiguous_view_names_the_alternative_instead_of_copying() {
         .expect_err("a non-contiguous view cannot be borrowed as a slice");
 
     match error {
-        SVDataError::NonContiguousView {
+        SVError::NonContiguousView {
             origin,
             alternative,
         } => {
@@ -85,7 +86,7 @@ fn an_unknown_ndarray_column_is_reported() {
 
     assert_eq!(
         source.column("other").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "other".to_owned()
         })
     );

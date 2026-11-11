@@ -14,7 +14,6 @@
 
 mod adapters;
 mod column_view;
-mod error;
 mod parity;
 mod representation;
 mod source;
@@ -23,7 +22,6 @@ mod table;
 
 pub use adapters::*;
 pub use column_view::{SVColumnView, SVStreamingView};
-pub use error::SVDataError;
 pub use parity::{
     SVRepresentationParityHarness, SVRepresentationTolerance, sv_assert_representation_parity,
 };

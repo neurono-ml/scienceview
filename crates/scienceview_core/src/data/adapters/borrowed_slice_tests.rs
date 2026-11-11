@@ -1,7 +1,8 @@
 //! Companion tests for the borrowed-slice adapter.
 
 use crate::sv_data::adapters::SVSliceColumn;
-use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation, SVSourceSchema};
+use crate::sv_data::{SVColumnRole, SVDataSource, SVRepresentation, SVSourceSchema};
+use crate::sv_error::SVError;
 
 const SAMPLES: [f64; 4] = [1.0, 2.0, 3.0, 4.0];
 
@@ -35,7 +36,7 @@ fn the_slice_adapter_reports_an_unknown_column() {
 
     assert_eq!(
         source.column("other").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "other".to_owned()
         })
     );

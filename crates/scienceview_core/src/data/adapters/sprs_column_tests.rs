@@ -1,9 +1,10 @@
 //! Companion tests for the `sprs` sparse adapter.
 
+use crate::sv_error::SVError;
 use sprs::CsVec;
 
 use crate::sv_data::adapters::SVSparseColumn;
-use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
+use crate::sv_data::{SVColumnRole, SVDataSource, SVRepresentation};
 
 #[test]
 fn a_sparse_vector_is_presented_without_being_densified() {
@@ -34,7 +35,7 @@ fn dense_values_rejects_the_sparse_vector_instead_of_expanding_it() {
 
     assert!(matches!(
         error,
-        SVDataError::UnsupportedRepresentation {
+        SVError::UnsupportedRepresentation {
             representation: SVRepresentation::Sparse,
             ..
         }
@@ -58,7 +59,7 @@ fn an_unknown_sparse_column_is_reported() {
 
     assert_eq!(
         source.column("value").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "value".to_owned()
         })
     );

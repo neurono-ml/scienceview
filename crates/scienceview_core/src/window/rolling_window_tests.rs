@@ -1,11 +1,11 @@
 //! Companion tests for the bounded rolling window.
 
+use crate::sv_error::SVError;
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::sv_data::SVDataError;
 use crate::sv_window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard};
 
 fn sv_lock<Value>(mutex: &Mutex<Value>) -> MutexGuard<'_, Value> {
@@ -16,7 +16,7 @@ fn sv_lock<Value>(mutex: &Mutex<Value>) -> MutexGuard<'_, Value> {
 fn a_window_rejects_a_capacity_of_zero() {
     assert_eq!(
         SVRollingWindow::with_capacity(0).err(),
-        Some(SVDataError::InvalidWindowCapacity { capacity: 0 })
+        Some(SVError::InvalidWindowCapacity { capacity: 0 })
     );
 }
 

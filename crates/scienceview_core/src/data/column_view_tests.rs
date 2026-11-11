@@ -1,8 +1,9 @@
 //! Companion tests for the three representations and their borrowing rules.
 
+use crate::sv_error::SVError;
 use std::cell::Cell;
 
-use crate::sv_data::{SVColumnView, SVDataError, SVRepresentation, SVSparseView, SVStreamingView};
+use crate::sv_data::{SVColumnView, SVRepresentation, SVSparseView, SVStreamingView};
 
 const DENSE_VALUES: [f64; 5] = [1.0, 0.0, 3.0, 0.0, 5.0];
 const SPARSE_INDICES: [usize; 3] = [0, 2, 4];
@@ -60,7 +61,7 @@ fn dense_values_rejects_a_sparse_view_instead_of_densifying() {
     let view = SVColumnView::Sparse(sparse_view());
 
     match view.dense_values() {
-        Err(SVDataError::UnsupportedRepresentation {
+        Err(SVError::UnsupportedRepresentation {
             operation,
             representation,
             alternative,
@@ -100,7 +101,7 @@ fn sparse_view_rejects_an_out_of_range_index() {
 
     assert_eq!(
         SVSparseView::new(&indices, &values, 5),
-        Err(SVDataError::SparseIndexOutOfRange {
+        Err(SVError::SparseIndexOutOfRange {
             index: 9,
             length: 5
         })
@@ -114,7 +115,7 @@ fn sparse_view_rejects_indices_that_do_not_increase() {
 
     assert_eq!(
         SVSparseView::new(&indices, &values, 4),
-        Err(SVDataError::SparseIndicesNotIncreasing { position: 2 })
+        Err(SVError::SparseIndicesNotIncreasing { position: 2 })
     );
 }
 
@@ -125,7 +126,7 @@ fn sparse_view_rejects_mismatched_lengths() {
 
     assert_eq!(
         SVSparseView::new(&indices, &values, 4),
-        Err(SVDataError::MismatchedSparseLengths {
+        Err(SVError::MismatchedSparseLengths {
             indices: 2,
             values: 1
         })

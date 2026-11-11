@@ -2,11 +2,10 @@
 //!
 //! A sparse view is never expanded into a dense buffer. Kernels that can use
 //! indices work on them directly; kernels that cannot report
-//! [`SVDataError::UnsupportedRepresentation`](crate::sv_data::SVDataError::UnsupportedRepresentation)
+//! [`SVError::UnsupportedRepresentation`](crate::sv_data::SVError::UnsupportedRepresentation)
 //! and name the alternative path instead of densifying.
 
-use crate::sv_data::SVDataError;
-
+use crate::sv_error::SVError;
 /// A borrowed sparse column of `length` logical values.
 ///
 /// Only the entries listed in `indices` are stored; every other logical
@@ -24,18 +23,14 @@ impl<'a> SVSparseView<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::MismatchedSparseLengths`] when the slices differ
-    /// in length, [`SVDataError::SparseIndicesNotIncreasing`] when the indices
+    /// Returns [`SVError::MismatchedSparseLengths`] when the slices differ
+    /// in length, [`SVError::SparseIndicesNotIncreasing`] when the indices
     /// are not strictly increasing and
-    /// [`SVDataError::SparseIndexOutOfRange`] when an index points past the
+    /// [`SVError::SparseIndexOutOfRange`] when an index points past the
     /// logical length.
-    pub fn new(
-        indices: &'a [usize],
-        values: &'a [f64],
-        length: usize,
-    ) -> Result<Self, SVDataError> {
+    pub fn new(indices: &'a [usize], values: &'a [f64], length: usize) -> Result<Self, SVError> {
         if indices.len() != values.len() {
-            return Err(SVDataError::MismatchedSparseLengths {
+            return Err(SVError::MismatchedSparseLengths {
                 indices: indices.len(),
                 values: values.len(),
             });
@@ -44,10 +39,10 @@ impl<'a> SVSparseView<'a> {
         let mut previous: Option<usize> = None;
         for (position, index) in indices.iter().copied().enumerate() {
             if previous.is_some_and(|previous_index| index <= previous_index) {
-                return Err(SVDataError::SparseIndicesNotIncreasing { position });
+                return Err(SVError::SparseIndicesNotIncreasing { position });
             }
             if index >= length {
-                return Err(SVDataError::SparseIndexOutOfRange { index, length });
+                return Err(SVError::SparseIndexOutOfRange { index, length });
             }
             previous = Some(index);
         }

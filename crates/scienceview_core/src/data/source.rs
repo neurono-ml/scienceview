@@ -1,8 +1,9 @@
 //! The open ingestion trait and the metadata a source declares.
 
+use crate::sv_error::SVError;
 use std::borrow::Cow;
 
-use crate::sv_data::{SVColumnView, SVDataError, SVRepresentation, SVStreamingView};
+use crate::sv_data::{SVColumnView, SVRepresentation, SVStreamingView};
 use crate::sv_window::SVWindowReadGuard;
 
 /// What a column means to an artist.
@@ -180,9 +181,9 @@ pub trait SVDataSource: Send + Sync {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::ColumnNotFound`] when the source has no column of
+    /// Returns [`SVError::ColumnNotFound`] when the source has no column of
     /// that name, and the validation failures of the representation in use.
-    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError>;
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError>;
 }
 
 #[cfg(test)]

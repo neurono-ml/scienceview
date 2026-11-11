@@ -1,6 +1,7 @@
 //! The computation boundary: a column as one of three representations.
 
-use crate::sv_data::{SVDataError, SVRepresentation, SVSparseView};
+use crate::sv_data::{SVRepresentation, SVSparseView};
+use crate::sv_error::SVError;
 
 /// A borrowed snapshot of the current window of a live source.
 ///
@@ -92,13 +93,13 @@ impl<'a> SVColumnView<'a> {
     /// # Errors
     ///
     /// A sparse view is never densified, so it returns
-    /// [`SVDataError::UnsupportedRepresentation`] naming the alternative:
+    /// [`SVError::UnsupportedRepresentation`] naming the alternative:
     /// iterate over [`SVSparseView::stored_entries`] instead.
-    pub fn dense_values(&self) -> Result<&'a [f64], SVDataError> {
+    pub fn dense_values(&self) -> Result<&'a [f64], SVError> {
         match self {
             SVColumnView::Dense(values) => Ok(values),
             SVColumnView::Streaming(streaming) => Ok(streaming.values()),
-            SVColumnView::Sparse(_) => Err(SVDataError::UnsupportedRepresentation {
+            SVColumnView::Sparse(_) => Err(SVError::UnsupportedRepresentation {
                 operation: "dense_values",
                 representation: SVRepresentation::Sparse,
                 alternative: "iterate over the sparse stored entries with `stored_entries`",

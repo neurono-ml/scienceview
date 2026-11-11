@@ -1,9 +1,9 @@
 //! A bounded ring buffer fed by a producer and borrowed by the render thread.
 
+use crate::sv_error::SVError;
 use std::collections::VecDeque;
 use std::sync::MutexGuard;
 
-use crate::sv_data::SVDataError;
 use crate::sv_window::{SVWindowOverflow, SVWindowPolicy};
 
 /// A bounded rolling window of samples.
@@ -26,11 +26,11 @@ impl SVRollingWindow {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::InvalidWindowCapacity`] when the capacity is
+    /// Returns [`SVError::InvalidWindowCapacity`] when the capacity is
     /// zero.
-    pub fn new(policy: SVWindowPolicy) -> Result<Self, SVDataError> {
+    pub fn new(policy: SVWindowPolicy) -> Result<Self, SVError> {
         if policy.maximum_number_of_points() == 0 {
-            return Err(SVDataError::InvalidWindowCapacity { capacity: 0 });
+            return Err(SVError::InvalidWindowCapacity { capacity: 0 });
         }
 
         Ok(Self {
@@ -45,9 +45,9 @@ impl SVRollingWindow {
     ///
     /// # Errors
     ///
-    /// Returns [`SVDataError::InvalidWindowCapacity`] when the capacity is
+    /// Returns [`SVError::InvalidWindowCapacity`] when the capacity is
     /// zero.
-    pub fn with_capacity(capacity: usize) -> Result<Self, SVDataError> {
+    pub fn with_capacity(capacity: usize) -> Result<Self, SVError> {
         Self::new(SVWindowPolicy::drop_oldest(capacity))
     }
 

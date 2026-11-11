@@ -1,11 +1,12 @@
 //! Companion tests for the Tokio channel adapter.
 
+use crate::sv_error::SVError;
 use std::time::{Duration, Instant};
 
 use tokio::sync::mpsc;
 
 use crate::sv_data::adapters::SVTokioChannelColumn;
-use crate::sv_data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
+use crate::sv_data::{SVDataSource, SVReactivity, SVRepresentation};
 
 #[test]
 fn a_tokio_read_drains_the_batches_already_available() {
@@ -68,7 +69,7 @@ fn a_tokio_source_reports_an_unknown_column() {
 
     assert_eq!(
         source.column("other").err(),
-        Some(SVDataError::ColumnNotFound {
+        Some(SVError::ColumnNotFound {
             name: "other".to_owned()
         })
     );
@@ -80,6 +81,6 @@ fn a_tokio_source_rejects_a_zero_capacity() {
 
     assert_eq!(
         SVTokioChannelColumn::with_capacity("value", receiver, 0).err(),
-        Some(SVDataError::InvalidWindowCapacity { capacity: 0 })
+        Some(SVError::InvalidWindowCapacity { capacity: 0 })
     );
 }
