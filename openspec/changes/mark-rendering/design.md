@@ -18,7 +18,7 @@ A dot's shape is geometry; its fill and stroke are paint. Separating them is wha
 
 ### D3 — Error bar is a mark
 
-The error bar is needed by the bar, point and regression recipes. Making it a mark rather than a private helper avoids three divergent implementations. This is the amendment recorded in FDR-123.
+The error bar is needed by the bar, point and regression recipes. Making it a mark rather than a private helper avoids three divergent implementations. This is the amendment recorded in [FDR-001 — `SVMark`](../../../docs/FDRs/core/core-mark.md).
 
 ### D4 — Marks never allocate the data
 
