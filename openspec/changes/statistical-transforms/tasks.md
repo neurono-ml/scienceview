@@ -12,8 +12,8 @@
 
 ## Density and CDF
 
-- [ ] Write failing tests for bandwidth rules, grid size and window semantics.
-- [ ] Implement kernel density and empirical CDF off the render thread.
+- [x] Write failing tests for bandwidth rules, grid size and window semantics.
+- [x] Implement kernel density and empirical CDF off the render thread.
 
 ## Fit
 
