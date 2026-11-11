@@ -2,8 +2,8 @@
 
 ## Theme source and compilation
 
-- [ ] Write failing tests for build-time compilation and token resolution.
-- [ ] Implement the theme source, the build-time compiler and the token struct.
+- [x] Write failing tests for build-time compilation and token resolution.
+- [x] Implement the theme source, the build-time compiler and the token struct.
 
 ## Palettes and colour maps
 
