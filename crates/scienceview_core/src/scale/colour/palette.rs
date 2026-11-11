@@ -61,7 +61,7 @@ impl SVScalePalette {
 
     /// Builds a palette from stops a theme compiler already validated.
     #[cfg(feature = "theme")]
-    pub(crate) fn sv_from_theme_palette(token: &str, colours: Vec<SVColour>) -> Self {
+    pub(crate) fn from_theme_palette(token: &str, colours: Vec<SVColour>) -> Self {
         Self {
             name: token.to_string(),
             colours,
@@ -120,7 +120,7 @@ impl SVScalePalette {
             .map(super::sv_colour_from_theme)
             .collect();
 
-        Ok(Self::sv_from_theme_palette(token, colours))
+        Ok(Self::from_theme_palette(token, colours))
     }
 
     /// Returns the entry for an assignment index, re-resolving the theme token

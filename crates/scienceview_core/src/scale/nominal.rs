@@ -90,7 +90,7 @@ impl<'a> SVNominalScale<'a> {
     /// Returns the slot interval, one slot per category.
     pub fn domain(&self) -> SVDomain {
         let upper = self.categories.len().saturating_sub(1) as f64;
-        SVDomain::sv_from_validated(0.0, upper)
+        SVDomain::from_validated(0.0, upper)
     }
 
     /// Returns where the domain came from.

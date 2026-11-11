@@ -44,11 +44,6 @@ impl SVColour {
         self.alpha
     }
 
-    /// Returns the four channels in draw order.
-    pub const fn components(&self) -> (u8, u8, u8, u8) {
-        (self.red, self.green, self.blue, self.alpha)
-    }
-
     /// Returns the colour with a different alpha channel.
     pub const fn with_alpha(self, alpha: u8) -> Self {
         Self { alpha, ..self }

@@ -79,7 +79,7 @@ impl SVColourMap {
 
     /// Builds a map from stops a theme compiler already validated.
     #[cfg(feature = "theme")]
-    pub(crate) fn sv_from_theme_stops(token: &str, stops: Vec<SVColour>) -> Self {
+    pub(crate) fn from_theme_stops(token: &str, stops: Vec<SVColour>) -> Self {
         Self {
             name: token.to_string(),
             stops,
@@ -132,7 +132,7 @@ impl SVColourMap {
             .map(super::sv_colour_from_theme)
             .collect();
 
-        Ok(Self::sv_from_theme_stops(token, stops))
+        Ok(Self::from_theme_stops(token, stops))
     }
 
     /// Interpolates the map, re-resolving the theme token first when the map is

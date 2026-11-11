@@ -65,7 +65,7 @@ impl SVDomain {
     }
 
     /// Builds a domain whose bounds the caller already validated.
-    pub(crate) fn sv_from_validated(lower: f64, upper: f64) -> Self {
+    pub(crate) fn from_validated(lower: f64, upper: f64) -> Self {
         Self { lower, upper }
     }
 
@@ -92,23 +92,5 @@ impl SVDomain {
     /// Returns `true` when a finite value falls inside the domain.
     pub fn contains(&self, value: f64) -> bool {
         value.is_finite() && value >= self.lower && value <= self.upper
-    }
-
-    /// Returns the position of a value as a fraction of the domain.
-    ///
-    /// A degenerate domain answers `0.5` for any finite value, which places
-    /// the single tick in the middle of the axis. A non-finite value has no
-    /// position and answers `None`; the fraction is not clamped, so a value
-    /// outside the domain extrapolates.
-    pub fn normalize(&self, value: f64) -> Option<f64> {
-        if !value.is_finite() {
-            return None;
-        }
-
-        if self.is_degenerate() {
-            return Some(0.5);
-        }
-
-        Some((value - self.lower) / self.length())
     }
 }

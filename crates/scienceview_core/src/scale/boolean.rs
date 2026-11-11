@@ -45,7 +45,7 @@ impl SVBooleanScale {
 
     /// Returns the two-slot interval.
     pub fn domain(&self) -> SVDomain {
-        SVDomain::sv_from_validated(0.0, 1.0)
+        SVDomain::from_validated(0.0, 1.0)
     }
 
     /// Places a boolean value on the range.
