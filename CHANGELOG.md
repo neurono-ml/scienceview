@@ -12,6 +12,14 @@ released.
 
 ### Added
 
+- The layout solver in `scienceview_core` (`sv_layout`): a total length model
+  (`SVLength` with absolute, fraction, intrinsic, aspect-ratio and fill
+  variants), minimum and maximum constraints, a layout tree solved in two
+  passes (measure, then solve) against a backend-supplied `SVViewport`, the
+  four explicit responsiveness modes (fixed, fit to parent, aspect-ratio
+  constrained, content derived), cached invalidation and revisioning on
+  viewport change, spacing seeded by theme tokens with built-in defaults, and
+  deterministic clamping — the minimum wins — when constraints contradict.
 - The data source layer: `SVDataSource` is the open ingestion contract and
   `SVColumnView` is the closed computation boundary with exactly three
   representations — dense, sparse and streaming. Adapters cover borrowed
