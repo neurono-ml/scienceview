@@ -17,6 +17,6 @@
 
 ## Backend contract
 
-- [ ] Write failing tests for the viewport description.
-- [ ] Implement the viewport and document the rasterization contract.
+- [x] Write failing tests for the viewport description.
+- [x] Implement the viewport and document the rasterization contract.
 
