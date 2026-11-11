@@ -41,5 +41,7 @@
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.
 
+pub use scienceview_core;
+
 #[cfg(test)]
 mod workspace_tests;

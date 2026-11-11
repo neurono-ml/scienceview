@@ -1,0 +1,10 @@
+[package]
+name = "scienceview_vue"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+description = "Vue.js component rendering backend for scienceview."
+repository = "https://github.com/neurono-ml/scienceview"
+homepage = "https://neurono-ml.github.io/scienceview"
+documentation = "https://docs.rs/scienceview_vue"

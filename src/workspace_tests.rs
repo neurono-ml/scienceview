@@ -37,7 +37,7 @@ fn backend_feature_is_enabled(feature: &str) -> bool {
 #[test]
 fn core_crate_is_reachable_through_the_facade() {
     assert_eq!(scienceview_core::sv_crate_name(), "scienceview_core");
-    assert_eq!(crate::core::sv_crate_name(), "scienceview_core");
+    assert_eq!(crate::scienceview_core::sv_crate_name(), "scienceview_core");
 }
 
 #[test]
