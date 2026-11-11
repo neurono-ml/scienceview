@@ -20,6 +20,6 @@
 ## Acceptance
 
 - [x] Verify concurrency: the same built figure rendered from several threads is safe.
-- [ ] Verify the span fields through a test subscriber.
+- [x] Verify the span fields through a test subscriber.
 - [ ] Update the crate documentation and the `CHANGELOG.md` entry.
 
