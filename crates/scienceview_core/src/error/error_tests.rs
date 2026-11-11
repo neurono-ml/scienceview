@@ -45,7 +45,10 @@ fn the_unsupported_representation_error_names_an_alternative_path() {
     let message = error.to_string();
 
     assert!(message.contains("Streaming"), "message was: {message}");
-    assert!(message.contains("a windowed view"), "message was: {message}");
+    assert!(
+        message.contains("a windowed view"),
+        "message was: {message}"
+    );
 }
 
 #[test]

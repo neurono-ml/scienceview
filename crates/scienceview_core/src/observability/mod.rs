@@ -5,7 +5,9 @@
 //! its own fields.
 
 mod operation_span;
+#[cfg(test)]
 mod operation_span_tests;
 
+pub use operation_span::SV_OPERATION_SPAN_NAME;
 pub use operation_span::sv_run_operation;
 pub use operation_span::sv_start_operation_span;

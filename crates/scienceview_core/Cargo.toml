@@ -13,5 +13,8 @@ documentation = "https://docs.rs/scienceview_core"
 thiserror = "2"
 tracing = "0.1"
 
+[dev-dependencies]
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }
+
 [lints]
 workspace = true

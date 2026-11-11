@@ -1,6 +1,7 @@
 //! Failure paths of the figure surface. Every error is a value, never a panic.
 
+#[cfg(test)]
 mod error_tests;
-mod sv_error;
+mod error_definition;
 
-pub use sv_error::SVError;
+pub use error_definition::SVError;
