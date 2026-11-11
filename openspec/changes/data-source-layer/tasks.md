@@ -2,7 +2,7 @@
 
 ## Representation types
 
-- [ ] Write failing tests for the three variants and their borrowing rules.
+- [x] Write failing tests for the three variants and their borrowing rules.
 - [ ] Implement `SVColumnView` and the source trait.
 
 ## Adapters
