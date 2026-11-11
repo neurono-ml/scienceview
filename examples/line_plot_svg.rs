@@ -1,4 +1,4 @@
-//! Line-plot example: renders a sine wave to `docs/src/assets/line_plot.svg`.
+//! Line-plot example: renders a sine wave to `docs/figures/line_plot.svg`.
 //!
 //! Run with `cargo run --example line_plot_svg` from the repository root.
 //! The SVG file is checked in and embedded in `README.md` and the mdBook,
@@ -76,9 +76,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     let root = manifest_directory()?;
-    let assets = root.join("docs").join("src").join("assets");
-    fs::create_dir_all(&assets)?;
-    let destination = assets.join("line_plot.svg");
+    let figures = root.join("docs").join("figures");
+    fs::create_dir_all(&figures)?;
+    let destination = figures.join("line_plot.svg");
     fs::write(&destination, svg)?;
     println!("Wrote {}", destination.display());
     Ok(())
