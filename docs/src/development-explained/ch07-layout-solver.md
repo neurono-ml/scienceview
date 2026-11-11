@@ -247,6 +247,12 @@ vertical the height — and
 viewport from 800 to 200 logical pixels reduces the count from 9 to 3. The
 decoration layer consumes that count instead of guessing.
 
+The count is total like the rest of the solver: an absurdly large extent paired
+with a tiny finite spacing saturates at the largest representable count instead
+of overflowing or wrapping to zero, and the test
+`an_enormous_extent_saturates_instead_of_overflowing` in `resolved_tests.rs`
+pins that boundary down.
+
 ## 8. Spacing comes from the theme, but never requires it
 
 Spacing is layout data whose values belong to the design system. The theme
