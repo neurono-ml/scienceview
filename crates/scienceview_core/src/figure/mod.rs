@@ -9,6 +9,8 @@ mod execution_mode;
 #[cfg(test)]
 mod figure_builder_tests;
 #[cfg(test)]
+mod figure_concurrency_tests;
+#[cfg(test)]
 mod figure_operation_tests;
 mod representation;
 
