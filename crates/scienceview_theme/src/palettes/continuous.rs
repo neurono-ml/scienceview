@@ -57,4 +57,24 @@ impl SVContinuousPalette {
     pub fn stops(&self) -> &[SVColour] {
         &self.stops
     }
+
+    /// Interpolates the map at `fraction`.
+    ///
+    /// The fraction is clamped to `0.0..=1.0` and a non-finite fraction maps to
+    /// the first stop, so an out-of-range value never panics. With `n` stops,
+    /// fraction `0.0` is the first stop, `1.0` the last, and `0.5` the middle
+    /// stop when `n` is odd.
+    pub fn colour_at(&self, fraction: f64) -> SVColour {
+        let fraction = if fraction.is_finite() {
+            fraction.clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        let last_index = self.stops.len() - 1;
+        let scaled = fraction * last_index as f64;
+        let lower_index = scaled.floor() as usize;
+        let upper_index = lower_index.saturating_add(1).min(last_index);
+        let local_fraction = scaled - lower_index as f64;
+        self.stops[lower_index].interpolate(self.stops[upper_index], local_fraction)
+    }
 }

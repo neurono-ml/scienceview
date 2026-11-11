@@ -35,4 +35,10 @@ impl SVDiscretePalette {
     pub fn colours(&self) -> &[SVColour] {
         &self.colours
     }
+
+    /// Returns the entry for a series, cycling when there are more series than
+    /// entries. The palette is never empty, so this cannot fail.
+    pub fn colour_at_index(&self, index: usize) -> SVColour {
+        self.colours[index % self.colours.len()]
+    }
 }

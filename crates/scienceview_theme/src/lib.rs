@@ -50,7 +50,10 @@ mod theme;
 mod tokens;
 
 pub use error::SVThemeError;
-pub use palettes::{SVColourMapKind, SVColourPalettes, SVContinuousPalette, SVDiscretePalette};
+pub use palettes::{
+    SVColourMapKind, SVColourPalettes, SVContinuousPalette, SVDerivationRule, SVDerivedPalette,
+    SVDiscretePalette,
+};
 #[cfg(feature = "theme-runtime-compilation")]
 pub use theme::sv_compile_theme;
 pub use theme::{SVTheme, SVThemeBuilder};

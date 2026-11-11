@@ -6,9 +6,11 @@
 //! recomputes from the data.
 
 mod continuous;
+mod derived;
 mod discrete;
 
 pub use continuous::{SVColourMapKind, SVContinuousPalette};
+pub use derived::{SVDerivationRule, SVDerivedPalette};
 pub use discrete::SVDiscretePalette;
 
 /// Every palette a compiled theme carries.
@@ -17,6 +19,9 @@ pub struct SVColourPalettes {
     pub(crate) categorical: Vec<SVDiscretePalette>,
     pub(crate) continuous: Vec<SVContinuousPalette>,
 }
+
+#[cfg(test)]
+mod palettes_tests;
 
 impl SVColourPalettes {
     /// Finds a categorical palette by name, or `None` when the theme does not
