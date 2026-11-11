@@ -18,4 +18,6 @@ pub use theme_tokens::{
 pub use typography::{SVFontSizes, SVFontWeights, SVTypographyTokens};
 
 #[cfg(test)]
+mod motion_tests;
+#[cfg(test)]
 mod tokens_tests;

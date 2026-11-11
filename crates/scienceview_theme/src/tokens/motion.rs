@@ -27,8 +27,11 @@ impl SVMotionTokens {
         self.reduced_motion
     }
 
-    /// Resolves one duration.
+    /// Resolves one duration, collapsing it to zero under reduced motion.
     pub fn duration(&self, which: SVMotionDuration) -> Duration {
+        if self.reduced_motion {
+            return Duration::ZERO;
+        }
         let milliseconds = match which {
             SVMotionDuration::Fast => self.durations.fast_milliseconds,
             SVMotionDuration::Normal => self.durations.normal_milliseconds,
