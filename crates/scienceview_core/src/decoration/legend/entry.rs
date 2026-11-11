@@ -49,4 +49,11 @@ impl SVLegendEntry {
     pub(crate) fn sv_set_visible(&mut self, visible: bool) {
         self.visible = visible;
     }
+
+    /// Adopts a new label and colour without touching the visibility, so a
+    /// data update never silently re-shows a series the reader hid.
+    pub(crate) fn sv_update(&mut self, label: String, colour: SVColour) {
+        self.label = label;
+        self.colour = colour;
+    }
 }

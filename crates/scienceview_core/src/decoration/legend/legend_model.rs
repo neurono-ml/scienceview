@@ -111,7 +111,7 @@ impl SVLegend {
             .iter_mut()
             .find(|entry| entry.series_key() == series_key)
         {
-            *entry = SVLegendEntry::new(series_key, label.into(), colour);
+            entry.sv_update(label.into(), colour);
             return false;
         }
         self.entries

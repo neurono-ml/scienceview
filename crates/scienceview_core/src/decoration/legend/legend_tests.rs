@@ -56,6 +56,19 @@ fn a_hidden_series_keeps_its_entry_and_reflects_the_state() {
 }
 
 #[test]
+fn updating_a_hidden_series_keeps_it_hidden() {
+    let mut legend = SVLegend::new();
+    legend.add_series("alpha", "Alpha", sv_colour(1));
+    assert!(legend.set_visible("alpha", false));
+
+    assert!(!legend.add_series("alpha", "Alpha renamed", sv_colour(2)));
+
+    assert_eq!(legend.entries()[0].label(), "Alpha renamed");
+    assert_eq!(legend.entries()[0].colour(), sv_colour(2));
+    assert_eq!(legend.is_visible("alpha"), Some(false));
+}
+
+#[test]
 fn many_series_produce_a_bounded_deterministic_layout() {
     let mut legend = SVLegend::new();
     for index in 0..100_u8 {

@@ -1,7 +1,7 @@
 //! Axis placement: label collision avoidance and band geometry.
 
 use super::{SVAxis, SVAxisSide, SVAxisSpace};
-use crate::sv_decoration::SVDecorationStyle;
+use crate::sv_decoration::{SVDecorationPrimitive, SVDecorationStyle};
 use crate::sv_layout::{
     SVLayoutNode, SVLayoutTree, SVLength, SVResolvedRectangle, SVResponsivenessMode, SVViewport,
 };
@@ -160,6 +160,43 @@ fn an_axis_title_reserves_more_thickness_than_no_title() {
 
     assert!(titled.band_thickness() > bare.band_thickness());
     assert!(titled.title_box().is_some());
+}
+
+#[test]
+fn a_vertical_axis_title_is_rotated_and_a_horizontal_one_is_not() {
+    let style = SVDecorationStyle::built_in();
+    let plot = SVResolvedRectangle::new(100.0, 50.0, 400.0, 300.0);
+
+    for (side, expected_rotation) in [
+        (SVAxisSide::Left, -90.0),
+        (SVAxisSide::Right, -90.0),
+        (SVAxisSide::Top, 0.0),
+        (SVAxisSide::Bottom, 0.0),
+    ] {
+        let axis = SVAxis::builder(side).title("value").build();
+        let measurement = axis
+            .measure(
+                &sv_continuous_scale(300.0),
+                SVAxisSpace::new(300.0).expect("positive extent"),
+                &style,
+            )
+            .expect("the axis is measurable");
+        let placement = axis.place(&measurement, plot, &style);
+        let rotations: Vec<f64> = placement
+            .primitives()
+            .iter()
+            .filter_map(|primitive| match primitive {
+                SVDecorationPrimitive::Text {
+                    text,
+                    rotation_degrees,
+                    ..
+                } if text == "value" => Some(*rotation_degrees),
+                _ => None,
+            })
+            .collect();
+
+        assert_eq!(rotations, vec![expected_rotation]);
+    }
 }
 
 #[test]
