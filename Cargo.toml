@@ -56,6 +56,8 @@ path = "src/lib.rs"
 default = []
 # Borrowed slices are the core data model; ndarray views are opt-in.
 data-ndarray = ["dep:ndarray", "scienceview_core/data-ndarray"]
+# Zero-copy views over `sprs` sparse vectors.
+data-sprs = ["scienceview_core/data-sprs"]
 # Opt-in JSON serialization of the figure specification.
 spec-serde = ["dep:serde", "dep:serde_json"]
 # One feature per rendering backend, one crate per feature.

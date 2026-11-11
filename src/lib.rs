@@ -37,6 +37,7 @@
 //! compile time:
 //!
 //! - `data-ndarray`: zero-copy views over `ndarray` arrays.
+//! - `data-sprs`: zero-copy views over `sprs` sparse vectors.
 //! - `spec-serde`: JSON serialization of the figure specification.
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.

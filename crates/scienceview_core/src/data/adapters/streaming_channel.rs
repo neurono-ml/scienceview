@@ -13,8 +13,15 @@ use crate::window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock}
 ///
 /// The producer owns the sending half and pushes samples; a read drains
 /// whatever already arrived — never waiting — into a bounded rolling window and
-/// hands out a borrowed snapshot of it. Neither the drain nor the read can
-/// grow without bound: an overflowing window drops its oldest sample.
+/// hands out a borrowed snapshot of it. The window itself cannot grow without
+/// bound: an overflowing window drops its oldest sample.
+///
+/// A standard-library channel has no bounded variant, so the adapter bounds
+/// *retention*, not the producer's backlog: a producer that keeps sending while
+/// no read happens can still grow the channel queue, and a read then drains the
+/// whole queue in one go. When backpressure matters, pace the producer or use
+/// [`SVTokioChannelColumn`](crate::data::SVTokioChannelColumn) with a bounded
+/// Tokio channel.
 #[derive(Debug)]
 pub struct SVChannelColumn<'a> {
     descriptor: SVColumnDescriptor<'a>,
