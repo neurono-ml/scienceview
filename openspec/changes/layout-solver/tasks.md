@@ -2,8 +2,8 @@
 
 ## Length model
 
-- [ ] Write failing tests for every length variant and the constraint combination.
-- [ ] Implement `SVLength` and the constraints.
+- [x] Write failing tests for every length variant and the constraint combination.
+- [x] Implement `SVLength` and the constraints.
 
 ## Measure and solve
 
