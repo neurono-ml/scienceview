@@ -6,6 +6,8 @@ mod backend_kind_tests;
 mod capability;
 mod dispatch;
 #[cfg(test)]
+pub(crate) mod test_support;
+#[cfg(test)]
 mod dispatch_tests;
 mod kind;
 mod matrix;
