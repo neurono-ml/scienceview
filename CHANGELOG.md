@@ -12,6 +12,17 @@ released.
 
 ### Added
 
+- The decoration kernel in `scienceview_core::sv_decoration`: axes on all four
+  sides with ticks derived from the space the layout granted (`SVTickSpace` and
+  `SVTickDerivation`) and a deterministic label collision pass, grid lines that
+  reuse the placed tick coordinates, a legend whose entries follow the series
+  enter/exit lifecycle with a bounded overflow row, a colour bar tied to the
+  very `SVContinuousColourScale` the cells use, and titles, subtitles and
+  captions. Every decoration measures itself in the measure pass, places itself
+  in the solve pass and emits backend-agnostic line, rectangle and text
+  primitives; text is measured as a box until a backend rasterizes glyphs. The
+  decoration style reads the existing `theme` feature's tokens and mirrors the
+  same values in documented built-in defaults when the feature is off.
 - The scale kernel in `scienceview_core::sv_scale`: `SVScale` is the closed
   model with exactly four kinds — continuous, nominal, temporal and boolean —
   and each scale owns its data domain and its display range together, so an
