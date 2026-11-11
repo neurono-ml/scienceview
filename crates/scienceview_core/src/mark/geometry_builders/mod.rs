@@ -14,6 +14,9 @@ mod positions;
 mod ribbon;
 mod simplify;
 
+pub(crate) use accessor::SVResolvedChannels;
+#[cfg(test)]
+pub(crate) use accessor::{sv_reset_resolution_count, sv_resolution_count};
 pub(crate) use arc::sv_wedge_geometry;
 pub(crate) use area::sv_area_geometry;
 pub(crate) use bar::sv_bar_geometry;

@@ -14,6 +14,7 @@ pub(crate) fn sv_ribbon_geometry<'data>(
     options: &SVRibbonOptions,
     request: &SVMarkRequest<'data, '_>,
     points: &[SVPoint],
+    expected_length: usize,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let upper_column = request
         .upper()
@@ -21,8 +22,18 @@ pub(crate) fn sv_ribbon_geometry<'data>(
     let lower_column = request
         .lower()
         .ok_or_else(|| sv_missing_boundary("lower"))?;
-    let upper = sv_boundary_positions(request, upper_column, "ribbon upper values")?;
-    let lower = sv_boundary_positions(request, lower_column, "ribbon lower values")?;
+    let upper = sv_boundary_positions(
+        request,
+        upper_column,
+        expected_length,
+        "ribbon upper values",
+    )?;
+    let lower = sv_boundary_positions(
+        request,
+        lower_column,
+        expected_length,
+        "ribbon lower values",
+    )?;
     if points.is_empty() {
         return Ok(SVMarkGeometry::default());
     }

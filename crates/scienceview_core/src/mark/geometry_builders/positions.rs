@@ -1,6 +1,6 @@
 //! Mapping data columns onto display positions through the scale kernel.
 
-use super::accessor::SVColumnAccessor;
+use super::accessor::{SVColumnAccessor, SVResolvedChannels};
 use crate::sv_data::SVColumnView;
 use crate::sv_error::SVError;
 use crate::sv_mark::{SVMarkRequest, SVPoint};
@@ -39,11 +39,17 @@ pub(crate) fn sv_require_same_length(
     })
 }
 
-/// Maps both channels onto display space, dispatching on each representation
-/// exactly once.
-pub(crate) fn sv_plot_positions(request: &SVMarkRequest<'_, '_>) -> Result<Vec<SVPoint>, SVError> {
-    let horizontal = SVColumnAccessor::resolve(request.primary());
-    let vertical = SVColumnAccessor::resolve(request.secondary());
+/// Maps both channels onto display space.
+///
+/// The two representations were already resolved once by the operation; this
+/// function only reads the resolved accessors, so a text mark that also
+/// formats its secondary values never dispatches them a second time.
+pub(crate) fn sv_plot_positions(
+    request: &SVMarkRequest<'_, '_>,
+    channels: &SVResolvedChannels<'_>,
+) -> Result<Vec<SVPoint>, SVError> {
+    let horizontal = channels.horizontal();
+    let vertical = channels.vertical();
     sv_require_same_length(
         horizontal.length(),
         vertical.length(),
@@ -63,10 +69,11 @@ pub(crate) fn sv_plot_positions(request: &SVMarkRequest<'_, '_>) -> Result<Vec<S
 pub(crate) fn sv_boundary_positions<'data>(
     request: &SVMarkRequest<'data, '_>,
     view: SVColumnView<'data>,
+    expected_length: usize,
     column_name: &str,
 ) -> Result<Vec<f64>, SVError> {
     let accessor = SVColumnAccessor::resolve(view);
-    sv_require_same_length(accessor.length(), request.primary().length(), column_name)?;
+    sv_require_same_length(accessor.length(), expected_length, column_name)?;
 
     (0..accessor.length())
         .map(|index| sv_scale_position(request.vertical_scale(), accessor.value_at(index)))
@@ -77,10 +84,11 @@ pub(crate) fn sv_boundary_positions<'data>(
 pub(crate) fn sv_horizontal_boundary_positions<'data>(
     request: &SVMarkRequest<'data, '_>,
     view: SVColumnView<'data>,
+    expected_length: usize,
     column_name: &str,
 ) -> Result<Vec<f64>, SVError> {
     let accessor = SVColumnAccessor::resolve(view);
-    sv_require_same_length(accessor.length(), request.primary().length(), column_name)?;
+    sv_require_same_length(accessor.length(), expected_length, column_name)?;
 
     (0..accessor.length())
         .map(|index| sv_scale_position(request.horizontal_scale(), accessor.value_at(index)))

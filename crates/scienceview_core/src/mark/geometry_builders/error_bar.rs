@@ -18,6 +18,7 @@ pub(crate) fn sv_error_bar_geometry<'data>(
     options: &SVErrorBarOptions,
     request: &SVMarkRequest<'data, '_>,
     points: &[SVPoint],
+    expected_length: usize,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let lower_column = request
         .lower()
@@ -32,8 +33,18 @@ pub(crate) fn sv_error_bar_geometry<'data>(
         SVErrorBarDirection::Vertical | SVErrorBarDirection::Both
     ) {
         Some((
-            sv_boundary_positions(request, lower_column, "error bar lower values")?,
-            sv_boundary_positions(request, upper_column, "error bar upper values")?,
+            sv_boundary_positions(
+                request,
+                lower_column,
+                expected_length,
+                "error bar lower values",
+            )?,
+            sv_boundary_positions(
+                request,
+                upper_column,
+                expected_length,
+                "error bar upper values",
+            )?,
         ))
     } else {
         None
@@ -43,8 +54,18 @@ pub(crate) fn sv_error_bar_geometry<'data>(
         SVErrorBarDirection::Horizontal | SVErrorBarDirection::Both
     ) {
         Some((
-            sv_horizontal_boundary_positions(request, lower_column, "error bar lower values")?,
-            sv_horizontal_boundary_positions(request, upper_column, "error bar upper values")?,
+            sv_horizontal_boundary_positions(
+                request,
+                lower_column,
+                expected_length,
+                "error bar lower values",
+            )?,
+            sv_horizontal_boundary_positions(
+                request,
+                upper_column,
+                expected_length,
+                "error bar upper values",
+            )?,
         ))
     } else {
         None

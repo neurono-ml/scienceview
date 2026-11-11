@@ -76,6 +76,35 @@ fn a_streaming_column_draws_from_its_snapshot() {
 }
 
 #[test]
+fn a_text_mark_resolves_each_streaming_column_once() {
+    use super::geometry_builders::{sv_reset_resolution_count, sv_resolution_count};
+
+    let horizontal = sv_horizontal_scale();
+    let vertical = sv_vertical_scale();
+    let snapshot = [0.0, 5.0, 10.0];
+    let streaming = SVStreamingView::new(&snapshot, 3, 0);
+    let request = SVMarkRequest::new(
+        SVColumnView::Streaming(streaming),
+        SVColumnView::Streaming(streaming),
+        &horizontal,
+        &vertical,
+        sv_plot_area(),
+    );
+
+    sv_reset_resolution_count();
+    let geometry = SVMark::from(SVMark::text())
+        .geometry(&request)
+        .expect("the streaming text draws");
+
+    assert_eq!(geometry.len(), 3);
+    assert_eq!(
+        sv_resolution_count(),
+        2,
+        "the text mark must dispatch each channel exactly once, including the secondary value it formats"
+    );
+}
+
+#[test]
 fn every_representation_combination_draws_the_same_geometry() {
     let horizontal = sv_horizontal_scale();
     let vertical = sv_vertical_scale();

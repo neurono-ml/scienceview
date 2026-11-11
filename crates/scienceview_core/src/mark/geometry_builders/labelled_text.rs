@@ -13,14 +13,16 @@ use crate::sv_mark::{
 ///
 /// A label comes from the request's label channel when one was supplied, and
 /// otherwise from the secondary value formatted with the mark's
-/// [`SVFormatSpec`](crate::sv_mark::SVFormatSpec). The mark draws what the
-/// recipe decided, never a data type's `Display` implementation.
+/// [`SVFormatSpec`](crate::sv_mark::SVFormatSpec). The secondary accessor is
+/// the one the operation already resolved, so the text mark never dispatches
+/// the representation a second time. The mark draws what the recipe decided,
+/// never a data type's `Display` implementation.
 pub(crate) fn sv_text_geometry<'data>(
     options: &SVTextOptions,
     request: &SVMarkRequest<'data, '_>,
     points: &[SVPoint],
+    values: SVColumnAccessor<'data>,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
-    let values = SVColumnAccessor::resolve(request.secondary());
     sv_require_same_length(points.len(), values.length(), "text values")?;
     if let Some(labels) = request.labels() {
         sv_require_same_length(points.len(), labels.len(), "text labels")?;

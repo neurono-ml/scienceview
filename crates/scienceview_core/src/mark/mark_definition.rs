@@ -2,8 +2,9 @@
 
 use crate::sv_error::SVError;
 use crate::sv_mark::geometry_builders::{
-    sv_area_geometry, sv_bar_geometry, sv_dot_geometry, sv_error_bar_geometry, sv_image_geometry,
-    sv_line_geometry, sv_plot_positions, sv_ribbon_geometry, sv_text_geometry, sv_wedge_geometry,
+    SVResolvedChannels, sv_area_geometry, sv_bar_geometry, sv_dot_geometry, sv_error_bar_geometry,
+    sv_image_geometry, sv_line_geometry, sv_plot_positions, sv_ribbon_geometry, sv_text_geometry,
+    sv_wedge_geometry,
 };
 use crate::sv_mark::mark_span::sv_run_mark_geometry;
 use crate::sv_mark::{
@@ -195,17 +196,24 @@ impl SVMark {
             if let SVMark::Image(options) = self {
                 return sv_image_geometry(options, request);
             }
-            let points = sv_plot_positions(request)?;
+            let channels = SVResolvedChannels::resolve(request);
+            let points = sv_plot_positions(request, &channels)?;
             match self {
                 SVMark::Dot(options) => sv_dot_geometry(options, request, &points),
                 SVMark::Line(options) => sv_line_geometry(options, request, &points),
                 SVMark::Area(options) => sv_area_geometry(options, request, &points),
                 SVMark::Bar(options) => sv_bar_geometry(options, request, &points),
-                SVMark::Ribbon(options) => sv_ribbon_geometry(options, request, &points),
-                SVMark::Text(options) => sv_text_geometry(options, request, &points),
+                SVMark::Ribbon(options) => {
+                    sv_ribbon_geometry(options, request, &points, channels.horizontal().length())
+                }
+                SVMark::Text(options) => {
+                    sv_text_geometry(options, request, &points, channels.vertical())
+                }
                 SVMark::Image(options) => sv_image_geometry(options, request),
                 SVMark::Wedge(options) => sv_wedge_geometry(options, request, &points),
-                SVMark::ErrorBar(options) => sv_error_bar_geometry(options, request, &points),
+                SVMark::ErrorBar(options) => {
+                    sv_error_bar_geometry(options, request, &points, channels.horizontal().length())
+                }
             }
         })
     }
