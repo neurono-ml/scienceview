@@ -11,6 +11,7 @@ mod length;
 pub(crate) mod measurement;
 mod node;
 mod resolved;
+mod responsiveness;
 mod solver;
 mod spacing;
 mod viewport;
@@ -20,6 +21,7 @@ pub use engine::SVLayoutTree;
 pub use length::SVLength;
 pub use node::{SVLayoutDirection, SVLayoutNode};
 pub use resolved::{SVResolvedLayout, SVResolvedNode, SVResolvedRectangle};
+pub use responsiveness::SVResponsivenessMode;
 pub use spacing::SVLayoutSpacing;
 pub use viewport::SVViewport;
 
@@ -27,5 +29,7 @@ pub use viewport::SVViewport;
 mod distribution_tests;
 #[cfg(test)]
 mod length_tests;
+#[cfg(test)]
+mod responsiveness_tests;
 #[cfg(test)]
 mod solver_tests;

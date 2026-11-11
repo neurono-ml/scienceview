@@ -3,6 +3,7 @@
 use crate::sv_layout::SVViewport;
 use crate::sv_layout::node::SVLayoutNode;
 use crate::sv_layout::resolved::SVResolvedLayout;
+use crate::sv_layout::responsiveness::SVResponsivenessMode;
 use crate::sv_layout::solver::sv_solve;
 
 /// A layout tree solved for one viewport and cached until it is invalidated.
@@ -15,6 +16,7 @@ use crate::sv_layout::solver::sv_solve;
 pub struct SVLayoutTree {
     root: SVLayoutNode,
     viewport: SVViewport,
+    responsiveness: SVResponsivenessMode,
     resolved: Option<SVResolvedLayout>,
     revision: u64,
 }
@@ -25,6 +27,7 @@ impl SVLayoutTree {
         Self {
             root,
             viewport: SVViewport::default(),
+            responsiveness: SVResponsivenessMode::default(),
             resolved: None,
             revision: 0,
         }
@@ -37,6 +40,13 @@ impl SVLayoutTree {
         self
     }
 
+    /// Sets the responsiveness mode and leaves the tree invalidated.
+    pub fn with_responsiveness(mut self, responsiveness: SVResponsivenessMode) -> Self {
+        self.responsiveness = responsiveness;
+        self.resolved = None;
+        self
+    }
+
     /// Returns the root node.
     pub fn root(&self) -> &SVLayoutNode {
         &self.root
@@ -45,6 +55,11 @@ impl SVLayoutTree {
     /// Returns the current viewport.
     pub fn viewport(&self) -> SVViewport {
         self.viewport
+    }
+
+    /// Returns the declared responsiveness mode.
+    pub fn responsiveness(&self) -> SVResponsivenessMode {
+        self.responsiveness
     }
 
     /// Returns the number of solves performed through this handle.
@@ -71,6 +86,19 @@ impl SVLayoutTree {
         true
     }
 
+    /// Changes the responsiveness mode.
+    ///
+    /// Returns `true` when the mode changed and the cached layout was
+    /// invalidated.
+    pub fn set_responsiveness(&mut self, responsiveness: SVResponsivenessMode) -> bool {
+        if self.responsiveness == responsiveness {
+            return false;
+        }
+        self.responsiveness = responsiveness;
+        self.resolved = None;
+        true
+    }
+
     /// Drops the cached solution without changing the viewport.
     pub fn invalidate(&mut self) {
         self.resolved = None;
@@ -81,7 +109,12 @@ impl SVLayoutTree {
     /// Useful for measuring a prospective viewport; the returned revision is
     /// the one the cache will use next.
     pub fn solve(&self, viewport: &SVViewport) -> SVResolvedLayout {
-        sv_solve(&self.root, viewport, self.revision.saturating_add(1))
+        sv_solve(
+            &self.root,
+            viewport,
+            self.responsiveness,
+            self.revision.saturating_add(1),
+        )
     }
 
     /// Returns the solved layout, re-solving it if it is invalidated.
@@ -89,13 +122,14 @@ impl SVLayoutTree {
         let Self {
             root,
             viewport,
+            responsiveness,
             resolved,
             revision,
         } = self;
         let next_revision = revision.saturating_add(1);
         resolved.get_or_insert_with(|| {
             *revision = next_revision;
-            sv_solve(root, viewport, next_revision)
+            sv_solve(root, viewport, *responsiveness, next_revision)
         })
     }
 }
