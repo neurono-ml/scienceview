@@ -12,6 +12,12 @@ released.
 
 ### Added
 
+- `scienceview_theme`, the design-token crate: one authored stylesheet
+  (`stylesheet/scienceview.scss`) compiled at build time into typed colours,
+  typography, spacing, radii, shadows and motion tokens, with categorical,
+  continuous and data-derived palettes, colour maps, reduced-motion collapse
+  and opt-in runtime recompilation that restyles a figure without rebuilding
+  it. Exposed through the `theme` feature.
 - The repository now builds as a Cargo workspace: `scienceview_core` plus one
   crate per rendering backend (`scienceview_svg`, `scienceview_html`,
   `scienceview_tui`, `scienceview_native`, `scienceview_wasm`,
