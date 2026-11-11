@@ -59,5 +59,11 @@ pub use scale_definition::SVScale;
 pub use temporal::{SVTemporalScale, SVTemporalUnit};
 
 #[cfg(test)]
+#[path = "domain_tests.rs"]
+mod domain_tests;
+#[cfg(test)]
 #[path = "kind_tests.rs"]
 mod kind_tests;
+#[cfg(test)]
+#[path = "transform_tests.rs"]
+mod transform_tests;
