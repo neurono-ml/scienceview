@@ -22,6 +22,17 @@ fn a_stroked_dot_needs_a_stroke_width() {
 }
 
 #[test]
+fn a_cross_never_needs_an_explicit_stroke_width() {
+    use crate::sv_mark::{SVDotShape, SVFillMode};
+
+    for fill in [SVFillMode::Filled, SVFillMode::Stroked, SVFillMode::Both] {
+        SVMark::from(SVMark::dot().shape(SVDotShape::Cross).fill(fill))
+            .validate()
+            .expect("a cross falls back to the theme line width");
+    }
+}
+
+#[test]
 fn a_dot_size_must_be_a_resolvable_positive_length() {
     for size in [
         SVLength::absolute(0.0),

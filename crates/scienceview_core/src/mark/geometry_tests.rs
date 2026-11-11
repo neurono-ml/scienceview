@@ -92,6 +92,42 @@ fn every_dot_shape_has_its_own_primitive() {
 }
 
 #[test]
+fn a_filled_cross_without_a_stroke_width_still_draws_two_visible_segments() {
+    let horizontal = sv_horizontal_scale();
+    let vertical = sv_vertical_scale();
+    let x = [5.0];
+    let y = [5.0];
+    let request = sv_dense_request(&x, &y, &horizontal, &vertical);
+
+    let geometry = SVMark::from(SVMark::dot().shape(crate::sv_mark::SVDotShape::Cross))
+        .geometry(&request)
+        .expect("the filled cross draws");
+
+    let SVMarkShape::Path(path) = geometry.primitives()[0].shape() else {
+        panic!("a cross must draw a path");
+    };
+    assert_eq!(path.commands().len(), 4);
+    assert_eq!(
+        path.commands()[0],
+        SVPathCommand::MoveTo(SVPoint::new(47.0, 50.0))
+    );
+    assert_eq!(
+        path.commands()[1],
+        SVPathCommand::LineTo(SVPoint::new(53.0, 50.0))
+    );
+
+    let paint = geometry.primitives()[0].paint();
+    assert!(
+        paint.stroke().is_some(),
+        "a cross has no interior to fill, so it must always be stroked"
+    );
+    assert!(
+        paint.stroke_width() > 0.0,
+        "a zero stroke width must fall back to a visible default"
+    );
+}
+
+#[test]
 fn a_dot_size_in_area_mode_grows_with_the_square_root() {
     let horizontal = sv_horizontal_scale();
     let vertical = sv_vertical_scale();

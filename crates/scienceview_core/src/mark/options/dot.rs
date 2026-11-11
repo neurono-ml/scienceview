@@ -22,6 +22,10 @@ pub enum SVDotShape {
     /// A diamond.
     Diamond,
     /// A plus sign, drawn as two stroked segments.
+    ///
+    /// A cross has no interior to fill, so it is always stroked: with
+    /// [`SVFillMode::Filled`] and a zero stroke width the geometry falls back
+    /// to the theme's line width instead of drawing an invisible marker.
     Cross,
     /// A regular hexagon.
     Hexagon,
@@ -164,14 +168,21 @@ impl SVDotOptions {
     /// # Errors
     ///
     /// Returns [`SVError::InvalidConfiguration`] when a size is not a positive
-    /// absolute or fractional length, when a stroked dot has no stroke width or
-    /// when the opacity is outside `0.0..=1.0`.
+    /// absolute or fractional length, when a stroked (non-cross) dot has no
+    /// stroke width or when the opacity is outside `0.0..=1.0`.
+    ///
+    /// A cross is exempt from the stroke-width rule: it is stroked-only and
+    /// falls back to the theme line width when no width is given, so that
+    /// `Cross` with [`SVFillMode::Filled`] still renders.
     pub(crate) fn validate(&self) -> Result<(), SVError> {
         if let Some(size) = self.size {
             sv_validate_length(size, "dot size", false)?;
         }
         sv_validate_length(self.stroke_width, "dot stroke width", true)?;
-        if !matches!(self.fill, SVFillMode::Filled) && sv_resolves_to_zero(self.stroke_width) {
+        if !matches!(self.fill, SVFillMode::Filled)
+            && self.shape != SVDotShape::Cross
+            && sv_resolves_to_zero(self.stroke_width)
+        {
             return Err(SVError::InvalidConfiguration {
                 message: "a stroked dot needs a stroke width above zero".to_string(),
             });
