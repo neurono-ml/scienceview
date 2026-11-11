@@ -28,3 +28,26 @@ The scale exposes a tick derivation hook, but the number of ticks comes from the
 
 - A moving domain can make an axis jump under streaming data; a sticky-range option is left open in the FDR.
 
+
+## Implementation notes
+
+- The theme dependency is gated on a new `theme` feature of the core crate,
+  which the root facade forwards from its own `theme` feature. Without it,
+  `sv_default_scale_palette` and `sv_default_colour_map` provide the
+  dependency-free path; the `from_theme` constructors and the `*_with_theme`
+  methods only exist with the feature.
+- Scales expose their own `SVColour` value instead of re-exporting the
+  theme's colour type, so the scale model compiles without the feature. The
+  theme bridge converts theme colours at the boundary.
+- The numeric column view of the data boundary carries `f64` values only, so
+  nominal and boolean scales reject `SVColumnView` and take their domain from
+  their own category list or two-slot model. Continuous and temporal scales
+  derive their domain from dense, sparse and streaming views; the sparse scan
+  reads stored entries and accounts for the implicit zero, and the streaming
+  scan reads the bounded snapshot without waiting.
+- `SVTickSpace` turns the granted axis length and the minimum label spacing
+  into a tick budget; `SVScale::tick_count` is an explicit override. The
+  temporal hook returns numeric timestamps labelled in the chosen unit, so
+  calendar-aware formatting stays with a later decoration layer.
+- The symmetric logarithm uses a linear threshold of one, so zero is defined
+  and the transform is odd.
