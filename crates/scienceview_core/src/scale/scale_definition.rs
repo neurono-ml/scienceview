@@ -23,7 +23,7 @@ pub enum SVScale<'a> {
     Boolean(SVBooleanScale),
 }
 
-impl SVScale<'_> {
+impl<'a> SVScale<'a> {
     /// Returns the kind of this scale.
     pub fn kind(&self) -> SVScaleKind {
         match self {
@@ -91,6 +91,35 @@ impl SVScale<'_> {
             SVScale::Continuous(scale) => Some(scale.transform()),
             SVScale::Temporal(scale) => Some(scale.transform()),
             SVScale::Nominal(_) | SVScale::Boolean(_) => None,
+        }
+    }
+
+    /// Borrows the nominal scale, when this is a nominal scale.
+    pub fn as_nominal(&self) -> Option<&SVNominalScale<'a>> {
+        match self {
+            SVScale::Nominal(scale) => Some(scale),
+            SVScale::Continuous(_) | SVScale::Temporal(_) | SVScale::Boolean(_) => None,
+        }
+    }
+
+    /// Adds categories a nominal scale has not seen yet.
+    ///
+    /// Existing categories keep their assignment index and therefore their
+    /// colour; no category is removed.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::InvalidConfiguration`] when this is not a nominal
+    /// scale.
+    pub fn assign_categories(&mut self, categories: &[&'a str]) -> Result<(), SVError> {
+        match self {
+            SVScale::Nominal(scale) => {
+                scale.assign_categories(categories);
+                Ok(())
+            }
+            scale => Err(SVError::InvalidConfiguration {
+                message: format!("a {} scale has no categories to assign", scale.kind()),
+            }),
         }
     }
 

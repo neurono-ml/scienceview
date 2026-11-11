@@ -7,4 +7,5 @@
 mod build_scale;
 mod scale_builder;
 
+pub(crate) use build_scale::sv_build_continuous_scale;
 pub use scale_builder::SVScaleBuilder;

@@ -131,19 +131,13 @@ fn boolean_scale_places_the_two_values_on_two_slots() {
     let scale = boolean_scale();
 
     assert_eq!(scale.kind(), SVScaleKind::Boolean);
-    assert_eq!(scale.position(SVScaleValue::Boolean(false)), Ok(0.0));
-    assert_eq!(scale.position(SVScaleValue::Boolean(true)), Ok(10.0));
-}
-
-#[test]
-fn boolean_scale_uses_the_documented_default_labels() {
-    let scale = boolean_scale();
-
     assert_eq!(scale.domain(), SVDomain::new(0.0, 1.0).expect("valid"));
     assert_eq!(
         scale.boolean_labels(),
         Some(("false".to_string(), "true".to_string()))
     );
+    assert_eq!(scale.position(SVScaleValue::Boolean(false)), Ok(0.0));
+    assert_eq!(scale.position(SVScaleValue::Boolean(true)), Ok(10.0));
 }
 
 #[test]

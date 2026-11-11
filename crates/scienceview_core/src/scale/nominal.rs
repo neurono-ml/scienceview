@@ -1,6 +1,6 @@
 //! A nominal scale: category labels placed on display slots.
 
-use super::{SVDomain, SVDomainSource, SVScaleKind, SVScaleRange};
+use super::{SVDomain, SVDomainSource, SVScaleKind, SVScalePalette, SVScaleRange, SVSrgbColour};
 use crate::sv_error::SVError;
 
 /// The order in which a nominal scale displays its categories.
@@ -36,6 +36,7 @@ pub struct SVNominalScale<'a> {
     categories: Vec<&'a str>,
     order: SVCategoryOrder,
     range: SVScaleRange,
+    palette: SVScalePalette,
 }
 
 impl<'a> SVNominalScale<'a> {
@@ -44,11 +45,13 @@ impl<'a> SVNominalScale<'a> {
         categories: Vec<&'a str>,
         order: SVCategoryOrder,
         range: SVScaleRange,
+        palette: SVScalePalette,
     ) -> Self {
         Self {
             categories,
             order,
             range,
+            palette,
         }
     }
 
@@ -77,6 +80,11 @@ impl<'a> SVNominalScale<'a> {
     /// Returns the display interval.
     pub fn range(&self) -> SVScaleRange {
         self.range
+    }
+
+    /// Returns the categorical palette.
+    pub fn palette(&self) -> &SVScalePalette {
+        &self.palette
     }
 
     /// Returns the slot interval, one slot per category.
@@ -128,6 +136,34 @@ impl<'a> SVNominalScale<'a> {
             slot as f64 / last_slot as f64
         };
         Ok(self.range.interpolate(fraction))
+    }
+
+    /// Returns the colour of a category.
+    ///
+    /// The colour follows the assignment index, so it never changes when the
+    /// display order changes or when another category arrives.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::InvalidConfiguration`] when the category is unknown.
+    pub fn colour(&self, category: &str) -> Result<SVSrgbColour, SVError> {
+        Ok(self.palette.colour_at_index(self.category_index(category)?))
+    }
+
+    /// Returns the colour of a category, re-resolving a theme-bound palette.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::InvalidConfiguration`] when the category is unknown or
+    /// the theme no longer carries the palette token.
+    #[cfg(feature = "theme")]
+    pub fn colour_with_theme(
+        &self,
+        category: &str,
+        theme: &scienceview_theme::SVTheme,
+    ) -> Result<SVSrgbColour, SVError> {
+        let index = self.category_index(category)?;
+        self.palette.colour_at_index_with_theme(index, theme)
     }
 
     /// Adds categories that are not part of the scale yet.

@@ -2,7 +2,7 @@
 
 use crate::sv_error::SVError;
 use crate::sv_scale::{
-    SVCategoryOrder, SVScaleBuilder, SVScaleKind, SVSrgbColour, SVScalePalette,
+    SVCategoryOrder, SVScaleBuilder, SVScaleKind, SVScalePalette, SVSrgbColour,
     sv_default_scale_palette,
 };
 
@@ -11,7 +11,10 @@ const WHITE: SVSrgbColour = SVSrgbColour::new(255, 255, 255, 255);
 
 #[test]
 fn a_colour_interpolates_between_its_two_channels() {
-    assert_eq!(BLACK.interpolate(WHITE, 0.5), SVSrgbColour::new(128, 128, 128, 255));
+    assert_eq!(
+        BLACK.interpolate(WHITE, 0.5),
+        SVSrgbColour::new(128, 128, 128, 255)
+    );
     assert_eq!(BLACK.interpolate(WHITE, 0.0), BLACK);
     assert_eq!(BLACK.interpolate(WHITE, 1.0), WHITE);
 }
@@ -46,8 +49,8 @@ fn a_palette_assigns_one_entry_per_index_and_cycles() {
 
 #[test]
 fn a_palette_needs_at_least_one_colour() {
-    let error =
-        SVScalePalette::from_colours("empty", Vec::new()).expect_err("an empty palette has no entry");
+    let error = SVScalePalette::from_colours("empty", Vec::new())
+        .expect_err("an empty palette has no entry");
 
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }
@@ -73,7 +76,9 @@ fn a_nominal_scale_keeps_each_category_colour_when_categories_arrive() {
         .colour("beta")
         .expect("the category is assigned");
 
-    scale.assign_categories(&["gamma", "alpha"]);
+    scale
+        .assign_categories(&["gamma", "alpha"])
+        .expect("a nominal scale accepts categories");
 
     let nominal = scale.as_nominal().expect("a nominal scale");
     assert_eq!(nominal.colour("alpha").expect("assigned"), alpha);

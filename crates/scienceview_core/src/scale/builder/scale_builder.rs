@@ -1,6 +1,8 @@
 //! The builder: the only public way to assemble a scale.
 
-use super::super::{SVCategoryOrder, SVScaleKind, SVScaleTransform, SVTemporalUnit};
+use super::super::{
+    SVCategoryOrder, SVScaleKind, SVScalePalette, SVScaleTransform, SVTemporalUnit,
+};
 use crate::sv_data::SVColumnView;
 
 /// Builds an [`SVScale`].
@@ -25,6 +27,7 @@ pub struct SVScaleBuilder<'a> {
     pub(super) nice: bool,
     pub(super) categories: Option<&'a [&'a str]>,
     pub(super) category_order: SVCategoryOrder,
+    pub(super) palette: Option<SVScalePalette>,
     pub(super) boolean_labels: Option<(&'a str, &'a str)>,
     pub(super) temporal_unit: SVTemporalUnit,
     pub(super) tick_count: Option<usize>,
@@ -43,6 +46,7 @@ impl<'a> SVScaleBuilder<'a> {
             nice: true,
             categories: None,
             category_order: SVCategoryOrder::DataOrder,
+            palette: None,
             boolean_labels: None,
             temporal_unit: SVTemporalUnit::Auto,
             tick_count: None,
@@ -97,6 +101,16 @@ impl<'a> SVScaleBuilder<'a> {
     #[must_use]
     pub fn categories(mut self, categories: &'a [&'a str]) -> Self {
         self.categories = Some(categories);
+        self
+    }
+
+    /// Configures the categorical palette of a nominal scale.
+    ///
+    /// The default is the dependency-free palette; a theme-bound palette is
+    /// obtained with `SVScalePalette::from_theme` under the `theme` feature.
+    #[must_use]
+    pub fn palette(mut self, palette: SVScalePalette) -> Self {
+        self.palette = Some(palette);
         self
     }
 

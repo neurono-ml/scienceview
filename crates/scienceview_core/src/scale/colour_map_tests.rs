@@ -1,8 +1,10 @@
 //! Companion tests for colour maps and continuous colour scales.
 
 use crate::sv_error::SVError;
+#[cfg(feature = "theme")]
+use crate::sv_scale::SVScalePalette;
 use crate::sv_scale::{
-    SVColourMap, SVContinuousColourScaleBuilder, SVSrgbColour, SVScaleTransform,
+    SVColourMap, SVContinuousColourScaleBuilder, SVScaleTransform, SVSrgbColour,
     sv_default_colour_map,
 };
 
@@ -34,8 +36,8 @@ fn a_colour_map_interpolates_its_stops() {
 
 #[test]
 fn a_colour_map_needs_at_least_two_stops() {
-    let error = SVColourMap::from_stops("single", vec![BLACK])
-        .expect_err("one stop cannot interpolate");
+    let error =
+        SVColourMap::from_stops("single", vec![BLACK]).expect_err("one stop cannot interpolate");
 
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }
@@ -118,7 +120,8 @@ fn a_nominal_palette_resolves_from_a_theme_token() {
 #[test]
 fn a_colour_map_resolves_from_a_theme_token() {
     let theme = scienceview_theme::sv_default_theme();
-    let map = SVColourMap::from_theme(&theme, "viridis").expect("the default theme carries viridis");
+    let map =
+        SVColourMap::from_theme(&theme, "viridis").expect("the default theme carries viridis");
 
     assert_eq!(map.name(), "viridis");
     assert_eq!(map.theme_token(), Some("viridis"));

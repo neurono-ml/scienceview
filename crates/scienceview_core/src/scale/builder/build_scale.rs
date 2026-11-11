@@ -2,7 +2,8 @@
 
 use super::super::{
     SVBooleanScale, SVContinuousScale, SVDomain, SVDomainSource, SVNominalScale, SVScale,
-    SVScaleKind, SVScaleRange, SVScaleTransform, SVTemporalScale, sv_nice_domain,
+    SVScaleKind, SVScaleRange, SVScaleTransform, SVTemporalScale, sv_default_scale_palette,
+    sv_nice_domain,
 };
 use super::SVScaleBuilder;
 use crate::sv_data::SVColumnView;
@@ -25,6 +26,7 @@ impl<'a> SVScaleBuilder<'a> {
         match self.kind {
             SVScaleKind::Continuous => {
                 sv_reject_option(self.categories.is_some(), "categories", self.kind)?;
+                sv_reject_option(self.palette.is_some(), "a palette", self.kind)?;
                 sv_reject_option(self.boolean_labels.is_some(), "boolean labels", self.kind)?;
                 let continuous = sv_build_continuous_scale(
                     self.explicit_domain,
@@ -58,14 +60,17 @@ impl<'a> SVScaleBuilder<'a> {
                         message: "a nominal scale requires at least one category".to_string(),
                     });
                 }
+                let palette = self.palette.unwrap_or_else(sv_default_scale_palette);
                 Ok(SVScale::Nominal(SVNominalScale::new(
                     categories,
                     self.category_order,
                     range,
+                    palette,
                 )))
             }
             SVScaleKind::Temporal => {
                 sv_reject_option(self.categories.is_some(), "categories", self.kind)?;
+                sv_reject_option(self.palette.is_some(), "a palette", self.kind)?;
                 sv_reject_option(self.boolean_labels.is_some(), "boolean labels", self.kind)?;
                 if self.transform_configured && self.transform != SVScaleTransform::Linear {
                     return Err(SVError::InvalidConfiguration {
@@ -110,7 +115,7 @@ impl<'a> SVScaleBuilder<'a> {
 }
 
 /// Builds a numeric scale from an explicit or a derived domain.
-fn sv_build_continuous_scale(
+pub(crate) fn sv_build_continuous_scale(
     explicit_domain: Option<(f64, f64)>,
     data_view: Option<SVColumnView<'_>>,
     transform: SVScaleTransform,
