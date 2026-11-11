@@ -48,6 +48,7 @@ mod nominal;
 mod range;
 mod scale_definition;
 mod temporal;
+mod ticks;
 mod transform;
 
 pub use boolean::SVBooleanScale;
@@ -84,6 +85,12 @@ mod domain_tests;
 #[cfg(test)]
 #[path = "kind_tests.rs"]
 mod kind_tests;
+#[cfg(test)]
+#[path = "tick_kind_tests.rs"]
+mod tick_kind_tests;
+#[cfg(test)]
+#[path = "tick_space_tests.rs"]
+mod tick_space_tests;
 #[cfg(test)]
 #[path = "transform_tests.rs"]
 mod transform_tests;
