@@ -2,7 +2,7 @@
 
 ## Error and observability primitives
 
-- [ ] Write failing tests for `SVError` Display and for the span fields.
+- [x] Write failing tests for `SVError` Display and for the span fields.
 - [ ] Implement `SVError` and the operation-span helper.
 
 ## Backend trait and kind
