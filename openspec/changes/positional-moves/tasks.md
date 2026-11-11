@@ -7,8 +7,8 @@
 
 ## Jitter and shift
 
-- [ ] Write failing tests for determinism and the displacement modes.
-- [ ] Implement jitter and shift.
+- [x] Write failing tests for determinism and the displacement modes.
+- [x] Implement jitter and shift.
 
 ## Swarm
 
