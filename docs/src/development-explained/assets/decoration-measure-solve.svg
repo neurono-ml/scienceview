@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc" font-family="Helvetica, Arial, sans-serif">
+  <title id="title">The decoration measure and solve cycle</title>
+  <desc id="desc">The scale kernel derives ticks from the space the layout grants; each decoration measures itself into an intrinsic size that the layout solver consumes; the solver returns the plot rectangle; each decoration places itself into backend-agnostic primitives that a backend rasterizes.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1120" height="620" fill="#f8fafc"/>
+
+  <text x="560" y="42" text-anchor="middle" font-size="24" font-weight="700" fill="#0f172a">Decorations measure before the plot is solved and place after it</text>
+  <text x="560" y="72" text-anchor="middle" font-size="14" fill="#475569">One protocol for axes, grid, legend, colour bar and titles</text>
+
+  <!-- Stage 1: the space -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="110" width="230" height="120" rx="12" fill="#fff4e6" stroke="#f4a261" stroke-width="2"/>
+  </g>
+  <text x="155" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#7c2d12">1 · The granted space</text>
+  <text x="155" y="168" text-anchor="middle" font-size="12" fill="#7c2d12">SVAxisSpace and SVTickSpace</text>
+  <text x="155" y="188" text-anchor="middle" font-size="12" fill="#7c2d12">carry the plot extent and the</text>
+  <text x="155" y="208" text-anchor="middle" font-size="12" fill="#7c2d12">minimum label spacing</text>
+
+  <!-- Stage 2: tick derivation -->
+  <g filter="url(#shadow)">
+    <rect x="320" y="110" width="230" height="120" rx="12" fill="#e3f2fd" stroke="#118ab2" stroke-width="2"/>
+  </g>
+  <text x="435" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#0b3c5d">2 · Scale derives ticks</text>
+  <text x="435" y="168" text-anchor="middle" font-size="12" fill="#0b3c5d">SVTickDerivation turns the</text>
+  <text x="435" y="188" text-anchor="middle" font-size="12" fill="#0b3c5d">space into values, positions</text>
+  <text x="435" y="208" text-anchor="middle" font-size="12" fill="#0b3c5d">and formatted labels</text>
+
+  <!-- Stage 3: measure -->
+  <g filter="url(#shadow)">
+    <rect x="600" y="110" width="230" height="120" rx="12" fill="#eef7ee" stroke="#2a9d8f" stroke-width="2"/>
+  </g>
+  <text x="715" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#12403a">3 · Decorations measure</text>
+  <text x="715" y="168" text-anchor="middle" font-size="12" fill="#12403a">Axes drop colliding labels and</text>
+  <text x="715" y="188" text-anchor="middle" font-size="12" fill="#12403a">report a band thickness; the</text>
+  <text x="715" y="208" text-anchor="middle" font-size="12" fill="#12403a">legend reports a bounded grid</text>
+
+  <!-- Stage 4: solve -->
+  <g filter="url(#shadow)">
+    <rect x="880" y="110" width="200" height="120" rx="12" fill="#fde8ef" stroke="#ef4766" stroke-width="2"/>
+  </g>
+  <text x="980" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#6b0f2a">4 · Layout solves</text>
+  <text x="980" y="168" text-anchor="middle" font-size="12" fill="#6b0f2a">SVLayoutTree measures the</text>
+  <text x="980" y="188" text-anchor="middle" font-size="12" fill="#6b0f2a">bands and gives the remainder</text>
+  <text x="980" y="208" text-anchor="middle" font-size="12" fill="#6b0f2a">to the plot area</text>
+
+  <path d="M 272 170 L 316 170" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 552 170 L 596 170" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 832 170 L 876 170" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- feedback loop -->
+  <path d="M 980 232 L 980 300 L 155 300 L 155 236" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+  <rect x="440" y="283" width="360" height="34" rx="8" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="620" y="305" text-anchor="middle" font-size="13" fill="#4c1d95">a viewport change invalidates the solution and re-runs the cycle</text>
+
+  <!-- place -->
+  <g filter="url(#shadow)">
+    <rect x="600" y="360" width="230" height="120" rx="12" fill="#eef7ee" stroke="#2a9d8f" stroke-width="2"/>
+  </g>
+  <text x="715" y="392" text-anchor="middle" font-size="15" font-weight="700" fill="#12403a">5 · Decorations place</text>
+  <text x="715" y="418" text-anchor="middle" font-size="12" fill="#12403a">Each decoration offsets the</text>
+  <text x="715" y="438" text-anchor="middle" font-size="12" fill="#12403a">solved plot rectangle and</text>
+  <text x="715" y="458" text-anchor="middle" font-size="12" fill="#12403a">emits lines, rectangles and text</text>
+
+  <g filter="url(#shadow)">
+    <rect x="880" y="360" width="200" height="120" rx="12" fill="#e3f2fd" stroke="#118ab2" stroke-width="2"/>
+  </g>
+  <text x="980" y="392" text-anchor="middle" font-size="15" font-weight="700" fill="#0b3c5d">6 · Backend rasterizes</text>
+  <text x="980" y="418" text-anchor="middle" font-size="12" fill="#0b3c5d">The primitives are</text>
+  <text x="980" y="438" text-anchor="middle" font-size="12" fill="#0b3c5d">backend-agnostic; only the</text>
+  <text x="980" y="458" text-anchor="middle" font-size="12" fill="#0b3c5d">final grid snaps to the device</text>
+
+  <!-- place then rasterize -->
+  <path d="M 832 420 L 876 420" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="700" y="510" text-anchor="middle" font-size="13" fill="#334155">the solved plot rectangle feeds placement</text>
+
+  <!-- Text is a box -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="360" width="480" height="120" rx="12" fill="#fef9c3" stroke="#d4a72c" stroke-width="2"/>
+  </g>
+  <text x="280" y="392" text-anchor="middle" font-size="15" font-weight="700" fill="#6b4d00">Text is laid out as a box today</text>
+  <text x="280" y="418" text-anchor="middle" font-size="12" fill="#6b4d00">SVTextBox estimates an advance from the character count at 0.6 em,</text>
+  <text x="280" y="438" text-anchor="middle" font-size="12" fill="#6b4d00">so no font is loaded in the core. A backend that owns real metrics</text>
+  <text x="280" y="458" text-anchor="middle" font-size="12" fill="#6b4d00">rasterizes the same box more precisely without changing the contract.</text>
+
+  <path d="M 522 420 L 596 420" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
