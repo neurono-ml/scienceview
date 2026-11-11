@@ -65,7 +65,9 @@ impl SVResolvedRectangle {
         }
         let count = (extent / spacing).floor();
         if count.is_finite() && count >= 1.0 {
-            count as usize + 1
+            // `as usize` saturates, so the saturation must be preserved when
+            // adding the final tick instead of overflowing at the boundary.
+            (count as usize).saturating_add(1)
         } else {
             2
         }

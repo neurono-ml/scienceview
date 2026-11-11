@@ -95,6 +95,8 @@ mod length_tests;
 #[cfg(test)]
 mod property_tests;
 #[cfg(test)]
+mod resolved_tests;
+#[cfg(test)]
 mod responsiveness_tests;
 #[cfg(test)]
 mod solver_tests;
