@@ -8,7 +8,7 @@
 ## Backend trait and kind
 
 - [x] Write failing tests for `SVBackendKind` (no automatic variant) and for per-operation dispatch.
-- [ ] Implement `SVBackendKind`, `SVRenderBackend` and a test backend that records the calls it receives.
+- [x] Implement `SVBackendKind`, `SVRenderBackend` and a test backend that records the calls it receives.
 - [ ] Implement the capability matrix lookup and the build-time rejection of unsupported combinations.
 
 ## Builder typestate
