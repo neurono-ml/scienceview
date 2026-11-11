@@ -7,8 +7,8 @@
 
 ## Measure and solve
 
-- [ ] Write failing tests for the two passes on a representative tree.
-- [ ] Implement measure, solve and the layout tree.
+- [x] Write failing tests for the two passes on a representative tree.
+- [x] Implement measure, solve and the layout tree.
 
 ## Responsiveness
 
