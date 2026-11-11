@@ -68,7 +68,10 @@ fn a_wide_axis_gets_more_ticks_than_a_narrow_one() {
         wide.len(),
         narrow.len()
     );
-    assert!(narrow.len() >= 2, "a readable axis keeps at least two ticks");
+    assert!(
+        narrow.len() >= 2,
+        "a readable axis keeps at least two ticks"
+    );
 }
 
 #[test]

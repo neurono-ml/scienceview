@@ -38,7 +38,7 @@ pub fn sv_nice_domain(domain: SVDomain, transform: SVScaleTransform) -> SVDomain
 }
 
 /// Returns the smallest 1/2/5 step that is at least as large as the raw step.
-fn sv_nice_step(raw_step: f64) -> f64 {
+pub(crate) fn sv_nice_step(raw_step: f64) -> f64 {
     if !raw_step.is_finite() || raw_step <= 0.0 {
         return 0.0;
     }

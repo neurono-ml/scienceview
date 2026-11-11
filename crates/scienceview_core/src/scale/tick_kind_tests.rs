@@ -1,7 +1,7 @@
 //! Companion tests for the kind-specific tick derivations and the hook trait.
 
 use crate::sv_scale::{
-    SVScale, SVScaleBuilder, SVScaleKind, SVTickDerivation, SVTickSpace, SVTemporalUnit,
+    SVScale, SVScaleBuilder, SVScaleKind, SVTemporalUnit, SVTickDerivation, SVTickSpace,
 };
 
 fn space(available: f64, spacing: f64) -> SVTickSpace {
@@ -41,7 +41,11 @@ fn a_temporal_axis_chooses_a_readable_unit() {
             tick.label()
         );
     }
-    assert!(ticks.windows(2).all(|pair| pair[0].value() < pair[1].value()));
+    assert!(
+        ticks
+            .windows(2)
+            .all(|pair| pair[0].value() < pair[1].value())
+    );
 }
 
 #[test]
@@ -77,9 +81,7 @@ fn a_nominal_axis_strides_its_categories_when_the_space_shrinks() {
     assert_eq!(wide.len(), categories.len());
     assert_eq!(narrow.len(), 2);
     assert!(
-        narrow
-            .iter()
-            .all(|tick| categories.contains(&tick.label().as_str())),
+        narrow.iter().all(|tick| categories.contains(&tick.label())),
         "every nominal tick labels a category"
     );
     assert_eq!(

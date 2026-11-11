@@ -65,6 +65,7 @@ pub use nominal::{SVCategoryOrder, SVNominalScale};
 pub use range::SVScaleRange;
 pub use scale_definition::SVScale;
 pub use temporal::{SVTemporalScale, SVTemporalUnit};
+pub use ticks::{SVTick, SVTickDerivation, SVTickFormat, SVTickSpace};
 pub use transform::SVScaleTransform;
 
 #[cfg(test)]

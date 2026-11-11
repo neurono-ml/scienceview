@@ -10,3 +10,4 @@ mod nice;
 
 pub use definition::{SVDomain, SVDomainSource};
 pub use nice::sv_nice_domain;
+pub(crate) use nice::sv_nice_step;
