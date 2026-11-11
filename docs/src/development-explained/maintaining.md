@@ -22,9 +22,11 @@ examples.
 | 3 | `ch03-theme-tokens.md` | Design tokens from zero: the stylesheet source, build-time and runtime compilation, palettes and colour maps, motion tokens and reduced motion |
 | 4 | `ch04-data-source-layer.md` | The data boundary: `SVDataSource`, the three representations, sparse indices, the bounded window, dispatch once and the parity harness |
 | 5 | `ch05-figure-builder-core.md` | The figure substrate: the builder typestate, the required explicit backend, per-operation dispatch, one error type and one operation span |
+| 7 | `ch07-layout-solver.md` | The layout solver: the length model, constraints, the measure and solve passes, the four responsiveness modes, the viewport and grid-independence, and the property tests |
 
-Chapter 3 covers theming, chapter 4 covers the data boundary and chapter 5
-covers the figure substrate, each written by its own change. Later chapters are
+Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
+covers the figure substrate and chapter 7 covers the layout solver, each
+written by its own change. Later chapters are
 planned, one per capability of the `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
