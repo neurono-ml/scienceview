@@ -94,3 +94,26 @@ fn lint_configuration_denies_warnings() {
         "every clippy lint group must be an error"
     );
 }
+
+#[test]
+fn readme_presents_the_project_badges_and_workspace_layout() {
+    let readme = include_str!("../README.md");
+    let badges = [
+        "actions/workflows/ci.yml/badge.svg",
+        "img.shields.io/crates/v/scienceview.svg",
+        "img.shields.io/docsrs/scienceview",
+        "img.shields.io/badge/rust-1.85",
+    ];
+
+    for badge in badges {
+        assert!(
+            readme.contains(badge),
+            "README.md must carry the `{badge}` badge"
+        );
+    }
+
+    assert!(
+        readme.contains("## Workspace layout"),
+        "README.md must describe the workspace layout"
+    );
+}
