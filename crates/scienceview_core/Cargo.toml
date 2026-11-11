@@ -19,7 +19,7 @@ data-sprs = ["dep:sprs"]
 streaming = []
 # Live updates fed by Tokio channels; the core still owns no async runtime.
 streaming-tokio = ["dep:tokio"]
-# Read compiled design tokens (spacing) from `scienceview_theme`.
+# Read compiled design tokens (colours, palettes, spacing) from `scienceview_theme`.
 theme = ["dep:scienceview_theme"]
 
 [dependencies]
