@@ -12,8 +12,8 @@
 
 ## Motion tokens
 
-- [ ] Write failing tests for reduced motion collapsing durations.
-- [ ] Implement the motion tokens.
+- [x] Write failing tests for reduced motion collapsing durations.
+- [x] Implement the motion tokens.
 
 ## Runtime compilation
 
