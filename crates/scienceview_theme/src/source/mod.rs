@@ -12,10 +12,9 @@ mod parser;
 mod schema;
 
 pub(crate) use ast::SVThemeSource;
-pub(crate) use parser::{SVParseError, sv_parse_theme_source};
+pub(crate) use parser::sv_parse_theme_source;
 pub(crate) use schema::{
     SV_COLOUR_TOKEN_NAMES, SV_MOTION_TOKEN_NAMES, SV_PALETTE_CATEGORICAL_PREFIX,
     SV_PALETTE_CYCLICAL_PREFIX, SV_PALETTE_DIVERGING_PREFIX, SV_PALETTE_SEQUENTIAL_PREFIX,
-    SV_RADIUS_TOKEN_NAMES, SV_SHADOW_TOKEN_NAMES, SV_SPACING_TOKEN_NAMES,
-    SV_TYPOGRAPHY_TOKEN_NAMES, sv_required_token_names,
+    SV_RADIUS_TOKEN_NAMES, SV_SHADOW_TOKEN_NAMES, SV_SPACING_TOKEN_NAMES, sv_required_token_names,
 };
