@@ -12,6 +12,7 @@ members = [
     "crates/scienceview_angular",
     "crates/scienceview_tauri",
     "crates/scienceview_dioxus",
+    "crates/scienceview_theme",
 ]
 
 [workspace.package]
@@ -60,6 +61,10 @@ data-ndarray = ["dep:ndarray", "scienceview_core/data-ndarray"]
 data-sprs = ["scienceview_core/data-sprs"]
 # Opt-in JSON serialization of the figure specification.
 spec-serde = ["dep:serde", "dep:serde_json"]
+# Design tokens: one authored theme compiled into backend-independent tokens.
+theme = ["dep:scienceview_theme"]
+# Recompile a theme while the program runs; absent, the build-time theme is used.
+theme-runtime-compilation = ["theme", "scienceview_theme/theme-runtime-compilation"]
 # One feature per rendering backend, one crate per feature.
 render-svg = ["dep:scienceview_svg"]
 render-html = ["dep:scienceview_html"]
@@ -78,6 +83,7 @@ streaming-tokio = ["dep:tokio", "scienceview_core/streaming-tokio"]
 
 [dependencies]
 scienceview_core = { path = "crates/scienceview_core", version = "0.1.0" }
+scienceview_theme = { path = "crates/scienceview_theme", version = "0.1.0", optional = true }
 ndarray = { version = "0.17", optional = true }
 serde = { version = "1", optional = true, features = ["derive"] }
 serde_json = { version = "1", optional = true }

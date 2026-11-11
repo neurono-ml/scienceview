@@ -18,7 +18,7 @@ Every figure and artist builder SHALL require an explicit backend selection, and
 
 #### Scenario: the backend is explicit and required
 - **WHEN** a backend is selected
-- **THEN** the built figure carries that kind for its whole lifetime
+- **THEN** the built figure carries that kind for every operation until the caller explicitly changes it
 
 ### Requirement: Dispatch happens per operation
 

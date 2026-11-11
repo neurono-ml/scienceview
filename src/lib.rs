@@ -45,6 +45,9 @@
 pub use scienceview_core;
 pub use scienceview_core::{data, window};
 
+#[cfg(feature = "theme")]
+pub use scienceview_theme;
+
 #[cfg(feature = "render-angular")]
 pub use scienceview_angular;
 #[cfg(feature = "render-dioxus")]
