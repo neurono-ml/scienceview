@@ -12,8 +12,8 @@
 
 ## Large data
 
-- [ ] Write failing tests for path grouping and document size.
-- [ ] Implement grouped paths for large mark sets.
+- [x] Write failing tests for path grouping and document size.
+- [x] Implement grouped paths for large mark sets.
 
 ## Assertions and figures
 
