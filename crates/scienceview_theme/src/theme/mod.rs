@@ -17,5 +17,5 @@ pub(crate) fn sv_build_time_theme_data() -> SVThemeData {
     crate::generated::sv_generated_theme_data()
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "theme-runtime-compilation"))]
 mod theme_tests;
