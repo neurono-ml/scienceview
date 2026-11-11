@@ -12,6 +12,18 @@ released.
 
 ### Added
 
+- The repository now builds as a Cargo workspace: `scienceview_core` plus one
+  crate per rendering backend (`scienceview_svg`, `scienceview_html`,
+  `scienceview_tui`, `scienceview_native`, `scienceview_wasm`,
+  `scienceview_react`, `scienceview_vue`, `scienceview_angular`,
+  `scienceview_tauri`, `scienceview_dioxus`). The root `scienceview` package is
+  a facade that re-exports the core and the enabled backends, `default = []`
+  and every backend feature maps 1:1 to its optional path dependency.
+- `rust-toolchain.toml` pinning Rust 1.85 with `rustfmt` and `clippy`, and a
+  workspace lint set that denies warnings.
+- Workspace smoke tests covering core reachability, the default feature set,
+  the toolchain pin, the lint configuration, the README badges and this
+  changelog entry.
 - Feature Description Records for the chart surface (`docs/FDRs/`) — one
   record per core kernel and per scientific-core chart recipe, plus the
   catalogue of deferred chart types and the engineering contract that
@@ -32,7 +44,11 @@ released.
 
 ### Changed
 
-- The README now points at the product requirements document.
+- CI now runs the workspace quality gates — formatting, clippy with warnings as
+  errors and the workspace test suite — plus a figures job that reruns every
+  example and fails on any drift under `docs/figures/`.
+- The README now points at the product requirements document and describes the
+  facade-over-workspace layout.
 
 ## [0.1.0] - Unreleased
 

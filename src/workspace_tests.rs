@@ -117,3 +117,17 @@ fn readme_presents_the_project_badges_and_workspace_layout() {
         "README.md must describe the workspace layout"
     );
 }
+
+#[test]
+fn changelog_records_the_workspace_bootstrap() {
+    let changelog = include_str!("../CHANGELOG.md");
+
+    assert!(
+        changelog.contains("## [Unreleased]"),
+        "CHANGELOG.md must keep an Unreleased section"
+    );
+    assert!(
+        changelog.contains("Cargo workspace"),
+        "CHANGELOG.md must record the workspace bootstrap"
+    );
+}
