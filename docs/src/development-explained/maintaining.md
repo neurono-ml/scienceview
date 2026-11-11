@@ -19,8 +19,11 @@ examples.
 |---|---|---|
 | 1 | `ch01-product-foundation.md` | The product foundation: the two audiences, the trait/enum split, the four-stage interaction pipeline, and the open decisions |
 | 2 | `ch02-workspace-bootstrap.md` | The Cargo workspace: the crate map, the feature map, the pinned toolchain and the four CI gates |
+| 5 | `ch05-figure-builder-core.md` | The figure substrate: the builder typestate, the required explicit backend, per-operation dispatch, one error type and one operation span |
 
-Later chapters are planned, one per capability of the
+Chapters 3 and 4 cover capabilities that landed alongside this one (theming
+and the data source layer, in their own changes); chapter 5 covers the figure
+substrate. Later chapters are planned, one per capability of the
 `foundation-core-architecture` change — `backend-selection`,
 `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
