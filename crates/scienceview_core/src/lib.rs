@@ -129,9 +129,21 @@
 //! through linear, logarithmic, symmetric-logarithmic or square-root functions,
 //! derive axis ticks from the space the layout engine grants, and resolve their
 //! colours from the same compiled theme tokens.
+//!
+//! ## Decorations
+//!
+//! [`sv_decoration`] is what makes an encoding legible: axes with ticks that
+//! fit the granted space, grid lines, the legend that follows the series
+//! lifecycle, the colour bar tied to its continuous colour scale, and the
+//! titles. Every decoration measures itself before the plot area is solved and
+//! places itself into the solved rectangle afterwards, emitting
+//! backend-agnostic primitives; text is laid out as a box until a backend
+//! rasterizes glyphs.
 
 #[path = "data/mod.rs"]
 pub mod sv_data;
+#[path = "decoration/mod.rs"]
+pub mod sv_decoration;
 #[path = "layout/mod.rs"]
 pub mod sv_layout;
 #[path = "scale/mod.rs"]
