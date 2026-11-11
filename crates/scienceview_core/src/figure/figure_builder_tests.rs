@@ -79,7 +79,9 @@ fn the_backend_can_be_changed_after_building() {
         .build()
         .expect("the configuration is complete");
 
-    figure.set_backend_kind(SVBackendKind::Native);
+    figure
+        .set_backend_kind(SVBackendKind::Native)
+        .expect("a native backend hosts dense data");
 
     assert_eq!(figure.backend_kind(), SVBackendKind::Native);
 }

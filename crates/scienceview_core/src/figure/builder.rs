@@ -191,6 +191,7 @@ impl<'values> SVFigureBuilder<'values, SVWithDataSource, SVWithBackend> {
             self.execution_mode,
             data,
             self.title,
+            requirements,
             registry,
         ))
     }

@@ -163,7 +163,9 @@ fn a_failing_operation_records_the_configured_kind_and_the_failure() {
         .backend_registry(Arc::new(sv_registry_with_recording_backend(&calls)))
         .build()
         .expect("the configuration is complete");
-    figure.set_backend_kind(SVBackendKind::Html);
+    figure
+        .set_backend_kind(SVBackendKind::Html)
+        .expect("html can host dense data");
 
     tracing::subscriber::with_default(subscriber, || {
         figure.render().expect_err("no html backend is registered");

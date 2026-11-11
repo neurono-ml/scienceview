@@ -10,12 +10,14 @@ use super::SVExecutionMode;
 use super::representation::SVDataRepresentation;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::SVBackendRegistry;
+use crate::sv_backend::SVBackendRequirements;
 use crate::sv_backend::SVRenderOutput;
 use crate::sv_backend::SVRenderRequest;
 use crate::sv_backend::SVSaveRequest;
 use crate::sv_backend::SVShowRequest;
 use crate::sv_backend::SVUpdateRequest;
 use crate::sv_backend::sv_resolve_render_backend;
+use crate::sv_backend::sv_verify_backend_requirements;
 use crate::sv_error::SVError;
 use crate::sv_observability::sv_run_operation;
 use std::path::Path;
@@ -31,6 +33,7 @@ pub struct SVFigure<'values> {
     execution_mode: SVExecutionMode,
     data: SVDataBinding<'values>,
     title: Option<&'values str>,
+    requirements: SVBackendRequirements,
     registry: Arc<SVBackendRegistry>,
 }
 
@@ -44,6 +47,7 @@ impl<'values> SVFigure<'values> {
         execution_mode: SVExecutionMode,
         data: SVDataBinding<'values>,
         title: Option<&'values str>,
+        requirements: SVBackendRequirements,
         registry: Arc<SVBackendRegistry>,
     ) -> Self {
         Self {
@@ -51,6 +55,7 @@ impl<'values> SVFigure<'values> {
             execution_mode,
             data,
             title,
+            requirements,
             registry,
         }
     }
@@ -61,8 +66,16 @@ impl<'values> SVFigure<'values> {
     }
 
     /// Changes the backend kind used by subsequent operations.
-    pub fn set_backend_kind(&mut self, backend_kind: SVBackendKind) {
+    ///
+    /// The figure's static requirements — the streaming representation it
+    /// carries plus any capability the builder requested — are checked against
+    /// the capability matrix of `backend_kind` before the switch, so a runtime
+    /// change cannot bypass the guarantee `build` enforces. A rejected switch
+    /// leaves the figure on its previous kind.
+    pub fn set_backend_kind(&mut self, backend_kind: SVBackendKind) -> Result<(), SVError> {
+        sv_verify_backend_requirements(backend_kind, self.requirements)?;
         self.backend_kind = backend_kind;
+        Ok(())
     }
 
     /// The execution mode the builder selected.

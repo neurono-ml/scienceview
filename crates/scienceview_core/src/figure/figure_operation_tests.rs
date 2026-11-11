@@ -92,7 +92,9 @@ fn changing_the_backend_kind_switches_the_next_operation() {
     let mut figure = built_figure(&values, SVBackendKind::Svg, &recorder);
 
     figure.render().expect("the svg backend renders");
-    figure.set_backend_kind(SVBackendKind::Html);
+    figure
+        .set_backend_kind(SVBackendKind::Html)
+        .expect("html can host dense data");
 
     let error = figure
         .render()
@@ -106,6 +108,50 @@ fn changing_the_backend_kind_switches_the_next_operation() {
         }
     );
     assert_eq!(recorder.render_calls(), 1);
+}
+
+#[test]
+fn a_streaming_figure_cannot_be_switched_to_an_export_only_backend() {
+    let values = [1.0, 2.0];
+    let recorder = SVCallRecorder::shared();
+    let mut figure = SVFigureBuilder::new()
+        .data_source(
+            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
+        )
+        .backend(SVBackendKind::Native)
+        .backend_registry(Arc::new(sv_registry_with_recording_backend(&recorder)))
+        .build()
+        .expect("a native backend accepts streaming data");
+
+    let error = figure
+        .set_backend_kind(SVBackendKind::Svg)
+        .expect_err("an export-only backend cannot stream");
+
+    assert_eq!(
+        error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Svg,
+            capability: crate::sv_backend::SVBackendCapability::Streaming,
+        }
+    );
+    assert_eq!(
+        figure.backend_kind(),
+        SVBackendKind::Native,
+        "a rejected switch leaves the figure on its previous kind"
+    );
+}
+
+#[test]
+fn a_valid_backend_switch_succeeds() {
+    let values = [1.0, 2.0];
+    let recorder = SVCallRecorder::shared();
+    let mut figure = built_figure(&values, SVBackendKind::Svg, &recorder);
+
+    figure
+        .set_backend_kind(SVBackendKind::Tui)
+        .expect("the terminal backend hosts dense data");
+
+    assert_eq!(figure.backend_kind(), SVBackendKind::Tui);
 }
 
 #[test]
