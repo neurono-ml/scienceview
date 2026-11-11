@@ -47,6 +47,7 @@
 //! | `render-dioxus` | `scienceview_dioxus` | optional |
 //! | `wasm` | `scienceview_wasm` | optional |
 //! | `data-ndarray` | Zero-copy `ndarray` views | optional |
+//! | `data-sprs` | Zero-copy `sprs` sparse views | optional |
 //! | `spec-serde` | JSON figure specification | optional |
 //! | `streaming` | Standard-library channel updates | none |
 //! | `streaming-tokio` | Tokio watch channel updates | optional |
@@ -54,6 +55,18 @@
 //!
 //! `scienceview_core` itself is always compiled: the facade re-exports it as a
 //! required dependency.
+//!
+//! ## Data boundary
+//!
+//! [`data`] holds the ingestion trait (`SVDataSource`) and the closed
+//! representation kernels receive (`SVColumnView`: dense, sparse or
+//! streaming). Sparse storage is never densified, and [`window`] provides the
+//! bounded rolling window that lets a live source be read without blocking the
+//! render thread. Representation parity is asserted with the harness in
+//! [`data`], whose tolerance policy lives beside it.
+
+pub mod data;
+pub mod window;
 
 /// Returns the name of this crate.
 ///
