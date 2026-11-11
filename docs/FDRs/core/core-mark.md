@@ -5,9 +5,9 @@
 | Id | FDR-001 |
 | Name | `SVMark` |
 | Family | Core — rendering |
-| Status | planned |
+| Status | shipped |
 | Layer | Core |
-| Public chapter | _pending_ |
+| Public chapter | `docs/src/development-explained/ch08-mark-rendering.md` |
 | Example program | _pending_ |
 
 ## Purpose
@@ -36,6 +36,7 @@ their visual options under one name per geometry:
 | `Text` | `Text` | `Text`, `TeXGlyph`, `MathTextGlyph` | `Scatter` (text) |
 | `Image` | — | `Image`, `ImageRGBA`, `ImageURL` | `Image`, `Heatmap` |
 | `Wedge` | — | `Wedge`, `Annulus`, `AnnularWedge`, `Arc` | `Pie` |
+| `ErrorBar` | — | `Whisker` | `Scatter` (error bars) |
 
 - seaborn — <https://seaborn.pydata.org/api.html#seaborn.objects.Dot>
 - bokeh — <https://docs.bokeh.org/en/latest/docs/reference/models/glyphs.html>
@@ -58,7 +59,7 @@ A mark consumes a *view* of display-space values, never a data source:
 
 | Channel | Type | Cardinality |
 |---|---|---|
-| position | `SVPoint` (f64 pair) | one per mark instance |
+| position | `SVMarkPoint` (f64 pair) | one per mark instance |
 | size | `f64` | per instance, or one default for the whole mark |
 | colour | `SVColour` (token or literal) | per instance, or one default |
 | opacity | `f32` in `[0, 1]` | per instance, or one default |
@@ -81,7 +82,9 @@ of the data it draws.
 
 `shape` covers the union of bokeh's marker list and plotly's
 `marker.symbol`; the terminal backend maps every shape to a cell
-approximation.
+approximation. `Cross` is stroked-only: its two segments have no interior, so
+it always receives a stroke and a zero stroke width falls back to the theme's
+line width instead of drawing an invisible marker.
 
 ### `Line`
 
@@ -148,6 +151,24 @@ A ribbon is a filled region between two boundary lines.
 | `end_angle` | `f64` radians | `TAU/2` | |
 | `inner_radius` | `f64` | `0` | `0` is a pie sector, `>0` an annulus |
 
+### `ErrorBar`
+
+An error bar is the interval segment a bar, point or regression recipe draws
+around an estimate. Making it a mark rather than a private helper keeps those
+recipes on one implementation with one opinion about caps.
+
+| Option | Type | Default | Notes |
+|---|---|---|---|
+| `direction` | `SVErrorBarDirection` | `Vertical` | `Vertical`, `Horizontal`, `Both` |
+| `cap_size` | `SVLength` | `0` | how far each cap reaches either side of the segment; `0` draws no caps |
+| `stroke_width` | `Option<SVLength>` | token `mark.line_width` | stroke width of the segment and its caps |
+| `colour` | `Option<SVColour>` | token `mark.palette` | explicit override |
+| `opacity` | `Option<f32>` | `1.0` | |
+
+The lower and upper boundaries arrive as the request's lower and upper
+channels. `Both` draws an interval on each axis from the same pair, which is
+how a two-dimensional interval is expressed.
+
 ## Configuration
 
 Every option above is exposed on the owning builder, never as a free function.
@@ -212,16 +233,32 @@ its capability matrix and fail at build time, never degrade silently.
 
 ## Acceptance
 
-- [ ] The mark set covers `Dot`, `Line`, `Area`, `Bar`, `Ribbon`, `Text`,
-      `Image`, `Wedge`, each with the option surface above.
+- [x] The mark set covers `Dot`, `Line`, `Area`, `Bar`, `Ribbon`, `Text`,
+      `Image`, `Wedge` and `ErrorBar`, each with the option surface above.
+- [x] Marks accept borrowed display-space values without copying them.
+- [x] Marks consume theme tokens; no literal colour or size is hardcoded.
+- [x] Mark geometry is resolved in the backend-independent coordinate system
+      and only the final rasterization is snapped to the backend grid.
+- [x] Interpolable properties are enumerated exactly as above and shared with
+      the transition layer.
+- [x] The capability matrix declares which marks each backend renders, and an
+      unsupported combination fails with `SVError::UnsupportedMark` at build
+      time.
 - [ ] Every mark renders on every backend that declares support for it, and
       the SVG, HTML, native and terminal renderings show the same data.
-- [ ] Marks accept borrowed display-space values without copying them.
-- [ ] Marks consume theme tokens; no literal colour or size is hardcoded.
-- [ ] Mark geometry is resolved in the backend-independent coordinate system
-      and only the final rasterization is snapped to the backend grid.
-- [ ] Interpolable properties are enumerated exactly as above and shared with
-      the transition layer.
+      *The backend crates that serialize the primitives are the next wave; the
+      kernel and its capability matrix are complete.*
+
+## Amendment
+
+The kernel shipped with two corrections to this record:
+
+- `ErrorBar` was added as the ninth variant. The bar, point and regression
+  recipes all need an interval segment, and one mark gives them one
+  implementation (design D3).
+- `Cross` is stroked-only. A cross has no interior to fill, so a filled cross
+  now always receives a stroke and a zero width falls back to the theme line
+  width.
 
 ## Open questions
 

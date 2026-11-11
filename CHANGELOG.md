@@ -112,6 +112,15 @@ released.
   the layout engine, the interactive control kit, scripting and dashboards.
 - `AGENTS.md` and `openspec/config.yaml` now point at `docs/FDRs/patterns.md`
   as the normative contract for changes that implement the chart surface.
+- The mark kernel in `scienceview_core::sv_mark`: the closed `SVMark`
+  vocabulary — dot, line, area, bar, ribbon, text, image, wedge and error bar —
+  with the option surface of every variant, build-time validation, theme-token
+  defaults with explicit overrides, and backend-agnostic geometry primitives
+  (`SVMarkShape`, `SVMarkPrimitive`, `SVMarkGeometry`) resolved in the layout's
+  coordinate system without rasterizing. Dense, sparse and streaming columns
+  are read through the `SVColumnView` boundary — sparse storage is never
+  densified and a live window never blocks the render thread — and the
+  interpolable-property table is exported for the transition kernel.
 
 ### Changed
 

@@ -11,6 +11,7 @@
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::SVRepresentation;
+use crate::sv_mark::SVMarkKind;
 use thiserror::Error;
 
 /// Everything that can go wrong while configuring, operating or reading a
@@ -32,6 +33,15 @@ pub enum SVError {
         backend_kind: SVBackendKind,
         /// The capability it lacks.
         capability: SVBackendCapability,
+    },
+
+    /// The selected backend cannot render a mark variant the figure composed.
+    #[error("backend `{backend_kind}` cannot render the `{mark_kind}` mark")]
+    UnsupportedMark {
+        /// The configured backend.
+        backend_kind: SVBackendKind,
+        /// The mark variant it lacks.
+        mark_kind: SVMarkKind,
     },
 
     /// A kernel cannot accept the representation it was given.
