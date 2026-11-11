@@ -112,9 +112,28 @@
 //! render thread. Representation parity is asserted with the harness in
 //! [`sv_data`], whose tolerance policy lives beside it; the scale kernel is the
 //! first real consumer of that harness.
+//!
+//! ## Layout
+//!
+//! [`sv_layout`] resolves figure geometry independently of the raster grid. A
+//! backend supplies a [`sv_layout::SVViewport`]; the layout tree measures the
+//! content, solves the viewport against the declared lengths and constraints,
+//! and hands back a solved tree every backend rasterizes on its own grid. The
+//! `theme` feature lets the default spacing come from compiled theme tokens;
+//! without it the layout uses documented built-in defaults.
+//!
+//! ## Scale
+//!
+//! [`sv_scale`] maps data values onto visual channels: continuous, nominal,
+//! temporal and boolean scales own their domain and range together, transform
+//! through linear, logarithmic, symmetric-logarithmic or square-root functions,
+//! derive axis ticks from the space the layout engine grants, and resolve their
+//! colours from the same compiled theme tokens.
 
 #[path = "data/mod.rs"]
 pub mod sv_data;
+#[path = "layout/mod.rs"]
+pub mod sv_layout;
 #[path = "scale/mod.rs"]
 pub mod sv_scale;
 #[path = "window/mod.rs"]
