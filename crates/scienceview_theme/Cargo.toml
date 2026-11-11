@@ -1,0 +1,19 @@
+[package]
+name = "scienceview_theme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Backend-independent design tokens for scienceview: one authored theme compiled into typed colours, typography, spacing, radii, shadows, motion, palettes and colour maps."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_theme"
+
+[features]
+default = []
+# Compile or recompile a theme while the program runs. Absent, the theme
+# compiled at build time is used.
+theme-runtime-compilation = []
+
+[lints]
+workspace = true

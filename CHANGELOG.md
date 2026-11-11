@@ -12,6 +12,26 @@ released.
 
 ### Added
 
+- Figure substrate in `scienceview_core`: `SVFigure`, the typestate
+  `SVFigureBuilder` that cannot build without a data source and a backend,
+  `SVBackendKind` (one variant per backend, deliberately no automatic variant),
+  `SVExecutionMode` (defaulting to `Automatic`) and the `SVBackendRegistry`
+  through which backend crates — including third-party crates — plug in.
+- `SVRenderBackend` as the public rendering contract: `build` transfers the
+  configured kind into the figure without dispatching, and every operation
+  (`render`, `update`, `save`, `show`) resolves the concrete backend at call
+  time. Unsupported capability combinations fail at build time.
+- `SVError` as the single public error enumeration, including
+  `UnsupportedRepresentation` and backend-unavailable errors.
+- One operation span per public operation, carrying `backend.kind`,
+  `representation`, `points` and `duration`, with the outcome recorded on
+  completion.
+- `scienceview_theme`, the design-token crate: one authored stylesheet
+  (`stylesheet/scienceview.scss`) compiled at build time into typed colours,
+  typography, spacing, radii, shadows and motion tokens, with categorical,
+  continuous and data-derived palettes, colour maps, reduced-motion collapse
+  and opt-in runtime recompilation that restyles a figure without rebuilding
+  it. Exposed through the `theme` feature.
 - The repository now builds as a Cargo workspace: `scienceview_core` plus one
   crate per rendering backend (`scienceview_svg`, `scienceview_html`,
   `scienceview_tui`, `scienceview_native`, `scienceview_wasm`,
