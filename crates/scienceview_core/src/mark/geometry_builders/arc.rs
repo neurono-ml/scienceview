@@ -74,7 +74,6 @@ fn sv_wedge_path(
         return path;
     }
 
-    let outer_end = sv_point_at_angle(centre, radius, end_angle);
     let inner_end = sv_point_at_angle(centre, inner_radius, end_angle);
     path.push(SVPathCommand::MoveTo(outer_start));
     path.push(SVPathCommand::ArcTo(SVArcTo::new(
@@ -90,7 +89,6 @@ fn sv_wedge_path(
         end_angle,
         start_angle,
     )));
-    path.push(SVPathCommand::LineTo(outer_end));
     path.push(SVPathCommand::Close);
 
     path

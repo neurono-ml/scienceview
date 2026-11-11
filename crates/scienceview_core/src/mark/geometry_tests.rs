@@ -311,6 +311,13 @@ fn a_wedge_draws_a_sector_or_an_annulus() {
         .filter(|command| matches!(command, SVPathCommand::ArcTo(_)))
         .count();
     assert_eq!(arcs, 2);
+    assert_eq!(path.commands().len(), 5);
+    assert_eq!(
+        path.commands()[2],
+        SVPathCommand::LineTo(SVPoint::new(40.0, 50.0))
+    );
+    assert!(matches!(path.commands()[3], SVPathCommand::ArcTo(_)));
+    assert_eq!(path.commands()[4], SVPathCommand::Close);
 }
 
 #[test]
