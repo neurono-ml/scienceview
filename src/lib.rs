@@ -40,3 +40,29 @@
 //! - `spec-serde`: JSON serialization of the figure specification.
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.
+
+pub use scienceview_core;
+
+#[cfg(feature = "render-angular")]
+pub use scienceview_angular;
+#[cfg(feature = "render-dioxus")]
+pub use scienceview_dioxus;
+#[cfg(feature = "render-html")]
+pub use scienceview_html;
+#[cfg(feature = "render-native")]
+pub use scienceview_native;
+#[cfg(feature = "render-react")]
+pub use scienceview_react;
+#[cfg(feature = "render-svg")]
+pub use scienceview_svg;
+#[cfg(feature = "render-tauri")]
+pub use scienceview_tauri;
+#[cfg(feature = "render-tui")]
+pub use scienceview_tui;
+#[cfg(feature = "render-vue")]
+pub use scienceview_vue;
+#[cfg(feature = "wasm")]
+pub use scienceview_wasm;
+
+#[cfg(test)]
+mod workspace_tests;

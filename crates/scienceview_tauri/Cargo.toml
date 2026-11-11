@@ -1,0 +1,13 @@
+[package]
+name = "scienceview_tauri"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Tauri native window rendering backend for scienceview."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_tauri"
+
+[lints]
+workspace = true

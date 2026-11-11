@@ -1,0 +1,13 @@
+[package]
+name = "scienceview_dioxus"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Dioxus component rendering backend for scienceview."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_dioxus"
+
+[lints]
+workspace = true
