@@ -1,20 +1,12 @@
 //! Rendering backends: the closed backend kind, the capability matrix, the
 //! `SVRenderBackend` contract and the per-operation dispatch seam.
 
-#[cfg(test)]
-mod backend_kind_tests;
 mod capability;
 mod dispatch;
-#[cfg(test)]
-mod dispatch_tests;
 mod kind;
 mod matrix;
-#[cfg(test)]
-mod matrix_tests;
 mod registry;
 mod render_backend;
-#[cfg(test)]
-pub(crate) mod test_support;
 
 pub use capability::SVBackendCapability;
 pub use dispatch::sv_resolve_render_backend;
@@ -32,3 +24,12 @@ pub use render_backend::SVRenderRequest;
 pub use render_backend::SVSaveRequest;
 pub use render_backend::SVShowRequest;
 pub use render_backend::SVUpdateRequest;
+
+#[cfg(test)]
+mod backend_kind_tests;
+#[cfg(test)]
+mod dispatch_tests;
+#[cfg(test)]
+mod matrix_tests;
+#[cfg(test)]
+pub(crate) mod test_support;
