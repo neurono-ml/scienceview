@@ -21,6 +21,6 @@
 ## Documentation of the skeleton
 
 - [x] Document the crate map and the feature map in the core crate's documentation.
-- [ ] Add the CI status, crates.io and docs.rs badges to `README.md`.
+- [x] Add the CI status, crates.io and docs.rs badges to `README.md`.
 - [ ] Add the `CHANGELOG.md` entry for the bootstrap.
 
