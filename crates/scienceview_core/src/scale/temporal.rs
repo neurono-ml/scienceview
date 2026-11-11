@@ -1,6 +1,8 @@
 //! A temporal scale: timestamps placed on a time axis.
 
-use super::{SVContinuousScale, SVDomain, SVDomainSource, SVScaleKind, SVScaleRange};
+use super::{
+    SVContinuousScale, SVDomain, SVDomainSource, SVScaleKind, SVScaleRange, SVScaleTransform,
+};
 use crate::sv_error::SVError;
 
 /// The unit a temporal axis ticks at.
@@ -101,6 +103,14 @@ impl SVTemporalScale {
     /// Returns the display interval.
     pub fn range(&self) -> SVScaleRange {
         self.continuous.range()
+    }
+
+    /// Returns the transform applied to the timestamp domain.
+    ///
+    /// A time axis interpolates linearly; the accessor exists so the axis layer
+    /// can report it without matching on the kind.
+    pub fn transform(&self) -> SVScaleTransform {
+        self.continuous.transform()
     }
 
     /// Returns the requested tick unit.

@@ -2,7 +2,7 @@
 
 use super::{
     SVBooleanScale, SVContinuousScale, SVDomain, SVDomainSource, SVNominalScale, SVScaleKind,
-    SVScaleRange, SVScaleValue, SVTemporalScale, SVTemporalUnit,
+    SVScaleRange, SVScaleTransform, SVScaleValue, SVTemporalScale, SVTemporalUnit,
 };
 use crate::sv_error::SVError;
 
@@ -81,6 +81,24 @@ impl SVScale<'_> {
                 Some((false_label.to_string(), true_label.to_string()))
             }
             SVScale::Continuous(_) | SVScale::Nominal(_) | SVScale::Temporal(_) => None,
+        }
+    }
+
+    /// Returns the transform of a numeric scale, or `None` for the discrete
+    /// kinds.
+    pub fn transform(&self) -> Option<SVScaleTransform> {
+        match self {
+            SVScale::Continuous(scale) => Some(scale.transform()),
+            SVScale::Temporal(scale) => Some(scale.transform()),
+            SVScale::Nominal(_) | SVScale::Boolean(_) => None,
+        }
+    }
+
+    /// Borrows the continuous projection, when this is a continuous scale.
+    pub fn as_continuous(&self) -> Option<&SVContinuousScale> {
+        match self {
+            SVScale::Continuous(scale) => Some(scale),
+            SVScale::Nominal(_) | SVScale::Temporal(_) | SVScale::Boolean(_) => None,
         }
     }
 

@@ -1,5 +1,3 @@
-//! Companion tests for the four scale kinds and the domain/range model.
-
 use crate::sv_error::SVError;
 use crate::sv_scale::{
     SVCategoryOrder, SVDomain, SVDomainSource, SVScale, SVScaleBuilder, SVScaleKind, SVScaleRange,
@@ -141,8 +139,7 @@ fn boolean_scale_places_the_two_values_on_two_slots() {
 fn boolean_scale_uses_the_documented_default_labels() {
     let scale = boolean_scale();
 
-    assert_eq!(scale.domain().lower(), 0.0);
-    assert_eq!(scale.domain().upper(), 1.0);
+    assert_eq!(scale.domain(), SVDomain::new(0.0, 1.0).expect("valid"));
     assert_eq!(
         scale.boolean_labels(),
         Some(("false".to_string(), "true".to_string()))
@@ -203,49 +200,4 @@ fn the_domain_and_range_accessors_report_the_configuration() {
         SVScaleRange::new(100.0, 200.0).expect("valid")
     );
     assert_eq!(scale.tick_count(), None);
-}
-
-#[test]
-fn a_nominal_scale_requires_categories() {
-    let error = SVScaleBuilder::new(SVScaleKind::Nominal)
-        .build()
-        .expect_err("a nominal scale without categories has no domain");
-
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
-}
-
-#[test]
-fn a_nominal_scale_rejects_an_explicit_numeric_domain() {
-    let error = SVScaleBuilder::new(SVScaleKind::Nominal)
-        .categories(&NOMINAL_CATEGORIES)
-        .domain(0.0, 3.0)
-        .build()
-        .expect_err("a nominal domain is its category list, not a numeric interval");
-
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
-}
-
-#[test]
-fn a_continuous_scale_requires_an_explicit_domain_before_derivation_exists() {
-    let error = SVScaleBuilder::new(SVScaleKind::Continuous)
-        .build()
-        .expect_err("a continuous scale needs an explicit domain or a data view");
-
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
-}
-
-#[test]
-fn the_range_rejects_non_finite_bounds() {
-    let error =
-        SVScaleRange::new(0.0, f64::NAN).expect_err("a non-finite range cannot place a mark");
-
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
-}
-
-#[test]
-fn the_domain_rejects_inverted_bounds() {
-    let error = SVDomain::new(10.0, 0.0)
-        .expect_err("an inverted domain is a configuration failure, not a reversed axis");
-
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }

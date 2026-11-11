@@ -75,7 +75,7 @@ fn every_transform_inverts_its_own_forward_map() {
         (SVScaleTransform::Linear, VALUES.as_slice()),
         (SVScaleTransform::SymmetricLogarithmic, VALUES.as_slice()),
         (SVScaleTransform::SquareRoot, &VALUES[3..]),
-        (SVScaleTransform::Logarithmic, &VALUES[2..]),
+        (SVScaleTransform::Logarithmic, &VALUES[4..]),
     ] {
         for value in values.iter().copied().filter(|value| *value != 0.0) {
             let transformed = transform

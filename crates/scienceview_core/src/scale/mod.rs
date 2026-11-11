@@ -47,17 +47,25 @@ mod nominal;
 mod range;
 mod scale_definition;
 mod temporal;
+mod transform;
 
 pub use boolean::SVBooleanScale;
 pub use builder::SVScaleBuilder;
 pub use continuous::SVContinuousScale;
-pub use domain::{SVDomain, SVDomainSource};
+pub use domain::{SVDomain, SVDomainSource, sv_nice_domain};
 pub use kind::{SVScaleKind, SVScaleValue};
 pub use nominal::{SVCategoryOrder, SVNominalScale};
 pub use range::SVScaleRange;
 pub use scale_definition::SVScale;
 pub use temporal::{SVTemporalScale, SVTemporalUnit};
+pub use transform::SVScaleTransform;
 
+#[cfg(test)]
+#[path = "builder_tests.rs"]
+mod builder_tests;
+#[cfg(test)]
+#[path = "domain_policy_tests.rs"]
+mod domain_policy_tests;
 #[cfg(test)]
 #[path = "domain_tests.rs"]
 mod domain_tests;
