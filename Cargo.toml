@@ -62,7 +62,7 @@ data-sprs = ["scienceview_core/data-sprs"]
 # Opt-in JSON serialization of the figure specification.
 spec-serde = ["dep:serde", "dep:serde_json"]
 # Design tokens: one authored theme compiled into backend-independent tokens.
-theme = ["dep:scienceview_theme"]
+theme = ["dep:scienceview_theme", "scienceview_core/theme"]
 # Recompile a theme while the program runs; absent, the build-time theme is used.
 theme-runtime-compilation = ["theme", "scienceview_theme/theme-runtime-compilation"]
 # One feature per rendering backend, one crate per feature.
