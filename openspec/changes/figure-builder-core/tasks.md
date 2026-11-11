@@ -9,7 +9,7 @@
 
 - [x] Write failing tests for `SVBackendKind` (no automatic variant) and for per-operation dispatch.
 - [x] Implement `SVBackendKind`, `SVRenderBackend` and a test backend that records the calls it receives.
-- [ ] Implement the capability matrix lookup and the build-time rejection of unsupported combinations.
+- [x] Implement the capability matrix lookup and the build-time rejection of unsupported combinations.
 
 ## Builder typestate
 
