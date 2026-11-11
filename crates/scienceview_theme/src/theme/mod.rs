@@ -13,9 +13,7 @@ pub use runtime::sv_compile_theme;
 #[cfg(feature = "theme-runtime-compilation")]
 pub(crate) use runtime::sv_compile_theme_data;
 
-pub(crate) fn sv_build_time_theme_data() -> SVThemeData {
-    crate::generated::sv_generated_theme_data()
-}
+pub(crate) use core_implementation::sv_build_time_theme_data;
 
 #[cfg(all(test, feature = "theme-runtime-compilation"))]
 mod theme_tests;

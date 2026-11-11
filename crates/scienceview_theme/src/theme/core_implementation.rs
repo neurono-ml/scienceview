@@ -77,3 +77,8 @@ impl SVTheme {
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 }
+
+/// The theme compiled at build time from the authored stylesheet.
+pub(crate) fn sv_build_time_theme_data() -> SVThemeData {
+    crate::generated::sv_generated_theme_data()
+}
