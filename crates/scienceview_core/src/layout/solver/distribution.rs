@@ -34,17 +34,21 @@ pub(super) fn sv_distribute_main(
         let measured = &measured_children[index];
         let size = match direction {
             SVLayoutDirection::Horizontal => {
-                let reference =
-                    child
-                        .height()
-                        .resolve_height(cross_available, measured.height, main_available);
+                let reference = child.height().resolve_constrained_height(
+                    child.constraints(),
+                    cross_available,
+                    measured.height,
+                    main_available,
+                );
                 length.resolve_width(main_available, measured.width, reference)
             }
             SVLayoutDirection::Vertical => {
-                let reference =
-                    child
-                        .width()
-                        .resolve_width(cross_available, measured.width, main_available);
+                let reference = child.width().resolve_constrained_width(
+                    child.constraints(),
+                    cross_available,
+                    measured.width,
+                    main_available,
+                );
                 length.resolve_height(main_available, measured.height, reference)
             }
         };

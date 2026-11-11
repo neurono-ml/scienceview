@@ -163,3 +163,49 @@ fn solving_twice_yields_the_same_tree() {
 
     assert_eq!(tree.solve(&viewport), tree.solve(&viewport));
 }
+
+#[test]
+fn vertical_aspect_ratio_width_is_derived_from_the_resolved_height() {
+    let root = SVLayoutNode::new("figure")
+        .with_direction(SVLayoutDirection::Vertical)
+        .with_width(SVLength::fill())
+        .with_height(SVLength::fill())
+        .child(
+            leaf(
+                "plot",
+                SVLength::aspect_ratio(2.0),
+                SVLength::absolute(100.0),
+            )
+            .with_constraints(SVLayoutConstraints::unbounded().with_maximum_width(150.0)),
+        );
+
+    let mut tree = SVLayoutTree::new(root).with_viewport(SVViewport::new(800.0, 600.0));
+    let layout = tree.resolved_layout();
+    let plot = layout.find("plot").expect("the plot is in the tree");
+
+    assert_close(plot.rectangle().height, 100.0);
+    assert_close(plot.rectangle().width, 150.0);
+}
+
+#[test]
+fn a_constrained_cross_axis_bounds_a_main_axis_aspect_ratio() {
+    let root = SVLayoutNode::new("figure")
+        .with_direction(SVLayoutDirection::Vertical)
+        .with_width(SVLength::fill())
+        .with_height(SVLength::fill())
+        .child(
+            leaf(
+                "plot",
+                SVLength::absolute(100.0),
+                SVLength::aspect_ratio(2.0),
+            )
+            .with_constraints(SVLayoutConstraints::unbounded().with_maximum_width(50.0)),
+        );
+
+    let mut tree = SVLayoutTree::new(root).with_viewport(SVViewport::new(800.0, 600.0));
+    let layout = tree.resolved_layout();
+    let plot = layout.find("plot").expect("the plot is in the tree");
+
+    assert_close(plot.rectangle().width, 50.0);
+    assert_close(plot.rectangle().height, 25.0);
+}

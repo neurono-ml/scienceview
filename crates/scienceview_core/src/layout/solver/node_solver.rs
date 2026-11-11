@@ -1,20 +1,24 @@
 //! Node placement: content box, child sizes and cursor advance.
 
-use crate::sv_layout::measurement::{SVMeasuredNode, sv_measure_tree};
+use crate::sv_layout::measurement::SVMeasuredNode;
 use crate::sv_layout::node::{SVLayoutDirection, SVLayoutNode};
 use crate::sv_layout::resolved::{SVResolvedNode, SVResolvedRectangle};
 use crate::sv_layout::solver::distribution::{sv_distribute_main, sv_effective_gap, sv_sanitize};
 
 pub(super) fn sv_solve_node(
     node: &SVLayoutNode,
-    _measured: &SVMeasuredNode,
+    measured: &SVMeasuredNode,
     rectangle: SVResolvedRectangle,
 ) -> SVResolvedNode {
-    let children = sv_solve_children(node, rectangle);
+    let children = sv_solve_children(node, measured, rectangle);
     SVResolvedNode::new(node.name().to_owned(), rectangle, children)
 }
 
-fn sv_solve_children(node: &SVLayoutNode, rectangle: SVResolvedRectangle) -> Vec<SVResolvedNode> {
+fn sv_solve_children(
+    node: &SVLayoutNode,
+    measured: &SVMeasuredNode,
+    rectangle: SVResolvedRectangle,
+) -> Vec<SVResolvedNode> {
     let children = node.children();
     if children.is_empty() {
         return Vec::new();
@@ -38,10 +42,10 @@ fn sv_solve_children(node: &SVLayoutNode, rectangle: SVResolvedRectangle) -> Vec
         SVLayoutDirection::Vertical => content_width,
     };
     let gap = sv_effective_gap(node.spacing(), children.len(), main_available);
-    let measured_children: Vec<SVMeasuredNode> = children.iter().map(sv_measure_tree).collect();
+    let measured_children = &measured.children;
     let main_sizes = sv_distribute_main(
         node,
-        &measured_children,
+        measured_children,
         main_available,
         cross_available,
         gap,
@@ -70,13 +74,13 @@ fn sv_solve_children(node: &SVLayoutNode, rectangle: SVResolvedRectangle) -> Vec
                 (width, height)
             }
             SVLayoutDirection::Vertical => {
+                let height = child.constraints().clamp_height(main_size);
                 let width = child.width().resolve_constrained_width(
                     child.constraints(),
                     content_width,
                     child_measured.width,
-                    content_height,
+                    height,
                 );
-                let height = child.constraints().clamp_height(main_size);
                 (width, height)
             }
         };
