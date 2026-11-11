@@ -12,7 +12,7 @@
 
 ## Window
 
-- [ ] Write failing tests for bounded rollover, drop-oldest and non-blocking reads.
+- [x] Write failing tests for bounded rollover, drop-oldest and non-blocking reads.
 - [ ] Implement the rolling window and its policy.
 
 ## Parity harness
