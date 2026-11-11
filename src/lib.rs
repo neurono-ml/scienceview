@@ -40,3 +40,6 @@
 //! - `spec-serde`: JSON serialization of the figure specification.
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.
+
+#[cfg(test)]
+mod workspace_tests;
