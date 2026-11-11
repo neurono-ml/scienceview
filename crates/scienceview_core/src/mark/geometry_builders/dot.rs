@@ -6,8 +6,8 @@ use crate::sv_layout::SVResolvedRectangle;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
     SVDotOptions, SVDotShape, SVDotSizeMode, SVFillMode, SVGeometryCircle, SVGeometryPath,
-    SVGeometryRectangle, SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest, SVMarkShape,
-    SVPathCommand, SVPoint,
+    SVGeometryRectangle, SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive, SVMarkRequest,
+    SVMarkShape, SVPathCommand,
 };
 use crate::sv_scale::SVColour;
 
@@ -15,7 +15,7 @@ use crate::sv_scale::SVColour;
 pub(crate) fn sv_dot_geometry<'data>(
     options: &SVDotOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let theme = request.theme();
     let plot_area = request.plot_area();
@@ -78,7 +78,7 @@ fn sv_dot_paint(
 }
 
 /// Builds the shape of one dot.
-fn sv_dot_shape(shape: SVDotShape, centre: SVPoint, radius: f64) -> SVMarkShape<'static> {
+fn sv_dot_shape(shape: SVDotShape, centre: SVMarkPoint, radius: f64) -> SVMarkShape<'static> {
     match shape {
         SVDotShape::Circle => SVMarkShape::Circle(SVGeometryCircle::new(centre, radius)),
         SVDotShape::Square => SVMarkShape::Rectangle(SVGeometryRectangle::new(
@@ -98,26 +98,26 @@ fn sv_dot_shape(shape: SVDotShape, centre: SVPoint, radius: f64) -> SVMarkShape<
 }
 
 /// Builds a regular polygon path around a centre.
-fn sv_polygon(centre: SVPoint, radius: f64, sides: usize) -> SVGeometryPath {
+fn sv_polygon(centre: SVMarkPoint, radius: f64, sides: usize) -> SVGeometryPath {
     sv_regular_polygon(centre, &sv_polygon_offsets(radius, sides), 0.0)
 }
 
 /// Builds the two segments of a cross.
-fn sv_cross(centre: SVPoint, arm: f64) -> SVGeometryPath {
+fn sv_cross(centre: SVMarkPoint, arm: f64) -> SVGeometryPath {
     let mut path = SVGeometryPath::default();
-    path.push(SVPathCommand::MoveTo(SVPoint::new(
+    path.push(SVPathCommand::MoveTo(SVMarkPoint::new(
         centre.x() - arm,
         centre.y(),
     )));
-    path.push(SVPathCommand::LineTo(SVPoint::new(
+    path.push(SVPathCommand::LineTo(SVMarkPoint::new(
         centre.x() + arm,
         centre.y(),
     )));
-    path.push(SVPathCommand::MoveTo(SVPoint::new(
+    path.push(SVPathCommand::MoveTo(SVMarkPoint::new(
         centre.x(),
         centre.y() - arm,
     )));
-    path.push(SVPathCommand::LineTo(SVPoint::new(
+    path.push(SVPathCommand::LineTo(SVMarkPoint::new(
         centre.x(),
         centre.y() + arm,
     )));

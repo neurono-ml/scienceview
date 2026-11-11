@@ -5,7 +5,7 @@ use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
     SVErrorBarDirection, SVErrorBarOptions, SVGeometryPath, SVMarkGeometry, SVMarkPaint,
-    SVMarkPrimitive, SVMarkRequest, SVMarkShape, SVPathCommand, SVPoint,
+    SVMarkPoint, SVMarkPrimitive, SVMarkRequest, SVMarkShape, SVPathCommand,
 };
 
 /// Builds the geometry of an error-bar mark.
@@ -17,7 +17,7 @@ use crate::sv_mark::{
 pub(crate) fn sv_error_bar_geometry<'data>(
     options: &SVErrorBarOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
     expected_length: usize,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let lower_column = request
@@ -102,13 +102,13 @@ pub(crate) fn sv_error_bar_geometry<'data>(
 
 /// Draws a vertical interval with its caps.
 fn sv_vertical_interval(path: &mut SVGeometryPath, x: f64, lower: f64, upper: f64, cap_size: f64) {
-    path.push(SVPathCommand::MoveTo(SVPoint::new(x, lower)));
-    path.push(SVPathCommand::LineTo(SVPoint::new(x, upper)));
+    path.push(SVPathCommand::MoveTo(SVMarkPoint::new(x, lower)));
+    path.push(SVPathCommand::LineTo(SVMarkPoint::new(x, upper)));
     if cap_size > 0.0 {
-        path.push(SVPathCommand::MoveTo(SVPoint::new(x - cap_size, lower)));
-        path.push(SVPathCommand::LineTo(SVPoint::new(x + cap_size, lower)));
-        path.push(SVPathCommand::MoveTo(SVPoint::new(x - cap_size, upper)));
-        path.push(SVPathCommand::LineTo(SVPoint::new(x + cap_size, upper)));
+        path.push(SVPathCommand::MoveTo(SVMarkPoint::new(x - cap_size, lower)));
+        path.push(SVPathCommand::LineTo(SVMarkPoint::new(x + cap_size, lower)));
+        path.push(SVPathCommand::MoveTo(SVMarkPoint::new(x - cap_size, upper)));
+        path.push(SVPathCommand::LineTo(SVMarkPoint::new(x + cap_size, upper)));
     }
 }
 
@@ -120,13 +120,13 @@ fn sv_horizontal_interval(
     y: f64,
     cap_size: f64,
 ) {
-    path.push(SVPathCommand::MoveTo(SVPoint::new(lower, y)));
-    path.push(SVPathCommand::LineTo(SVPoint::new(upper, y)));
+    path.push(SVPathCommand::MoveTo(SVMarkPoint::new(lower, y)));
+    path.push(SVPathCommand::LineTo(SVMarkPoint::new(upper, y)));
     if cap_size > 0.0 {
-        path.push(SVPathCommand::MoveTo(SVPoint::new(lower, y - cap_size)));
-        path.push(SVPathCommand::LineTo(SVPoint::new(lower, y + cap_size)));
-        path.push(SVPathCommand::MoveTo(SVPoint::new(upper, y - cap_size)));
-        path.push(SVPathCommand::LineTo(SVPoint::new(upper, y + cap_size)));
+        path.push(SVPathCommand::MoveTo(SVMarkPoint::new(lower, y - cap_size)));
+        path.push(SVPathCommand::LineTo(SVMarkPoint::new(lower, y + cap_size)));
+        path.push(SVPathCommand::MoveTo(SVMarkPoint::new(upper, y - cap_size)));
+        path.push(SVPathCommand::LineTo(SVMarkPoint::new(upper, y + cap_size)));
     }
 }
 

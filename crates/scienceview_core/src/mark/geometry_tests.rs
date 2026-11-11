@@ -6,7 +6,7 @@ use super::mark_test_support::{
 use crate::sv_data::{SVColumnView, SVStreamingView};
 use crate::sv_error::SVError;
 use crate::sv_mark::{
-    SVImageRaster, SVMark, SVMarkRequest, SVMarkShape, SVPathCommand, SVPoint, SVTextAlign,
+    SVImageRaster, SVMark, SVMarkPoint, SVMarkRequest, SVMarkShape, SVPathCommand, SVTextAlign,
     SVTextBaseline,
 };
 use crate::sv_scale::{SVScaleBuilder, SVScaleKind};
@@ -24,7 +24,7 @@ fn a_dot_draws_one_circle_per_instance() {
         .expect("the mark draws");
 
     assert_eq!(geometry.len(), 3);
-    let centres: Vec<SVPoint> = geometry
+    let centres: Vec<SVMarkPoint> = geometry
         .primitives()
         .iter()
         .map(|primitive| match primitive.shape() {
@@ -35,9 +35,9 @@ fn a_dot_draws_one_circle_per_instance() {
     assert_eq!(
         centres,
         vec![
-            SVPoint::new(0.0, 100.0),
-            SVPoint::new(50.0, 50.0),
-            SVPoint::new(100.0, 0.0),
+            SVMarkPoint::new(0.0, 100.0),
+            SVMarkPoint::new(50.0, 50.0),
+            SVMarkPoint::new(100.0, 0.0),
         ]
     );
     let radius = match geometry.primitives()[0].shape() {
@@ -109,11 +109,11 @@ fn a_filled_cross_without_a_stroke_width_still_draws_two_visible_segments() {
     assert_eq!(path.commands().len(), 4);
     assert_eq!(
         path.commands()[0],
-        SVPathCommand::MoveTo(SVPoint::new(47.0, 50.0))
+        SVPathCommand::MoveTo(SVMarkPoint::new(47.0, 50.0))
     );
     assert_eq!(
         path.commands()[1],
-        SVPathCommand::LineTo(SVPoint::new(53.0, 50.0))
+        SVPathCommand::LineTo(SVMarkPoint::new(53.0, 50.0))
     );
 
     let paint = geometry.primitives()[0].paint();
@@ -195,7 +195,7 @@ fn an_area_closes_against_the_zero_baseline() {
     let SVPathCommand::LineTo(last_vertex) = path.commands()[5] else {
         panic!("the closing edge must be a line");
     };
-    assert_eq!(last_vertex, SVPoint::new(0.0, 100.0));
+    assert_eq!(last_vertex, SVMarkPoint::new(0.0, 100.0));
 }
 
 #[test]
@@ -243,11 +243,11 @@ fn a_ribbon_fills_between_its_boundaries() {
     let SVPathCommand::MoveTo(first_vertex) = path.commands()[0] else {
         panic!("the ribbon starts with a move");
     };
-    assert_eq!(first_vertex, SVPoint::new(0.0, 10.0));
+    assert_eq!(first_vertex, SVMarkPoint::new(0.0, 10.0));
     let SVPathCommand::LineTo(last_vertex) = path.commands()[5] else {
         panic!("the ribbon closes along the lower boundary");
     };
-    assert_eq!(last_vertex, SVPoint::new(0.0, 90.0));
+    assert_eq!(last_vertex, SVMarkPoint::new(0.0, 90.0));
 }
 
 #[test]
@@ -350,7 +350,7 @@ fn a_wedge_draws_a_sector_or_an_annulus() {
     assert_eq!(path.commands().len(), 5);
     assert_eq!(
         path.commands()[2],
-        SVPathCommand::LineTo(SVPoint::new(40.0, 50.0))
+        SVPathCommand::LineTo(SVMarkPoint::new(40.0, 50.0))
     );
     assert!(matches!(path.commands()[3], SVPathCommand::ArcTo(_)));
     assert_eq!(path.commands()[4], SVPathCommand::Close);
@@ -379,7 +379,7 @@ fn an_error_bar_draws_the_interval_and_its_caps() {
     let SVPathCommand::MoveTo(lower_start) = path.commands()[0] else {
         panic!("the interval starts with a move");
     };
-    assert_eq!(lower_start, SVPoint::new(50.0, 70.0));
+    assert_eq!(lower_start, SVMarkPoint::new(50.0, 70.0));
 }
 
 #[test]

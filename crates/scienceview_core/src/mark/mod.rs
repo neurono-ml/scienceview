@@ -88,7 +88,7 @@ mod request;
 
 pub use geometry::{
     SVArcTo, SVGeometryCircle, SVGeometryImage, SVGeometryPath, SVGeometryRectangle,
-    SVGeometryText, SVMarkGeometry, SVMarkPrimitive, SVMarkShape, SVPathCommand, SVPoint,
+    SVGeometryText, SVMarkGeometry, SVMarkPoint, SVMarkPrimitive, SVMarkShape, SVPathCommand,
 };
 pub use mark_definition::{SVMark, SVMarkKind};
 pub use options::{

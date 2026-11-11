@@ -5,8 +5,8 @@ use super::positions::sv_scale_position;
 use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVAreaOptions, SVBaselineMode, SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest,
-    SVMarkShape, SVPoint,
+    SVAreaOptions, SVBaselineMode, SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive,
+    SVMarkRequest, SVMarkShape,
 };
 use crate::sv_scale::SVScale;
 
@@ -29,19 +29,19 @@ pub(crate) fn sv_baseline_position(
 pub(crate) fn sv_area_geometry<'data>(
     options: &SVAreaOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     if points.is_empty() {
         return Ok(SVMarkGeometry::default());
     }
 
     let baseline = sv_baseline_position(request.vertical_scale(), options.baseline_value())?;
-    let mut vertices: Vec<SVPoint> = points.to_vec();
+    let mut vertices: Vec<SVMarkPoint> = points.to_vec();
     vertices.extend(
         points
             .iter()
             .rev()
-            .map(|point| SVPoint::new(point.x(), baseline)),
+            .map(|point| SVMarkPoint::new(point.x(), baseline)),
     );
 
     let theme = request.theme();

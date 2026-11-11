@@ -6,12 +6,12 @@
 /// [`SVViewport`](crate::sv_layout::SVViewport) and snaps only the final
 /// raster, so the geometry an SVG backend serializes keeps sub-pixel precision.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct SVPoint {
+pub struct SVMarkPoint {
     x: f64,
     y: f64,
 }
 
-impl SVPoint {
+impl SVMarkPoint {
     /// Builds a point from its two coordinates.
     pub const fn new(x: f64, y: f64) -> Self {
         Self { x, y }
@@ -28,7 +28,7 @@ impl SVPoint {
     }
 
     /// Returns the Euclidean distance to another point.
-    pub fn distance_to(&self, other: SVPoint) -> f64 {
+    pub fn distance_to(&self, other: SVMarkPoint) -> f64 {
         let horizontal = self.x - other.x;
         let vertical = self.y - other.y;
         (horizontal * horizontal + vertical * vertical).sqrt()

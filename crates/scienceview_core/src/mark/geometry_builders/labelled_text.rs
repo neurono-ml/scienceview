@@ -5,8 +5,8 @@ use super::positions::sv_require_same_length;
 use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVGeometryText, SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest, SVMarkShape,
-    SVPoint, SVTextOptions,
+    SVGeometryText, SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive, SVMarkRequest,
+    SVMarkShape, SVTextOptions,
 };
 
 /// Builds the geometry of a text mark.
@@ -20,7 +20,7 @@ use crate::sv_mark::{
 pub(crate) fn sv_text_geometry<'data>(
     options: &SVTextOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
     values: SVColumnAccessor<'data>,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     sv_require_same_length(points.len(), values.length(), "text values")?;

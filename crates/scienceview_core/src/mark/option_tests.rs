@@ -8,8 +8,8 @@ use crate::sv_error::SVError;
 use crate::sv_layout::SVLength;
 use crate::sv_mark::{
     SVBarOrientation, SVBaselineMode, SVDashPattern, SVDashSequence, SVDotSizeMode,
-    SVErrorBarDirection, SVFormatSpec, SVImageInterpolation, SVMark, SVMarkShape, SVPathCommand,
-    SVPoint, SVRibbonBoundary, SVTextAlign, SVWedgeOptions,
+    SVErrorBarDirection, SVFormatSpec, SVImageInterpolation, SVMark, SVMarkPoint, SVMarkShape,
+    SVPathCommand, SVRibbonBoundary, SVTextAlign, SVWedgeOptions,
 };
 
 #[test]
@@ -165,7 +165,7 @@ fn every_area_baseline_mode_closes_at_its_place() {
         let SVPathCommand::LineTo(vertex) = path.commands()[1] else {
             panic!("the closing edge must be a line");
         };
-        assert_eq!(vertex, SVPoint::new(50.0, expected));
+        assert_eq!(vertex, SVMarkPoint::new(50.0, expected));
     }
 }
 
@@ -341,7 +341,7 @@ fn the_error_bar_direction_selects_the_axis() {
     let SVPathCommand::MoveTo(start) = path.commands()[0] else {
         panic!("the interval starts with a move");
     };
-    assert_eq!(start, SVPoint::new(30.0, 50.0));
+    assert_eq!(start, SVMarkPoint::new(30.0, 50.0));
 }
 
 #[test]

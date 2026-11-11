@@ -1,6 +1,6 @@
 //! The primitive list a backend serializes without extra geometry logic.
 
-use super::SVPoint;
+use super::SVMarkPoint;
 use crate::sv_layout::SVResolvedRectangle;
 use crate::sv_mark::options::{SVImageInterpolation, SVTextAlign, SVTextBaseline};
 use crate::sv_mark::paint::SVMarkPaint;
@@ -13,9 +13,9 @@ use crate::sv_mark::paint::SVMarkPaint;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SVPathCommand {
     /// Starts a new subpath at the point.
-    MoveTo(SVPoint),
+    MoveTo(SVMarkPoint),
     /// Draws a straight segment to the point.
-    LineTo(SVPoint),
+    LineTo(SVMarkPoint),
     /// Draws a circular arc.
     ArcTo(SVArcTo),
     /// Closes the current subpath.
@@ -30,7 +30,7 @@ pub enum SVPathCommand {
 /// caller computes from its scale, not by a flag here.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SVArcTo {
-    centre: SVPoint,
+    centre: SVMarkPoint,
     radius: f64,
     start_angle: f64,
     end_angle: f64,
@@ -38,7 +38,7 @@ pub struct SVArcTo {
 
 impl SVArcTo {
     /// Builds an arc around `centre`.
-    pub const fn new(centre: SVPoint, radius: f64, start_angle: f64, end_angle: f64) -> Self {
+    pub const fn new(centre: SVMarkPoint, radius: f64, start_angle: f64, end_angle: f64) -> Self {
         Self {
             centre,
             radius,
@@ -48,7 +48,7 @@ impl SVArcTo {
     }
 
     /// Returns the arc centre.
-    pub const fn centre(&self) -> SVPoint {
+    pub const fn centre(&self) -> SVMarkPoint {
         self.centre
     }
 
@@ -130,13 +130,13 @@ impl SVGeometryRectangle {
 /// A circle in display space.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SVGeometryCircle {
-    centre: SVPoint,
+    centre: SVMarkPoint,
     radius: f64,
 }
 
 impl SVGeometryCircle {
     /// Builds a circle; a non-finite or negative radius becomes zero.
-    pub fn new(centre: SVPoint, radius: f64) -> Self {
+    pub fn new(centre: SVMarkPoint, radius: f64) -> Self {
         Self {
             centre,
             radius: if radius.is_finite() && radius > 0.0 {
@@ -148,7 +148,7 @@ impl SVGeometryCircle {
     }
 
     /// Returns the circle centre.
-    pub const fn centre(&self) -> SVPoint {
+    pub const fn centre(&self) -> SVMarkPoint {
         self.centre
     }
 
@@ -161,7 +161,7 @@ impl SVGeometryCircle {
 /// One run of text, already formatted by the mark.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SVGeometryText {
-    position: SVPoint,
+    position: SVMarkPoint,
     text: String,
     font_family: String,
     font_size: f64,
@@ -172,7 +172,7 @@ pub struct SVGeometryText {
 impl SVGeometryText {
     /// Builds a text run.
     pub fn new(
-        position: SVPoint,
+        position: SVMarkPoint,
         text: impl Into<String>,
         font_family: impl Into<String>,
         font_size: f64,
@@ -194,7 +194,7 @@ impl SVGeometryText {
     }
 
     /// Returns the anchor position.
-    pub fn position(&self) -> SVPoint {
+    pub fn position(&self) -> SVMarkPoint {
         self.position
     }
 

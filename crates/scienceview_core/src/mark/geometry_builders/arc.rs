@@ -3,15 +3,15 @@
 use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVArcTo, SVGeometryPath, SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest,
-    SVMarkShape, SVPathCommand, SVPoint, SVWedgeOptions,
+    SVArcTo, SVGeometryPath, SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive,
+    SVMarkRequest, SVMarkShape, SVPathCommand, SVWedgeOptions,
 };
 
 /// Builds the geometry of a wedge mark.
 pub(crate) fn sv_wedge_geometry<'data>(
     options: &SVWedgeOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let plot_area = request.plot_area();
     let radius = sv_resolve_length(
@@ -52,7 +52,7 @@ pub(crate) fn sv_wedge_geometry<'data>(
 
 /// Builds the path of one sector or annulus.
 fn sv_wedge_path(
-    centre: SVPoint,
+    centre: SVMarkPoint,
     radius: f64,
     inner_radius: f64,
     start_angle: f64,
@@ -95,8 +95,8 @@ fn sv_wedge_path(
 }
 
 /// Returns the point at `radius` and `angle` around a centre.
-fn sv_point_at_angle(centre: SVPoint, radius: f64, angle: f64) -> SVPoint {
-    SVPoint::new(
+fn sv_point_at_angle(centre: SVMarkPoint, radius: f64, angle: f64) -> SVMarkPoint {
+    SVMarkPoint::new(
         centre.x() + radius * angle.cos(),
         centre.y() + radius * angle.sin(),
     )

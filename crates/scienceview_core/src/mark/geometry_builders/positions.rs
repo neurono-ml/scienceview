@@ -3,7 +3,7 @@
 use super::accessor::{SVColumnAccessor, SVResolvedChannels};
 use crate::sv_data::SVColumnView;
 use crate::sv_error::SVError;
-use crate::sv_mark::{SVMarkRequest, SVPoint};
+use crate::sv_mark::{SVMarkPoint, SVMarkRequest};
 use crate::sv_scale::{SVScale, SVScaleValue};
 
 /// Places one numeric value on a scale.
@@ -47,7 +47,7 @@ pub(crate) fn sv_require_same_length(
 pub(crate) fn sv_plot_positions(
     request: &SVMarkRequest<'_, '_>,
     channels: &SVResolvedChannels<'_>,
-) -> Result<Vec<SVPoint>, SVError> {
+) -> Result<Vec<SVMarkPoint>, SVError> {
     let horizontal = channels.horizontal();
     let vertical = channels.vertical();
     sv_require_same_length(
@@ -60,7 +60,7 @@ pub(crate) fn sv_plot_positions(
         .map(|index| {
             let x = sv_scale_position(request.horizontal_scale(), horizontal.value_at(index))?;
             let y = sv_scale_position(request.vertical_scale(), vertical.value_at(index))?;
-            Ok(SVPoint::new(x, y))
+            Ok(SVMarkPoint::new(x, y))
         })
         .collect()
 }

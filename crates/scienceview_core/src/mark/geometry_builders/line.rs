@@ -5,15 +5,15 @@ use super::simplify::sv_simplify;
 use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVLineOptions, SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest, SVMarkShape,
-    SVPoint,
+    SVLineOptions, SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive, SVMarkRequest,
+    SVMarkShape,
 };
 
 /// Builds the geometry of a line mark.
 pub(crate) fn sv_line_geometry<'data>(
     options: &SVLineOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let theme = request.theme();
     let simplified = sv_simplify(points, f64::from(options.simplify_value()));

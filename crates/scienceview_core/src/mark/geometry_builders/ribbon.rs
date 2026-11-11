@@ -5,7 +5,7 @@ use super::positions::sv_boundary_positions;
 use crate::sv_error::SVError;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVMarkGeometry, SVMarkPaint, SVMarkPrimitive, SVMarkRequest, SVMarkShape, SVPoint,
+    SVMarkGeometry, SVMarkPaint, SVMarkPoint, SVMarkPrimitive, SVMarkRequest, SVMarkShape,
     SVRibbonBoundary, SVRibbonOptions,
 };
 
@@ -13,7 +13,7 @@ use crate::sv_mark::{
 pub(crate) fn sv_ribbon_geometry<'data>(
     options: &SVRibbonOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
     expected_length: usize,
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     let upper_column = request
@@ -43,17 +43,17 @@ pub(crate) fn sv_ribbon_geometry<'data>(
     let opacity = sv_resolve_opacity(options.opacity_value(), theme.area_opacity());
     let primitive = match options.boundary_value() {
         SVRibbonBoundary::Both => {
-            let mut vertices: Vec<SVPoint> = points
+            let mut vertices: Vec<SVMarkPoint> = points
                 .iter()
                 .zip(&upper)
-                .map(|(point, boundary)| SVPoint::new(point.x(), *boundary))
+                .map(|(point, boundary)| SVMarkPoint::new(point.x(), *boundary))
                 .collect();
             vertices.extend(
                 points
                     .iter()
                     .zip(&lower)
                     .rev()
-                    .map(|(point, boundary)| SVPoint::new(point.x(), *boundary)),
+                    .map(|(point, boundary)| SVMarkPoint::new(point.x(), *boundary)),
             );
             let paint = SVMarkPaint::filled(colour).with_opacity(opacity);
             SVMarkPrimitive::new(SVMarkShape::Path(sv_closed_path(&vertices)), paint)
@@ -64,10 +64,10 @@ pub(crate) fn sv_ribbon_geometry<'data>(
             } else {
                 &lower
             };
-            let vertices: Vec<SVPoint> = points
+            let vertices: Vec<SVMarkPoint> = points
                 .iter()
                 .zip(boundary)
-                .map(|(point, boundary)| SVPoint::new(point.x(), *boundary))
+                .map(|(point, boundary)| SVMarkPoint::new(point.x(), *boundary))
                 .collect();
             let width = sv_resolve_length(None, theme.line_width(), request.plot_area());
             let paint = SVMarkPaint::stroked(colour, width).with_opacity(opacity);

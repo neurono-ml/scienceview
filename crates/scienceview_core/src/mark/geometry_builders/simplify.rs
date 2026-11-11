@@ -1,6 +1,6 @@
 //! Polyline simplification: the Ramer–Douglas–Peucker pass of the line mark.
 
-use crate::sv_mark::SVPoint;
+use crate::sv_mark::SVMarkPoint;
 
 /// Drops the points that sit within `tolerance` of the simplified line.
 ///
@@ -8,7 +8,7 @@ use crate::sv_mark::SVPoint;
 /// rasterization-independent decision: the same tolerance removes the same
 /// points on every backend. A tolerance at or below zero, or a polyline of two
 /// points, returns the input unchanged.
-pub(crate) fn sv_simplify(points: &[SVPoint], tolerance: f64) -> Vec<SVPoint> {
+pub(crate) fn sv_simplify(points: &[SVMarkPoint], tolerance: f64) -> Vec<SVMarkPoint> {
     let last_index = match points.len().checked_sub(1) {
         Some(last_index) if points.len() >= 3 && tolerance > 0.0 => last_index,
         _ => return points.to_vec(),
@@ -52,7 +52,7 @@ pub(crate) fn sv_simplify(points: &[SVPoint], tolerance: f64) -> Vec<SVPoint> {
 }
 
 /// Returns the perpendicular distance from a point to a segment.
-fn sv_distance_to_segment(point: SVPoint, start: SVPoint, end: SVPoint) -> f64 {
+fn sv_distance_to_segment(point: SVMarkPoint, start: SVMarkPoint, end: SVMarkPoint) -> f64 {
     let horizontal = end.x() - start.x();
     let vertical = end.y() - start.y();
     let length_squared = horizontal * horizontal + vertical * vertical;
@@ -63,7 +63,7 @@ fn sv_distance_to_segment(point: SVPoint, start: SVPoint, end: SVPoint) -> f64 {
     let projection = ((point.x() - start.x()) * horizontal + (point.y() - start.y()) * vertical)
         / length_squared;
     let projection = projection.clamp(0.0, 1.0);
-    let closest = SVPoint::new(
+    let closest = SVMarkPoint::new(
         start.x() + horizontal * projection,
         start.y() + vertical * projection,
     );

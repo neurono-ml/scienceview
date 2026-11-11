@@ -5,15 +5,15 @@ use crate::sv_error::SVError;
 use crate::sv_layout::SVResolvedRectangle;
 use crate::sv_mark::paint::{sv_resolve_colour, sv_resolve_length, sv_resolve_opacity};
 use crate::sv_mark::{
-    SVBarOptions, SVBarOrientation, SVGeometryRectangle, SVMarkGeometry, SVMarkPaint,
-    SVMarkPrimitive, SVMarkRequest, SVMarkShape, SVPoint,
+    SVBarOptions, SVBarOrientation, SVGeometryRectangle, SVMarkGeometry, SVMarkPaint, SVMarkPoint,
+    SVMarkPrimitive, SVMarkRequest, SVMarkShape,
 };
 
 /// Builds the geometry of a bar mark.
 pub(crate) fn sv_bar_geometry<'data>(
     options: &SVBarOptions,
     request: &SVMarkRequest<'data, '_>,
-    points: &[SVPoint],
+    points: &[SVMarkPoint],
 ) -> Result<SVMarkGeometry<'data>, SVError> {
     if points.is_empty() {
         return Ok(SVMarkGeometry::default());
@@ -60,7 +60,7 @@ fn sv_baseline(options: &SVBarOptions, request: &SVMarkRequest<'_, '_>) -> Resul
 /// Builds one bar rectangle.
 fn sv_bar_rectangle(
     orientation: SVBarOrientation,
-    point: SVPoint,
+    point: SVMarkPoint,
     baseline: f64,
     width: f64,
 ) -> SVResolvedRectangle {

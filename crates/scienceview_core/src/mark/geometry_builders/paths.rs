@@ -1,9 +1,9 @@
 //! Path building shared by the mark variants.
 
-use crate::sv_mark::{SVGeometryPath, SVPathCommand, SVPoint};
+use crate::sv_mark::{SVGeometryPath, SVMarkPoint, SVPathCommand};
 
 /// Builds an open path through the points.
-pub(crate) fn sv_open_path(points: &[SVPoint]) -> SVGeometryPath {
+pub(crate) fn sv_open_path(points: &[SVMarkPoint]) -> SVGeometryPath {
     let mut path = SVGeometryPath::default();
     for (position, point) in points.iter().copied().enumerate() {
         if position == 0 {
@@ -17,7 +17,7 @@ pub(crate) fn sv_open_path(points: &[SVPoint]) -> SVGeometryPath {
 }
 
 /// Builds a closed path through the points.
-pub(crate) fn sv_closed_path(points: &[SVPoint]) -> SVGeometryPath {
+pub(crate) fn sv_closed_path(points: &[SVMarkPoint]) -> SVGeometryPath {
     let mut path = sv_open_path(points);
     if !points.is_empty() {
         path.push(SVPathCommand::Close);
@@ -28,16 +28,16 @@ pub(crate) fn sv_closed_path(points: &[SVPoint]) -> SVGeometryPath {
 
 /// Builds a closed polygon from offsets around a centre.
 pub(crate) fn sv_regular_polygon(
-    centre: SVPoint,
+    centre: SVMarkPoint,
     offsets: &[(f64, f64)],
     rotation: f64,
 ) -> SVGeometryPath {
-    let vertices: Vec<SVPoint> = offsets
+    let vertices: Vec<SVMarkPoint> = offsets
         .iter()
         .map(|(horizontal, vertical)| {
             let rotated_horizontal = horizontal * rotation.cos() - vertical * rotation.sin();
             let rotated_vertical = horizontal * rotation.sin() + vertical * rotation.cos();
-            SVPoint::new(
+            SVMarkPoint::new(
                 centre.x() + rotated_horizontal,
                 centre.y() + rotated_vertical,
             )
