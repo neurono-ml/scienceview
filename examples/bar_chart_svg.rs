@@ -1,4 +1,4 @@
-//! Bar-chart example: renders sample values to `docs/src/assets/bar_chart.svg`.
+//! Bar-chart example: renders sample values to `docs/figures/bar_chart.svg`.
 //!
 //! Run with `cargo run --example bar_chart_svg` from the repository root.
 //! The SVG file is checked in and embedded in `README.md` and the mdBook,
@@ -69,9 +69,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     let root = manifest_directory()?;
-    let assets = root.join("docs").join("src").join("assets");
-    fs::create_dir_all(&assets)?;
-    let destination = assets.join("bar_chart.svg");
+    let figures = root.join("docs").join("figures");
+    fs::create_dir_all(&figures)?;
+    let destination = figures.join("bar_chart.svg");
     fs::write(&destination, svg)?;
     println!("Wrote {}", destination.display());
     Ok(())
