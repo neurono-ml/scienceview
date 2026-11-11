@@ -36,8 +36,8 @@ fn the_kind_set_is_closed_and_exhaustive() {
         SVMove::stack().into(),
         SVMove::dodge().into(),
         SVMove::jitter().into(),
-        SVMove::swarm().into(),
         SVMove::shift().into(),
+        SVMove::swarm().into(),
         SVMove::normalize().into(),
     ];
     let kinds: Vec<SVMoveKind> = moves.iter().map(SVMove::kind).collect();
