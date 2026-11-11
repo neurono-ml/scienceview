@@ -2,13 +2,13 @@
 
 ## Scale kinds
 
-- [ ] Write failing tests for each of the four scale kinds.
-- [ ] Implement `SVScale` and its domain/range model.
+- [x] Write failing tests for each of the four scale kinds.
+- [x] Implement `SVScale` and its domain/range model.
 
 ## Transforms and domains
 
-- [ ] Write failing tests for linear, log, symlog and sqrt transforms, and for explicit domains.
-- [ ] Implement the transforms and domain derivation.
+- [x] Write failing tests for linear, log, symlog and sqrt transforms, and for explicit domains.
+- [x] Implement the transforms and domain derivation.
 
 ## Colour scales
 
