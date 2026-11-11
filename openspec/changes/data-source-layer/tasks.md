@@ -17,6 +17,6 @@
 
 ## Parity harness
 
-- [ ] Implement the harness and adopt it in one kernel's tests as a proof of concept.
-- [ ] Document the tolerance policy.
+- [x] Implement the harness and adopt it in one kernel's tests as a proof of concept.
+- [x] Document the tolerance policy.
 
