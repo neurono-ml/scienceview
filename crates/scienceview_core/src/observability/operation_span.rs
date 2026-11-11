@@ -9,8 +9,8 @@
 //! name as the `operation` field.
 
 use crate::sv_backend::SVBackendKind;
+use crate::sv_data::SVRepresentation;
 use crate::sv_error::SVError;
-use crate::sv_figure::SVDataRepresentation;
 use std::time::Instant;
 use tracing::Span;
 
@@ -24,7 +24,7 @@ pub const SV_OPERATION_SPAN_NAME: &str = "scienceview.operation";
 pub fn sv_start_operation_span(
     operation: &'static str,
     backend_kind: SVBackendKind,
-    representation: SVDataRepresentation,
+    representation: SVRepresentation,
     points: usize,
 ) -> Span {
     tracing::info_span!(
@@ -48,7 +48,7 @@ pub fn sv_start_operation_span(
 pub fn sv_run_operation<T>(
     operation: &'static str,
     backend_kind: SVBackendKind,
-    representation: SVDataRepresentation,
+    representation: SVRepresentation,
     points: usize,
     operation_body: impl FnOnce() -> Result<T, SVError>,
 ) -> Result<T, SVError> {

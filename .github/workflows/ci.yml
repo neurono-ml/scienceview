@@ -129,3 +129,22 @@ jobs:
         run: |
           cargo build --workspace --all-targets
           cargo test --workspace --all-targets
+
+  features:
+    name: Optional features (clippy + tests, all features)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install Rust 1.85 toolchain (clippy)
+        uses: dtolnay/rust-toolchain@1.85
+        with:
+          components: clippy
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: cargo clippy --workspace --all-targets --all-features
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: cargo test --workspace --all-targets --all-features
+        run: cargo test --workspace --all-targets --all-features

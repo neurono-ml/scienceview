@@ -27,12 +27,12 @@
 //!
 //! ```
 //! use scienceview_core::sv_backend::SVBackendKind;
-//! use scienceview_core::sv_figure::SVDataBinding;
+//! use scienceview_core::sv_data::SVColumnView;
 //! use scienceview_core::sv_figure::SVFigureBuilder;
 //!
 //! let values = [1.0, 2.0, 3.0];
 //! let figure = SVFigureBuilder::new()
-//!     .data_source(SVDataBinding::dense(&values))
+//!     .data_source(SVColumnView::Dense(&values))
 //!     .backend(SVBackendKind::Svg)
 //!     .build()
 //!     .expect("the configuration is complete");
@@ -81,6 +81,7 @@
 //! | `render-dioxus` | `scienceview_dioxus` | optional |
 //! | `wasm` | `scienceview_wasm` | optional |
 //! | `data-ndarray` | Zero-copy `ndarray` views | optional |
+//! | `data-sprs` | Zero-copy `sprs` sparse views | optional |
 //! | `spec-serde` | JSON figure specification | optional |
 //! | `streaming` | Standard-library channel updates | none |
 //! | `streaming-tokio` | Tokio watch channel updates | optional |
@@ -88,6 +89,20 @@
 //!
 //! `scienceview_core` itself is always compiled: the facade re-exports it as a
 //! required dependency.
+//!
+//! ## Data boundary
+//!
+//! [`sv_data`] holds the ingestion trait (`SVDataSource`) and the closed
+//! representation kernels receive (`SVColumnView`: dense, sparse or
+//! streaming). Sparse storage is never densified, and [`sv_window`] provides the
+//! bounded rolling window that lets a live source be read without blocking the
+//! render thread. Representation parity is asserted with the harness in
+//! [`sv_data`], whose tolerance policy lives beside it.
+
+#[path = "data/mod.rs"]
+pub mod sv_data;
+#[path = "window/mod.rs"]
+pub mod sv_window;
 
 // The directories follow the change grid (`backend/`, `error/`,
 // `figure/`, `observability/`) while the public module names follow the naming

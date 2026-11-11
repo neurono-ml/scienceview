@@ -94,6 +94,7 @@ figure.render();
 Borrowed slices are the core data model — no heavy algebra or GUI toolkit is required to describe a figure. Everything else is an opt-in Cargo feature:
 
 - `data-ndarray`: zero-copy views over `ndarray` arrays.
+- `data-sprs`: zero-copy views over `sprs` sparse vectors.
 - `spec-serde`: JSON serialization of the figure specification.
 - `theme`: the authored theme compiled at build time into backend-independent
   design tokens, palettes and colour maps (`theme-runtime-compilation` adds

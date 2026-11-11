@@ -12,6 +12,15 @@ released.
 
 ### Added
 
+- The data source layer: `SVDataSource` is the open ingestion contract and
+  `SVColumnView` is the closed computation boundary with exactly three
+  representations — dense, sparse and streaming. Adapters cover borrowed
+  slices, `ndarray` views (`data-ndarray`), `sprs` sparse vectors
+  (`data-sprs`), standard-library channels (`streaming`) and Tokio channels
+  (`streaming-tokio`); sparse data is never densified. `SVRollingWindow` bounds
+  every streaming source and never blocks the render thread, and
+  `SVRepresentationParityHarness` proves dense, sparse and streaming outputs
+  agree within the documented tolerance (dense against sparse exactly).
 - Figure substrate in `scienceview_core`: `SVFigure`, the typestate
   `SVFigureBuilder` that cannot build without a data source and a backend,
   `SVBackendKind` (one variant per backend, deliberately no automatic variant),
@@ -64,6 +73,11 @@ released.
 
 ### Changed
 
+- The data boundary is exposed through the public modules `sv_data` and
+  `sv_window` (the on-disk folders stay `data/` and `window/`), its failures are
+  folded into `SVError` so the crate keeps one public error type, and `SVFigure`
+  carries the data layer's `SVColumnView` instead of a duplicate representation
+  enumeration.
 - CI now runs the workspace quality gates — formatting, clippy with warnings as
   errors and the workspace test suite — plus a figures job that reruns every
   example and fails on any drift under `docs/figures/`.

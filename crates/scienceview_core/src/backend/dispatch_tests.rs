@@ -91,8 +91,7 @@ fn an_export_only_recording_backend_refuses_update_save_and_show() {
         .update(&SVUpdateRequest {
             backend_kind: SVBackendKind::Svg,
             execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
-            representation: crate::sv_figure::SVDataRepresentation::Dense,
-            values: &[],
+            view: crate::sv_data::SVColumnView::Dense(&[]),
             appended_points: 0,
         })
         .expect_err("an export-only double cannot update in place");
@@ -100,8 +99,7 @@ fn an_export_only_recording_backend_refuses_update_save_and_show() {
         .save(&crate::sv_backend::SVSaveRequest {
             backend_kind: SVBackendKind::Svg,
             execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
-            representation: crate::sv_figure::SVDataRepresentation::Dense,
-            values: &[],
+            view: crate::sv_data::SVColumnView::Dense(&[]),
             destination: std::path::Path::new("figure.svg"),
         })
         .expect_err("an export-only double can export, so `save` is not universally refused");
@@ -109,8 +107,7 @@ fn an_export_only_recording_backend_refuses_update_save_and_show() {
         .show(&crate::sv_backend::SVShowRequest {
             backend_kind: SVBackendKind::Svg,
             execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
-            representation: crate::sv_figure::SVDataRepresentation::Dense,
-            values: &[],
+            view: crate::sv_data::SVColumnView::Dense(&[]),
         })
         .expect_err("an export-only double cannot present the figure");
 
@@ -166,8 +163,7 @@ fn a_backend_that_does_not_override_an_operation_reports_the_missing_capability(
         .update(&SVUpdateRequest {
             backend_kind: SVBackendKind::Svg,
             execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
-            representation: crate::sv_figure::SVDataRepresentation::Dense,
-            values: &[],
+            view: crate::sv_data::SVColumnView::Dense(&[]),
             appended_points: 0,
         })
         .expect_err("the default update reports the missing capability");

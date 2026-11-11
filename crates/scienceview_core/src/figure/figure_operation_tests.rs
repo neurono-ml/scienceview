@@ -3,13 +3,13 @@
 //! Every operation resolves the configured kind to a concrete backend at call
 //! time and records the configured kind — never a hardcoded value.
 
-use super::SVDataBinding;
 use super::SVFigure;
 use super::SVFigureBuilder;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::test_support::SVCallRecorder;
 use crate::sv_backend::test_support::sv_registry_with_capable_recording_backend;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
+use crate::sv_data::{SVColumnView, SVStreamingView};
 use crate::sv_error::SVError;
 use std::sync::Arc;
 
@@ -19,7 +19,7 @@ fn built_figure<'values>(
     recorder: &Arc<SVCallRecorder>,
 ) -> SVFigure<'values> {
     SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(values))
+        .data_source(SVColumnView::Dense(values))
         .backend(kind)
         .backend_registry(Arc::new(sv_registry_with_recording_backend(recorder)))
         .build()
@@ -44,7 +44,7 @@ fn every_operation_dispatches_separately() {
     let values = [1.0, 2.0];
     let recorder = SVCallRecorder::shared();
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .backend_registry(Arc::new(sv_registry_with_capable_recording_backend(
             &recorder,
@@ -115,9 +115,7 @@ fn a_streaming_figure_cannot_be_switched_to_an_export_only_backend() {
     let values = [1.0, 2.0];
     let recorder = SVCallRecorder::shared();
     let mut figure = SVFigureBuilder::new()
-        .data_source(
-            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
-        )
+        .data_source(SVColumnView::Streaming(SVStreamingView::new(&values, 0, 0)))
         .backend(SVBackendKind::Native)
         .backend_registry(Arc::new(sv_registry_with_recording_backend(&recorder)))
         .build()

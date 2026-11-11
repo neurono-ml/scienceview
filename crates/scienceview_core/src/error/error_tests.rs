@@ -5,8 +5,8 @@
 
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
+use crate::sv_data::SVRepresentation;
 use crate::sv_error::SVError;
-use crate::sv_figure::SVDataRepresentation;
 
 #[test]
 fn the_missing_backend_error_names_the_requirement() {
@@ -39,11 +39,13 @@ fn the_unsupported_capability_error_names_backend_and_capability() {
 #[test]
 fn the_unsupported_representation_error_names_an_alternative_path() {
     let error = SVError::UnsupportedRepresentation {
-        representation: SVDataRepresentation::Streaming,
-        alternative_path: "a windowed view",
+        operation: "dense_values",
+        representation: SVRepresentation::Streaming,
+        alternative: "a windowed view",
     };
     let message = error.to_string();
 
+    assert!(message.contains("dense_values"), "message was: {message}");
     assert!(message.contains("Streaming"), "message was: {message}");
     assert!(
         message.contains("a windowed view"),
@@ -89,18 +91,6 @@ fn the_invalid_configuration_error_names_the_problem() {
         error.to_string().contains("the point count is zero"),
         "message was: {error}"
     );
-}
-
-#[test]
-fn the_inconsistent_point_count_error_names_both_counts() {
-    let error = SVError::InconsistentPointCount {
-        point_count: 2,
-        value_count: 5,
-    };
-    let message = error.to_string();
-
-    assert!(message.contains('2'), "message was: {message}");
-    assert!(message.contains('5'), "message was: {message}");
 }
 
 #[test]
