@@ -7,7 +7,7 @@
 
 ## Legend
 
-- [ ] Write failing tests for entry lifecycle and hidden series.
+- [x] Write failing tests for entry lifecycle and hidden series.
 - [ ] Implement the legend model.
 
 ## Colour bar
