@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1060 640" role="img" aria-label="The figure builder typestate, the built figure and the per-operation dispatch to a render backend">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d3557"/>
+    </marker>
+    <marker id="arrow-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a9d8f"/>
+    </marker>
+    <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e07a1f"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1060" height="640" fill="#ffffff"/>
+
+  <text x="530" y="36" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1d3557">
+    The builder typestate and the per-operation dispatch
+  </text>
+
+  <!-- Builder states -->
+  <text x="40" y="72" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#457b9d">1. THE TYPESTATE</text>
+
+  <rect x="40" y="88" width="250" height="86" rx="12" fill="#ef476f" stroke="#b5173d" stroke-width="2"/>
+  <text x="165" y="118" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    SVWithoutDataSource
+  </text>
+  <text x="165" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#ffe3ec">
+    SVWithoutBackend
+  </text>
+  <text x="165" y="160" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#ffe3ec">
+    new() · no build()
+  </text>
+
+  <rect x="340" y="88" width="250" height="86" rx="12" fill="#f4a261" stroke="#c4711a" stroke-width="2"/>
+  <text x="465" y="118" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    SVWithDataSource
+  </text>
+  <text x="465" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#fff4e6">
+    SVWithoutBackend
+  </text>
+  <text x="465" y="160" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#fff4e6">
+    data_source(..) · no build()
+  </text>
+
+  <rect x="640" y="88" width="250" height="86" rx="12" fill="#2a9d8f" stroke="#1d7268" stroke-width="2"/>
+  <text x="765" y="118" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    SVWithDataSource
+  </text>
+  <text x="765" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#e0fbf7">
+    SVWithBackend
+  </text>
+  <text x="765" y="160" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#e0fbf7">
+    build() exists here only
+  </text>
+
+  <line x1="292" y1="131" x2="336" y2="131" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="314" y="122" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#1d3557">data_source</text>
+
+  <line x1="592" y1="131" x2="636" y2="131" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="614" y="122" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#1d3557">backend</text>
+
+  <!-- build -->
+  <rect x="660" y="222" width="210" height="76" rx="12" fill="#8338ec" stroke="#5a189a" stroke-width="2"/>
+  <text x="765" y="250" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    build() → SVFigure
+  </text>
+  <text x="765" y="272" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#f3e8ff">
+    capability check · kind transferred
+  </text>
+  <text x="765" y="288" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#f3e8ff">
+    no backend resolved
+  </text>
+  <line x1="765" y1="176" x2="765" y2="218" stroke="#2a9d8f" stroke-width="2" marker-end="url(#arrow-ok)"/>
+
+  <!-- Figure -->
+  <rect x="40" y="222" width="540" height="76" rx="12" fill="#118ab2" stroke="#0b5f7d" stroke-width="2"/>
+  <text x="310" y="250" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    SVFigure · carries backend_kind, execution_mode, data, registry
+  </text>
+  <text x="310" y="272" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#d9f3fb">
+    non-generic over the backend · kind is a runtime value
+  </text>
+  <text x="310" y="288" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#d9f3fb">
+    set_backend_kind switches the backend of later operations
+  </text>
+  <line x1="657" y1="260" x2="584" y2="260" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="5 4"/>
+  <text x="620" y="252" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#1d3557">returns</text>
+
+  <!-- Operations -->
+  <text x="40" y="340" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#457b9d">2. ONE DISPATCH PER OPERATION</text>
+
+  <rect x="40" y="356" width="120" height="44" rx="10" fill="#1d3557"/>
+  <text x="100" y="383" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">render()</text>
+  <rect x="180" y="356" width="120" height="44" rx="10" fill="#1d3557"/>
+  <text x="240" y="383" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">update()</text>
+  <rect x="320" y="356" width="120" height="44" rx="10" fill="#1d3557"/>
+  <text x="380" y="383" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">save()</text>
+  <rect x="460" y="356" width="120" height="44" rx="10" fill="#1d3557"/>
+  <text x="520" y="383" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">show()</text>
+
+  <line x1="310" y1="300" x2="310" y2="352" stroke="#e07a1f" stroke-width="2" marker-end="url(#arrow-flow)"/>
+
+  <!-- Registry -->
+  <rect x="120" y="444" width="440" height="66" rx="12" fill="#f4a261" stroke="#c4711a" stroke-width="2"/>
+  <text x="340" y="471" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    SVBackendRegistry::resolve(backend_kind)
+  </text>
+  <text x="340" y="492" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#fff4e6">
+    providers registered by backend crates · unregistered → BackendUnavailable
+  </text>
+
+  <line x1="100" y1="402" x2="220" y2="440" stroke="#e07a1f" stroke-width="2" marker-end="url(#arrow-flow)"/>
+  <line x1="240" y1="402" x2="290" y2="440" stroke="#e07a1f" stroke-width="2" marker-end="url(#arrow-flow)"/>
+  <line x1="380" y1="402" x2="390" y2="440" stroke="#e07a1f" stroke-width="2" marker-end="url(#arrow-flow)"/>
+  <line x1="520" y1="402" x2="460" y2="440" stroke="#e07a1f" stroke-width="2" marker-end="url(#arrow-flow)"/>
+
+  <!-- Backend -->
+  <rect x="640" y="444" width="380" height="66" rx="12" fill="#2a9d8f" stroke="#1d7268" stroke-width="2"/>
+  <text x="830" y="471" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    Arc&lt;dyn SVRenderBackend&gt;
+  </text>
+  <text x="830" y="492" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#e0fbf7">
+    kind() must match · render / update / save / show
+  </text>
+  <line x1="562" y1="477" x2="636" y2="477" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Span -->
+  <rect x="40" y="548" width="980" height="70" rx="12" fill="#e9f5f9" stroke="#118ab2" stroke-width="2"/>
+  <text x="60" y="575" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#0b5f7d">
+    every operation runs inside one span
+  </text>
+  <text x="60" y="599" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#1d3557">
+    backend.kind = the configured kind (never hardcoded) · representation = Dense / Sparse / Streaming · points = drawn marks · duration · outcome
+  </text>
+</svg>
