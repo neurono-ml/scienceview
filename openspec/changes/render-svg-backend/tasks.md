@@ -1,0 +1,22 @@
+# Tasks
+
+## Backend skeleton
+
+- [ ] Write failing tests for the capability matrix and for an empty figure.
+- [ ] Implement the crate and the backend trait.
+
+## Marks and decorations
+
+- [ ] Write failing snapshot tests for each mark variant and decoration.
+- [ ] Implement rendering of marks and decorations.
+
+## Large data
+
+- [ ] Write failing tests for path grouping and document size.
+- [ ] Implement grouped paths for large mark sets.
+
+## Assertions and figures
+
+- [ ] Add a test asserting byte-identical output across runs.
+- [ ] Add the first example program and its generated figure under `docs/figures/`.
+

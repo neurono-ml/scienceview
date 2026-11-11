@@ -1,0 +1,40 @@
+# Design
+
+## Context
+
+`SVPairPlot` is one of the scientific-core recipes specified in
+`docs/FDRs/multivariate-pair-plot.md`. This change implements exactly that record on top of
+the core kernels already landed by the earlier waves, and touches nothing else.
+
+
+## Decisions
+
+### D1 — Composition
+
+The chart is exactly the composition
+`data -> [no stat] -> values -> [SVMove::Dodge (+ Jitter) within each cell] -> [SVScale per axis] -> SVMark::Dot, one cell per pair`. It introduces no new mark, stat, move or scale variant; if
+implementation reveals a missing variant, that is a change to the core
+capability first (patterns.md P5).
+
+### D2 — Data contract
+
+The chart consumes `x_variables`, `y_variables`, `hue`. Dense,
+sparse and streaming representations are accepted; the recipe dispatches on the
+representation once per operation and never densifies or blocks (patterns.md
+P6).
+
+### D3 — Temporal behaviour
+
+point position: interpolates in every cell. point colour: interpolates. diagonal distribution: re-computed per frame.
+
+### D4 — Registration
+
+The chart is registered by appending one
+line to `src/recipes/multivariate/mod.rs`. No central registry exists, because a
+central registry would serialise every recipe change against every other one
+(patterns.md P4).
+
+## Open Questions
+
+- Should `SVPairPlot` and `SVSplomPlot` be one recipe with a type-dependent diagonal, rather than two? *Open — leaning yes; the difference is largely the diagonal and the dodge/jitter.*
+

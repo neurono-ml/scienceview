@@ -12,6 +12,14 @@ released.
 
 ### Added
 
+- Feature Description Records for the chart surface (`docs/FDRs/`) — one
+  record per core kernel and per scientific-core chart recipe, plus the
+  catalogue of deferred chart types and the engineering contract that
+  governs their implementation.
+- A scaffolded change grid of fifty-two OpenSpec changes implementing the
+  chart surface, the kernels it composes and the backends and integrations it
+  needs, dispatched as a dependency-ordered DAG of waves.
+
 - Product requirements document (`docs/PRD.md`) establishing the product source
   of truth: the vision, the two audiences the library serves, the
   architectural principles, the capability catalogue, the roadmap and the open
@@ -19,6 +27,8 @@ released.
 - Ten normative capability specifications covering backend selection, the data
   view boundary, model events, event payloads, backend capabilities, theming,
   the layout engine, the interactive control kit, scripting and dashboards.
+- `AGENTS.md` and `openspec/config.yaml` now point at `docs/FDRs/patterns.md`
+  as the normative contract for changes that implement the chart surface.
 
 ### Changed
 
