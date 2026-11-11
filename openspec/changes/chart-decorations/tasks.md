@@ -17,6 +17,6 @@
 
 ## Titles and theming
 
-- [ ] Write failing tests for token consumption.
+- [x] Write failing tests for token consumption.
 - [ ] Implement titles, labels and decoration theming.
 
