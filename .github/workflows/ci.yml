@@ -47,7 +47,21 @@ jobs:
           cargo run --example line_plot_svg
           cargo run --example bar_chart_svg
       - name: The mirrored figures must match the code branch
-        run: diff -r --brief code/docs/figures docs/src/assets
+        run: |
+          # The code branch owns the figures; its path moved once already, so
+          # the job resolves it instead of assuming one.
+          figures_directory=""
+          for candidate in code/docs/figures code/docs/src/assets; do
+            if [ -d "$candidate" ]; then
+              figures_directory="$candidate"
+              break
+            fi
+          done
+          if [ -z "$figures_directory" ]; then
+            echo "No figures found in the code checkout — nothing to compare." >&2
+            exit 1
+          fi
+          diff -r --brief "$figures_directory" docs/src/assets
 
   code:
     name: Code (only when this branch carries the workspace)
