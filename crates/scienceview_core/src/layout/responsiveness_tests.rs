@@ -181,3 +181,24 @@ fn a_viewport_change_recomputes_the_tick_count() {
     assert_eq!(narrow_ticks, 3);
     assert!(narrow_ticks < wide_ticks);
 }
+
+#[test]
+fn tick_count_is_available_along_either_axis() {
+    let root = figure(SVLength::fill(), SVLength::fill())
+        .with_direction(crate::sv_layout::SVLayoutDirection::Vertical);
+    let viewport = SVViewport::new(400.0, 500.0);
+    let layout = SVLayoutTree::new(root)
+        .with_viewport(viewport)
+        .with_responsiveness(SVResponsivenessMode::FitToParent)
+        .solve(&viewport);
+    let rectangle = layout.root().rectangle();
+
+    assert_eq!(
+        rectangle.readable_tick_count_along(crate::sv_layout::SVLayoutDirection::Horizontal, 100.0),
+        5
+    );
+    assert_eq!(
+        rectangle.readable_tick_count_along(crate::sv_layout::SVLayoutDirection::Vertical, 100.0),
+        6
+    );
+}

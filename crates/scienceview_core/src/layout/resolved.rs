@@ -1,6 +1,7 @@
 //! The solved layout tree every backend rasterizes.
 
 use crate::sv_layout::SVViewport;
+use crate::sv_layout::node::SVLayoutDirection;
 
 /// A resolved position and size in backend-independent logical pixels.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -41,11 +42,28 @@ impl SVResolvedRectangle {
     /// A tick needs at least `minimum_tick_spacing` logical pixels; the
     /// decoration layer consumes this count instead of guessing one.
     pub fn readable_tick_count(&self, minimum_tick_spacing: f64) -> usize {
+        self.readable_tick_count_along(SVLayoutDirection::Horizontal, minimum_tick_spacing)
+    }
+
+    /// Returns how many readable ticks fit along the requested axis.
+    ///
+    /// A horizontal axis uses the width and a vertical axis uses the height;
+    /// the space-derived count is what makes ticks adapt when the viewport
+    /// shrinks.
+    pub fn readable_tick_count_along(
+        &self,
+        direction: SVLayoutDirection,
+        minimum_tick_spacing: f64,
+    ) -> usize {
+        let extent = match direction {
+            SVLayoutDirection::Horizontal => self.width,
+            SVLayoutDirection::Vertical => self.height,
+        };
         let spacing = sv_sanitize(minimum_tick_spacing);
         if spacing <= 0.0 {
             return 2;
         }
-        let count = (self.width / spacing).floor();
+        let count = (extent / spacing).floor();
         if count.is_finite() && count >= 1.0 {
             count as usize + 1
         } else {
