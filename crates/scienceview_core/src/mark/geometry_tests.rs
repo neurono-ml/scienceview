@@ -433,6 +433,72 @@ fn a_streaming_view_draws_from_its_snapshot() {
 }
 
 #[test]
+fn a_non_finite_primary_value_is_rejected_with_the_typed_error() {
+    for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+        let horizontal = sv_horizontal_scale();
+        let vertical = sv_vertical_scale();
+        let primary = [value];
+        let secondary = [5.0];
+        let request = sv_dense_request(&primary, &secondary, &horizontal, &vertical);
+
+        let error = SVMark::from(SVMark::dot())
+            .geometry(&request)
+            .expect_err("a non-finite value cannot be placed");
+
+        assert_non_finite_rejection(error);
+    }
+}
+
+#[test]
+fn a_non_finite_secondary_value_is_rejected_with_the_typed_error() {
+    for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+        let horizontal = sv_horizontal_scale();
+        let vertical = sv_vertical_scale();
+        let primary = [5.0];
+        let secondary = [value];
+        let request = sv_dense_request(&primary, &secondary, &horizontal, &vertical);
+
+        let error = SVMark::from(SVMark::line())
+            .geometry(&request)
+            .expect_err("a non-finite value cannot be placed");
+
+        assert_non_finite_rejection(error);
+    }
+}
+
+#[test]
+fn a_non_finite_streaming_snapshot_is_rejected_with_the_typed_error() {
+    let horizontal = sv_horizontal_scale();
+    let vertical = sv_vertical_scale();
+    let snapshot = [0.0, f64::NAN, 10.0];
+    let dense = [0.0, 5.0, 10.0];
+    let streaming = SVStreamingView::new(&snapshot, 3, 0);
+    let request = SVMarkRequest::new(
+        SVColumnView::Streaming(streaming),
+        SVColumnView::Dense(&dense),
+        &horizontal,
+        &vertical,
+        sv_plot_area(),
+    );
+
+    let error = SVMark::from(SVMark::dot())
+        .geometry(&request)
+        .expect_err("a non-finite value cannot be placed");
+
+    assert_non_finite_rejection(error);
+}
+
+fn assert_non_finite_rejection(error: SVError) {
+    match error {
+        SVError::InvalidConfiguration { message } => assert!(
+            message.contains("non-finite"),
+            "the error must name the non-finite value: {message}"
+        ),
+        other => panic!("expected an InvalidConfiguration error, received {other:?}"),
+    }
+}
+
+#[test]
 fn a_nominal_scale_reports_its_own_configuration_error() {
     let categories: [&str; 2] = ["a", "b"];
     let nominal = SVScaleBuilder::new(SVScaleKind::Nominal)
