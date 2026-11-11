@@ -11,6 +11,7 @@ use crate::sv_mark::{
     SVAreaOptions, SVBarOptions, SVDotOptions, SVErrorBarOptions, SVImageOptions, SVLineOptions,
     SVMarkGeometry, SVMarkRequest, SVRibbonOptions, SVTextOptions, SVWedgeOptions,
 };
+use core::fmt;
 
 /// The kind of a mark, independent of its options.
 ///
@@ -40,6 +41,23 @@ pub enum SVMarkKind {
 }
 
 impl SVMarkKind {
+    /// Every kind, in declaration order.
+    ///
+    /// Kept exhaustive on purpose: a backend capability matrix iterates it, and
+    /// a new variant fails that matrix's tests until the matrix declares how
+    /// each backend renders it.
+    pub const ALL: [Self; 9] = [
+        Self::Dot,
+        Self::Line,
+        Self::Area,
+        Self::Bar,
+        Self::Ribbon,
+        Self::Text,
+        Self::Image,
+        Self::Wedge,
+        Self::ErrorBar,
+    ];
+
     /// Returns the kind name as written in observability spans and errors.
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -53,6 +71,12 @@ impl SVMarkKind {
             SVMarkKind::Wedge => "Wedge",
             SVMarkKind::ErrorBar => "ErrorBar",
         }
+    }
+}
+
+impl fmt::Display for SVMarkKind {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.as_str())
     }
 }
 

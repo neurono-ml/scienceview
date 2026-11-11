@@ -4,6 +4,7 @@
 mod capability;
 mod dispatch;
 mod kind;
+mod mark_support;
 mod matrix;
 mod registry;
 mod render_backend;
@@ -11,6 +12,8 @@ mod render_backend;
 pub use capability::SVBackendCapability;
 pub use dispatch::sv_resolve_render_backend;
 pub use kind::SVBackendKind;
+pub use mark_support::sv_mark_supported;
+pub use mark_support::sv_verify_mark_supported;
 pub use matrix::SVBackendCapabilities;
 pub use matrix::SVBackendRequirements;
 pub use matrix::sv_backend_capabilities;
@@ -29,6 +32,8 @@ pub use render_backend::SVUpdateRequest;
 mod backend_kind_tests;
 #[cfg(test)]
 mod dispatch_tests;
+#[cfg(test)]
+mod mark_support_tests;
 #[cfg(test)]
 mod matrix_tests;
 #[cfg(test)]
