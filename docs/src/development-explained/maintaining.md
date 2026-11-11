@@ -18,8 +18,9 @@ examples.
 | Chapter | File | Subject |
 |---|---|---|
 | 1 | `ch01-product-foundation.md` | The product foundation: the two audiences, the trait/enum split, the four-stage interaction pipeline, and the open decisions |
+| 2 | `ch02-workspace-bootstrap.md` | The Cargo workspace: the crate map, the feature map, the pinned toolchain and the four CI gates |
 
-Chapters 2 to 11 are planned, one per capability of the
+Later chapters are planned, one per capability of the
 `foundation-core-architecture` change — `backend-selection`,
 `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and

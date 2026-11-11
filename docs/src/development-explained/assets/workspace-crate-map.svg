@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1040 430" role="img" aria-label="scienceview workspace: the facade re-exports the core and one crate per rendering backend">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d3557"/>
+    </marker>
+    <marker id="arrow-dashed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e07a1f"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1040" height="430" fill="#ffffff"/>
+
+  <text x="520" y="34" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1d3557">
+    The scienceview Cargo workspace
+  </text>
+
+  <!-- Facade -->
+  <rect x="350" y="58" width="340" height="66" rx="12" fill="#8338ec" stroke="#5a189a" stroke-width="2"/>
+  <text x="520" y="86" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+    scienceview (root facade)
+  </text>
+  <text x="520" y="108" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#f3e8ff">
+    default = [] · re-exports only what is enabled
+  </text>
+
+  <!-- Core -->
+  <rect x="380" y="180" width="280" height="70" rx="12" fill="#118ab2" stroke="#0b5f7d" stroke-width="2"/>
+  <text x="520" y="209" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">
+    scienceview_core
+  </text>
+  <text x="520" y="231" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#d7f2fa">
+    figure model · data boundary · kernels · layout
+  </text>
+
+  <line x1="520" y1="124" x2="520" y2="176" stroke="#1d3557" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="535" y="155" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#1d3557">always compiled</text>
+
+  <!-- Backend label -->
+  <text x="520" y="300" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#e07a1f">
+    one optional crate per backend — feature on, crate available, selection still explicit
+  </text>
+
+  <!-- Backend boxes: two rows of five -->
+  <g font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">
+    <!-- row 1 -->
+    <rect x="30" y="318" width="176" height="40" rx="9" fill="#06d6a0" stroke="#048a68" stroke-width="1.6"/>
+    <text x="118" y="342" fill="#053b2c">scienceview_svg</text>
+    <rect x="222" y="318" width="176" height="40" rx="9" fill="#06d6a0" stroke="#048a68" stroke-width="1.6"/>
+    <text x="310" y="342" fill="#053b2c">scienceview_html</text>
+    <rect x="414" y="318" width="176" height="40" rx="9" fill="#06d6a0" stroke="#048a68" stroke-width="1.6"/>
+    <text x="502" y="342" fill="#053b2c">scienceview_tui</text>
+    <rect x="606" y="318" width="176" height="40" rx="9" fill="#06d6a0" stroke="#048a68" stroke-width="1.6"/>
+    <text x="694" y="342" fill="#053b2c">scienceview_native</text>
+    <rect x="798" y="318" width="206" height="40" rx="9" fill="#06d6a0" stroke="#048a68" stroke-width="1.6"/>
+    <text x="901" y="342" fill="#053b2c">scienceview_wasm</text>
+
+    <!-- row 2 -->
+    <rect x="30" y="372" width="176" height="40" rx="9" fill="#e9c46a" stroke="#b5892c" stroke-width="1.6"/>
+    <text x="118" y="396" fill="#3d2c03">scienceview_react</text>
+    <rect x="222" y="372" width="176" height="40" rx="9" fill="#e9c46a" stroke="#b5892c" stroke-width="1.6"/>
+    <text x="310" y="396" fill="#3d2c03">scienceview_vue</text>
+    <rect x="414" y="372" width="176" height="40" rx="9" fill="#e9c46a" stroke="#b5892c" stroke-width="1.6"/>
+    <text x="502" y="396" fill="#3d2c03">scienceview_angular</text>
+    <rect x="606" y="372" width="176" height="40" rx="9" fill="#e9c46a" stroke="#b5892c" stroke-width="1.6"/>
+    <text x="694" y="396" fill="#3d2c03">scienceview_tauri</text>
+    <rect x="798" y="372" width="206" height="40" rx="9" fill="#e9c46a" stroke="#b5892c" stroke-width="1.6"/>
+    <text x="901" y="396" fill="#3d2c03">scienceview_dioxus</text>
+  </g>
+
+  <!-- dashed feature arrows from facade to backend rows -->
+  <path d="M 430 124 C 360 170, 120 240, 118 314" fill="none" stroke="#e07a1f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-dashed)"/>
+  <path d="M 610 124 C 680 170, 901 240, 901 314" fill="none" stroke="#e07a1f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-dashed)"/>
+</svg>
