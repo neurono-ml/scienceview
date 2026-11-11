@@ -12,8 +12,8 @@
 
 ## Swarm
 
-- [ ] Write failing tests for non-overlap and determinism.
-- [ ] Implement the swarm layout.
+- [x] Write failing tests for non-overlap and determinism.
+- [x] Implement the swarm layout.
 
 ## Normalise and composition order
 
