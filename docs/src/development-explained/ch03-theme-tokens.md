@@ -195,7 +195,7 @@ both the typed and the named access path.
 
 The crate follows the repository conventions:
 
-- public structs and enums carry the `SV` prefix (`SVTheme`, `SVColourPalette`);
+- public structs and enums carry the `SV` prefix (`SVTheme`, `SVColourPalettes`);
 - free functions carry `sv_` (`sv_default_theme`, `sv_theme_builder`,
   `sv_resolve_token`, `sv_compile_theme`);
 - methods do not (`tokens()`, `resolve()`, `colour_at()`);
