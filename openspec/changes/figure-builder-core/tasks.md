@@ -15,7 +15,7 @@
 
 - [x] Write failing tests proving a figure cannot be built without a data source or a backend.
 - [x] Implement the builder state machine and `SVFigure`.
-- [ ] Implement `build`, transferring the kind without dispatch.
+- [x] Implement `build`, transferring the kind without dispatch.
 
 ## Acceptance
 
