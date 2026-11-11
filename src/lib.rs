@@ -42,6 +42,7 @@
 //! - `streaming-tokio`: live updates over Tokio watch channels.
 
 pub use scienceview_core;
+pub use scienceview_core::{data, window};
 
 #[cfg(feature = "render-angular")]
 pub use scienceview_angular;
