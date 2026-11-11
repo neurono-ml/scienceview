@@ -100,10 +100,7 @@ fn nominal_scale_places_categories_in_data_order() {
     let scale = nominal_scale(SVCategoryOrder::DataOrder);
 
     assert_eq!(scale.kind(), SVScaleKind::Nominal);
-    assert_eq!(
-        scale.position(SVScaleValue::Category("gamma")),
-        Ok(0.0)
-    );
+    assert_eq!(scale.position(SVScaleValue::Category("gamma")), Ok(0.0));
     assert_eq!(scale.position(SVScaleValue::Category("alpha")), Ok(50.0));
     assert_eq!(scale.position(SVScaleValue::Category("beta")), Ok(100.0));
 }
@@ -168,10 +165,7 @@ fn boolean_scale_accepts_custom_labels() {
 #[test]
 fn every_value_kind_matches_its_scale_kind() {
     assert_eq!(SVScaleValue::Numeric(1.0).kind(), SVScaleKind::Continuous);
-    assert_eq!(
-        SVScaleValue::Category("alpha").kind(),
-        SVScaleKind::Nominal
-    );
+    assert_eq!(SVScaleValue::Category("alpha").kind(), SVScaleKind::Nominal);
     assert_eq!(SVScaleValue::Timestamp(1.0).kind(), SVScaleKind::Temporal);
     assert_eq!(SVScaleValue::Boolean(true).kind(), SVScaleKind::Boolean);
 }
@@ -204,7 +198,10 @@ fn the_domain_and_range_accessors_report_the_configuration() {
     let scale = continuous_scale();
 
     assert_eq!(scale.domain(), SVDomain::new(0.0, 10.0).expect("valid"));
-    assert_eq!(scale.range(), SVScaleRange::new(100.0, 200.0).expect("valid"));
+    assert_eq!(
+        scale.range(),
+        SVScaleRange::new(100.0, 200.0).expect("valid")
+    );
     assert_eq!(scale.tick_count(), None);
 }
 
@@ -239,8 +236,8 @@ fn a_continuous_scale_requires_an_explicit_domain_before_derivation_exists() {
 
 #[test]
 fn the_range_rejects_non_finite_bounds() {
-    let error = SVScaleRange::new(0.0, f64::NAN)
-        .expect_err("a non-finite range cannot place a mark");
+    let error =
+        SVScaleRange::new(0.0, f64::NAN).expect_err("a non-finite range cannot place a mark");
 
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }

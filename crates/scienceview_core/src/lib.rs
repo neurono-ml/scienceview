@@ -101,10 +101,10 @@
 
 #[path = "data/mod.rs"]
 pub mod sv_data;
-#[path = "window/mod.rs"]
-pub mod sv_window;
 #[path = "scale/mod.rs"]
 pub mod sv_scale;
+#[path = "window/mod.rs"]
+pub mod sv_window;
 
 // The directories follow the change grid (`backend/`, `error/`,
 // `figure/`, `observability/`) while the public module names follow the naming
