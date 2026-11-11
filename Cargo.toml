@@ -14,15 +14,23 @@ members = [
     "crates/scienceview_dioxus",
 ]
 
-[package]
-name = "scienceview"
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
-description = "Scientific visualization for Rust: builder-style figures with styling, interactivity and streaming updates across native, HTML, WebAssembly and terminal targets."
 repository = "https://github.com/neurono-ml/scienceview"
 homepage = "https://neurono-ml.github.io/scienceview"
+
+[package]
+name = "scienceview"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Scientific visualization for Rust: builder-style figures with styling, interactivity and streaming updates across native, HTML, WebAssembly and terminal targets."
+repository.workspace = true
+homepage.workspace = true
 documentation = "https://docs.rs/scienceview"
 keywords = ["visualization", "plotting", "charts", "streaming", "tui"]
 categories = ["visualization", "science"]

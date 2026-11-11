@@ -52,3 +52,20 @@ fn backend_features_are_off_by_default() {
         "the default build must not enable any backend, found {enabled:?}"
     );
 }
+
+#[test]
+fn toolchain_is_pinned_to_the_declared_minimum() {
+    let manifest_directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let toolchain_path = manifest_directory.join("rust-toolchain.toml");
+    let toolchain = std::fs::read_to_string(&toolchain_path)
+        .unwrap_or_else(|error| panic!("cannot read {}: {error}", toolchain_path.display()));
+
+    assert!(
+        toolchain.contains("channel = \"1.85\""),
+        "rust-toolchain.toml must pin channel 1.85, found:\n{toolchain}"
+    );
+    assert!(
+        toolchain.contains("\"rustfmt\"") && toolchain.contains("\"clippy\""),
+        "rust-toolchain.toml must install rustfmt and clippy, found:\n{toolchain}"
+    );
+}
