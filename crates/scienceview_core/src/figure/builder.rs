@@ -182,8 +182,7 @@ impl<'values> SVFigureBuilder<'values, SVWithDataSource, SVWithBackend> {
         } else {
             self.requirements
         };
-        let _ = requirements;
-        let _ = sv_verify_backend_requirements;
+        sv_verify_backend_requirements(backend_kind, requirements)?;
 
         let registry = self.registry.unwrap_or_else(sv_backend_registry);
 
