@@ -196,6 +196,13 @@ The channel adapters — `SVChannelColumn` for standard-library channels and
 drain whatever already arrived with `try_iter` or `try_recv`, push it into the
 window, and hand out the snapshot. "Already arrived" is the whole contract.
 
+What is bounded is *retention*, not necessarily the producer's queue. A
+standard-library channel has no bounded variant, so a producer that keeps
+sending while no read happens can grow that queue, and a read then drains all
+of it in one go. Backpressure therefore remains the producer's concern: pace
+it, or use a bounded Tokio channel with `SVTokioChannelColumn`. The window
+still guarantees that memory held by the plot itself stays inside its capacity.
+
 ## 7. Dispatch exactly once
 
 A kernel receives one view and must resolve its representation exactly once.
