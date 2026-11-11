@@ -107,6 +107,13 @@ making it a mark gives all three recipes one implementation.
 pixels and hands the mark an already-mapped raster. That keeps `Image` reusable
 for an actual photograph, and it keeps the colour decision where the data is.
 
+**A cross is stroked-only.** A cross is two segments, not a closed outline, so
+it has no interior a fill could cover. The geometry therefore gives every cross
+a stroke, and a zero stroke width falls back to the theme's line width. Without
+that rule a `Cross` with the default `Filled` paint would draw an invisible
+marker — the bug the geometry test
+`a_filled_cross_without_a_stroke_width_still_draws_two_visible_segments` pins.
+
 Every variant gets a `From` conversion into `SVMark`, so a recipe can write
 `let mark: SVMark = SVMark::bar().group_gap(0.1).into();`.
 
@@ -136,9 +143,17 @@ Three properties follow from that shape:
   window already carries, so drawing a live figure returns immediately with
   whatever data has arrived.
 
-Once both channels are resolved, `sv_plot_positions` places every pair through
-the two scales. A length mismatch is a value — `SVError::MismatchedLengths` —
-never a panic.
+Once both channels are resolved into `SVResolvedChannels`, `sv_plot_positions`
+places every pair through the two scales. A length mismatch is a value —
+`SVError::MismatchedLengths` — never a panic.
+
+The operation resolves the two channels once and passes the resolved accessors
+down to every builder. That detail matters for the text mark, which formats the
+secondary value as its label: before the fix it asked for the secondary column
+again and a streaming column was dispatched twice. The accessor now travels
+with the operation, and
+`a_text_mark_resolves_each_streaming_column_once` proves a text mark over two
+streaming columns performs exactly two resolutions.
 
 ### The nominal-axis rule
 
@@ -164,6 +179,11 @@ The path vocabulary is intentionally tiny. Three commands plus "close" cover
 every mark in the closed set, and each maps to one instruction in a serialized
 format — which is what "an SVG backend serializes without extra logic" means in
 practice.
+
+Positions inside that geometry are `SVMarkPoint`, not `SVPoint`: the decoration
+kernel exposes its own public `SVPoint`, so the mark type carries its family
+prefix. The rename happened while both modules were being made reachable from
+the core crate, before either name could leak into another API.
 
 Two design details matter for correctness:
 
@@ -237,6 +257,15 @@ capability in its matrix and the build stops with
 `SVError::UnsupportedBackendCapability` — the same error model chapter 5
 established.
 
+The mark surface has its own matrix next to the backend capability matrix.
+`sv_mark_supported(mark_kind, backend_kind)` answers whether a backend renders
+a variant, and `sv_verify_mark_supported` turns a negative answer into the
+typed `SVError::UnsupportedMark`, naming the backend and the mark kind. Every
+backend renders the eight vector marks; the terminal backend rejects the image
+mark because a cell grid cannot embed a borrowed raster. A figure can therefore
+reject an impossible composition while it is being configured, instead of
+serializing an empty shape and leaving the user to wonder what happened.
+
 ## 9. The interpolable table belongs where the properties live
 
 Wave 5 adds transitions: a mark that moves from one state to another animates
@@ -270,7 +299,10 @@ area closes against the zero baseline, a bar has the requested fraction of the
 slot width, a ribbon fills between its boundaries, a text run carries the
 formatted value, an image borrows its raster, a wedge switches from one arc to
 two when the inner radius appears, and an error bar draws its interval with
-caps.
+caps. Two further tests pin the corrections this chapter describes: a filled
+cross with no stroke width still draws two visible segments, and a non-finite
+value in either channel returns `SVError::InvalidConfiguration` instead of a
+silently placed mark.
 
 **`option_tests.rs`** exercises the option surface and its validation, including
 the dash parser, the four area baselines, the bar orientation, the text formats
@@ -282,7 +314,9 @@ and the wedge radii.
 dense, sparse and streaming columns, asserts dense and sparse are *exactly*
 equal and every representation combination agrees, feeds the mark kernel to the
 project's representation-parity harness, checks that a short window draws what
-it holds, and finally builds the same mark from shared views on four threads:
+it holds, counts the resolutions a text mark performs over two streaming
+columns (exactly two, one per channel), and finally builds the same mark from
+shared views on four threads:
 
 ```rust,ignore
 std::thread::scope(|scope| {
