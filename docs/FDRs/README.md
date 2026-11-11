@@ -41,7 +41,7 @@ Layer 1 — CORE (docs/FDRs/core/)
    The kernels every chart is built from. Each core FDR describes a small,
    composable, backend-independent unit of computation or rendering.
 
-     core-mark        SVMark   dot, line, area, bar, ribbon, text, image, wedge
+     core-mark        SVMark   dot, line, area, bar, ribbon, text, image, wedge, error bar
      core-stat        SVStat   bin, count, aggregate, kde, ecdf, percentile, fit
      core-move        SVMove   stack, dodge, jitter, shift, norm
      core-scale       SVScale  continuous, nominal, temporal, boolean
