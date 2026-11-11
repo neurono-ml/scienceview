@@ -95,6 +95,9 @@ Borrowed slices are the core data model — no heavy algebra or GUI toolkit is r
 
 - `data-ndarray`: zero-copy views over `ndarray` arrays.
 - `spec-serde`: JSON serialization of the figure specification.
+- `theme`: the authored theme compiled at build time into backend-independent
+  design tokens, palettes and colour maps (`theme-runtime-compilation` adds
+  recompilation while the program runs).
 - `streaming`: live updates over standard-library channels.
 - `streaming-tokio`: live updates over Tokio watch channels.
 

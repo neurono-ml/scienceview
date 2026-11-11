@@ -1,0 +1,81 @@
+// scienceview default theme.
+//
+// This is the single authored source of the visual identity. The build-time
+// compiler turns every declaration below into a typed Rust token; the optional
+// runtime compiler parses the same file into the same tokens. Only the subset
+// documented in crates/scienceview_theme/build_support/parser.rs is accepted:
+// `$group.name: value;` declarations, line comments, colour lists and
+// colour-map stop lists.
+//
+// Colours are #rrggbb or #rrggbbaa. Lengths are pixels. Durations are
+// milliseconds. Shadows are `offset_x offset_y blur_radius colour`.
+
+// ---------------------------------------------------------------------------
+// Colours: semantic roles, never raw brand values at the call site.
+// ---------------------------------------------------------------------------
+$colour.background: #ffffff;
+$colour.surface: #f6f8fa;
+$colour.text: #1f2328;
+$colour.text_muted: #59636e;
+$colour.grid: #d1d9e0;
+$colour.axis: #59636e;
+$colour.accent: #0969da;
+$colour.success: #1a7f37;
+$colour.warning: #9a6700;
+$colour.error: #cf222e;
+
+// ---------------------------------------------------------------------------
+// Typography
+// ---------------------------------------------------------------------------
+$typography.family: system-ui;
+$typography.size.body: 12;
+$typography.size.title: 16;
+$typography.size.label: 10;
+$typography.weight.regular: 400;
+$typography.weight.bold: 700;
+$typography.line_height: 1.4;
+
+// ---------------------------------------------------------------------------
+// Spacing and radii
+// ---------------------------------------------------------------------------
+$spacing.unit: 4;
+$spacing.x_small: 4;
+$spacing.small: 8;
+$spacing.medium: 16;
+$spacing.large: 24;
+$spacing.x_large: 32;
+
+$radius.none: 0;
+$radius.small: 2;
+$radius.medium: 4;
+$radius.large: 8;
+
+// ---------------------------------------------------------------------------
+// Shadows
+// ---------------------------------------------------------------------------
+$shadow.none: 0 0 0 #00000000;
+$shadow.overlay: 0 4 12 #1f232826;
+
+// ---------------------------------------------------------------------------
+// Motion: durations and easings are theme data; `reduced` collapses every
+// duration to zero so accessibility is a property of the theme.
+// ---------------------------------------------------------------------------
+$motion.duration.fast: 120;
+$motion.duration.normal: 240;
+$motion.duration.slow: 400;
+$motion.easing.standard: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+$motion.easing.emphasized: cubic-bezier(0.4, 0.0, 0.2, 1.0);
+$motion.easing.decelerate: cubic-bezier(0.0, 0.0, 0.2, 1.0);
+$motion.reduced: false;
+
+// ---------------------------------------------------------------------------
+// Palettes: categorical entries are assigned by series; the lists below are
+// the ordered stops of each colour map.
+// ---------------------------------------------------------------------------
+$palette.categorical.default: #0969da #1a7f37 #9a6700 #cf222e #8250df #bf3989 #1b7c83 #57606a #d4a72c #6e7781;
+$palette.categorical.colourblind: #0072b2 #009e73 #e69f00 #d55e00 #cc79a7 #56b4e9 #f0e442 #000000;
+
+$palette.sequential.viridis: #440154 #3b528b #21918c #5ec962 #fde725;
+$palette.sequential.magma: #000004 #3b0f70 #8c2981 #de4968 #fe9f6d #fcfdbf;
+$palette.diverging.balance: #2166ac #67a9cf #f7f7f7 #ef8a62 #b2182b;
+$palette.cyclical.twilight: #e2d9e2 #8b7aa8 #4f4a7a #2a2a4a #4f4a7a #8b7aa8 #e2d9e2;
