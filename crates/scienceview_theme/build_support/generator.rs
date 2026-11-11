@@ -54,9 +54,26 @@ fn sv_emit_colour(token_name: &str, value: &str) -> Result<String, String> {
 }
 
 fn sv_parse_number(token_name: &str, value: &str) -> Result<f64, String> {
-    value
+    let number = value
         .parse::<f64>()
-        .map_err(|_| format!("token `{token_name}`: `{value}` is not a number"))
+        .map_err(|_| format!("token `{token_name}`: `{value}` is not a number"))?;
+    if !number.is_finite() {
+        return Err(format!(
+            "token `{token_name}`: `{value}` is not a finite number"
+        ));
+    }
+    Ok(number)
+}
+
+/// Parses a number that can never be negative: a length, a size or a duration.
+fn sv_parse_non_negative_number(token_name: &str, value: &str) -> Result<f64, String> {
+    let number = sv_parse_number(token_name, value)?;
+    if number < 0.0 {
+        return Err(format!(
+            "token `{token_name}`: `{value}` must not be negative"
+        ));
+    }
+    Ok(number)
 }
 
 fn sv_emit_f64(value: f64) -> String {
@@ -76,15 +93,15 @@ fn sv_generate_colour_tokens(source: &SVThemeSource) -> Result<String, String> {
 
 fn sv_generate_typography_tokens(source: &SVThemeSource) -> Result<String, String> {
     let family = sv_value(source, "typography.family");
-    let body = sv_emit_f64(sv_parse_number(
+    let body = sv_emit_f64(sv_parse_non_negative_number(
         "typography.size.body",
         sv_value(source, "typography.size.body"),
     )?);
-    let title = sv_emit_f64(sv_parse_number(
+    let title = sv_emit_f64(sv_parse_non_negative_number(
         "typography.size.title",
         sv_value(source, "typography.size.title"),
     )?);
-    let label = sv_emit_f64(sv_parse_number(
+    let label = sv_emit_f64(sv_parse_non_negative_number(
         "typography.size.label",
         sv_value(source, "typography.size.label"),
     )?);
@@ -96,7 +113,7 @@ fn sv_generate_typography_tokens(source: &SVThemeSource) -> Result<String, Strin
         "typography.weight.bold",
         sv_value(source, "typography.weight.bold"),
     )?;
-    let line_height = sv_emit_f64(sv_parse_number(
+    let line_height = sv_emit_f64(sv_parse_non_negative_number(
         "typography.line_height",
         sv_value(source, "typography.line_height"),
     )?);
@@ -106,16 +123,25 @@ fn sv_generate_typography_tokens(source: &SVThemeSource) -> Result<String, Strin
 }
 
 fn sv_parse_weight(token_name: &str, value: &str) -> Result<u16, String> {
-    value
+    let weight = value
         .parse::<u16>()
-        .map_err(|_| format!("token `{token_name}`: `{value}` is not a font weight"))
+        .map_err(|_| format!("token `{token_name}`: `{value}` is not a font weight"))?;
+    if !(1..=1000).contains(&weight) {
+        return Err(format!(
+            "token `{token_name}`: `{value}` is outside the 1..=1000 font-weight range"
+        ));
+    }
+    Ok(weight)
 }
 
 fn sv_generate_spacing_tokens(source: &SVThemeSource) -> Result<String, String> {
     let mut output = String::from("            spacing: crate::tokens::SVSpacingTokens {\n");
     for token_name in schema::SV_SPACING_TOKEN_NAMES {
         let field_name = token_name.trim_start_matches("spacing.");
-        let value = sv_emit_f64(sv_parse_number(token_name, sv_value(source, token_name))?);
+        let value = sv_emit_f64(sv_parse_non_negative_number(
+            token_name,
+            sv_value(source, token_name),
+        )?);
         output.push_str(&format!("                {field_name}: {value},\n"));
     }
     output.push_str("            },\n");
@@ -126,7 +152,10 @@ fn sv_generate_radius_tokens(source: &SVThemeSource) -> Result<String, String> {
     let mut output = String::from("            radius: crate::tokens::SVRadiusTokens {\n");
     for token_name in schema::SV_RADIUS_TOKEN_NAMES {
         let field_name = token_name.trim_start_matches("radius.");
-        let value = sv_emit_f64(sv_parse_number(token_name, sv_value(source, token_name))?);
+        let value = sv_emit_f64(sv_parse_non_negative_number(
+            token_name,
+            sv_value(source, token_name),
+        )?);
         output.push_str(&format!("                {field_name}: {value},\n"));
     }
     output.push_str("            },\n");
@@ -153,7 +182,7 @@ fn sv_emit_shadow(token_name: &str, value: &str) -> Result<String, String> {
     }
     let offset_x = sv_emit_f64(sv_parse_number(token_name, parts[0])?);
     let offset_y = sv_emit_f64(sv_parse_number(token_name, parts[1])?);
-    let blur_radius = sv_emit_f64(sv_parse_number(token_name, parts[2])?);
+    let blur_radius = sv_emit_f64(sv_parse_non_negative_number(token_name, parts[2])?);
     let colour = sv_emit_colour(token_name, parts[3])?;
     Ok(format!(
         "crate::tokens::SVShadow::new({offset_x}, {offset_y}, {blur_radius}, {colour})"
@@ -161,15 +190,15 @@ fn sv_emit_shadow(token_name: &str, value: &str) -> Result<String, String> {
 }
 
 fn sv_generate_motion_tokens(source: &SVThemeSource) -> Result<String, String> {
-    let fast = sv_emit_f64(sv_parse_number(
+    let fast = sv_emit_f64(sv_parse_non_negative_number(
         "motion.duration.fast",
         sv_value(source, "motion.duration.fast"),
     )?);
-    let normal = sv_emit_f64(sv_parse_number(
+    let normal = sv_emit_f64(sv_parse_non_negative_number(
         "motion.duration.normal",
         sv_value(source, "motion.duration.normal"),
     )?);
-    let slow = sv_emit_f64(sv_parse_number(
+    let slow = sv_emit_f64(sv_parse_non_negative_number(
         "motion.duration.slow",
         sv_value(source, "motion.duration.slow"),
     )?);
@@ -270,12 +299,12 @@ fn sv_generate_palettes(source: &SVThemeSource) -> Result<String, String> {
         .into_iter()
         .find_map(|(prefix, kind)| token_name.strip_prefix(prefix).map(|name| (kind, name)));
         if let Some((kind, palette_name)) = kind {
-            let colours = sv_emit_colour_list(token_name, &declaration.token_value)?;
-            if colours.split(',').count() < 2 {
+            if declaration.token_value.split_whitespace().count() < 2 {
                 return Err(format!(
                     "token `{token_name}`: a colour map needs at least two stops"
                 ));
             }
+            let colours = sv_emit_colour_list(token_name, &declaration.token_value)?;
             continuous.push_str(&format!(
                 "                crate::palettes::SVContinuousPalette::from_validated_stops({palette_name:?}, crate::palettes::SVColourMapKind::{kind}, vec![{colours}]),\n"
             ));

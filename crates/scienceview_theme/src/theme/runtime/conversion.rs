@@ -62,9 +62,26 @@ fn sv_invalid(token_name: &str, value: &str, expected: &str) -> SVThemeError {
 
 fn sv_number(source: &SVThemeSource, token_name: &str) -> Result<f64, SVThemeError> {
     let value = sv_value(source, token_name)?;
-    value
+    let number = value
         .parse::<f64>()
-        .map_err(|_| sv_invalid(token_name, value, "a number"))
+        .map_err(|_| sv_invalid(token_name, value, "a number"))?;
+    if !number.is_finite() {
+        return Err(sv_invalid(token_name, value, "a finite number"));
+    }
+    Ok(number)
+}
+
+/// Parses a number that can never be negative: a length, a size or a duration.
+fn sv_non_negative_number(source: &SVThemeSource, token_name: &str) -> Result<f64, SVThemeError> {
+    let number = sv_number(source, token_name)?;
+    if number < 0.0 {
+        return Err(sv_invalid(
+            token_name,
+            sv_value(source, token_name)?,
+            "a number that is not negative",
+        ));
+    }
+    Ok(number)
 }
 
 fn sv_colour(source: &SVThemeSource, token_name: &str) -> Result<SVColour, SVThemeError> {
@@ -97,41 +114,48 @@ fn sv_colour_tokens(source: &SVThemeSource) -> Result<SVColourTokens, SVThemeErr
 
 fn sv_typography_tokens(source: &SVThemeSource) -> Result<SVTypographyTokens, SVThemeError> {
     let family = sv_value(source, "typography.family")?.to_string();
-    let regular = sv_value(source, "typography.weight.regular")?
-        .parse::<u16>()
-        .map_err(|_| sv_invalid("typography.weight.regular", "weight", "a u16 weight"))?;
-    let bold = sv_value(source, "typography.weight.bold")?
-        .parse::<u16>()
-        .map_err(|_| sv_invalid("typography.weight.bold", "weight", "a u16 weight"))?;
+    let regular = sv_font_weight(source, "typography.weight.regular")?;
+    let bold = sv_font_weight(source, "typography.weight.bold")?;
     Ok(SVTypographyTokens {
         family,
         size: SVFontSizes {
-            body: sv_number(source, "typography.size.body")?,
-            title: sv_number(source, "typography.size.title")?,
-            label: sv_number(source, "typography.size.label")?,
+            body: sv_non_negative_number(source, "typography.size.body")?,
+            title: sv_non_negative_number(source, "typography.size.title")?,
+            label: sv_non_negative_number(source, "typography.size.label")?,
         },
         weight: SVFontWeights { regular, bold },
-        line_height: sv_number(source, "typography.line_height")?,
+        line_height: sv_non_negative_number(source, "typography.line_height")?,
     })
+}
+
+fn sv_font_weight(source: &SVThemeSource, token_name: &str) -> Result<u16, SVThemeError> {
+    let value = sv_value(source, token_name)?;
+    let weight = value
+        .parse::<u16>()
+        .map_err(|_| sv_invalid(token_name, value, "a u16 weight"))?;
+    if !(1..=1000).contains(&weight) {
+        return Err(sv_invalid(token_name, value, "a weight within 1..=1000"));
+    }
+    Ok(weight)
 }
 
 fn sv_spacing_tokens(source: &SVThemeSource) -> Result<SVSpacingTokens, SVThemeError> {
     Ok(SVSpacingTokens {
-        unit: sv_number(source, SV_SPACING_TOKEN_NAMES[0])?,
-        x_small: sv_number(source, SV_SPACING_TOKEN_NAMES[1])?,
-        small: sv_number(source, SV_SPACING_TOKEN_NAMES[2])?,
-        medium: sv_number(source, SV_SPACING_TOKEN_NAMES[3])?,
-        large: sv_number(source, SV_SPACING_TOKEN_NAMES[4])?,
-        x_large: sv_number(source, SV_SPACING_TOKEN_NAMES[5])?,
+        unit: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[0])?,
+        x_small: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[1])?,
+        small: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[2])?,
+        medium: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[3])?,
+        large: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[4])?,
+        x_large: sv_non_negative_number(source, SV_SPACING_TOKEN_NAMES[5])?,
     })
 }
 
 fn sv_radius_tokens(source: &SVThemeSource) -> Result<SVRadiusTokens, SVThemeError> {
     Ok(SVRadiusTokens {
-        none: sv_number(source, SV_RADIUS_TOKEN_NAMES[0])?,
-        small: sv_number(source, SV_RADIUS_TOKEN_NAMES[1])?,
-        medium: sv_number(source, SV_RADIUS_TOKEN_NAMES[2])?,
-        large: sv_number(source, SV_RADIUS_TOKEN_NAMES[3])?,
+        none: sv_non_negative_number(source, SV_RADIUS_TOKEN_NAMES[0])?,
+        small: sv_non_negative_number(source, SV_RADIUS_TOKEN_NAMES[1])?,
+        medium: sv_non_negative_number(source, SV_RADIUS_TOKEN_NAMES[2])?,
+        large: sv_non_negative_number(source, SV_RADIUS_TOKEN_NAMES[3])?,
     })
 }
 
@@ -152,9 +176,19 @@ fn sv_shadow(source: &SVThemeSource, token_name: &str) -> Result<SVShadow, SVThe
         parts[1]
             .parse()
             .map_err(|_| sv_invalid(token_name, value, "numeric shadow offsets"))?,
-        parts[2]
-            .parse()
-            .map_err(|_| sv_invalid(token_name, value, "a numeric blur radius"))?,
+        {
+            let blur_radius = parts[2]
+                .parse::<f64>()
+                .map_err(|_| sv_invalid(token_name, value, "a numeric blur radius"))?;
+            if !blur_radius.is_finite() || blur_radius < 0.0 {
+                return Err(sv_invalid(
+                    token_name,
+                    value,
+                    "a finite, non-negative blur radius",
+                ));
+            }
+            blur_radius
+        },
         SVColour::from_hex(parts[3])
             .map_err(|_| sv_invalid(token_name, value, "a shadow colour"))?,
     ))
@@ -221,9 +255,9 @@ fn sv_easing(source: &SVThemeSource, token_name: &str) -> Result<SVTimingFunctio
 fn sv_motion_tokens(source: &SVThemeSource) -> Result<SVMotionTokens, SVThemeError> {
     Ok(SVMotionTokens {
         durations: SVMotionDurations {
-            fast_milliseconds: sv_number(source, SV_MOTION_TOKEN_NAMES[0])?,
-            normal_milliseconds: sv_number(source, SV_MOTION_TOKEN_NAMES[1])?,
-            slow_milliseconds: sv_number(source, SV_MOTION_TOKEN_NAMES[2])?,
+            fast_milliseconds: sv_non_negative_number(source, SV_MOTION_TOKEN_NAMES[0])?,
+            normal_milliseconds: sv_non_negative_number(source, SV_MOTION_TOKEN_NAMES[1])?,
+            slow_milliseconds: sv_non_negative_number(source, SV_MOTION_TOKEN_NAMES[2])?,
         },
         easings: SVMotionEasings {
             standard: sv_easing(source, SV_MOTION_TOKEN_NAMES[3])?,

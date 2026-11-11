@@ -6,6 +6,9 @@
 
 #[path = "../../build_support/ast.rs"]
 mod ast;
+#[cfg(test)]
+#[path = "../../build_support/generator.rs"]
+mod generator;
 #[path = "../../build_support/parser.rs"]
 mod parser;
 #[path = "../../build_support/schema.rs"]
@@ -18,3 +21,6 @@ pub(crate) use schema::{
     SV_PALETTE_CYCLICAL_PREFIX, SV_PALETTE_DIVERGING_PREFIX, SV_PALETTE_SEQUENTIAL_PREFIX,
     SV_RADIUS_TOKEN_NAMES, SV_SHADOW_TOKEN_NAMES, SV_SPACING_TOKEN_NAMES, sv_required_token_names,
 };
+
+#[cfg(test)]
+mod generator_tests;

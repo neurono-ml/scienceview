@@ -175,3 +175,39 @@ fn a_runtime_theme_can_declare_reduced_motion() {
         Ok(SVTokenValue::Duration(std::time::Duration::ZERO))
     );
 }
+
+#[test]
+fn a_colour_map_with_a_single_stop_is_rejected() {
+    let broken = sv_authored_source_with(
+        "$palette.sequential.magma: #000004 #3b0f70 #8c2981 #de4968 #fe9f6d #fcfdbf;",
+        "$palette.sequential.magma: #000004;",
+    );
+    let error = sv_compile_theme(&broken).expect_err("a one-stop colour map must fail");
+    assert_eq!(
+        error,
+        SVThemeError::EmptyPalette {
+            palette_name: "magma".to_string()
+        }
+    );
+}
+
+#[test]
+fn a_non_finite_number_is_rejected_instead_of_reaching_a_token() {
+    let broken = sv_authored_source_with("$spacing.medium: 16;", "$spacing.medium: NaN;");
+    let error = sv_compile_theme(&broken).expect_err("a non-finite length must fail");
+    assert!(matches!(
+        error,
+        SVThemeError::InvalidValue { ref token_name, .. } if token_name == "spacing.medium"
+    ));
+}
+
+#[test]
+fn a_negative_duration_is_rejected_without_panicking() {
+    let broken =
+        sv_authored_source_with("$motion.duration.fast: 120;", "$motion.duration.fast: -5;");
+    let error = sv_compile_theme(&broken).expect_err("a negative duration must fail");
+    assert!(matches!(
+        error,
+        SVThemeError::InvalidValue { ref token_name, .. } if token_name == "motion.duration.fast"
+    ));
+}
