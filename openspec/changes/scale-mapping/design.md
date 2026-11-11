@@ -36,7 +36,7 @@ The scale exposes a tick derivation hook, but the number of ticks comes from the
   `sv_default_scale_palette` and `sv_default_colour_map` provide the
   dependency-free path; the `from_theme` constructors and the `*_with_theme`
   methods only exist with the feature.
-- Scales expose their own `SVSrgbColour` value instead of re-exporting the
+- Scales expose their own `SVColour` value instead of re-exporting the
   theme's colour type, so the scale model compiles without the feature. The
   theme bridge converts theme colours at the boundary.
 - The numeric column view of the data boundary carries `f64` values only, so
