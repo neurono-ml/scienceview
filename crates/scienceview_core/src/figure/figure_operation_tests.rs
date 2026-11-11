@@ -8,6 +8,7 @@ use super::SVFigure;
 use super::SVFigureBuilder;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::test_support::SVCallRecorder;
+use crate::sv_backend::test_support::sv_registry_with_capable_recording_backend;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
 use crate::sv_error::SVError;
 use std::sync::Arc;
@@ -42,7 +43,14 @@ fn render_dispatches_once_to_the_configured_backend() {
 fn every_operation_dispatches_separately() {
     let values = [1.0, 2.0];
     let recorder = SVCallRecorder::shared();
-    let figure = built_figure(&values, SVBackendKind::Svg, &recorder);
+    let figure = SVFigureBuilder::new()
+        .data_source(SVDataBinding::dense(&values))
+        .backend(SVBackendKind::Svg)
+        .backend_registry(Arc::new(sv_registry_with_capable_recording_backend(
+            &recorder,
+        )))
+        .build()
+        .expect("the configuration is complete");
 
     figure.render().expect("render");
     figure.update(1).expect("update");

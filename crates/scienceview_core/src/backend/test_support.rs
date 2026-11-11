@@ -3,8 +3,15 @@
 //! A recording backend proves *when* an operation reached a backend, which is
 //! the observable difference between dispatching at build time and dispatching
 //! per operation.
+//!
+//! Two doubles exist on purpose. [`SVRecordingBackend`] is the default one: it
+//! records `render` and refuses every other operation, honouring the
+//! export-only row it declares. [`SVCapableRecordingBackend`] declares and
+//! implements every capability, so a test that walks all four operations can
+//! do so without lying about what a backend supports.
 
 use super::SVBackendCapabilities;
+use super::SVBackendCapability;
 use super::SVBackendKind;
 use super::SVBackendRegistry;
 use super::SVRenderBackend;
@@ -82,6 +89,10 @@ impl SVCallRecorder {
 }
 
 /// A backend that renders nothing but records being called.
+///
+/// It declares the export-only row of the matrix and honours it: only `render`
+/// is implemented, so `update`, `save` and `show` report the missing
+/// capability instead of pretending to succeed.
 pub struct SVRecordingBackend {
     recorder: Arc<SVCallRecorder>,
 }
@@ -100,6 +111,60 @@ impl SVRenderBackend for SVRecordingBackend {
 
     fn capabilities(&self) -> SVBackendCapabilities {
         SVBackendCapabilities::export_only()
+    }
+
+    fn render(&self, request: &SVRenderRequest<'_>) -> Result<SVRenderOutput, SVError> {
+        self.recorder.record_render();
+        Ok(SVRenderOutput {
+            backend_kind: request.backend_kind,
+            bytes: Vec::new(),
+        })
+    }
+
+    fn update(&self, _request: &SVUpdateRequest<'_>) -> Result<SVRenderOutput, SVError> {
+        Err(SVError::UnsupportedBackendCapability {
+            backend_kind: self.kind(),
+            capability: SVBackendCapability::InPlaceUpdate,
+        })
+    }
+
+    fn save(&self, _request: &SVSaveRequest<'_>) -> Result<(), SVError> {
+        Err(SVError::UnsupportedBackendCapability {
+            backend_kind: self.kind(),
+            capability: SVBackendCapability::Export,
+        })
+    }
+
+    fn show(&self, _request: &SVShowRequest<'_>) -> Result<(), SVError> {
+        Err(SVError::UnsupportedBackendCapability {
+            backend_kind: self.kind(),
+            capability: SVBackendCapability::Presentation,
+        })
+    }
+}
+
+/// A backend that declares every capability and records every operation.
+///
+/// Used where the test needs all four operations to succeed while still proving
+/// that each one dispatches separately.
+pub struct SVCapableRecordingBackend {
+    recorder: Arc<SVCallRecorder>,
+}
+
+impl SVCapableRecordingBackend {
+    /// Wraps a recorder in a fully capable backend that answers as `svg`.
+    pub fn new(recorder: Arc<SVCallRecorder>) -> Self {
+        Self { recorder }
+    }
+}
+
+impl SVRenderBackend for SVCapableRecordingBackend {
+    fn kind(&self) -> SVBackendKind {
+        SVBackendKind::Svg
+    }
+
+    fn capabilities(&self) -> SVBackendCapabilities {
+        SVBackendCapabilities::new(true, true, true, true, true, true)
     }
 
     fn render(&self, request: &SVRenderRequest<'_>) -> Result<SVRenderOutput, SVError> {
@@ -132,12 +197,24 @@ impl SVRenderBackend for SVRecordingBackend {
 /// A provider that knows exactly one backend (`Svg`) and counts its lookups.
 pub struct SVRecordingProvider {
     recorder: Arc<SVCallRecorder>,
+    capable: bool,
 }
 
 impl SVRecordingProvider {
-    /// Wraps a recorder in a provider.
+    /// Wraps a recorder in a provider of the export-only double.
     pub fn new(recorder: Arc<SVCallRecorder>) -> Self {
-        Self { recorder }
+        Self {
+            recorder,
+            capable: false,
+        }
+    }
+
+    /// Wraps a recorder in a provider of the fully capable double.
+    pub fn capable(recorder: Arc<SVCallRecorder>) -> Self {
+        Self {
+            recorder,
+            capable: true,
+        }
     }
 }
 
@@ -145,15 +222,30 @@ impl SVRenderBackendProvider for SVRecordingProvider {
     fn provide(&self, backend_kind: SVBackendKind) -> Option<Arc<dyn SVRenderBackend>> {
         self.recorder.record_provide();
         (backend_kind == SVBackendKind::Svg).then(|| {
-            Arc::new(SVRecordingBackend::new(Arc::clone(&self.recorder)))
-                as Arc<dyn SVRenderBackend>
+            let backend: Arc<dyn SVRenderBackend> = if self.capable {
+                Arc::new(SVCapableRecordingBackend::new(Arc::clone(&self.recorder)))
+            } else {
+                Arc::new(SVRecordingBackend::new(Arc::clone(&self.recorder)))
+            };
+            backend
         })
     }
 }
 
-/// A registry serving the recording backend, isolated from the process-wide one.
+/// A registry serving the export-only recording backend, isolated from the
+/// process-wide one.
 pub fn sv_registry_with_recording_backend(recorder: &Arc<SVCallRecorder>) -> SVBackendRegistry {
     let registry = SVBackendRegistry::new();
     registry.register(Arc::new(SVRecordingProvider::new(Arc::clone(recorder))));
+    registry
+}
+
+/// A registry serving the fully capable recording backend, isolated from the
+/// process-wide one.
+pub fn sv_registry_with_capable_recording_backend(
+    recorder: &Arc<SVCallRecorder>,
+) -> SVBackendRegistry {
+    let registry = SVBackendRegistry::new();
+    registry.register(Arc::new(SVRecordingProvider::capable(Arc::clone(recorder))));
     registry
 }

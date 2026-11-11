@@ -83,6 +83,64 @@ fn a_provider_that_answers_with_the_wrong_kind_is_rejected() {
 }
 
 #[test]
+fn an_export_only_recording_backend_refuses_update_save_and_show() {
+    let recorder = SVCallRecorder::shared();
+    let backend = SVRecordingBackend::new(Arc::clone(&recorder));
+
+    let update_error = backend
+        .update(&SVUpdateRequest {
+            backend_kind: SVBackendKind::Svg,
+            execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
+            representation: crate::sv_figure::SVDataRepresentation::Dense,
+            values: &[],
+            appended_points: 0,
+        })
+        .expect_err("an export-only double cannot update in place");
+    let save_error = backend
+        .save(&crate::sv_backend::SVSaveRequest {
+            backend_kind: SVBackendKind::Svg,
+            execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
+            representation: crate::sv_figure::SVDataRepresentation::Dense,
+            values: &[],
+            destination: std::path::Path::new("figure.svg"),
+        })
+        .expect_err("an export-only double can export, so `save` is not universally refused");
+    let show_error = backend
+        .show(&crate::sv_backend::SVShowRequest {
+            backend_kind: SVBackendKind::Svg,
+            execution_mode: crate::sv_figure::SVExecutionMode::Automatic,
+            representation: crate::sv_figure::SVDataRepresentation::Dense,
+            values: &[],
+        })
+        .expect_err("an export-only double cannot present the figure");
+
+    assert_eq!(
+        update_error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Svg,
+            capability: super::SVBackendCapability::InPlaceUpdate,
+        }
+    );
+    assert_eq!(
+        show_error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Svg,
+            capability: super::SVBackendCapability::Presentation,
+        }
+    );
+    assert_eq!(
+        save_error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Svg,
+            capability: super::SVBackendCapability::Export,
+        }
+    );
+    assert_eq!(recorder.update_calls(), 0);
+    assert_eq!(recorder.save_calls(), 0);
+    assert_eq!(recorder.show_calls(), 0);
+}
+
+#[test]
 fn a_backend_that_does_not_override_an_operation_reports_the_missing_capability() {
     struct SVRenderOnlyBackend;
 
