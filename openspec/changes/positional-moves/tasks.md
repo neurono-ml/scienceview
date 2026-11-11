@@ -2,8 +2,8 @@
 
 ## Stack and dodge
 
-- [ ] Write failing tests for the stacking modes and the dodge width.
-- [ ] Implement stack and dodge, including the window semantics.
+- [x] Write failing tests for the stacking modes and the dodge width.
+- [x] Implement stack and dodge, including the window semantics.
 
 ## Jitter and shift
 
