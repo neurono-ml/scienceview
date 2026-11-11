@@ -104,6 +104,32 @@ fn changing_the_colour_map_changes_the_bar() {
 }
 
 #[test]
+fn a_vertical_bar_draws_more_than_one_tick() {
+    let bar = SVColourBar::builder(sv_default_scale()).build();
+    let style = SVDecorationStyle::built_in();
+    let measurement = bar
+        .measure(
+            SVColourBarSpace::new(300.0).expect("positive length"),
+            &style,
+        )
+        .expect("the bar is measurable");
+
+    assert!(
+        measurement.number_of_ticks() > 1,
+        "the default vertical bar collapsed to {} tick(s)",
+        measurement.number_of_ticks()
+    );
+    let positions: Vec<f64> = measurement
+        .ticks()
+        .iter()
+        .map(|measured| measured.position())
+        .collect();
+    for pair in positions.windows(2) {
+        assert!(pair[0] < pair[1]);
+    }
+}
+
+#[test]
 fn a_degenerate_domain_draws_a_readable_bar() {
     let scale = SVContinuousColourScaleBuilder::new()
         .domain(7.0, 7.0)

@@ -85,6 +85,41 @@ fn degenerate_domain_draws_a_single_tick() {
 }
 
 #[test]
+fn a_reversed_range_keeps_every_readable_tick() {
+    let style = SVDecorationStyle::built_in();
+    let scale = SVScaleBuilder::new(SVScaleKind::Continuous)
+        .domain(0.0, 100.0)
+        .range(400.0, 0.0)
+        .build()
+        .expect("the configuration is complete");
+    let axis = SVAxis::builder(SVAxisSide::Left).build();
+    let measurement = axis
+        .measure(
+            &scale,
+            SVAxisSpace::new(400.0).expect("positive extent"),
+            &style,
+        )
+        .expect("the axis is measurable");
+
+    assert!(
+        measurement.number_of_ticks() > 1,
+        "a reversed range collapsed to {} tick(s)",
+        measurement.number_of_ticks()
+    );
+    let positions: Vec<f64> = measurement
+        .ticks()
+        .iter()
+        .map(|measured| measured.position())
+        .collect();
+    for pair in positions.windows(2) {
+        assert!(
+            pair[0] < pair[1],
+            "the measured ticks are not in ascending display order"
+        );
+    }
+}
+
+#[test]
 fn nominal_axis_ticks_are_the_category_labels() {
     let style = SVDecorationStyle::built_in();
     let categories = ["alpha", "beta", "gamma", "delta"];

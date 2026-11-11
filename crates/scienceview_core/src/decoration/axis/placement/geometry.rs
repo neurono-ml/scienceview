@@ -1,6 +1,8 @@
 //! The geometry of one placed axis: band, line, ticks, labels and title.
 
-use super::{SVAxisMeasurement, SVAxisSide, SVAxisTickPlacement};
+use super::super::measurement::SVAxisMeasurement;
+use super::super::side::SVAxisSide;
+use super::placement_definition::SVAxisTickPlacement;
 use crate::sv_decoration::{
     SVDecorationPrimitive, SVDecorationStyle, SVPoint, SVStroke, SVTextAnchor,
 };

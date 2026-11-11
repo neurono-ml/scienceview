@@ -2,8 +2,11 @@
 //!
 //! The tick space decides how many ticks the scale derives; this pass decides
 //! which of those labels fit beside each other. It is deliberately greedy and
-//! ordered by position, so the same data and the same viewport always keep the
-//! same ticks.
+//! ordered by display position, so the same data and the same viewport always
+//! keep the same ticks — whether the scale range runs up or down. A reversed
+//! range (the usual orientation of a vertical axis, and of a vertical colour
+//! bar) yields descending positions, so the ticks are sorted before the
+//! collision pass instead of assuming the scale's value order.
 
 use super::measurement::SVAxisTickMeasurement;
 use crate::sv_decoration::{SVDecorationStyle, SVTextBox};
@@ -16,6 +19,9 @@ pub(crate) fn sv_measure_axis_ticks(
     style: &SVDecorationStyle,
     padding: f64,
 ) -> Vec<SVAxisTickMeasurement> {
+    let mut ticks = ticks;
+    ticks.sort_by(|left, right| left.position().total_cmp(&right.position()));
+
     let mut measured: Vec<SVAxisTickMeasurement> = Vec::new();
     let mut previous_end = f64::NEG_INFINITY;
 
