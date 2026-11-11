@@ -129,11 +129,24 @@
 //! through linear, logarithmic, symmetric-logarithmic or square-root functions,
 //! derive axis ticks from the space the layout engine grants, and resolve their
 //! colours from the same compiled theme tokens.
+//!
+//! ## Marks
+//!
+//! [`sv_mark`] is the closed vocabulary every recipe draws with: dot, line,
+//! area, bar, ribbon, text, image, wedge and error bar. A mark owns geometry and
+//! paint, never data. It consumes the closed [`sv_data`] representation, places
+//! its values through [`sv_scale`] inside the rectangle [`sv_layout`] solved,
+//! and returns backend-agnostic primitives a backend serializes without
+//! re-deriving a position. The interpolable-property table the transition layer
+//! consumes is exported from the same module, next to the properties it
+//! describes.
 
 #[path = "data/mod.rs"]
 pub mod sv_data;
 #[path = "layout/mod.rs"]
 pub mod sv_layout;
+#[path = "mark/mod.rs"]
+pub mod sv_mark;
 #[path = "scale/mod.rs"]
 pub mod sv_scale;
 #[path = "window/mod.rs"]
