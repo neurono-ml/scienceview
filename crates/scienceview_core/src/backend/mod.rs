@@ -6,8 +6,6 @@ mod backend_kind_tests;
 mod capability;
 mod dispatch;
 #[cfg(test)]
-pub(crate) mod test_support;
-#[cfg(test)]
 mod dispatch_tests;
 mod kind;
 mod matrix;
@@ -15,6 +13,8 @@ mod matrix;
 mod matrix_tests;
 mod registry;
 mod render_backend;
+#[cfg(test)]
+pub(crate) mod test_support;
 
 pub use capability::SVBackendCapability;
 pub use dispatch::sv_resolve_render_backend;

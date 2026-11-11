@@ -46,7 +46,9 @@ fn every_operation_dispatches_separately() {
 
     figure.render().expect("render");
     figure.update(1).expect("update");
-    figure.save(std::path::Path::new("figure.svg")).expect("save");
+    figure
+        .save(std::path::Path::new("figure.svg"))
+        .expect("save");
     figure.show().expect("show");
 
     assert_eq!(recorder.provider_lookups(), 4);
