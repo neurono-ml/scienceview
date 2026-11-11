@@ -8,3 +8,6 @@ description = "self-contained SVG rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_svg"
+
+[lints]
+workspace = true

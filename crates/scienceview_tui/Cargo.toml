@@ -8,3 +8,6 @@ description = "terminal (TUI) rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_tui"
+
+[lints]
+workspace = true

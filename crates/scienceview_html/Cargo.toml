@@ -8,3 +8,6 @@ description = "self-contained HTML rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_html"
+
+[lints]
+workspace = true

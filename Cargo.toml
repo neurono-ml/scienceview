@@ -22,6 +22,12 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/neurono-ml/scienceview"
 homepage = "https://neurono-ml.github.io/scienceview"
 
+[workspace.lints.rust]
+warnings = "deny"
+
+[workspace.lints.clippy]
+all = "deny"
+
 [package]
 name = "scienceview"
 version.workspace = true
@@ -85,3 +91,6 @@ scienceview_vue = { path = "crates/scienceview_vue", version = "0.1.0", optional
 scienceview_angular = { path = "crates/scienceview_angular", version = "0.1.0", optional = true }
 scienceview_tauri = { path = "crates/scienceview_tauri", version = "0.1.0", optional = true }
 scienceview_dioxus = { path = "crates/scienceview_dioxus", version = "0.1.0", optional = true }
+
+[lints]
+workspace = true

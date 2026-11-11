@@ -8,3 +8,6 @@ description = "Dioxus component rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_dioxus"
+
+[lints]
+workspace = true

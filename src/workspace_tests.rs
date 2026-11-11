@@ -69,3 +69,28 @@ fn toolchain_is_pinned_to_the_declared_minimum() {
         "rust-toolchain.toml must install rustfmt and clippy, found:\n{toolchain}"
     );
 }
+
+#[test]
+fn lint_configuration_denies_warnings() {
+    let manifest_directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_path = manifest_directory.join("Cargo.toml");
+    let manifest = std::fs::read_to_string(&manifest_path)
+        .unwrap_or_else(|error| panic!("cannot read {}: {error}", manifest_path.display()));
+
+    assert!(
+        manifest.contains("[workspace.lints.rust]"),
+        "the workspace must configure rust lints"
+    );
+    assert!(
+        manifest.contains("warnings = \"deny\""),
+        "rust warnings must be errors"
+    );
+    assert!(
+        manifest.contains("[workspace.lints.clippy]"),
+        "the workspace must configure clippy lints"
+    );
+    assert!(
+        manifest.contains("all = \"deny\""),
+        "every clippy lint group must be an error"
+    );
+}

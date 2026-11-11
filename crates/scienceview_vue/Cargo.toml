@@ -8,3 +8,6 @@ description = "Vue.js component rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_vue"
+
+[lints]
+workspace = true

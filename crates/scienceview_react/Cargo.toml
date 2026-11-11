@@ -8,3 +8,6 @@ description = "React component rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_react"
+
+[lints]
+workspace = true

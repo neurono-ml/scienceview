@@ -8,3 +8,6 @@ description = "Angular component rendering backend for scienceview."
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_angular"
+
+[lints]
+workspace = true
