@@ -17,6 +17,6 @@
 
 ## Ticks
 
-- [ ] Write failing tests for the tick derivation hook.
-- [ ] Implement the tick derivation interface used by the layout engine.
+- [x] Write failing tests for the tick derivation hook.
+- [x] Implement the tick derivation interface used by the layout engine.
 
