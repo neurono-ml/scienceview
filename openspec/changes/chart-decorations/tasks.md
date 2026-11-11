@@ -8,7 +8,7 @@
 ## Legend
 
 - [x] Write failing tests for entry lifecycle and hidden series.
-- [ ] Implement the legend model.
+- [x] Implement the legend model.
 
 ## Colour bar
 
