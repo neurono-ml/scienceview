@@ -4,12 +4,11 @@ use crate::sv_error::SVError;
 #[cfg(feature = "theme")]
 use crate::sv_scale::SVScalePalette;
 use crate::sv_scale::{
-    SVColourMap, SVContinuousColourScaleBuilder, SVScaleTransform, SVSrgbColour,
-    sv_default_colour_map,
+    SVColour, SVColourMap, SVContinuousColourScaleBuilder, SVScaleTransform, sv_default_colour_map,
 };
 
-const BLACK: SVSrgbColour = SVSrgbColour::new(0, 0, 0, 255);
-const WHITE: SVSrgbColour = SVSrgbColour::new(255, 255, 255, 255);
+const BLACK: SVColour = SVColour::new(0, 0, 0, 255);
+const WHITE: SVColour = SVColour::new(255, 255, 255, 255);
 
 fn grey_scale_map() -> SVColourMap {
     SVColourMap::from_stops("greys", vec![BLACK, WHITE]).expect("two stops are a valid colour map")
@@ -21,7 +20,7 @@ fn a_colour_map_interpolates_its_stops() {
 
     assert_eq!(map.colour_at(0.0), BLACK);
     assert_eq!(map.colour_at(1.0), WHITE);
-    assert_eq!(map.colour_at(0.5), SVSrgbColour::new(128, 128, 128, 255));
+    assert_eq!(map.colour_at(0.5), SVColour::new(128, 128, 128, 255));
     assert_eq!(
         map.colour_at(-1.0),
         BLACK,
@@ -61,7 +60,7 @@ fn a_continuous_colour_scale_interpolates_across_its_domain() {
 
     assert_eq!(scale.colour(0.0), Ok(BLACK));
     assert_eq!(scale.colour(10.0), Ok(WHITE));
-    assert_eq!(scale.colour(5.0), Ok(SVSrgbColour::new(128, 128, 128, 255)));
+    assert_eq!(scale.colour(5.0), Ok(SVColour::new(128, 128, 128, 255)));
 }
 
 #[test]
@@ -76,7 +75,7 @@ fn a_continuous_colour_scale_respects_its_transform() {
 
     assert_eq!(
         scale.colour(10.0),
-        Ok(SVSrgbColour::new(128, 128, 128, 255)),
+        Ok(SVColour::new(128, 128, 128, 255)),
         "one decade of two maps to the middle of the colour map"
     );
 }

@@ -1,6 +1,6 @@
 //! A continuous scale whose range is a colour map instead of a position.
 
-use super::{SVColourMap, SVSrgbColour};
+use super::{SVColour, SVColourMap};
 use crate::sv_error::SVError;
 use crate::sv_scale::{SVContinuousScale, SVDomain, SVScaleTransform};
 
@@ -60,7 +60,7 @@ impl SVContinuousColourScale {
     ///
     /// Returns [`SVError::InvalidConfiguration`] when the value has no
     /// fraction.
-    pub fn colour(&self, value: f64) -> Result<SVSrgbColour, SVError> {
+    pub fn colour(&self, value: f64) -> Result<SVColour, SVError> {
         Ok(self.colour_map.colour_at(self.fraction(value)?))
     }
 
@@ -75,7 +75,7 @@ impl SVContinuousColourScale {
         &self,
         value: f64,
         theme: &scienceview_theme::SVTheme,
-    ) -> Result<SVSrgbColour, SVError> {
+    ) -> Result<SVColour, SVError> {
         let fraction = self.fraction(value)?;
         self.colour_map.colour_at_with_theme(fraction, theme)
     }

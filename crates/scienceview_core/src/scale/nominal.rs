@@ -1,6 +1,6 @@
 //! A nominal scale: category labels placed on display slots.
 
-use super::{SVDomain, SVDomainSource, SVScaleKind, SVScalePalette, SVScaleRange, SVSrgbColour};
+use super::{SVColour, SVDomain, SVDomainSource, SVScaleKind, SVScalePalette, SVScaleRange};
 use crate::sv_error::SVError;
 
 /// The order in which a nominal scale displays its categories.
@@ -146,7 +146,7 @@ impl<'a> SVNominalScale<'a> {
     /// # Errors
     ///
     /// Returns [`SVError::InvalidConfiguration`] when the category is unknown.
-    pub fn colour(&self, category: &str) -> Result<SVSrgbColour, SVError> {
+    pub fn colour(&self, category: &str) -> Result<SVColour, SVError> {
         Ok(self.palette.colour_at_index(self.category_index(category)?))
     }
 
@@ -161,7 +161,7 @@ impl<'a> SVNominalScale<'a> {
         &self,
         category: &str,
         theme: &scienceview_theme::SVTheme,
-    ) -> Result<SVSrgbColour, SVError> {
+    ) -> Result<SVColour, SVError> {
         let index = self.category_index(category)?;
         self.palette.colour_at_index_with_theme(index, theme)
     }

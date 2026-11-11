@@ -2,18 +2,18 @@
 
 use crate::sv_error::SVError;
 use crate::sv_scale::{
-    SVCategoryOrder, SVScaleBuilder, SVScaleKind, SVScalePalette, SVSrgbColour,
+    SVCategoryOrder, SVColour, SVScaleBuilder, SVScaleKind, SVScalePalette,
     sv_default_scale_palette,
 };
 
-const BLACK: SVSrgbColour = SVSrgbColour::new(0, 0, 0, 255);
-const WHITE: SVSrgbColour = SVSrgbColour::new(255, 255, 255, 255);
+const BLACK: SVColour = SVColour::new(0, 0, 0, 255);
+const WHITE: SVColour = SVColour::new(255, 255, 255, 255);
 
 #[test]
 fn a_colour_interpolates_between_its_two_channels() {
     assert_eq!(
         BLACK.interpolate(WHITE, 0.5),
-        SVSrgbColour::new(128, 128, 128, 255)
+        SVColour::new(128, 128, 128, 255)
     );
     assert_eq!(BLACK.interpolate(WHITE, 0.0), BLACK);
     assert_eq!(BLACK.interpolate(WHITE, 1.0), WHITE);

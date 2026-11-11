@@ -6,14 +6,14 @@
 
 /// One straight (non-premultiplied) colour with four 8-bit channels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SVSrgbColour {
+pub struct SVColour {
     red: u8,
     green: u8,
     blue: u8,
     alpha: u8,
 }
 
-impl SVSrgbColour {
+impl SVColour {
     /// Builds a colour from its four channels.
     pub const fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
         Self {

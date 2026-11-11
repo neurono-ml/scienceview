@@ -55,8 +55,8 @@ pub use boolean::SVBooleanScale;
 pub use builder::SVScaleBuilder;
 pub(crate) use builder::sv_build_continuous_scale;
 pub use colour::{
-    SVColourMap, SVContinuousColourScale, SVContinuousColourScaleBuilder, SVScalePalette,
-    SVSrgbColour, sv_default_colour_map, sv_default_scale_palette,
+    SVColour, SVColourMap, SVContinuousColourScale, SVContinuousColourScaleBuilder, SVScalePalette,
+    sv_default_colour_map, sv_default_scale_palette,
 };
 pub use continuous::SVContinuousScale;
 pub use domain::{SVDomain, SVDomainSource, sv_nice_domain};

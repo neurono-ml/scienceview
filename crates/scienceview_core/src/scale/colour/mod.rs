@@ -12,18 +12,18 @@
 //! so a theme recompilation restyles every themed encoding on the next call.
 
 mod colour_map;
+mod colour_value;
 mod continuous_colour_scale;
 mod continuous_colour_scale_builder;
 mod palette;
-mod srgb_colour;
 #[cfg(feature = "theme")]
 mod theme_bridge;
 
 pub use colour_map::{SVColourMap, sv_default_colour_map};
+pub use colour_value::SVColour;
 pub use continuous_colour_scale::SVContinuousColourScale;
 pub use continuous_colour_scale_builder::SVContinuousColourScaleBuilder;
 pub use palette::{SVScalePalette, sv_default_scale_palette};
-pub use srgb_colour::SVSrgbColour;
 
 #[cfg(feature = "theme")]
-pub(crate) use theme_bridge::sv_srgb_colour_from_theme;
+pub(crate) use theme_bridge::sv_colour_from_theme;

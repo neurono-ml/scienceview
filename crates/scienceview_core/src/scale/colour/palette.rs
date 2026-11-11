@@ -1,6 +1,6 @@
 //! The categorical palette a nominal scale assigns one entry per category.
 
-use super::SVSrgbColour;
+use super::SVColour;
 use crate::sv_error::SVError;
 
 /// An ordered list of colours assigned one per category.
@@ -11,7 +11,7 @@ use crate::sv_error::SVError;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SVScalePalette {
     name: String,
-    colours: Vec<SVSrgbColour>,
+    colours: Vec<SVColour>,
     theme_token: Option<String>,
 }
 
@@ -21,10 +21,7 @@ impl SVScalePalette {
     /// # Errors
     ///
     /// Returns [`SVError::InvalidConfiguration`] when the list is empty.
-    pub fn from_colours(
-        name: impl Into<String>,
-        colours: Vec<SVSrgbColour>,
-    ) -> Result<Self, SVError> {
+    pub fn from_colours(name: impl Into<String>, colours: Vec<SVColour>) -> Result<Self, SVError> {
         if colours.is_empty() {
             return Err(SVError::InvalidConfiguration {
                 message: "a categorical palette needs at least one colour".to_string(),
@@ -44,7 +41,7 @@ impl SVScalePalette {
     }
 
     /// Returns the ordered entries.
-    pub fn colours(&self) -> &[SVSrgbColour] {
+    pub fn colours(&self) -> &[SVColour] {
         &self.colours
     }
 
@@ -55,16 +52,16 @@ impl SVScalePalette {
 
     /// Returns the entry for an assignment index, cycling when the palette is
     /// shorter than the number of categories.
-    pub fn colour_at_index(&self, index: usize) -> SVSrgbColour {
+    pub fn colour_at_index(&self, index: usize) -> SVColour {
         if self.colours.is_empty() {
-            return SVSrgbColour::new(0, 0, 0, u8::MAX);
+            return SVColour::new(0, 0, 0, u8::MAX);
         }
         self.colours[index % self.colours.len()]
     }
 
     /// Builds a palette from stops a theme compiler already validated.
     #[cfg(feature = "theme")]
-    pub(crate) fn sv_from_theme_palette(token: &str, colours: Vec<SVSrgbColour>) -> Self {
+    pub(crate) fn sv_from_theme_palette(token: &str, colours: Vec<SVColour>) -> Self {
         Self {
             name: token.to_string(),
             colours,
@@ -79,17 +76,17 @@ impl SVScalePalette {
 /// `theme` feature produces the same colours as one with it while importing no
 /// stylesheet compiler.
 pub fn sv_default_scale_palette() -> SVScalePalette {
-    const DEFAULT_COLOURS: [SVSrgbColour; 10] = [
-        SVSrgbColour::new(9, 105, 218, 255),
-        SVSrgbColour::new(26, 127, 55, 255),
-        SVSrgbColour::new(154, 103, 0, 255),
-        SVSrgbColour::new(207, 34, 46, 255),
-        SVSrgbColour::new(130, 80, 223, 255),
-        SVSrgbColour::new(191, 57, 137, 255),
-        SVSrgbColour::new(27, 124, 131, 255),
-        SVSrgbColour::new(87, 96, 106, 255),
-        SVSrgbColour::new(212, 167, 44, 255),
-        SVSrgbColour::new(110, 119, 129, 255),
+    const DEFAULT_COLOURS: [SVColour; 10] = [
+        SVColour::new(9, 105, 218, 255),
+        SVColour::new(26, 127, 55, 255),
+        SVColour::new(154, 103, 0, 255),
+        SVColour::new(207, 34, 46, 255),
+        SVColour::new(130, 80, 223, 255),
+        SVColour::new(191, 57, 137, 255),
+        SVColour::new(27, 124, 131, 255),
+        SVColour::new(87, 96, 106, 255),
+        SVColour::new(212, 167, 44, 255),
+        SVColour::new(110, 119, 129, 255),
     ];
 
     SVScalePalette {
@@ -120,7 +117,7 @@ impl SVScalePalette {
             .colours()
             .iter()
             .copied()
-            .map(super::sv_srgb_colour_from_theme)
+            .map(super::sv_colour_from_theme)
             .collect();
 
         Ok(Self::sv_from_theme_palette(token, colours))
@@ -138,7 +135,7 @@ impl SVScalePalette {
         &self,
         index: usize,
         theme: &scienceview_theme::SVTheme,
-    ) -> Result<SVSrgbColour, SVError> {
+    ) -> Result<SVColour, SVError> {
         let Some(token) = self.theme_token.as_deref() else {
             return Ok(self.colour_at_index(index));
         };
@@ -159,8 +156,6 @@ impl SVScalePalette {
             });
         }
 
-        Ok(super::sv_srgb_colour_from_theme(
-            colours[index % colours.len()],
-        ))
+        Ok(super::sv_colour_from_theme(colours[index % colours.len()]))
     }
 }
