@@ -55,6 +55,18 @@
 //! `scienceview_core` itself is always compiled: the facade re-exports it as a
 //! required dependency.
 
+// The directories follow the change grid (`backend/`, `error/`,
+// `figure/`, `observability/`) while the public module names follow the naming
+// rule of PRD §3.8: public modules carry the `sv_` prefix.
+#[path = "backend/mod.rs"]
+pub mod sv_backend;
+#[path = "error/mod.rs"]
+pub mod sv_error;
+#[path = "figure/mod.rs"]
+pub mod sv_figure;
+#[path = "observability/mod.rs"]
+pub mod sv_observability;
+
 /// Returns the name of this crate.
 ///
 /// Pipeline code and the workspace smoke tests use it to prove that the core
