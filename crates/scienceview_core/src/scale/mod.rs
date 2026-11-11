@@ -40,6 +40,7 @@
 
 mod boolean;
 mod builder;
+mod colour;
 mod continuous;
 mod domain;
 mod kind;
@@ -63,6 +64,12 @@ pub use transform::SVScaleTransform;
 #[cfg(test)]
 #[path = "builder_tests.rs"]
 mod builder_tests;
+#[cfg(test)]
+#[path = "colour_map_tests.rs"]
+mod colour_map_tests;
+#[cfg(test)]
+#[path = "colour_value_tests.rs"]
+mod colour_value_tests;
 #[cfg(test)]
 #[path = "domain_policy_tests.rs"]
 mod domain_policy_tests;
