@@ -98,6 +98,15 @@
 //! bounded rolling window that lets a live source be read without blocking the
 //! render thread. Representation parity is asserted with the harness in
 //! [`sv_data`], whose tolerance policy lives beside it.
+//!
+//! ## Layout
+//!
+//! [`sv_layout`] resolves figure geometry independently of the raster grid. A
+//! backend supplies a [`sv_layout::SVViewport`]; the layout tree measures the
+//! content, solves the viewport against the declared lengths and constraints,
+//! and hands back a solved tree every backend rasterizes on its own grid. The
+//! `theme` feature lets the default spacing come from compiled theme tokens;
+//! without it the layout uses documented built-in defaults.
 
 #[path = "data/mod.rs"]
 pub mod sv_data;

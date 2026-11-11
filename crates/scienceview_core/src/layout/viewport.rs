@@ -40,8 +40,8 @@ impl SVViewport {
     /// A terminal reports its character cell here, so the solved tree stays
     /// continuous and only rasterization snaps to the coarse grid.
     pub fn with_cell_grid(mut self, cell_width: f64, cell_height: f64) -> Self {
-        self.cell_width = sv_sanitize_size(cell_width).max(1e-9);
-        self.cell_height = sv_sanitize_size(cell_height).max(1e-9);
+        self.cell_width = sv_sanitize_cell(cell_width);
+        self.cell_height = sv_sanitize_cell(cell_height);
         self
     }
 
@@ -113,6 +113,14 @@ fn sv_sanitize_size(value: f64) -> f64 {
         value
     } else {
         0.0
+    }
+}
+
+fn sv_sanitize_cell(value: f64) -> f64 {
+    if value.is_finite() && value > 0.0 {
+        value
+    } else {
+        1.0
     }
 }
 
