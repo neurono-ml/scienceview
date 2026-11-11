@@ -20,3 +20,9 @@
 - [x] Write failing tests for the viewport description.
 - [x] Implement the viewport and document the rasterization contract.
 
+
+## Review fixes
+
+- [x] Reuse the measured tree during solve instead of re-measuring every subtree.
+- [x] Resolve cross-axis aspect ratios from the constrained cross declaration and the resolved main size.
+- [x] Expose the readable tick count along either axis.
