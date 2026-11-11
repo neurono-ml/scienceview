@@ -93,10 +93,23 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Regenerate figures with the tool itself
         run: |
-          cargo run --example line_plot_svg
-          cargo run --example bar_chart_svg
+          shopt -s nullglob
+          examples=(examples/*.rs)
+          if [ ${#examples[@]} -eq 0 ]; then
+            echo "no example programs found under examples/" >&2
+            exit 1
+          fi
+          for example in "${examples[@]}"; do
+            cargo run --example "$(basename "${example}" .rs)"
+          done
       - name: Checked-in figures must match tool output
-        run: git diff --exit-code -- docs/figures
+        run: |
+          git diff --exit-code -- docs/figures
+          if [ -n "$(git status --porcelain --untracked-files=all -- docs/figures)" ]; then
+            echo "docs/figures must contain exactly the figures the examples produce" >&2
+            git status --short --untracked-files=all -- docs/figures
+            exit 1
+          fi
 
   msrv:
     name: MSRV gate (exact 1.85)
