@@ -17,6 +17,6 @@
 
 ## Normalise and composition order
 
-- [ ] Write failing tests for normalisation and the fixed order.
-- [ ] Implement normalize and the composition pipeline.
+- [x] Write failing tests for normalisation and the fixed order.
+- [x] Implement normalize and the composition pipeline.
 
