@@ -113,6 +113,21 @@ mod dodge_tests;
 #[path = "jitter_tests.rs"]
 mod jitter_tests;
 #[cfg(test)]
+#[path = "move_concurrency_tests.rs"]
+mod move_concurrency_tests;
+#[cfg(test)]
+#[path = "normalize_tests.rs"]
+mod normalize_tests;
+#[cfg(test)]
+#[path = "option_tests.rs"]
+mod option_tests;
+#[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
+#[path = "sequence_tests.rs"]
+mod sequence_tests;
+#[cfg(test)]
 #[path = "shift_tests.rs"]
 mod shift_tests;
 #[cfg(test)]
