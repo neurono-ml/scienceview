@@ -1,14 +1,13 @@
 //! The figure builder and its state machine.
 //!
 //! ```compile_fail
-//! use scienceview_core::sv_backend::SVBackendKind;
-//! use scienceview_core::sv_figure::SVDataBinding;
+//! use scienceview_core::sv_data::SVColumnView;
 //! use scienceview_core::sv_figure::SVFigureBuilder;
 //!
 //! let values = [1.0, 2.0];
 //! // Missing backend: `build` does not exist on this state.
 //! let figure = SVFigureBuilder::new()
-//!     .data_source(SVDataBinding::dense(&values))
+//!     .data_source(SVColumnView::Dense(&values))
 //!     .build();
 //! # let _ = figure;
 //! ```
@@ -24,7 +23,6 @@
 //! # let _ = figure;
 //! ```
 
-use super::SVDataBinding;
 use super::SVExecutionMode;
 use super::SVFigure;
 use super::builder_state::SVWithBackend;
@@ -36,6 +34,8 @@ use crate::sv_backend::SVBackendRegistry;
 use crate::sv_backend::SVBackendRequirements;
 use crate::sv_backend::sv_backend_registry;
 use crate::sv_backend::sv_verify_backend_requirements;
+use crate::sv_data::SVColumnView;
+use crate::sv_data::SVRepresentation;
 use crate::sv_error::SVError;
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -48,7 +48,7 @@ use std::sync::Arc;
 /// both. The order of the two calls is free, and every optional setting can be
 /// applied at any stage, including before the required ones.
 pub struct SVFigureBuilder<'values, DataSourceState, BackendState> {
-    data: Option<SVDataBinding<'values>>,
+    data: Option<SVColumnView<'values>>,
     backend_kind: Option<SVBackendKind>,
     execution_mode: SVExecutionMode,
     requirements: SVBackendRequirements,
@@ -82,7 +82,7 @@ impl<'values, BackendState> SVFigureBuilder<'values, SVWithoutDataSource, Backen
     /// Attaches the figure's data.
     pub fn data_source(
         self,
-        data: SVDataBinding<'values>,
+        data: SVColumnView<'values>,
     ) -> SVFigureBuilder<'values, SVWithDataSource, BackendState> {
         SVFigureBuilder {
             data: Some(data),
@@ -177,7 +177,7 @@ impl<'values> SVFigureBuilder<'values, SVWithDataSource, SVWithBackend> {
         let data = self.data.ok_or(SVError::MissingDataSource)?;
         let backend_kind = self.backend_kind.ok_or(SVError::MissingBackendSelection)?;
 
-        let requirements = if data.representation() == super::SVDataRepresentation::Streaming {
+        let requirements = if data.representation() == SVRepresentation::Streaming {
             self.requirements.requiring_streaming()
         } else {
             self.requirements

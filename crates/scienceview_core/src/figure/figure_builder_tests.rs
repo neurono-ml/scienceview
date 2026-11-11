@@ -5,13 +5,12 @@
 //! `build` only exists on the fully configured state, so the missing case
 //! cannot even be written.
 
-use super::SVDataBinding;
-use super::SVDataRepresentation;
 use super::SVExecutionMode;
 use super::SVFigureBuilder;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::test_support::SVCallRecorder;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
+use crate::sv_data::{SVColumnView, SVRepresentation, SVSparseView, SVStreamingView};
 use crate::sv_error::SVError;
 
 #[test]
@@ -19,7 +18,7 @@ fn a_configured_builder_builds_a_figure_that_carries_the_selected_kind() {
     let values = [1.0, 2.0, 3.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
@@ -32,7 +31,7 @@ fn the_execution_mode_defaults_to_automatic() {
     let values = [1.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
@@ -45,7 +44,7 @@ fn an_explicit_execution_mode_is_honoured() {
     let values = [1.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .execution_mode(SVExecutionMode::Synchronous)
         .build()
@@ -55,18 +54,22 @@ fn an_explicit_execution_mode_is_honoured() {
 }
 
 #[test]
-fn the_data_binding_is_carried_into_the_figure() {
+fn the_data_view_is_carried_into_the_figure() {
+    let indices = [0, 1, 2, 3];
     let values = [1.0, 2.0, 3.0, 4.0];
+    let view = SVColumnView::Sparse(
+        SVSparseView::new(&indices, &values, 40).expect("the indices are valid"),
+    );
 
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::sparse(&values, 40).expect("the point count covers the values"))
+        .data_source(view)
         .backend(SVBackendKind::Tui)
         .build()
         .expect("the configuration is complete");
 
-    assert_eq!(figure.representation(), SVDataRepresentation::Sparse);
+    assert_eq!(figure.representation(), SVRepresentation::Sparse);
     assert_eq!(figure.point_count(), 40);
-    assert_eq!(figure.values(), &values);
+    assert_eq!(figure.data_view(), view);
 }
 
 #[test]
@@ -74,7 +77,7 @@ fn the_backend_can_be_changed_after_building() {
     let values = [1.0];
 
     let mut figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
@@ -92,7 +95,7 @@ fn build_resolves_no_backend() {
     let recorder = SVCallRecorder::shared();
 
     let _figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .backend_registry(std::sync::Arc::new(sv_registry_with_recording_backend(
             &recorder,
@@ -109,9 +112,7 @@ fn a_streaming_binding_is_rejected_by_an_export_only_backend() {
     let values = [1.0, 2.0];
 
     let error = SVFigureBuilder::new()
-        .data_source(
-            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
-        )
+        .data_source(SVColumnView::Streaming(SVStreamingView::new(&values, 0, 0)))
         .backend(SVBackendKind::Svg)
         .build()
         .map(|_figure| ())
@@ -131,7 +132,7 @@ fn a_scripting_requirement_is_rejected_by_an_export_only_backend() {
     let values = [1.0];
 
     let error = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Html)
         .requires_scripting()
         .build()
@@ -152,9 +153,7 @@ fn a_supported_combination_builds() {
     let values = [1.0, 2.0];
 
     let figure = SVFigureBuilder::new()
-        .data_source(
-            SVDataBinding::streaming(&values, 2).expect("the point count covers the values"),
-        )
+        .data_source(SVColumnView::Streaming(SVStreamingView::new(&values, 0, 0)))
         .backend(SVBackendKind::Native)
         .requires_events()
         .requires_in_place_update()

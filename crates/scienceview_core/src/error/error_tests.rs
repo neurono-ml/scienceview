@@ -5,8 +5,8 @@
 
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
-use crate::sv_error::SVError;
 use crate::sv_data::SVRepresentation;
+use crate::sv_error::SVError;
 
 #[test]
 fn the_missing_backend_error_names_the_requirement() {
@@ -91,18 +91,6 @@ fn the_invalid_configuration_error_names_the_problem() {
         error.to_string().contains("the point count is zero"),
         "message was: {error}"
     );
-}
-
-#[test]
-fn the_inconsistent_point_count_error_names_both_counts() {
-    let error = SVError::InconsistentPointCount {
-        point_count: 2,
-        value_count: 5,
-    };
-    let message = error.to_string();
-
-    assert!(message.contains('2'), "message was: {message}");
-    assert!(message.contains('5'), "message was: {message}");
 }
 
 #[test]

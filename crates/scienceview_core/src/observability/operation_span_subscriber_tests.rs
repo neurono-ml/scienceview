@@ -7,7 +7,7 @@
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::test_support::SVCallRecorder;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
-use crate::sv_figure::SVDataBinding;
+use crate::sv_data::SVColumnView;
 use crate::sv_figure::SVFigureBuilder;
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -131,7 +131,7 @@ fn render_emits_one_span_with_the_configured_kind_and_fields() {
     let values = [1.0, 2.0, 3.0];
     let calls = SVCallRecorder::shared();
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .backend_registry(Arc::new(sv_registry_with_recording_backend(&calls)))
         .build()
@@ -158,7 +158,7 @@ fn a_failing_operation_records_the_configured_kind_and_the_failure() {
     let values = [1.0, 2.0];
     let calls = SVCallRecorder::shared();
     let mut figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .backend_registry(Arc::new(sv_registry_with_recording_backend(&calls)))
         .build()

@@ -8,8 +8,8 @@
 use super::capability::SVBackendCapability;
 use super::kind::SVBackendKind;
 use super::matrix::SVBackendCapabilities;
+use crate::sv_data::SVColumnView;
 use crate::sv_error::SVError;
-use crate::sv_figure::SVDataRepresentation;
 use crate::sv_figure::SVExecutionMode;
 use std::path::Path;
 use std::sync::Arc;
@@ -24,10 +24,8 @@ pub struct SVRenderRequest<'figure> {
     pub backend_kind: SVBackendKind,
     /// The execution mode the figure requested.
     pub execution_mode: SVExecutionMode,
-    /// The representation the values arrived in.
-    pub representation: SVDataRepresentation,
-    /// The figure's values, borrowed.
-    pub values: &'figure [f64],
+    /// The figure's data, in the representation it arrived in.
+    pub view: SVColumnView<'figure>,
     /// The optional figure title.
     pub title: Option<&'figure str>,
 }
@@ -48,10 +46,8 @@ pub struct SVUpdateRequest<'figure> {
     pub backend_kind: SVBackendKind,
     /// The execution mode the figure requested.
     pub execution_mode: SVExecutionMode,
-    /// The representation the values arrived in.
-    pub representation: SVDataRepresentation,
-    /// The figure's current values, borrowed.
-    pub values: &'figure [f64],
+    /// The figure's data, in the representation it arrived in.
+    pub view: SVColumnView<'figure>,
     /// How many points the update appended.
     pub appended_points: usize,
 }
@@ -63,10 +59,8 @@ pub struct SVSaveRequest<'figure> {
     pub backend_kind: SVBackendKind,
     /// The execution mode the figure requested.
     pub execution_mode: SVExecutionMode,
-    /// The representation the values arrived in.
-    pub representation: SVDataRepresentation,
-    /// The figure's values, borrowed.
-    pub values: &'figure [f64],
+    /// The figure's data, in the representation it arrived in.
+    pub view: SVColumnView<'figure>,
     /// Where the backend must write.
     pub destination: &'figure Path,
 }
@@ -78,10 +72,8 @@ pub struct SVShowRequest<'figure> {
     pub backend_kind: SVBackendKind,
     /// The execution mode the figure requested.
     pub execution_mode: SVExecutionMode,
-    /// The representation the values arrived in.
-    pub representation: SVDataRepresentation,
-    /// The figure's values, borrowed.
-    pub values: &'figure [f64],
+    /// The figure's data, in the representation it arrived in.
+    pub view: SVColumnView<'figure>,
 }
 
 /// The rendering contract every backend implements.

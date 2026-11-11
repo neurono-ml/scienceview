@@ -4,11 +4,11 @@
 //! The figure is immutable during a render and holds its backend through an
 //! `Arc`, so every thread resolves the same kind and receives its own output.
 
-use super::SVDataBinding;
 use super::SVFigureBuilder;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_backend::test_support::SVCallRecorder;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
+use crate::sv_data::SVColumnView;
 use std::sync::Arc;
 use std::thread;
 
@@ -19,7 +19,7 @@ fn one_built_figure_renders_safely_from_several_threads() {
     let values: Vec<f64> = (0..1024).map(f64::from).collect();
     let recorder = SVCallRecorder::shared();
     let figure = SVFigureBuilder::new()
-        .data_source(SVDataBinding::dense(&values))
+        .data_source(SVColumnView::Dense(&values))
         .backend(SVBackendKind::Svg)
         .backend_registry(Arc::new(sv_registry_with_recording_backend(&recorder)))
         .build()
@@ -60,7 +60,7 @@ fn concurrent_operations_on_distinct_backends_do_not_interfere() {
         .into_iter()
         .map(|backend_kind| {
             SVFigureBuilder::new()
-                .data_source(SVDataBinding::dense(&values))
+                .data_source(SVColumnView::Dense(&values))
                 .backend(backend_kind)
                 .backend_registry(Arc::clone(&registry))
                 .build()

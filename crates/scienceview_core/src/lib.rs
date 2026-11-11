@@ -27,12 +27,12 @@
 //!
 //! ```
 //! use scienceview_core::sv_backend::SVBackendKind;
-//! use scienceview_core::sv_figure::SVDataBinding;
+//! use scienceview_core::sv_data::SVColumnView;
 //! use scienceview_core::sv_figure::SVFigureBuilder;
 //!
 //! let values = [1.0, 2.0, 3.0];
 //! let figure = SVFigureBuilder::new()
-//!     .data_source(SVDataBinding::dense(&values))
+//!     .data_source(SVColumnView::Dense(&values))
 //!     .backend(SVBackendKind::Svg)
 //!     .build()
 //!     .expect("the configuration is complete");
