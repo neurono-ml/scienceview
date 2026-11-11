@@ -6,6 +6,40 @@
 //! separate crate commanded by the `SVRenderBackend` trait, so the default
 //! build stays free of GUI and WebAssembly dependencies.
 //!
+//! ## The figure substrate
+//!
+//! Every figure and artist is built through a builder that requires an explicit
+//! backend and carries an execution mode:
+//!
+//! - [`sv_figure`] owns `SVFigure`, the typestate `SVFigureBuilder`, the data
+//!   binding it carries and `SVExecutionMode` (defaulting to `Automatic`).
+//! - [`sv_backend`] owns the closed `SVBackendKind` (no automatic variant), the
+//!   capability matrix, the `SVRenderBackend` contract and the registry through
+//!   which backend crates plug in.
+//! - [`sv_error`] owns `SVError`, the single public error enumeration.
+//! - [`sv_observability`] owns the one operation span every public operation
+//!   runs inside, carrying the configured backend kind, the representation, the
+//!   number of marks and the elapsed time.
+//!
+//! The backend kind is a runtime value, never a type parameter, and `build`
+//! performs no dispatch: each operation resolves the configured kind to a
+//! concrete backend at call time.
+//!
+//! ```
+//! use scienceview_core::sv_backend::SVBackendKind;
+//! use scienceview_core::sv_figure::SVDataBinding;
+//! use scienceview_core::sv_figure::SVFigureBuilder;
+//!
+//! let values = [1.0, 2.0, 3.0];
+//! let figure = SVFigureBuilder::new()
+//!     .data_source(SVDataBinding::dense(&values))
+//!     .backend(SVBackendKind::Svg)
+//!     .build()
+//!     .expect("the configuration is complete");
+//!
+//! assert_eq!(figure.backend_kind(), SVBackendKind::Svg);
+//! ```
+//!
 //! ## Crate map
 //!
 //! The workspace has one core crate plus one crate per rendering backend, all
