@@ -89,7 +89,7 @@ jobs:
           cargo run --example line_plot_svg
           cargo run --example bar_chart_svg
       - name: Checked-in figures must match tool output
-        run: git diff --exit-code -- docs/src/assets
+        run: git diff --exit-code -- docs/figures
 
   msrv:
     name: MSRV gate (exact 1.85)
