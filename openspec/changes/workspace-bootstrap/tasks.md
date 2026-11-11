@@ -15,7 +15,7 @@
 ## CI gates
 
 - [x] Add the CI workflow with the four gates.
-- [ ] Add the `figures` job that runs the examples and fails on a diff in `docs/figures/`.
+- [x] Add the `figures` job that runs the examples and fails on a diff in `docs/figures/`.
 - [ ] Verify the workflow fails when a gate is deliberately broken, then restore it.
 
 ## Documentation of the skeleton
