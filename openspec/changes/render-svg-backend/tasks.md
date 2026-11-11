@@ -7,8 +7,8 @@
 
 ## Marks and decorations
 
-- [ ] Write failing snapshot tests for each mark variant and decoration.
-- [ ] Implement rendering of marks and decorations.
+- [x] Write failing snapshot tests for each mark variant and decoration.
+- [x] Implement rendering of marks and decorations.
 
 ## Large data
 
