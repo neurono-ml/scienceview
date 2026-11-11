@@ -240,8 +240,9 @@ without changing the viewport. The revision on `SVResolvedLayout` gives a
 backend a cheap way to know whether the geometry it is looking at is stale.
 
 Because ticks are part of the solved space, they re-derive too. The
-`readable_tick_count` method on `SVResolvedRectangle` answers "how many ticks
-fit at this minimum spacing?", and
+`readable_tick_count_along` method on `SVResolvedRectangle` answers "how many
+ticks fit on this axis at this minimum spacing?" — horizontal uses the width,
+vertical the height — and
 `a_viewport_change_recomputes_the_tick_count` asserts that narrowing the
 viewport from 800 to 200 logical pixels reduces the count from 9 to 3. The
 decoration layer consumes that count instead of guessing.
