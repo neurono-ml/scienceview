@@ -17,6 +17,6 @@
 
 ## Runtime compilation
 
-- [ ] Write failing tests for recompiling a theme and restyling a figure.
-- [ ] Implement the runtime feature behind its flag.
+- [x] Write failing tests for recompiling a theme and restyling a figure.
+- [x] Implement the runtime feature behind its flag.
 
