@@ -84,6 +84,9 @@ impl<'a> SVResolvedChannels<'a> {
     }
 }
 
+#[cfg(test)]
+pub(crate) use sv_resolution_counter::{sv_reset_resolution_count, sv_resolution_count};
+
 /// Test-only count of representation resolutions on the current thread.
 ///
 /// A thread-local keeps the counter isolated when the test binary runs cases
@@ -112,6 +115,3 @@ mod sv_resolution_counter {
         RESOLUTIONS.with(|resolutions| resolutions.set(resolutions.get() + 1));
     }
 }
-
-#[cfg(test)]
-pub(crate) use sv_resolution_counter::{sv_reset_resolution_count, sv_resolution_count};
