@@ -6,6 +6,7 @@
 //! and the data as a line. This is the path `SVFigure::render()` takes.
 
 mod default_figure;
+mod default_series;
 
 pub(crate) use default_figure::sv_render_default_figure;
 

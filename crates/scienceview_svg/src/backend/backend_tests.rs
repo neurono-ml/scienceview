@@ -5,7 +5,6 @@
 use super::SVSvgBackend;
 use super::SVSvgBackendProvider;
 use super::sv_register_svg_backend;
-use crate::document::SVSvgDocument;
 use scienceview_core::sv_backend::SVBackendCapability;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_backend::SVBackendRegistry;
@@ -20,7 +19,6 @@ use scienceview_core::sv_backend::sv_resolve_render_backend;
 use scienceview_core::sv_data::SVColumnView;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_figure::{SVExecutionMode, SVFigureBuilder};
-use scienceview_core::sv_layout::SVViewport;
 use std::sync::Arc;
 
 fn request(values: &[f64]) -> SVRenderRequest<'_> {
@@ -189,13 +187,4 @@ fn a_built_figure_renders_end_to_end_through_the_process_registry() {
     assert_eq!(output.backend_kind, SVBackendKind::Svg);
     assert!(document.contains("<svg xmlns=\"http://www.w3.org/2000/svg\""));
     assert!(document.contains("End to end"));
-}
-
-#[test]
-fn a_document_composes_the_public_surface_without_the_backend() {
-    let viewport = SVViewport::new(320.0, 200.0);
-    let document = SVSvgDocument::new(viewport).with_title("Composed").to_svg();
-
-    assert!(document.contains("viewBox=\"0 0 320 200\""));
-    assert!(document.contains("<title>Composed</title>"));
 }

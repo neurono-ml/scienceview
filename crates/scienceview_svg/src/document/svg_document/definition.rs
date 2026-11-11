@@ -5,9 +5,12 @@
 //! element (or one grouped path). The order of pushes is the draw order, so a
 //! caller controls what covers what without a z-index attribute.
 
-use crate::serialize::sv_escape_text;
-use crate::serialize::sv_format_number;
+use crate::serialize::sv_serialize_decoration_primitive;
+use crate::serialize::sv_serialize_mark_geometry;
+use crate::serialize::sv_serialize_mark_primitive;
+use scienceview_core::sv_decoration::SVDecorationPrimitive;
 use scienceview_core::sv_layout::SVViewport;
+use scienceview_core::sv_mark::{SVMarkGeometry, SVMarkPrimitive};
 use scienceview_core::sv_scale::SVColour;
 
 /// A self-contained SVG document under construction.
@@ -26,13 +29,13 @@ use scienceview_core::sv_scale::SVColour;
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct SVSvgDocument {
-    viewport: SVViewport,
-    title: Option<String>,
-    description: Option<String>,
-    accessibility_label: Option<String>,
-    background: Option<SVColour>,
-    font_family: String,
-    elements: Vec<String>,
+    pub(super) viewport: SVViewport,
+    pub(super) title: Option<String>,
+    pub(super) description: Option<String>,
+    pub(super) accessibility_label: Option<String>,
+    pub(super) background: Option<SVColour>,
+    pub(super) font_family: String,
+    pub(super) elements: Vec<String>,
 }
 
 impl SVSvgDocument {
@@ -84,6 +87,60 @@ impl SVSvgDocument {
         self
     }
 
+    /// Appends every primitive of a mark geometry in draw order.
+    #[must_use]
+    pub fn with_mark_geometry(mut self, geometry: &SVMarkGeometry<'_>) -> Self {
+        self.push_mark_geometry(geometry);
+        self
+    }
+
+    /// Appends every primitive of a mark geometry in draw order.
+    pub fn push_mark_geometry(&mut self, geometry: &SVMarkGeometry<'_>) {
+        for element in sv_serialize_mark_geometry(geometry, &self.font_family) {
+            self.push_element(element);
+        }
+    }
+
+    /// Appends one mark primitive in draw order.
+    #[must_use]
+    pub fn with_mark_primitive(mut self, primitive: &SVMarkPrimitive<'_>) -> Self {
+        self.push_mark_primitive(primitive);
+        self
+    }
+
+    /// Appends one mark primitive in draw order.
+    pub fn push_mark_primitive(&mut self, primitive: &SVMarkPrimitive<'_>) {
+        let element = sv_serialize_mark_primitive(primitive, &self.font_family);
+        self.push_element(element);
+    }
+
+    /// Appends decoration primitives in draw order.
+    #[must_use]
+    pub fn with_decoration_primitives(mut self, primitives: &[SVDecorationPrimitive]) -> Self {
+        self.push_decoration_primitives(primitives);
+        self
+    }
+
+    /// Appends decoration primitives in draw order.
+    pub fn push_decoration_primitives(&mut self, primitives: &[SVDecorationPrimitive]) {
+        for primitive in primitives {
+            self.push_decoration_primitive(primitive);
+        }
+    }
+
+    /// Appends one decoration primitive in draw order.
+    #[must_use]
+    pub fn with_decoration_primitive(mut self, primitive: &SVDecorationPrimitive) -> Self {
+        self.push_decoration_primitive(primitive);
+        self
+    }
+
+    /// Appends one decoration primitive in draw order.
+    pub fn push_decoration_primitive(&mut self, primitive: &SVDecorationPrimitive) {
+        let element = sv_serialize_decoration_primitive(primitive, &self.font_family);
+        self.push_element(element);
+    }
+
     /// Appends one already-serialized element in draw order.
     pub fn push_element(&mut self, element: impl Into<String>) {
         let element = element.into();
@@ -117,61 +174,16 @@ impl SVSvgDocument {
     pub fn number_of_elements(&self) -> usize {
         self.elements.len()
     }
+}
 
+impl SVSvgDocument {
     /// Serializes the document to SVG text.
     ///
     /// The attribute order of the root element and of the metadata children is
     /// fixed; repeating the call on the same document always yields the same
     /// bytes.
     pub fn to_svg(&self) -> String {
-        let width = sv_format_number(self.viewport.width());
-        let height = sv_format_number(self.viewport.height());
-        let label = sv_escape_text(self.accessibility_label());
-        let mut document = String::new();
-
-        document.push_str("<svg xmlns=\"http://www.w3.org/2000/svg\"");
-        document.push_str(" width=\"");
-        document.push_str(&width);
-        document.push_str("\" height=\"");
-        document.push_str(&height);
-        document.push_str("\" viewBox=\"0 0 ");
-        document.push_str(&width);
-        document.push(' ');
-        document.push_str(&height);
-        document.push_str("\" role=\"img\" aria-label=\"");
-        document.push_str(&label);
-        document.push_str("\">\n");
-
-        let title = self.title.as_deref().unwrap_or("scienceview figure");
-        document.push_str("  <title>");
-        document.push_str(&sv_escape_text(title));
-        document.push_str("</title>\n");
-        document.push_str("  <desc>");
-        document.push_str(&sv_escape_text(
-            self.description
-                .as_deref()
-                .unwrap_or("Figure generated by scienceview"),
-        ));
-        document.push_str("</desc>\n");
-
-        if let Some(background) = self.background {
-            document.push_str("  <rect x=\"0\" y=\"0\" width=\"");
-            document.push_str(&width);
-            document.push_str("\" height=\"");
-            document.push_str(&height);
-            document.push_str("\" fill=\"");
-            document.push_str(&background.to_hex_string());
-            document.push_str("\"/>\n");
-        }
-
-        for element in &self.elements {
-            document.push_str("  ");
-            document.push_str(element);
-            document.push('\n');
-        }
-
-        document.push_str("</svg>\n");
-        document
+        super::serialization::sv_serialize_document(self)
     }
 
     /// Serializes the document to bytes.

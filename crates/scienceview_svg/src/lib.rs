@@ -45,6 +45,7 @@
 mod backend;
 mod document;
 mod figure;
+mod image;
 mod serialize;
 
 pub use backend::{SVSvgBackend, SVSvgBackendProvider, sv_register_svg_backend};
