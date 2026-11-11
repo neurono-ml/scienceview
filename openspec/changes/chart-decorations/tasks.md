@@ -12,7 +12,7 @@
 
 ## Colour bar
 
-- [ ] Write failing tests for domain and colour-map agreement.
+- [x] Write failing tests for domain and colour-map agreement.
 - [ ] Implement the colour bar.
 
 ## Titles and theming
