@@ -7,8 +7,8 @@
 
 ## Palettes and colour maps
 
-- [ ] Write failing tests for discrete, continuous and derived palettes.
-- [ ] Implement the palette types and the colour-map tokens.
+- [x] Write failing tests for discrete, continuous and derived palettes.
+- [x] Implement the palette types and the colour-map tokens.
 
 ## Motion tokens
 
