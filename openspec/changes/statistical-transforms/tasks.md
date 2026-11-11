@@ -7,8 +7,8 @@
 
 ## Aggregation and percentiles
 
-- [ ] Write failing tests for each aggregate method and the error kinds.
-- [ ] Implement aggregate and percentile.
+- [x] Write failing tests for each aggregate method and the error kinds.
+- [x] Implement aggregate and percentile.
 
 ## Density and CDF
 
