@@ -110,5 +110,11 @@ pub use stage::SVMoveStage;
 #[path = "dodge_tests.rs"]
 mod dodge_tests;
 #[cfg(test)]
+#[path = "jitter_tests.rs"]
+mod jitter_tests;
+#[cfg(test)]
+#[path = "shift_tests.rs"]
+mod shift_tests;
+#[cfg(test)]
 #[path = "stack_tests.rs"]
 mod stack_tests;
