@@ -130,12 +130,11 @@ impl SVMove {
     /// documented range; the message names the option and the range.
     pub fn validate(&self) -> Result<(), SVError> {
         match self {
-            Self::Stack(_)
-            | Self::Jitter(_)
-            | Self::Shift(_)
-            | Self::Swarm(_)
-            | Self::Normalize(_) => Ok(()),
+            Self::Stack(_) | Self::Normalize(_) => Ok(()),
             Self::Dodge(options) => sv_validate_dodge_options(options),
+            Self::Jitter(options) => sv_validate_jitter_options(options),
+            Self::Shift(options) => sv_validate_shift_options(options),
+            Self::Swarm(options) => sv_validate_swarm_options(options),
         }
     }
 }
@@ -153,6 +152,52 @@ fn sv_validate_dodge_options(options: &SVDodgeOptions) -> Result<(), SVError> {
         return Err(SVError::InvalidConfiguration {
             message: format!("dodge gap must be within [0.0, 1.0), received {gap}"),
         });
+    }
+    Ok(())
+}
+
+/// Validates the jitter amount once, when the sequence is assembled.
+fn sv_validate_jitter_options(options: &SVJitterOptions) -> Result<(), SVError> {
+    let amount = options.amount_value();
+    if !amount.is_finite() || amount < 0.0 {
+        return Err(SVError::InvalidConfiguration {
+            message: format!(
+                "jitter amount must be a finite fraction of the category width and at least zero, received {amount}"
+            ),
+        });
+    }
+    Ok(())
+}
+
+/// Validates the shift amount once, when the sequence is assembled.
+fn sv_validate_shift_options(options: &SVShiftOptions) -> Result<(), SVError> {
+    let amount = options.amount_value();
+    if !amount.is_finite() {
+        return Err(SVError::InvalidConfiguration {
+            message: format!("shift amount must be finite, received {amount}"),
+        });
+    }
+    Ok(())
+}
+
+/// Validates the swarm geometry once, when the sequence is assembled.
+fn sv_validate_swarm_options(options: &SVSwarmOptions) -> Result<(), SVError> {
+    let marker_extent = options.marker_extent_value();
+    if !marker_extent.is_finite() || marker_extent <= 0.0 {
+        return Err(SVError::InvalidConfiguration {
+            message: format!(
+                "swarm marker_extent must be a finite length greater than zero, received {marker_extent}"
+            ),
+        });
+    }
+    if let Some(width) = options.width_value() {
+        if !width.is_finite() || width <= 0.0 {
+            return Err(SVError::InvalidConfiguration {
+                message: format!(
+                    "swarm width must be a finite length greater than zero, received {width}"
+                ),
+            });
+        }
     }
     Ok(())
 }
