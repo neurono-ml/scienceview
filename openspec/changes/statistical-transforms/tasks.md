@@ -2,8 +2,8 @@
 
 ## Binning and counting
 
-- [ ] Write failing tests for bin edges, widths, normalisation and cumulative modes.
-- [ ] Implement bin and count, using the parity harness.
+- [x] Write failing tests for bin edges, widths, normalisation and cumulative modes.
+- [x] Implement bin and count, using the parity harness.
 
 ## Aggregation and percentiles
 
