@@ -21,6 +21,18 @@
 //!   runs inside, carrying the configured backend kind, the representation, the
 //!   number of marks and the elapsed time.
 //!
+//! ## The scale kernel
+//!
+//! [`sv_scale`] is the only place where a data value becomes a visual property.
+//! `SVScale` is a closed model of four kinds — continuous, nominal, temporal and
+//! boolean — and each scale owns its data domain and display range together, so
+//! an axis cannot disagree with the marks on it. Domains are explicit or derived
+//! from a [`SVColumnView`](sv_data::SVColumnView) without densifying sparse data
+//! or blocking on a stream; transforms (linear, logarithmic, symmetric
+//! logarithmic, square root) are invertible; nominal colours are stable and
+//! continuous colours resolve theme colour maps; and the tick derivation hook
+//! turns the space the layout engine grants an axis into readable ticks.
+//!
 //! The backend kind is a runtime value, never a type parameter, and `build`
 //! performs no dispatch: each operation resolves the configured kind to a
 //! concrete backend at call time.
@@ -85,6 +97,7 @@
 //! | `spec-serde` | JSON figure specification | optional |
 //! | `streaming` | Standard-library channel updates | none |
 //! | `streaming-tokio` | Tokio watch channel updates | optional |
+//! | `theme` | Theme resolution for scale palettes and colour maps | optional |
 //! | `default` | Nothing | none |
 //!
 //! `scienceview_core` itself is always compiled: the facade re-exports it as a
@@ -97,7 +110,8 @@
 //! streaming). Sparse storage is never densified, and [`sv_window`] provides the
 //! bounded rolling window that lets a live source be read without blocking the
 //! render thread. Representation parity is asserted with the harness in
-//! [`sv_data`], whose tolerance policy lives beside it.
+//! [`sv_data`], whose tolerance policy lives beside it; the scale kernel is the
+//! first real consumer of that harness.
 
 #[path = "data/mod.rs"]
 pub mod sv_data;

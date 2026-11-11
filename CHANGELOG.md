@@ -12,6 +12,29 @@ released.
 
 ### Added
 
+- The scale kernel in `scienceview_core::sv_scale`: `SVScale` is the closed
+  model with exactly four kinds — continuous, nominal, temporal and boolean —
+  and each scale owns its data domain and its display range together, so an
+  axis and the marks on it cannot disagree while the domain animates. Domains
+  are explicit when configured and derived from a dense, sparse or streaming
+  `SVColumnView` otherwise, with the representation resolved once and the
+  sparse storage never densified.
+- `SVScaleTransform` with `Linear`, `Logarithmic`, `SymmetricLogarithmic` and
+  `SquareRoot`, each exposing a forward map and its inverse; an undefined value
+  is a configuration error instead of a `NaN`.
+- Colour scales: `SVScalePalette` assigns a stable palette entry per category
+  so a series keeps its colour across updates, while `SVContinuousColourScale`
+  interpolates a colour map. Both work without any theme dependency through
+  the default palette and colour map; with the new core `theme` feature they
+  resolve theme tokens and re-resolve them per call, so a theme recompilation
+  restyles continuous encodings without rebuilding the figure.
+- The tick derivation hook: `SVTickSpace` turns the axis length and minimum
+  label spacing the layout engine grants into a tick budget, and
+  `SVScale::ticks` derives values, positions and labels per kind, including
+  integer-exponent logarithmic ticks and a readable temporal unit ladder.
+  `SVTickDerivation` is the trait a decoration consumes.
+- The scale is the first real kernel to adopt the `SVRepresentationParityHarness`
+  in `sv_data`, proving dense, sparse and streaming domain derivation agree.
 - The data source layer: `SVDataSource` is the open ingestion contract and
   `SVColumnView` is the closed computation boundary with exactly three
   representations — dense, sparse and streaming. Adapters cover borrowed
