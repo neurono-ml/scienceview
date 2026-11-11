@@ -8,7 +8,7 @@
 ## Adapters
 
 - [x] Write failing tests for slice, `ndarray`, sparse and channel adapters.
-- [ ] Implement the adapters, keeping `data-ndarray` and `streaming` behind features.
+- [x] Implement the adapters, keeping `data-ndarray`, `data-sprs`, `streaming` and `streaming-tokio` behind features.
 
 ## Window
 
