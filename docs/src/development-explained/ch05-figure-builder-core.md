@@ -138,8 +138,9 @@ and "my callback never fired and I spent an afternoon on it". A streaming data
 binding implies a streaming requirement automatically.
 
 **It transfers the kind into the figure.** The new `SVFigure` stores the kind,
-the execution mode, the data binding and a handle to the backend registry. Its
-constructor is private to the crate; the builder is the only way in.
+the execution mode, the data binding, the static requirements it validated and
+a handle to the backend registry. Its constructor is private to the crate; the
+builder is the only way in.
 
 **It does not dispatch.** No concrete backend is looked up, instantiated or
 called while building. The test is blunt about it:
@@ -193,8 +194,12 @@ worse than failing.
 
 The consequence for the user is a property no other design gives for free: the
 same `SVFigure` type serves every backend, and `set_backend_kind` changes which
-backend the *next* operation uses. The companion test walks all four operations
-and counts them, proving each one dispatches separately:
+backend the *next* operation uses. The switch is validated, not blind: the
+figure keeps the static requirements `build` checked, and changing the kind
+re-runs the same capability check, so a streaming figure cannot be moved to an
+export-only backend after the fact. The method returns a `Result` and a rejected
+switch leaves the figure on its previous kind. The companion test walks all four
+operations and counts them, proving each one dispatches separately:
 
 ```rust,ignore
 // crates/scienceview_core/src/figure/figure_operation_tests.rs
@@ -220,6 +225,7 @@ that matter in this change:
 | `BackendUnavailable` | No implementation of the configured kind is registered |
 | `BackendFailure` | A registered backend failed during an operation |
 | `InvalidConfiguration` | The configuration is internally inconsistent |
+| `InconsistentPointCount` | A sparse or streaming binding declares fewer points than it carries |
 
 The error messages are part of the contract, so the tests assert them: the
 unsupported-capability error names *both* the backend and the capability, and
@@ -253,7 +259,9 @@ and asserts that the span says `html`:
 
 ```rust,ignore
 // crates/scienceview_core/src/observability/operation_span_subscriber_tests.rs
-figure.set_backend_kind(SVBackendKind::Html);
+figure
+    .set_backend_kind(SVBackendKind::Html)
+    .expect("html can host dense data");
 tracing::subscriber::with_default(subscriber, || {
     figure.render().expect_err("no html backend is registered");
 });
@@ -327,7 +335,10 @@ required backend; the substrate supplies the dispatch, the errors and the span.
 The data binding used here is a placeholder — borrowed values plus a
 representation — and the dedicated data layer replaces its constructors behind
 the same builder method, which is why the figure never inspects the
-representation until it dispatches.
+representation until it dispatches. Sparse and streaming bindings validate
+their logical point count on construction: declaring fewer points than the
+values they carry is an `InconsistentPointCount` error, never a silent
+correction.
 
 That is the whole idea of the change: put the invariant in one place, encoded
 in the type system, so that fifty-two charts written by many agents cannot
