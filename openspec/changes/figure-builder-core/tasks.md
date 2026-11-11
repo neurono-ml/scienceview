@@ -21,5 +21,5 @@
 
 - [x] Verify concurrency: the same built figure rendered from several threads is safe.
 - [x] Verify the span fields through a test subscriber.
-- [ ] Update the crate documentation and the `CHANGELOG.md` entry.
+- [x] Update the crate documentation and the `CHANGELOG.md` entry.
 
