@@ -3,7 +3,7 @@
 ## Workspace skeleton
 
 - [x] Write the failing test: a workspace-level smoke test that asserts the core crate is reachable and that a backend feature is off by default.
-- [ ] Create the workspace `Cargo.toml` with the members and the feature map already declared by the PRD.
+- [x] Create the workspace `Cargo.toml` with the members and the feature map already declared by the PRD.
 - [ ] Create the core crate and the ten backend crate skeletons, each with a minimal `lib.rs` carrying the crate documentation.
 
 ## Toolchain and lints
