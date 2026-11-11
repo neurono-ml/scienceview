@@ -31,12 +31,10 @@ pub(crate) fn sv_apply_normalize(
         });
     }
 
-    let number_of_points = state.values.len();
     let mut positive_totals: HashMap<u32, f64> = HashMap::new();
     let mut negative_totals: HashMap<u32, f64> = HashMap::new();
 
-    for index in 0..number_of_points {
-        let group_key = group_keys[index];
+    for (index, group_key) in group_keys.iter().copied().enumerate() {
         let contribution = state.values[index] - state.baselines[index];
         if contribution > 0.0 {
             *positive_totals.entry(group_key).or_insert(0.0) += contribution;
@@ -50,8 +48,7 @@ pub(crate) fn sv_apply_normalize(
         SVNormalisationTarget::Percent => 100.0,
     };
 
-    for index in 0..number_of_points {
-        let group_key = group_keys[index];
+    for (index, group_key) in group_keys.iter().copied().enumerate() {
         let contribution = state.values[index] - state.baselines[index];
         let total = if contribution >= 0.0 {
             positive_totals.get(&group_key).copied().unwrap_or(0.0)

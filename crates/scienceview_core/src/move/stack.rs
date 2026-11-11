@@ -30,12 +30,10 @@ pub(crate) fn sv_apply_stack(
         });
     }
 
-    let number_of_points = state.values.len();
     let mut positive_totals: HashMap<u32, f64> = HashMap::new();
     let mut negative_totals: HashMap<u32, f64> = HashMap::new();
 
-    for index in 0..number_of_points {
-        let group_key = group_keys[index];
+    for (index, group_key) in group_keys.iter().copied().enumerate() {
         let value = state.values[index];
 
         if value == 0.0 {

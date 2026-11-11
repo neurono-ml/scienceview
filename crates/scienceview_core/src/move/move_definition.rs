@@ -148,7 +148,7 @@ fn sv_validate_dodge_options(options: &SVDodgeOptions) -> Result<(), SVError> {
             message: format!("dodge width must be within (0.0, 1.0], received {width}"),
         });
     }
-    if !gap.is_finite() || gap < 0.0 || gap >= 1.0 {
+    if !gap.is_finite() || !(0.0..1.0).contains(&gap) {
         return Err(SVError::InvalidConfiguration {
             message: format!("dodge gap must be within [0.0, 1.0), received {gap}"),
         });
