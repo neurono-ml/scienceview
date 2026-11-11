@@ -13,6 +13,9 @@ mod generator;
 mod parser;
 #[path = "../../build_support/schema.rs"]
 mod schema;
+#[cfg(test)]
+#[path = "../../build_support/values.rs"]
+mod values;
 
 pub(crate) use ast::SVThemeSource;
 pub(crate) use parser::sv_parse_theme_source;
