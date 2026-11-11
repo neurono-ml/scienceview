@@ -20,3 +20,11 @@
 - [x] Implement the harness and adopt it in one kernel's tests as a proof of concept.
 - [x] Document the tolerance policy.
 
+
+## Review fixes and integration
+
+- [x] Rename the public modules to `sv_data` and `sv_window` while keeping the on-disk folders.
+- [x] Replace the figure's placeholder binding with `SVColumnView` and remove the duplicate representation enumeration.
+- [x] Fold `SVDataError` into `SVError`, keeping one public error surface.
+- [x] Split the parity harness into a folder module below the 200-line limit.
+- [x] Record the optional features and the integration in the proposal impact.
