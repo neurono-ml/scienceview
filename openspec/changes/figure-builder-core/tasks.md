@@ -2,24 +2,24 @@
 
 ## Error and observability primitives
 
-- [ ] Write failing tests for `SVError` Display and for the span fields.
-- [ ] Implement `SVError` and the operation-span helper.
+- [x] Write failing tests for `SVError` Display and for the span fields.
+- [x] Implement `SVError` and the operation-span helper.
 
 ## Backend trait and kind
 
-- [ ] Write failing tests for `SVBackendKind` (no automatic variant) and for per-operation dispatch.
-- [ ] Implement `SVBackendKind`, `SVRenderBackend` and a test backend that records the calls it receives.
-- [ ] Implement the capability matrix lookup and the build-time rejection of unsupported combinations.
+- [x] Write failing tests for `SVBackendKind` (no automatic variant) and for per-operation dispatch.
+- [x] Implement `SVBackendKind`, `SVRenderBackend` and a test backend that records the calls it receives.
+- [x] Implement the capability matrix lookup and the build-time rejection of unsupported combinations.
 
 ## Builder typestate
 
-- [ ] Write failing tests proving a figure cannot be built without a data source or a backend.
-- [ ] Implement the builder state machine and `SVFigure`.
-- [ ] Implement `build`, transferring the kind without dispatch.
+- [x] Write failing tests proving a figure cannot be built without a data source or a backend.
+- [x] Implement the builder state machine and `SVFigure`.
+- [x] Implement `build`, transferring the kind without dispatch.
 
 ## Acceptance
 
-- [ ] Verify concurrency: the same built figure rendered from several threads is safe.
-- [ ] Verify the span fields through a test subscriber.
-- [ ] Update the crate documentation and the `CHANGELOG.md` entry.
+- [x] Verify concurrency: the same built figure rendered from several threads is safe.
+- [x] Verify the span fields through a test subscriber.
+- [x] Update the crate documentation and the `CHANGELOG.md` entry.
 
