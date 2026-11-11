@@ -73,6 +73,11 @@ released.
 
 ### Changed
 
+- The data boundary is exposed through the public modules `sv_data` and
+  `sv_window` (the on-disk folders stay `data/` and `window/`), its failures are
+  folded into `SVError` so the crate keeps one public error type, and `SVFigure`
+  carries the data layer's `SVColumnView` instead of a duplicate representation
+  enumeration.
 - CI now runs the workspace quality gates — formatting, clippy with warnings as
   errors and the workspace test suite — plus a figures job that reruns every
   example and fails on any drift under `docs/figures/`.
