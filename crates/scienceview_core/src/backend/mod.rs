@@ -9,6 +9,8 @@ mod dispatch;
 mod dispatch_tests;
 mod kind;
 mod matrix;
+#[cfg(test)]
+mod matrix_tests;
 mod registry;
 mod render_backend;
 
@@ -16,7 +18,9 @@ pub use capability::SVBackendCapability;
 pub use dispatch::sv_resolve_render_backend;
 pub use kind::SVBackendKind;
 pub use matrix::SVBackendCapabilities;
+pub use matrix::SVBackendRequirements;
 pub use matrix::sv_backend_capabilities;
+pub use matrix::sv_verify_backend_requirements;
 pub use registry::SVBackendRegistry;
 pub use registry::sv_backend_registry;
 pub use render_backend::SVRenderBackend;

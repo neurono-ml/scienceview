@@ -140,8 +140,8 @@ fn an_unregistered_kind_is_reported_as_unavailable() {
     let registry = registry_with_recording_backend(&recorder);
 
     let error = sv_resolve_render_backend(&registry, SVBackendKind::Native)
-        .err()
-        .expect("no native backend is registered");
+        .map(|_backend| ())
+        .expect_err("no native backend is registered");
 
     assert_eq!(
         error,
@@ -167,8 +167,8 @@ fn a_provider_that_answers_with_the_wrong_kind_is_rejected() {
     registry.register(Arc::new(SVMisbehavingProvider));
 
     let error = sv_resolve_render_backend(&registry, SVBackendKind::Tui)
-        .err()
-        .expect("the provider answered with a different kind");
+        .map(|_backend| ())
+        .expect_err("the provider answered with a different kind");
 
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
 }
