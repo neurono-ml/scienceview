@@ -1,4 +1,4 @@
-# Chapter 3 — The data boundary
+# Chapter 4 — The data boundary
 
 > This chapter explains how data gets into `scienceview`: why a chart cannot
 > simply accept a `Vec<f64>`, what a *borrowed view* is, what "dense", "sparse"
@@ -86,6 +86,12 @@ pub enum SVColumnView<'a> {
 The `'a` is Rust's way of writing "this view borrows something that outlives
 it". The enumeration owns nothing; it is a description of borrowed data.
 
+Both halves live in the public module `sv_data`, and the bounded window lives
+in `sv_window`. The on-disk folder names stay short (`data/` and `window/`),
+but every public module carries the project's `sv_` prefix, so a reader of the
+public surface never meets an unprefixed name. The root facade re-exports both:
+`scienceview::sv_data` and `scienceview::sv_window`.
+
 ## 4. Dense: the reference implementation
 
 Dense is the simplest case and the yardstick for the other two.
@@ -125,9 +131,11 @@ Two rules make it trustworthy.
 
 First, construction validates. Indices must be strictly increasing, inside the
 column, and there must be exactly one value per index. A caller that passes
-garbage gets an error, not a silently wrong plot: `SVDataError::
+garbage gets an error, not a silently wrong plot: `SVError::
 SparseIndicesNotIncreasing`, `SparseIndexOutOfRange`, or
-`MismatchedSparseLengths`.
+`MismatchedSparseLengths`. All of them are variants of `SVError`, the crate's
+single public error enumeration: the data boundary does not own a second error
+type, so a caller matching on failures never translates between layers.
 
 Second — and this is the rule the whole capability is named after — a sparse
 view is **never densified**. There is no function anywhere that turns it into a
@@ -135,7 +143,7 @@ view is **never densified**. There is no function anywhere that turns it into a
 alternative:
 
 ```rust
-SVColumnView::Sparse(_) => Err(SVDataError::UnsupportedRepresentation {
+SVColumnView::Sparse(_) => Err(SVError::UnsupportedRepresentation {
     operation: "dense_values",
     representation: SVRepresentation::Sparse,
     alternative: "iterate over the sparse stored entries with `stored_entries`",
@@ -243,7 +251,7 @@ nothing for it. The core's only mandatory dependencies remain `thiserror` and
 The `ndarray` adapter demonstrates the zero-copy rule in an awkward case. An
 `ndarray` view can be strided — for instance a column of a row-major matrix —
 and a strided view cannot be borrowed as one contiguous slice. Rather than
-silently copying, the adapter returns `SVDataError::NonContiguousView` with the
+silently copying, the adapter returns `SVError::NonContiguousView` with the
 alternative spelled out: call `.to_owned()` and pass the contiguous buffer.
 The test `a_non_contiguous_view_names_the_alternative_instead_of_copying`
 asserts the error.
