@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1120 560" role="img" aria-label="A mark turns data columns into backend-agnostic geometry: the data boundary, the scale kernel, the mark kernel and the layout solve feed the primitives a backend serializes">
+  <defs>
+    <marker id="mark-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d3557"/>
+    </marker>
+    <marker id="mark-arrow-cool" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+    <marker id="mark-arrow-warm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+    <linearGradient id="mark-background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f6f8fa"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1120" height="560" fill="url(#mark-background)"/>
+  <text x="560" y="42" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#1f2328">
+    From data to drawable geometry
+  </text>
+  <text x="560" y="70" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#59636e">
+    Three independent inputs meet in one closed kernel; a backend only serializes the result
+  </text>
+
+  <!-- Data boundary -->
+  <rect x="40" y="120" width="220" height="120" rx="14" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="150" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#0a3069">sv_data</text>
+  <text x="150" y="175" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">dense · sparse · streaming</text>
+  <text x="150" y="197" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVColumnView</text>
+  <text x="150" y="219" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">dispatched exactly once</text>
+
+  <!-- Scale kernel -->
+  <rect x="40" y="300" width="220" height="120" rx="14" fill="#dafbe1" stroke="#1a7f37" stroke-width="2"/>
+  <text x="150" y="330" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#0a3622">sv_scale</text>
+  <text x="150" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVScale::position</text>
+  <text x="150" y="377" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">domain + transform + range</text>
+  <text x="150" y="399" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">values become coordinates</text>
+
+  <!-- Layout -->
+  <rect x="340" y="300" width="220" height="120" rx="14" fill="#fff8c5" stroke="#9a6700" stroke-width="2"/>
+  <text x="450" y="330" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#4d2d00">sv_layout</text>
+  <text x="450" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVResolvedRectangle</text>
+  <text x="450" y="377" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">the solved plot area</text>
+  <text x="450" y="399" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">no backend re-derives it</text>
+
+  <!-- Mark kernel -->
+  <rect x="640" y="180" width="240" height="160" rx="16" fill="#fbefff" stroke="#8250df" stroke-width="2.5"/>
+  <text x="760" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#3c1e70">sv_mark</text>
+  <text x="760" y="238" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVMark::geometry</text>
+  <text x="760" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">one closed enumeration</text>
+  <text x="760" y="284" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#1f2328">Dot · Line · Area · Bar</text>
+  <text x="760" y="302" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#1f2328">Ribbon · Text · Image</text>
+  <text x="760" y="320" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#1f2328">Wedge · ErrorBar</text>
+
+  <!-- Primitives -->
+  <rect x="920" y="150" width="170" height="220" rx="14" fill="#ffebe9" stroke="#cf222e" stroke-width="2"/>
+  <text x="1005" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#82071e">SVMarkGeometry</text>
+  <text x="1005" y="206" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Path</text>
+  <text x="1005" y="228" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Rectangle</text>
+  <text x="1005" y="250" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Circle</text>
+  <text x="1005" y="272" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Text</text>
+  <text x="1005" y="294" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Image (borrowed)</text>
+  <text x="1005" y="326" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">+ SVMarkPaint</text>
+  <text x="1005" y="348" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">fill · stroke · opacity</text>
+
+  <!-- Arrows -->
+  <path d="M 260 180 C 340 180 360 200 400 220 L 610 240" fill="none" stroke="#0969da" stroke-width="2.5" marker-end="url(#mark-arrow-cool)"/>
+  <path d="M 260 360 C 340 360 360 340 400 320 L 610 300" fill="none" stroke="#1a7f37" stroke-width="2.5" marker-end="url(#mark-arrow-cool)"/>
+  <path d="M 560 360 C 620 360 640 340 640 300" fill="none" stroke="#9a6700" stroke-width="2.5" marker-end="url(#mark-arrow)"/>
+  <path d="M 880 260 L 915 260" fill="none" stroke="#cf222e" stroke-width="2.5" marker-end="url(#mark-arrow-warm)"/>
+
+  <!-- Bottom notes -->
+  <rect x="40" y="458" width="480" height="72" rx="12" fill="#ffffff" stroke="#d1d9e0" stroke-width="1.5"/>
+  <text x="60" y="484" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Geometry is not raster</text>
+  <text x="60" y="506" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">Coordinates stay continuous; a backend snaps only its final raster.</text>
+
+  <rect x="560" y="458" width="530" height="72" rx="12" fill="#ffffff" stroke="#d1d9e0" stroke-width="1.5"/>
+  <text x="580" y="484" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#1f2328">The interpolable table travels with the properties</text>
+  <text x="580" y="506" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">position · size · colour · opacity · font size tween; shape · dash · family swap.</text>
+</svg>

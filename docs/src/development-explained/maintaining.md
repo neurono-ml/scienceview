@@ -24,10 +24,12 @@ examples.
 | 5 | `ch05-figure-builder-core.md` | The figure substrate: the builder typestate, the required explicit backend, per-operation dispatch, one error type and one operation span |
 | 6 | `ch06-scale-mapping.md` | The scale kernel: the four kinds, explicit and derived domains across the three representations, the four transforms and their inverses, stable nominal colours, theme-bound continuous colour and tick derivation from the granted space |
 | 7 | `ch07-layout-solver.md` | The layout solver: the length model, constraints, the measure and solve passes, the four responsiveness modes, the viewport and grid-independence, and the property tests |
+| 8 | `ch08-mark-rendering.md` | Marks: the closed nine-variant vocabulary, the representation parity of the geometry kernel, backend-agnostic primitives, theme defaults and overrides, build-time validation and the interpolable-property table |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
-covers the figure substrate, chapter 6 covers the scale kernel and chapter 7
-covers the layout solver, each written by its own change. Later chapters are
+covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
+covers the layout solver and chapter 8 covers the mark kernel, each written by
+its own change. Later chapters are
 planned, one per capability of the `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
