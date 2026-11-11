@@ -8,7 +8,7 @@
 
 ## Toolchain and lints
 
-- [ ] Pin the toolchain in `rust-toolchain.toml` and set `rust-version` in every crate.
+- [x] Pin the toolchain in `rust-toolchain.toml` and set `rust-version` in every crate.
 - [ ] Configure the lint set (warnings as errors) and the formatter.
 - [ ] Verify `cargo fmt --all --check`, `cargo clippy --workspace --all-targets` and `cargo test --workspace` are green.
 
