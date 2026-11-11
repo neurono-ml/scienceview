@@ -12,8 +12,8 @@
 
 ## Colour scales
 
-- [ ] Write failing tests for stable nominal colours and continuous colour interpolation.
-- [ ] Implement the colour scales over theme tokens.
+- [x] Write failing tests for stable nominal colours and continuous colour interpolation.
+- [x] Implement the colour scales over theme tokens.
 
 ## Ticks
 
