@@ -20,6 +20,7 @@ examples.
 | 1 | `ch01-product-foundation.md` | The product foundation: the two audiences, the trait/enum split, the four-stage interaction pipeline, and the open decisions |
 | 2 | `ch02-workspace-bootstrap.md` | The Cargo workspace: the crate map, the feature map, the pinned toolchain and the four CI gates |
 | 3 | `ch03-theme-tokens.md` | Design tokens from zero: the stylesheet source, build-time and runtime compilation, palettes and colour maps, motion tokens and reduced motion |
+| 4 | `ch04-data-source-layer.md` | The data boundary: `SVDataSource`, the three representations, sparse indices, the bounded window, dispatch once and the parity harness |
 | 5 | `ch05-figure-builder-core.md` | The figure substrate: the builder typestate, the required explicit backend, per-operation dispatch, one error type and one operation span |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary and chapter 5

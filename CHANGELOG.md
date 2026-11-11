@@ -12,6 +12,15 @@ released.
 
 ### Added
 
+- The data source layer: `SVDataSource` is the open ingestion contract and
+  `SVColumnView` is the closed computation boundary with exactly three
+  representations — dense, sparse and streaming. Adapters cover borrowed
+  slices, `ndarray` views (`data-ndarray`), `sprs` sparse vectors
+  (`data-sprs`), standard-library channels (`streaming`) and Tokio channels
+  (`streaming-tokio`); sparse data is never densified. `SVRollingWindow` bounds
+  every streaming source and never blocks the render thread, and
+  `SVRepresentationParityHarness` proves dense, sparse and streaming outputs
+  agree within the documented tolerance (dense against sparse exactly).
 - Figure substrate in `scienceview_core`: `SVFigure`, the typestate
   `SVFigureBuilder` that cannot build without a data source and a backend,
   `SVBackendKind` (one variant per backend, deliberately no automatic variant),

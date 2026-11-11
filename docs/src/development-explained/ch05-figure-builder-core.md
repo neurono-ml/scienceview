@@ -36,7 +36,7 @@ configures an object step by step and finishes with `build()`:
 
 ```rust,ignore
 SVFigureBuilder::new()
-    .data_source(binding)
+    .data_source(data_view)
     .backend(SVBackendKind::Svg)
     .build()
 ```
@@ -117,7 +117,7 @@ fail the build if the missing-step program ever starts compiling:
 // crates/scienceview_core/src/figure/builder.rs (documentation example)
 // Missing backend: `build` does not exist on this state.
 let figure = SVFigureBuilder::new()
-    .data_source(SVDataBinding::dense(&values))
+    .data_source(SVColumnView::Dense(&values))
     .build();
 ```
 
@@ -148,7 +148,7 @@ called while building. The test is blunt about it:
 ```rust,ignore
 // crates/scienceview_core/src/figure/figure_builder_tests.rs
 let _figure = SVFigureBuilder::new()
-    .data_source(SVDataBinding::dense(&values))
+    .data_source(SVColumnView::Dense(&values))
     .backend(SVBackendKind::Svg)
     .backend_registry(Arc::new(sv_registry_with_recording_backend(&recorder)))
     .build()
@@ -225,12 +225,17 @@ that matter in this change:
 | `BackendUnavailable` | No implementation of the configured kind is registered |
 | `BackendFailure` | A registered backend failed during an operation |
 | `InvalidConfiguration` | The configuration is internally inconsistent |
-| `InconsistentPointCount` | A sparse or streaming binding declares fewer points than it carries |
+| Data-boundary failures | `ColumnNotFound`, `MismatchedLengths` and the sparse/window validation variants, folded into `SVError` |
 
 The error messages are part of the contract, so the tests assert them: the
 unsupported-capability error names *both* the backend and the capability, and
 the unsupported-representation error names the documented alternative path. A
 user who reads the message should not need the source code.
+
+`SVError` is the only public error enumeration of the crate. When the data
+boundary landed it brought no second error type: its variants were folded in,
+so a caller matching on a failed read and a caller matching on a failed render
+use the same type.
 
 Nothing unwraps a user input. Internal invariants use `?` and `ok_or`; a lock
 that was poisoned is recovered rather than panicked on, because a panic in a
@@ -332,13 +337,10 @@ SVScatterPlot::new()
 
 The recipe supplies its own builder with the same state machine and the same
 required backend; the substrate supplies the dispatch, the errors and the span.
-The data binding used here is a placeholder — borrowed values plus a
-representation — and the dedicated data layer replaces its constructors behind
-the same builder method, which is why the figure never inspects the
-representation until it dispatches. Sparse and streaming bindings validate
-their logical point count on construction: declaring fewer points than the
-values they carry is an `InconsistentPointCount` error, never a silent
-correction.
+The data the figure carries is the data layer's own `SVColumnView` — one value,
+one representation type — so the figure never builds a parallel notion of
+"dense, sparse or streaming" and the backend receives that view directly. The
+representation is read from the view, never stored twice.
 
 That is the whole idea of the change: put the invariant in one place, encoded
 in the type system, so that fifty-two charts written by many agents cannot
