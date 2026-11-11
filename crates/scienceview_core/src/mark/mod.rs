@@ -83,6 +83,7 @@ mod mark_definition;
 mod mark_span;
 mod options;
 mod paint;
+mod property;
 mod request;
 
 pub use geometry::{
@@ -97,6 +98,7 @@ pub use options::{
     SVRibbonBoundary, SVRibbonOptions, SVTextAlign, SVTextBaseline, SVTextOptions, SVWedgeOptions,
 };
 pub use paint::{SVMarkPaint, SVMarkTheme};
+pub use property::{SVMarkProperty, sv_mark_property_table};
 pub use request::{SVImageRaster, SVMarkRequest};
 
 #[cfg(test)]
@@ -113,3 +115,6 @@ mod paint_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
+#[cfg(test)]
+#[path = "property_tests.rs"]
+mod property_tests;
