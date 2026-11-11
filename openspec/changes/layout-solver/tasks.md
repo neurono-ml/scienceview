@@ -12,8 +12,8 @@
 
 ## Responsiveness
 
-- [ ] Write failing tests for the four modes under viewport change.
-- [ ] Implement the modes and the invalidation path.
+- [x] Write failing tests for the four modes under viewport change.
+- [x] Implement the modes and the invalidation path.
 
 ## Backend contract
 
