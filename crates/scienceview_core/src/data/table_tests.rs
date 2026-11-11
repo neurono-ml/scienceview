@@ -1,6 +1,6 @@
 //! Companion tests for the multi-column table and its validating builder.
 
-use crate::data::{SVColumnRole, SVDataError, SVDataSource, SVDataTable};
+use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVDataTable};
 
 const LATITUDE: [f64; 3] = [10.0, 20.0, 30.0];
 const TEMPERATURE: [f64; 3] = [1.0, 2.0, 3.0];

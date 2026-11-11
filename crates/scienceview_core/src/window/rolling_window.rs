@@ -3,8 +3,8 @@
 use std::collections::VecDeque;
 use std::sync::MutexGuard;
 
-use crate::data::SVDataError;
-use crate::window::{SVWindowOverflow, SVWindowPolicy};
+use crate::sv_data::SVDataError;
+use crate::sv_window::{SVWindowOverflow, SVWindowPolicy};
 
 /// A bounded rolling window of samples.
 ///

@@ -4,8 +4,8 @@ use std::time::{Duration, Instant};
 
 use tokio::sync::mpsc;
 
-use crate::data::adapters::SVTokioChannelColumn;
-use crate::data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
+use crate::sv_data::adapters::SVTokioChannelColumn;
+use crate::sv_data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
 
 #[test]
 fn a_tokio_read_drains_the_batches_already_available() {

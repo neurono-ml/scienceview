@@ -1,7 +1,7 @@
 //! Companion tests for the borrowed-slice adapter.
 
-use crate::data::adapters::SVSliceColumn;
-use crate::data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation, SVSourceSchema};
+use crate::sv_data::adapters::SVSliceColumn;
+use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation, SVSourceSchema};
 
 const SAMPLES: [f64; 4] = [1.0, 2.0, 3.0, 4.0];
 

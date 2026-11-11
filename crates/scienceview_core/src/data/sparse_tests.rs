@@ -1,6 +1,6 @@
 //! Companion tests for borrowed sparse storage.
 
-use crate::data::SVSparseView;
+use crate::sv_data::SVSparseView;
 
 #[test]
 fn a_sparse_view_borrows_its_storage() {

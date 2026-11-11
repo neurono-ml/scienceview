@@ -2,10 +2,10 @@
 //!
 //! A sparse view is never expanded into a dense buffer. Kernels that can use
 //! indices work on them directly; kernels that cannot report
-//! [`SVDataError::UnsupportedRepresentation`](crate::data::SVDataError::UnsupportedRepresentation)
+//! [`SVDataError::UnsupportedRepresentation`](crate::sv_data::SVDataError::UnsupportedRepresentation)
 //! and name the alternative path instead of densifying.
 
-use crate::data::SVDataError;
+use crate::sv_data::SVDataError;
 
 /// A borrowed sparse column of `length` logical values.
 ///

@@ -7,7 +7,7 @@
 
 use std::cell::RefCell;
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnView, SVRepresentation, SVRepresentationParityHarness, sv_assert_representation_parity,
 };
 

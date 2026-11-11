@@ -2,7 +2,7 @@
 
 use std::cell::Cell;
 
-use crate::data::{SVColumnView, SVDataError, SVRepresentation, SVSparseView, SVStreamingView};
+use crate::sv_data::{SVColumnView, SVDataError, SVRepresentation, SVSparseView, SVStreamingView};
 
 const DENSE_VALUES: [f64; 5] = [1.0, 0.0, 3.0, 0.0, 5.0];
 const SPARSE_INDICES: [usize; 3] = [0, 2, 4];

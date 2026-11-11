@@ -5,11 +5,11 @@ use std::sync::Mutex;
 
 use tokio::sync::mpsc::Receiver;
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVDataError, SVDataSource, SVReactivity,
     SVSourceSchema,
 };
-use crate::window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock};
+use crate::sv_window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock};
 
 /// A streaming, single-column source fed by a Tokio channel.
 ///

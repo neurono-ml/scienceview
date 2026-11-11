@@ -1,9 +1,9 @@
 //! The parity harness every kernel adopts.
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnView, SVDataError, SVRepresentationTolerance, SVSparseView, SVStreamingView,
 };
-use crate::window::SVRollingWindow;
+use crate::sv_window::SVRollingWindow;
 
 /// Proves that a kernel produces the same output for the three representations.
 ///

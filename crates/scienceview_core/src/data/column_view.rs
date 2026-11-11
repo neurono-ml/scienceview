@@ -1,6 +1,6 @@
 //! The computation boundary: a column as one of three representations.
 
-use crate::data::{SVDataError, SVRepresentation, SVSparseView};
+use crate::sv_data::{SVDataError, SVRepresentation, SVSparseView};
 
 /// A borrowed snapshot of the current window of a live source.
 ///

@@ -4,10 +4,10 @@ use std::borrow::Cow;
 use std::sync::Mutex;
 use std::sync::mpsc::Receiver;
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVDataError, SVDataSource, SVSourceSchema,
 };
-use crate::window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock};
+use crate::sv_window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock};
 
 /// A streaming, single-column source fed by a standard-library channel.
 ///
@@ -20,7 +20,7 @@ use crate::window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard, sv_lock}
 /// *retention*, not the producer's backlog: a producer that keeps sending while
 /// no read happens can still grow the channel queue, and a read then drains the
 /// whole queue in one go. When backpressure matters, pace the producer or use
-/// [`SVTokioChannelColumn`](crate::data::SVTokioChannelColumn) with a bounded
+/// [`SVTokioChannelColumn`](crate::sv_data::SVTokioChannelColumn) with a bounded
 /// Tokio channel.
 #[derive(Debug)]
 pub struct SVChannelColumn<'a> {
@@ -90,8 +90,8 @@ impl SVDataSource for SVChannelColumn<'_> {
         SVSourceSchema::from_columns(std::slice::from_ref(&self.descriptor))
     }
 
-    fn reactivity(&self) -> crate::data::SVReactivity {
-        crate::data::SVReactivity::EventDriven
+    fn reactivity(&self) -> crate::sv_data::SVReactivity {
+        crate::sv_data::SVReactivity::EventDriven
     }
 
     fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVDataError> {

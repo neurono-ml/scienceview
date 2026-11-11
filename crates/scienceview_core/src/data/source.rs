@@ -2,8 +2,8 @@
 
 use std::borrow::Cow;
 
-use crate::data::{SVColumnView, SVDataError, SVRepresentation, SVStreamingView};
-use crate::window::SVWindowReadGuard;
+use crate::sv_data::{SVColumnView, SVDataError, SVRepresentation, SVStreamingView};
+use crate::sv_window::SVWindowReadGuard;
 
 /// What a column means to an artist.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -145,7 +145,7 @@ impl SVColumnSnapshot<'_> {
     pub fn dispatch<Result>(
         &mut self,
         dense: impl FnOnce(&[f64]) -> Result,
-        sparse: impl FnOnce(&crate::data::SVSparseView<'_>) -> Result,
+        sparse: impl FnOnce(&crate::sv_data::SVSparseView<'_>) -> Result,
         streaming: impl FnOnce(&SVStreamingView<'_>) -> Result,
     ) -> Result {
         match self {

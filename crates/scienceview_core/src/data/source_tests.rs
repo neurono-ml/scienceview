@@ -1,6 +1,6 @@
 //! Companion tests for the open ingestion trait and the source schema.
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
     SVReactivity, SVSourceSchema,
 };
@@ -48,7 +48,7 @@ fn a_third_party_source_reaches_any_artist_through_the_public_trait() {
     let mut snapshot = source.column("temperature").expect("the column exists");
     assert_eq!(
         snapshot.representation(),
-        crate::data::SVRepresentation::Dense
+        crate::sv_data::SVRepresentation::Dense
     );
     assert_eq!(snapshot.column_view().length(), 3);
 }

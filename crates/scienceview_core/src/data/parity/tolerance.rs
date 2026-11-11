@@ -12,7 +12,7 @@
 //!   only absorbs the order in which a kernel accumulates the window.
 //! - **The tolerance is part of the kernel's contract.** A kernel whose
 //!   mathematics needs a wider margin raises it explicitly through
-//!   [`crate::data::SVRepresentationParityHarness::with_tolerance`] and records
+//!   [`crate::sv_data::SVRepresentationParityHarness::with_tolerance`] and records
 //!   the reason in its Feature Description Record.
 
 /// The margin within which two representation results count as equal.

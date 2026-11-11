@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::data::SVDataError;
-use crate::window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard};
+use crate::sv_data::SVDataError;
+use crate::sv_window::{SVRollingWindow, SVWindowPolicy, SVWindowReadGuard};
 
 fn sv_lock<Value>(mutex: &Mutex<Value>) -> MutexGuard<'_, Value> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)

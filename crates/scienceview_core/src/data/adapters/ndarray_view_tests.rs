@@ -2,8 +2,8 @@
 
 use ndarray::{Array1, Array2, array};
 
-use crate::data::adapters::SVNdarrayColumn;
-use crate::data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
+use crate::sv_data::adapters::SVNdarrayColumn;
+use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
 
 #[test]
 fn an_ndarray_view_is_borrowed_without_copying() {

@@ -1,6 +1,6 @@
 //! Companion tests for the documented tolerance policy.
 
-use crate::data::SVRepresentationTolerance;
+use crate::sv_data::SVRepresentationTolerance;
 
 #[test]
 fn exact_tolerance_only_accepts_identical_values() {

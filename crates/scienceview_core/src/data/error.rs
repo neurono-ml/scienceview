@@ -12,7 +12,7 @@
 //! Nothing outside this module constructs a data failure, so folding the
 //! enumeration into `SVError` later is a mechanical change.
 
-use crate::data::SVRepresentation;
+use crate::sv_data::SVRepresentation;
 
 /// A failure raised while reading data or building a view.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]

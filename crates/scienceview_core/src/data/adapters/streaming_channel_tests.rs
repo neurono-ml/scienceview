@@ -4,8 +4,8 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::data::adapters::SVChannelColumn;
-use crate::data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
+use crate::sv_data::adapters::SVChannelColumn;
+use crate::sv_data::{SVDataError, SVDataSource, SVReactivity, SVRepresentation};
 
 #[test]
 fn a_read_drains_every_sample_already_available() {

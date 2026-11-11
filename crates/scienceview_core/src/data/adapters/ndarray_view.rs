@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 use ndarray::ArrayView1;
 
-use crate::data::{
+use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataError, SVDataSource,
     SVSourceSchema,
 };

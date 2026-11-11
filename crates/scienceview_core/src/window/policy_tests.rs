@@ -1,6 +1,6 @@
 //! Companion tests for the window rollover policy.
 
-use crate::window::{SVWindowOverflow, SVWindowPolicy};
+use crate::sv_window::{SVWindowOverflow, SVWindowPolicy};
 
 #[test]
 fn drop_oldest_policy_keeps_the_newest_samples() {

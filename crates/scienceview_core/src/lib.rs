@@ -92,15 +92,17 @@
 //!
 //! ## Data boundary
 //!
-//! [`data`] holds the ingestion trait (`SVDataSource`) and the closed
+//! [`sv_data`] holds the ingestion trait (`SVDataSource`) and the closed
 //! representation kernels receive (`SVColumnView`: dense, sparse or
-//! streaming). Sparse storage is never densified, and [`window`] provides the
+//! streaming). Sparse storage is never densified, and [`sv_window`] provides the
 //! bounded rolling window that lets a live source be read without blocking the
 //! render thread. Representation parity is asserted with the harness in
-//! [`data`], whose tolerance policy lives beside it.
+//! [`sv_data`], whose tolerance policy lives beside it.
 
-pub mod data;
-pub mod window;
+#[path = "data/mod.rs"]
+pub mod sv_data;
+#[path = "window/mod.rs"]
+pub mod sv_window;
 
 // The directories follow the change grid (`backend/`, `error/`,
 // `figure/`, `observability/`) while the public module names follow the naming

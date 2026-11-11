@@ -2,8 +2,8 @@
 
 use sprs::CsVec;
 
-use crate::data::adapters::SVSparseColumn;
-use crate::data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
+use crate::sv_data::adapters::SVSparseColumn;
+use crate::sv_data::{SVColumnRole, SVDataError, SVDataSource, SVRepresentation};
 
 #[test]
 fn a_sparse_vector_is_presented_without_being_densified() {
