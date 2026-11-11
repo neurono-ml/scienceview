@@ -118,3 +118,6 @@ mod shift_tests;
 #[cfg(test)]
 #[path = "stack_tests.rs"]
 mod stack_tests;
+#[cfg(test)]
+#[path = "swarm_tests.rs"]
+mod swarm_tests;
