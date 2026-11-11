@@ -161,6 +161,8 @@ pub mod sv_layout;
 pub mod sv_mark;
 #[path = "scale/mod.rs"]
 pub mod sv_scale;
+#[path = "stat/mod.rs"]
+pub mod sv_stat;
 #[path = "window/mod.rs"]
 pub mod sv_window;
 
