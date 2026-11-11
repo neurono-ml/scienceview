@@ -10,6 +10,12 @@ use crate::sv_stat::bin_result::SVBinResult;
 use crate::sv_stat::count::sv_apply_count;
 use crate::sv_stat::count_options::SVCountOptions;
 use crate::sv_stat::count_result::SVCountResult;
+use crate::sv_stat::density::sv_apply_kernel_density;
+use crate::sv_stat::density_options::SVKernelDensityOptions;
+use crate::sv_stat::density_result::SVKernelDensityResult;
+use crate::sv_stat::empirical_cdf::sv_apply_empirical_cdf;
+use crate::sv_stat::empirical_cdf_options::SVEmpiricalCdfOptions;
+use crate::sv_stat::empirical_cdf_result::SVEmpiricalCdfResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::percentile::sv_apply_percentile;
 use crate::sv_stat::percentile_options::SVPercentileOptions;
@@ -26,6 +32,10 @@ pub enum SVStatKind {
     Aggregate,
     /// Percentiles of one continuous column.
     Percentile,
+    /// Kernel density estimate of one continuous column.
+    KernelDensity,
+    /// Empirical cumulative distribution of one continuous column.
+    EmpiricalCdf,
 }
 
 impl SVStatKind {
@@ -36,6 +46,8 @@ impl SVStatKind {
             SVStatKind::Count => "Count",
             SVStatKind::Aggregate => "Aggregate",
             SVStatKind::Percentile => "Percentile",
+            SVStatKind::KernelDensity => "KernelDensity",
+            SVStatKind::EmpiricalCdf => "EmpiricalCdf",
         }
     }
 }
@@ -55,6 +67,10 @@ pub enum SVStat {
     Aggregate(SVAggregateOptions),
     /// Reports requested quantiles of one continuous column.
     Percentile(SVPercentileOptions),
+    /// Estimates a density over one continuous column.
+    KernelDensity(SVKernelDensityOptions),
+    /// Accumulates the empirical distribution of one continuous column.
+    EmpiricalCdf(SVEmpiricalCdfOptions),
 }
 
 impl SVStat {
@@ -78,6 +94,16 @@ impl SVStat {
         SVStat::Percentile(options)
     }
 
+    /// Builds a kernel-density stat.
+    pub fn kernel_density(options: SVKernelDensityOptions) -> Self {
+        SVStat::KernelDensity(options)
+    }
+
+    /// Builds an empirical-CDF stat.
+    pub fn empirical_cdf(options: SVEmpiricalCdfOptions) -> Self {
+        SVStat::EmpiricalCdf(options)
+    }
+
     /// Returns the kind of this stat.
     pub fn kind(&self) -> SVStatKind {
         match self {
@@ -85,13 +111,15 @@ impl SVStat {
             SVStat::Count(_) => SVStatKind::Count,
             SVStat::Aggregate(_) => SVStatKind::Aggregate,
             SVStat::Percentile(_) => SVStatKind::Percentile,
+            SVStat::KernelDensity(_) => SVStatKind::KernelDensity,
+            SVStat::EmpiricalCdf(_) => SVStatKind::EmpiricalCdf,
         }
     }
 
     /// Returns `true` when the kernel is heavy enough to belong on the compute
     /// pool rather than on the render thread.
     pub fn is_heavy(&self) -> bool {
-        false
+        matches!(self, SVStat::KernelDensity(_))
     }
 
     /// Applies the stat to the input columns and returns the derived values in
@@ -102,6 +130,8 @@ impl SVStat {
             SVStat::Count(options) => sv_apply_count(options, &input),
             SVStat::Aggregate(options) => sv_apply_aggregate(options, &input),
             SVStat::Percentile(options) => sv_apply_percentile(options, &input),
+            SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
+            SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
         }
     }
 }
@@ -117,6 +147,10 @@ pub enum SVStatResult {
     Groups(SVAggregateResult),
     /// The derived view of percentiles.
     Quantiles(SVPercentileResult),
+    /// The derived view of a kernel density estimate.
+    Density(SVKernelDensityResult),
+    /// The derived view of an empirical cumulative distribution.
+    Cumulative(SVEmpiricalCdfResult),
 }
 
 impl SVStatResult {
@@ -127,6 +161,8 @@ impl SVStatResult {
             SVStatResult::Categories(_) => SVStatKind::Count,
             SVStatResult::Groups(_) => SVStatKind::Aggregate,
             SVStatResult::Quantiles(_) => SVStatKind::Percentile,
+            SVStatResult::Density(_) => SVStatKind::KernelDensity,
+            SVStatResult::Cumulative(_) => SVStatKind::EmpiricalCdf,
         }
     }
 
@@ -135,6 +171,8 @@ impl SVStatResult {
     pub fn is_windowed(&self) -> bool {
         match self {
             SVStatResult::Quantiles(result) => result.is_windowed(),
+            SVStatResult::Density(result) => result.is_windowed(),
+            SVStatResult::Cumulative(result) => result.is_windowed(),
             _ => false,
         }
     }

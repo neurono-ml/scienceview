@@ -63,6 +63,24 @@ impl SVSortedObservations {
         self.positive.get(position).copied()
     }
 
+    /// Returns one `(value, cumulative count)` pair per distinct value.
+    ///
+    /// The implicit zeros contribute a single breakpoint with their whole
+    /// multiplicity, so the curve is built without expanding them.
+    pub(crate) fn cumulative_breakpoints(&self) -> Vec<(f64, usize)> {
+        let mut breakpoints: Vec<(f64, usize)> = Vec::new();
+        let mut cumulative = 0usize;
+
+        sv_push_breakpoints(&self.negative, &mut breakpoints, &mut cumulative);
+        if self.zero_count > 0 {
+            cumulative += self.zero_count;
+            breakpoints.push((0.0, cumulative));
+        }
+        sv_push_breakpoints(&self.positive, &mut breakpoints, &mut cumulative);
+
+        breakpoints
+    }
+
     /// Returns the linearly interpolated quantile of the logical sequence.
     pub(crate) fn quantile(&self, quantile: f64) -> Option<f64> {
         if self.length == 0 {
@@ -86,3 +104,20 @@ impl SVSortedObservations {
 #[cfg(test)]
 #[path = "sorted_observations_tests.rs"]
 mod sorted_observations_tests;
+
+/// Folds an ascending segment into the cumulative breakpoints.
+fn sv_push_breakpoints(
+    values: &[f64],
+    breakpoints: &mut Vec<(f64, usize)>,
+    cumulative: &mut usize,
+) {
+    for value in values {
+        *cumulative += 1;
+        match breakpoints.last_mut() {
+            Some((last_value, last_cumulative)) if last_value == value => {
+                *last_cumulative = *cumulative;
+            }
+            _ => breakpoints.push((*value, *cumulative)),
+        }
+    }
+}

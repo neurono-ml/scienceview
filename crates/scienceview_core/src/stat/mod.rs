@@ -15,6 +15,12 @@ mod bin_result;
 mod count;
 mod count_options;
 mod count_result;
+mod density;
+mod density_options;
+mod density_result;
+mod empirical_cdf;
+mod empirical_cdf_options;
+mod empirical_cdf_result;
 mod input;
 mod numeric;
 mod observations;
@@ -30,6 +36,10 @@ pub use bin_options::{SVBinOptions, SVNormalisation};
 pub use bin_result::SVBinResult;
 pub use count_options::{SVCountOptions, SVCountOrder};
 pub use count_result::SVCountResult;
+pub use density_options::{SVKernelDensityOptions, SVKernelShape};
+pub use density_result::SVKernelDensityResult;
+pub use empirical_cdf_options::SVEmpiricalCdfOptions;
+pub use empirical_cdf_result::SVEmpiricalCdfResult;
 pub use input::SVStatInput;
 pub use percentile_options::SVPercentileOptions;
 pub use percentile_result::SVPercentileResult;
@@ -44,6 +54,12 @@ mod bin_tests;
 #[cfg(test)]
 #[path = "count_tests.rs"]
 mod count_tests;
+#[cfg(test)]
+#[path = "density_tests.rs"]
+mod density_tests;
+#[cfg(test)]
+#[path = "empirical_cdf_tests.rs"]
+mod empirical_cdf_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
