@@ -2,8 +2,8 @@
 
 ## Backend skeleton
 
-- [ ] Write failing tests for the capability matrix and for an empty figure.
-- [ ] Implement the crate and the backend trait.
+- [x] Write failing tests for the capability matrix and for an empty figure.
+- [x] Implement the crate and the backend trait.
 
 ## Marks and decorations
 
