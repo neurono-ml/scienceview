@@ -6,6 +6,8 @@
 
 mod operation_span;
 #[cfg(test)]
+mod operation_span_subscriber_tests;
+#[cfg(test)]
 mod operation_span_tests;
 
 pub use operation_span::SV_OPERATION_SPAN_NAME;
