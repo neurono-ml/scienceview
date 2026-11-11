@@ -5,6 +5,18 @@
 //! by the default feature set.
 
 /// Every backend feature declared by the root package.
+#[cfg(not(any(
+    feature = "render-svg",
+    feature = "render-html",
+    feature = "render-tui",
+    feature = "render-native",
+    feature = "render-react",
+    feature = "render-vue",
+    feature = "render-angular",
+    feature = "render-tauri",
+    feature = "render-dioxus",
+    feature = "wasm",
+)))]
 const BACKEND_FEATURES: [&str; 10] = [
     "render-svg",
     "render-html",
@@ -18,6 +30,18 @@ const BACKEND_FEATURES: [&str; 10] = [
     "wasm",
 ];
 
+#[cfg(not(any(
+    feature = "render-svg",
+    feature = "render-html",
+    feature = "render-tui",
+    feature = "render-native",
+    feature = "render-react",
+    feature = "render-vue",
+    feature = "render-angular",
+    feature = "render-tauri",
+    feature = "render-dioxus",
+    feature = "wasm",
+)))]
 fn backend_feature_is_enabled(feature: &str) -> bool {
     match feature {
         "render-svg" => cfg!(feature = "render-svg"),
@@ -40,6 +64,43 @@ fn core_crate_is_reachable_through_the_facade() {
     assert_eq!(crate::scienceview_core::sv_crate_name(), "scienceview_core");
 }
 
+#[allow(unused_imports)]
+#[test]
+fn enabled_backends_are_reachable_through_the_facade() {
+    #[cfg(feature = "render-angular")]
+    use crate::scienceview_angular;
+    #[cfg(feature = "render-dioxus")]
+    use crate::scienceview_dioxus;
+    #[cfg(feature = "render-html")]
+    use crate::scienceview_html;
+    #[cfg(feature = "render-native")]
+    use crate::scienceview_native;
+    #[cfg(feature = "render-react")]
+    use crate::scienceview_react;
+    #[cfg(feature = "render-svg")]
+    use crate::scienceview_svg;
+    #[cfg(feature = "render-tauri")]
+    use crate::scienceview_tauri;
+    #[cfg(feature = "render-tui")]
+    use crate::scienceview_tui;
+    #[cfg(feature = "render-vue")]
+    use crate::scienceview_vue;
+    #[cfg(feature = "wasm")]
+    use crate::scienceview_wasm;
+}
+
+#[cfg(not(any(
+    feature = "render-svg",
+    feature = "render-html",
+    feature = "render-tui",
+    feature = "render-native",
+    feature = "render-react",
+    feature = "render-vue",
+    feature = "render-angular",
+    feature = "render-tauri",
+    feature = "render-dioxus",
+    feature = "wasm",
+)))]
 #[test]
 fn backend_features_are_off_by_default() {
     let enabled: Vec<&str> = BACKEND_FEATURES
