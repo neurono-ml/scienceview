@@ -229,7 +229,7 @@ a fraction of the map and only then a colour — which is why
 ### The theme is optional
 
 The core crate is dependency-light on purpose, so the scale does not import the
-theme crate unconditionally. It has its own small colour value, `SVSrgbColour`,
+theme crate unconditionally. It has its own small colour value, `SVColour`,
 and two dependency-free defaults that mirror the default theme's colours:
 
 - `sv_default_scale_palette()` for categories,
