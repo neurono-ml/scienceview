@@ -13,7 +13,7 @@
 
 ## Builder typestate
 
-- [ ] Write failing tests proving a figure cannot be built without a data source or a backend.
+- [x] Write failing tests proving a figure cannot be built without a data source or a backend.
 - [ ] Implement the builder state machine and `SVFigure`.
 - [ ] Implement `build`, transferring the kind without dispatch.
 
