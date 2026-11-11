@@ -2,110 +2,71 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [docs/documentations]
   pull_request:
 
 jobs:
-  fmt:
-    name: Formatting (cargo fmt)
+  book:
+    name: Book (build + sitemap)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Install Rust 1.85 toolchain (rustfmt)
-        uses: dtolnay/rust-toolchain@1.85
+      - name: Install mdBook
+        uses: peaceiris/actions-mdbook@v2
         with:
-          components: rustfmt
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-      - name: cargo fmt --all -- --check
-        run: cargo fmt --all -- --check
-
-  clippy:
-    name: Static analysis (clippy, warnings as errors)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Install Rust 1.85 toolchain (clippy)
-        uses: dtolnay/rust-toolchain@1.85
-        with:
-          components: clippy
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-      - name: cargo clippy --workspace --all-targets -- -D warnings
-        run: cargo clippy --workspace --all-targets -- -D warnings
-
-  test:
-    name: Workspace tests + doctests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Install Rust 1.85 toolchain
-        uses: dtolnay/rust-toolchain@1.85
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-      - name: cargo test --workspace --all-targets
-        run: cargo test --workspace --all-targets
-
-  examples:
-    name: Examples (build + test)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Install Rust 1.85 toolchain
-        uses: dtolnay/rust-toolchain@1.85
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-      - name: cargo build --examples
-        run: cargo build --examples
-      - name: cargo test --examples
-        run: cargo test --examples
+          mdbook-version: latest
+      - name: Build book
+        run: mdbook build docs
+      - name: Regenerate sitemap.xml
+        run: node docs/scripts/postbuild.mjs
 
   figures:
-    name: Figures (tool-generated, no drift)
+    name: Figures (mirrored from the code branch)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout the book branch
         uses: actions/checkout@v6
         with:
           persist-credentials: false
+      - name: Checkout the code from the code branch
+        uses: actions/checkout@v6
+        with:
+          repository: neurono-ml/scienceview
+          ref: main
+          path: code
       - name: Install Rust 1.85 toolchain
         uses: dtolnay/rust-toolchain@1.85
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
-      - name: Regenerate figures with the tool itself
+      - name: Regenerate the figures with the tool itself
+        working-directory: code
         run: |
           cargo run --example line_plot_svg
           cargo run --example bar_chart_svg
-      - name: Checked-in figures must match tool output
-        run: git diff --exit-code -- docs/src/assets
+      - name: The mirrored figures must match the code branch
+        run: diff -r --brief code/docs/figures docs/src/assets
 
-  msrv:
-    name: MSRV gate (exact 1.85)
+  code:
+    name: Code (only when this branch carries the workspace)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Install exact Rust 1.85 toolchain (rustfmt + clippy)
+      - name: Install Rust 1.85 toolchain
         uses: dtolnay/rust-toolchain@1.85
-        with:
-          components: rustfmt, clippy
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
-      - name: cargo build + test on exact 1.85
+      - name: Build and test the workspace, when this branch carries it
         run: |
-          cargo build --workspace --all-targets
-          cargo test --workspace --all-targets
+          if [ -f Cargo.toml ]; then
+            cargo fmt --all -- --check
+            cargo clippy --workspace --all-targets -- -D warnings
+            cargo test --workspace --all-targets
+          else
+            echo "This branch carries the book only — nothing to build."
+          fi
