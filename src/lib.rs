@@ -43,7 +43,7 @@
 //! - `streaming-tokio`: live updates over Tokio watch channels.
 
 pub use scienceview_core;
-pub use scienceview_core::{sv_data, sv_scale, sv_window};
+pub use scienceview_core::{sv_data, sv_decoration, sv_layout, sv_scale, sv_window};
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
