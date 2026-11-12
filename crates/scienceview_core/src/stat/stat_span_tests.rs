@@ -6,7 +6,7 @@
 
 use crate::sv_data::{SVColumnView, SVSparseView};
 use crate::sv_error::SVError;
-use crate::sv_observability::span_test_support::SVSpanRecorder;
+use crate::sv_observability::span_test_support::{SVSpanRecorder, sv_span_test_guard};
 use crate::sv_stat::{SVAggregateOptions, SVBinOptions, SVStat, SVStatInput, SVStatKind};
 use tracing_subscriber::Registry;
 use tracing_subscriber::layer::SubscriberExt;
@@ -24,6 +24,8 @@ fn every_stat_kind_is_named_for_the_span() {
 
 #[test]
 fn an_apply_emits_one_span_with_the_kind_and_the_representation() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let indices = [1usize];
@@ -48,6 +50,8 @@ fn an_apply_emits_one_span_with_the_kind_and_the_representation() {
 
 #[test]
 fn a_failing_apply_records_the_outcome_in_its_span() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let stat = SVStat::bin(SVBinOptions::new());
