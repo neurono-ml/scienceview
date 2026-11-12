@@ -232,5 +232,4 @@ fn the_interpolation_kinds_share_one_easing_curve_definition() {
     assert!((SVInterpolation::EaseInOut.ease(0.5) - 0.5).abs() < 1e-12);
     assert_eq!(SVInterpolation::Step.ease(0.99), 0.0);
     assert_eq!(SVInterpolation::Step.ease(1.0), 1.0);
-    assert_eq!(SVInterpolation::Linear.as_str(), "Linear");
 }

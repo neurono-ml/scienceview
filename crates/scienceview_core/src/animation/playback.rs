@@ -47,15 +47,6 @@ pub enum SVAnimationLoop {
 }
 
 impl SVAnimationLoop {
-    /// Returns the name used in spans and configuration messages.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::None => "None",
-            Self::Count(_) => "Count",
-            Self::Forever => "Forever",
-        }
-    }
-
     /// Returns the number of passes the loop allows, if it is bounded.
     pub fn total_passes(self) -> Option<u32> {
         match self {
@@ -76,17 +67,6 @@ pub enum SVAnimationDirection {
     Reverse,
     /// Forward on one pass, backward on the next.
     Alternate,
-}
-
-impl SVAnimationDirection {
-    /// Returns the name used in spans and configuration messages.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Forward => "Forward",
-            Self::Reverse => "Reverse",
-            Self::Alternate => "Alternate",
-        }
-    }
 }
 
 /// How the state between two neighbouring keyframes is computed.
@@ -110,17 +90,6 @@ pub enum SVInterpolation {
 }
 
 impl SVInterpolation {
-    /// Returns the name used in spans and configuration messages.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Linear => "Linear",
-            Self::EaseIn => "EaseIn",
-            Self::EaseOut => "EaseOut",
-            Self::EaseInOut => "EaseInOut",
-            Self::Step => "Step",
-        }
-    }
-
     /// Applies the curve to a progress in the unit interval.
     pub fn ease(self, progress: f64) -> f64 {
         let progress = if progress.is_finite() {

@@ -15,19 +15,3 @@ pub enum SVKeyframeAdmission {
     /// The keyframe is stamped before the newest retained keyframe.
     DroppedOutOfOrder,
 }
-
-impl SVKeyframeAdmission {
-    /// Returns the name used in spans and diagnostics.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Accepted => "accepted",
-            Self::DroppedDuplicate => "dropped-duplicate",
-            Self::DroppedOutOfOrder => "dropped-out-of-order",
-        }
-    }
-
-    /// Returns `true` when the keyframe entered the window.
-    pub fn is_accepted(self) -> bool {
-        self == Self::Accepted
-    }
-}

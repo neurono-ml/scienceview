@@ -63,18 +63,15 @@ impl SVAnimation {
     }
 
     fn sv_can_start_next_pass(&self) -> bool {
-        match self.loop_mode {
-            SVAnimationLoop::None => false,
-            SVAnimationLoop::Count(count) => self.pass + 1 < count.max(1),
-            SVAnimationLoop::Forever => true,
-        }
+        self.loop_mode
+            .total_passes()
+            .is_none_or(|total| self.pass + 1 < total)
     }
 
     fn sv_remaining_passes(&self) -> u32 {
-        match self.loop_mode {
-            SVAnimationLoop::None => 0,
-            SVAnimationLoop::Count(count) => count.max(1).saturating_sub(self.pass + 1),
-            SVAnimationLoop::Forever => u32::MAX,
+        match self.loop_mode.total_passes() {
+            Some(total) => total.saturating_sub(self.pass + 1),
+            None => u32::MAX,
         }
     }
 
