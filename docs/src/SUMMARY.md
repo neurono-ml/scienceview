@@ -15,4 +15,5 @@
 - [Chapter 8 — Marks: the geometry every recipe draws with](development-explained/ch08-mark-rendering.md)
 - [Chapter 9 — Decorations: axes, legends and the two-pass cycle](development-explained/ch09-chart-decorations.md)
 - [Chapter 10 — Statistical transforms: what the chart says about the data](development-explained/ch10-statistical-transforms.md)
+- [Chapter 12 — SVG: turning a figure into a file nobody has to install](development-explained/ch12-svg-backend.md)
 - [Maintaining this book](development-explained/maintaining.md)
