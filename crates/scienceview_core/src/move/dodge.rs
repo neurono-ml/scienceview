@@ -4,8 +4,13 @@
 //! actually has, so a category with two groups fills its slot with two bars and
 //! a category with four fills it with four. The width is derived from the group
 //! count; it is never assumed.
+//!
+//! A dodge is purely positional: it reads the value column through its
+//! representation-aware accessor and never copies it. Only the displacement and
+//! the narrowed width are materialised.
 
 use crate::sv_error::SVError;
+use crate::sv_move::column::SVMoveColumn;
 use crate::sv_move::working_state::SVMoveState;
 use crate::sv_move::{SVDodgeOptions, SVMoveRequest};
 use std::collections::BTreeMap;
@@ -18,13 +23,13 @@ use std::collections::BTreeMap;
 /// disagree, and [`SVError::InvalidConfiguration`] when a point names a
 /// category the request never declared.
 pub(crate) fn sv_apply_dodge(
-    state: &mut SVMoveState,
+    state: &mut SVMoveState<'_>,
     request: &SVMoveRequest<'_>,
     options: &SVDodgeOptions,
 ) -> Result<(), SVError> {
     let group_keys = request.group_keys();
     let category_keys = request.category_keys();
-    let number_of_points = state.values.len();
+    let number_of_points = state.length;
     if group_keys.len() != number_of_points || category_keys.len() != number_of_points {
         return Err(SVError::MismatchedLengths {
             name: "group_keys".to_string(),
@@ -43,6 +48,13 @@ pub(crate) fn sv_apply_dodge(
 
     let total_width = f64::from(options.width_value());
     let gap = f64::from(options.gap_value());
+    let source = state.source;
+    let horizontal_offsets = state
+        .horizontal_offsets
+        .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
+    let widths = state
+        .widths
+        .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
 
     for index in 0..number_of_points {
         let category_key = category_keys[index];
@@ -71,8 +83,8 @@ pub(crate) fn sv_apply_dodge(
         let centre =
             -total_width / 2.0 + total_width * (ordinal as f64 + 0.5) / number_of_groups as f64;
 
-        state.horizontal_offsets[index] += centre;
-        state.widths[index] = width_per_group;
+        horizontal_offsets.sv_add(index, centre);
+        widths.sv_set(index, width_per_group);
     }
 
     state.widths_produced = true;

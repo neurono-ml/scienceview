@@ -41,7 +41,9 @@ fn three_groups_divide_the_slot_evenly() {
     // Default width 0.8 over three groups: 0.8 / 3 per group, centred on 0.
     let slot = 0.8 / 3.0;
     assert_slice_close(
-        moved.horizontal_offsets(),
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
         &[
             -0.4 + slot * 0.5,
             -0.4 + slot * 1.5,
@@ -51,7 +53,7 @@ fn three_groups_divide_the_slot_evenly() {
             -0.4 + slot * 2.5,
         ],
     );
-    let widths = moved.widths().expect("a dodge narrows the width");
+    let widths = moved.dense_widths().expect("a dodge narrows the width");
     assert_slice_close(widths, &[slot; 6]);
 }
 
@@ -62,10 +64,15 @@ fn the_group_count_is_per_category() {
     let categories = [0, 0, 0, 1, 1];
     let moved = sv_apply_dodge_to(&values, &groups, &categories, SVMove::dodge().into());
 
-    let widths = moved.widths().expect("a dodge narrows the width");
+    let widths = moved.dense_widths().expect("a dodge narrows the width");
     assert_slice_close(&widths[0..3], &[0.8 / 3.0; 3]);
     assert_slice_close(&widths[3..5], &[0.8 / 2.0; 2]);
-    assert_slice_close(&moved.horizontal_offsets()[3..5], &[-0.2, 0.2]);
+    assert_slice_close(
+        &moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")[3..5],
+        &[-0.2, 0.2],
+    );
 }
 
 #[test]
@@ -80,9 +87,14 @@ fn the_gap_shrinks_every_group_inside_its_slot() {
         SVMove::dodge().gap(0.2).width(0.8).into(),
     );
 
-    let widths = moved.widths().expect("a dodge narrows the width");
+    let widths = moved.dense_widths().expect("a dodge narrows the width");
     assert_slice_close(widths, &[0.32, 0.32]);
-    assert_slice_close(moved.horizontal_offsets(), &[-0.2, 0.2]);
+    assert_slice_close(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[-0.2, 0.2],
+    );
 }
 
 #[test]

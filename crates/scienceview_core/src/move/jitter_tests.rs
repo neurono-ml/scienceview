@@ -23,7 +23,8 @@ fn a_non_zero_amount_displaces_points() {
 
     assert!(
         moved
-            .horizontal_offsets()
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
             .iter()
             .any(|offset| offset.abs() > f64::EPSILON),
         "a jitter with an amount must move at least one point"
@@ -39,7 +40,14 @@ fn the_same_seed_produces_the_same_displacement() {
     let first = sv_apply_jitter_to(&values, &groups, jitter.clone());
     let second = sv_apply_jitter_to(&values, &groups, jitter);
 
-    assert_eq!(first.horizontal_offsets(), second.horizontal_offsets());
+    assert_eq!(
+        first
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        second
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
+    );
 }
 
 #[test]
@@ -49,7 +57,14 @@ fn a_different_seed_produces_a_different_displacement() {
     let first = sv_apply_jitter_to(&values, &groups, SVMove::jitter().seed(1).into());
     let second = sv_apply_jitter_to(&values, &groups, SVMove::jitter().seed(2).into());
 
-    assert_ne!(first.horizontal_offsets(), second.horizontal_offsets());
+    assert_ne!(
+        first
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        second
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
+    );
 }
 
 #[test]
@@ -63,7 +78,10 @@ fn the_displacement_stays_within_the_amount_band() {
     );
 
     let band = 0.1 * 0.8;
-    for offset in moved.horizontal_offsets() {
+    for offset in moved
+        .dense_horizontal_offsets()
+        .expect("a dense displacement")
+    {
         assert!(
             offset.abs() <= band + 1e-12,
             "the offset {offset} leaves the documented band {band}"
@@ -83,9 +101,19 @@ fn the_gaussian_mode_is_bounded_and_deterministic() {
     let first = sv_apply_jitter_to(&values, &groups, jitter.clone());
     let second = sv_apply_jitter_to(&values, &groups, jitter);
 
-    assert_eq!(first.horizontal_offsets(), second.horizontal_offsets());
+    assert_eq!(
+        first
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        second
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
+    );
     let band = 0.2 * 0.8;
-    for offset in first.horizontal_offsets() {
+    for offset in first
+        .dense_horizontal_offsets()
+        .expect("a dense displacement")
+    {
         assert!(offset.abs() <= band + 1e-12);
     }
 }
@@ -100,7 +128,14 @@ fn the_offset_follows_the_mark_key_not_the_value() {
     let first = sv_apply_jitter_to(&first_values, &group_keys, jitter.clone());
     let second = sv_apply_jitter_to(&second_values, &group_keys, jitter);
 
-    assert_eq!(first.horizontal_offsets(), second.horizontal_offsets());
+    assert_eq!(
+        first
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        second
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
+    );
 }
 
 #[test]
@@ -112,7 +147,12 @@ fn a_jitter_never_changes_values_widths_or_the_vertical_axis() {
     assert!(!moved.values_changed());
     assert!(moved.values().is_none());
     assert!(moved.widths().is_none());
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
 }
 
 #[test]

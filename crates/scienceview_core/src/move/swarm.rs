@@ -12,7 +12,13 @@
 //! ([`SV_SWARM_MAXIMUM_ATTEMPTS`]) and the overlap scan stops as soon as the
 //! ascending values leave the marker window.
 
+//!
+//! A swarm reads the value column through its representation-aware accessor and
+//! lays out only the entries the column stores, so a sparse input is never
+//! expanded; an implicit sparse zero is not a stored mark and keeps offset zero.
+
 use crate::sv_error::SVError;
+use crate::sv_move::column::SVMoveColumn;
 use crate::sv_move::working_state::SVMoveState;
 use crate::sv_move::{SVMoveRequest, SVSwarmOptions};
 use std::collections::BTreeMap;
@@ -20,8 +26,8 @@ use std::collections::BTreeMap;
 /// How many candidate offsets one point tries before the layout gives up.
 ///
 /// The cap is what bounds the run time even for data that would need a very
-/// wide swarm; the caller sees the last candidate instead of an unbounded
-/// search.
+/// wide swarm; a point that exhausts it is reported as an invalid
+/// configuration instead of being placed on top of another mark.
 pub(crate) const SV_SWARM_MAXIMUM_ATTEMPTS: usize = 1024;
 
 /// Applies a swarm layout to the working state.
@@ -29,42 +35,50 @@ pub(crate) const SV_SWARM_MAXIMUM_ATTEMPTS: usize = 1024;
 /// # Errors
 ///
 /// Returns [`SVError::MismatchedLengths`] when the group codes and the values
-/// disagree; the sequence validates that first.
+/// disagree; the sequence validates that first. Returns
+/// [`SVError::InvalidConfiguration`] when the bounded search cannot place a
+/// point without a collision, naming the group and the point.
 pub(crate) fn sv_apply_swarm(
-    state: &mut SVMoveState,
+    state: &mut SVMoveState<'_>,
     request: &SVMoveRequest<'_>,
     options: &SVSwarmOptions,
 ) -> Result<(), SVError> {
     let group_keys = request.group_keys();
-    if group_keys.len() != state.values.len() {
+    if group_keys.len() != state.length {
         return Err(SVError::MismatchedLengths {
             name: "group_keys".to_string(),
-            expected: state.values.len(),
+            expected: state.length,
             actual: group_keys.len(),
         });
     }
 
     let mut groups: BTreeMap<u32, Vec<usize>> = BTreeMap::new();
-    for (index, group_key) in group_keys.iter().copied().enumerate() {
-        groups.entry(group_key).or_default().push(index);
+    for index in state.values.stored_positions() {
+        groups.entry(group_keys[index]).or_default().push(index);
     }
 
     let marker_extent = options.marker_extent_value();
     let maximum_offset = options.width_value().map(|width| f64::from(width) / 2.0);
+    let source = state.source;
+    let horizontal_offsets = state
+        .horizontal_offsets
+        .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
+    let values = &state.values;
 
     for indices in groups.values_mut() {
         indices.sort_by(|left, right| {
-            state.values[*left]
-                .total_cmp(&state.values[*right])
+            values
+                .value_at(*left)
+                .total_cmp(&values.value_at(*right))
                 .then(left.cmp(right))
         });
 
         let mut placed: Vec<(f64, f64)> = Vec::with_capacity(indices.len());
         for index in indices.iter().copied() {
-            let value = state.values[index];
+            let value = values.value_at(index);
             let offset = sv_place_in_swarm(&placed, value, marker_extent, maximum_offset);
             placed.push((value, offset));
-            state.horizontal_offsets[index] += offset;
+            horizontal_offsets.sv_add(index, offset);
         }
     }
 

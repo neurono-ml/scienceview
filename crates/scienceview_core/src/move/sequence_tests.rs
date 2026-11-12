@@ -106,8 +106,18 @@ fn the_empty_sequence_is_the_identity() {
     let request = SVMoveRequest::new(SVColumnView::Dense(&values), &groups);
     let moved = sequence.apply(&request).expect("the identity applies");
 
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0, 0.0]);
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0, 0.0]
+    );
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0, 0.0]
+    );
     assert!(!moved.values_changed());
     assert!(moved.widths().is_none());
 }

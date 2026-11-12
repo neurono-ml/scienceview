@@ -46,7 +46,7 @@
 //!
 //! // A normalised diverging stack: the group totals to one.
 //! let tops = moved.values().expect("normalize writes new values");
-//! assert!((tops[2] - 1.0).abs() < 1e-12);
+//! assert!((tops.value_at(2).expect("the third point") - 1.0).abs() < 1e-12);
 //! ```
 //!
 //! ## Determinism
@@ -79,6 +79,7 @@
 //! [`sv_scale`](crate::sv_scale)'s job, and drawing them is the mark's; the move
 //! knows nothing about pixels, viewports or backends.
 
+mod column;
 mod dodge;
 mod jitter;
 mod move_definition;
@@ -95,6 +96,7 @@ mod stage;
 mod swarm;
 mod working_state;
 
+pub use column::{SVMoveColumn, SVMoveSparseColumn, SVMoveStoredEntries};
 pub use move_definition::{SVMove, SVMoveKind};
 pub use options::{
     SVDodgeOptions, SVJitterMode, SVJitterOptions, SVNormalisationTarget, SVNormalizeOptions,
@@ -130,6 +132,9 @@ mod sequence_tests;
 #[cfg(test)]
 #[path = "shift_tests.rs"]
 mod shift_tests;
+#[cfg(test)]
+#[path = "sparse_boundary_tests.rs"]
+mod sparse_boundary_tests;
 #[cfg(test)]
 #[path = "stack_tests.rs"]
 mod stack_tests;

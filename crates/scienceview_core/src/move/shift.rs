@@ -1,29 +1,30 @@
 //! Shift: a fixed displacement in data units.
 
 use crate::sv_error::SVError;
+use crate::sv_move::column::SVMoveColumn;
 use crate::sv_move::working_state::SVMoveState;
 use crate::sv_move::{SVShiftDirection, SVShiftOptions};
 
 /// Applies a shift to the working state.
 ///
 /// A shift changes no value and no width: it only moves the marks, so it is the
-/// one move that composes after every displacement and before normalising.
+/// one move that composes after every displacement and before normalising. It
+/// shares the borrowed value column and never copies it; only the shifted
+/// displacement column is materialised.
 pub(crate) fn sv_apply_shift(
-    state: &mut SVMoveState,
+    state: &mut SVMoveState<'_>,
     options: &SVShiftOptions,
 ) -> Result<(), SVError> {
     let amount = options.amount_value();
-    match options.direction_value() {
-        SVShiftDirection::Horizontal => {
-            for offset in &mut state.horizontal_offsets {
-                *offset += amount;
-            }
-        }
-        SVShiftDirection::Vertical => {
-            for offset in &mut state.vertical_offsets {
-                *offset += amount;
-            }
-        }
+    let source = state.source;
+    let offsets = match options.direction_value() {
+        SVShiftDirection::Horizontal => &mut state.horizontal_offsets,
+        SVShiftDirection::Vertical => &mut state.vertical_offsets,
+    }
+    .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
+
+    for index in 0..state.length {
+        offsets.sv_add(index, amount);
     }
     Ok(())
 }

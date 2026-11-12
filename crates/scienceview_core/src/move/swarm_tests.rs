@@ -32,7 +32,12 @@ fn well_separated_values_stay_on_the_axis() {
     let groups = [0; 4];
     let moved = sv_apply_swarm_to(&values, &groups, SVMove::swarm().marker_extent(1.0).into());
 
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0, 0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0, 0.0, 0.0]
+    );
 }
 
 #[test]
@@ -41,7 +46,9 @@ fn identical_values_are_spread_apart() {
     let groups = [0; 4];
     let moved = sv_apply_swarm_to(&values, &groups, SVMove::swarm().marker_extent(1.0).into());
 
-    let offsets = moved.horizontal_offsets();
+    let offsets = moved
+        .dense_horizontal_offsets()
+        .expect("a dense displacement");
     assert_eq!(offsets, &[0.0, 1.0, -1.0, 2.0]);
 }
 
@@ -61,9 +68,13 @@ fn no_two_points_of_a_category_overlap() {
             assert!(
                 !sv_overlaps(
                     values[left],
-                    moved.horizontal_offsets()[left],
+                    moved
+                        .dense_horizontal_offsets()
+                        .expect("a dense displacement")[left],
                     values[right],
-                    moved.horizontal_offsets()[right],
+                    moved
+                        .dense_horizontal_offsets()
+                        .expect("a dense displacement")[right],
                     marker_extent,
                 ),
                 "points {left} and {right} overlap"
@@ -78,7 +89,12 @@ fn categories_are_laid_out_independently() {
     let groups = [0, 1];
     let moved = sv_apply_swarm_to(&values, &groups, SVMove::swarm().marker_extent(1.0).into());
 
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
 }
 
 #[test]
@@ -90,7 +106,14 @@ fn the_layout_is_deterministic() {
     let first = sv_apply_swarm_to(&values, &groups, swarm.clone());
     let second = sv_apply_swarm_to(&values, &groups, swarm);
 
-    assert_eq!(first.horizontal_offsets(), second.horizontal_offsets());
+    assert_eq!(
+        first
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        second
+            .dense_horizontal_offsets()
+            .expect("a dense displacement")
+    );
 }
 
 #[test]
@@ -103,7 +126,10 @@ fn the_width_bounds_the_displacement() {
         SVMove::swarm().marker_extent(0.5).width(2.0).into(),
     );
 
-    for offset in moved.horizontal_offsets() {
+    for offset in moved
+        .dense_horizontal_offsets()
+        .expect("a dense displacement")
+    {
         assert!(
             offset.abs() <= 1.0 + 1e-12,
             "the offset {offset} leaves the half-width 1.0"
@@ -142,5 +168,10 @@ fn a_swarm_never_changes_values() {
     assert!(!moved.values_changed());
     assert!(moved.values().is_none());
     assert!(moved.widths().is_none());
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
 }

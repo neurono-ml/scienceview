@@ -18,8 +18,18 @@ fn a_horizontal_shift_displaces_the_categorical_axis() {
     let values = [1.0, 2.0, 3.0];
     let moved = sv_apply_shift_to(&values, SVMove::shift().amount(0.25).into());
 
-    assert_eq!(moved.horizontal_offsets(), &[0.25, 0.25, 0.25]);
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.25, 0.25, 0.25]
+    );
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0, 0.0]
+    );
 }
 
 #[test]
@@ -33,8 +43,18 @@ fn a_vertical_shift_displaces_the_value_axis() {
             .into(),
     );
 
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0, 0.0]);
-    assert_eq!(moved.vertical_offsets(), &[-1.5, -1.5, -1.5]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0, 0.0]
+    );
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[-1.5, -1.5, -1.5]
+    );
 }
 
 #[test]
@@ -42,8 +62,18 @@ fn the_default_shift_is_the_identity() {
     let values = [1.0, 2.0];
     let moved = sv_apply_shift_to(&values, SVMove::shift().into());
 
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0]);
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
     assert!(!moved.values_changed());
     assert!(moved.widths().is_none());
 }

@@ -1,7 +1,7 @@
 //! Representation parity: the same data through dense, sparse and streaming.
 
 use crate::sv_data::{SVColumnView, SVSparseView, SVStreamingView};
-use crate::sv_move::{SVMove, SVMoveOutput, SVMoveRequest, SVMoveSequence};
+use crate::sv_move::{SVMove, SVMoveColumn, SVMoveOutput, SVMoveRequest, SVMoveSequence};
 
 /// The logical data every representation carries: one implicit zero in the
 /// middle, which a sparse view does not store.
@@ -34,14 +34,40 @@ fn sv_requests<'a>(
     ]
 }
 
+/// Asserts that two columns carry the same logical values, position by
+/// position. A dense and a sparse column describe the same data even though
+/// their storage differs, so the comparison is logical, never structural.
+fn assert_same_column(actual: &SVMoveColumn, expected: &SVMoveColumn) {
+    assert_eq!(actual.length(), expected.length());
+    for index in 0..expected.length() {
+        assert_eq!(
+            actual.value_at(index),
+            expected.value_at(index),
+            "position {index} differs"
+        );
+    }
+}
+
 /// Asserts that three outputs carry the same displacement.
 fn assert_same_displacement(outputs: &[SVMoveOutput; 3]) {
     for output in &outputs[1..] {
-        assert_eq!(output.horizontal_offsets(), outputs[0].horizontal_offsets());
-        assert_eq!(output.vertical_offsets(), outputs[0].vertical_offsets());
-        assert_eq!(output.values(), outputs[0].values());
-        assert_eq!(output.baselines(), outputs[0].baselines());
-        assert_eq!(output.widths(), outputs[0].widths());
+        assert_same_column(output.horizontal_offsets(), outputs[0].horizontal_offsets());
+        assert_same_column(output.vertical_offsets(), outputs[0].vertical_offsets());
+        match (output.values(), outputs[0].values()) {
+            (Some(actual), Some(expected)) => assert_same_column(actual, expected),
+            (None, None) => {}
+            _ => panic!("only one representation produced values"),
+        }
+        match (output.baselines(), outputs[0].baselines()) {
+            (Some(actual), Some(expected)) => assert_same_column(actual, expected),
+            (None, None) => {}
+            _ => panic!("only one representation produced baselines"),
+        }
+        match (output.widths(), outputs[0].widths()) {
+            (Some(actual), Some(expected)) => assert_same_column(actual, expected),
+            (None, None) => {}
+            _ => panic!("only one representation produced widths"),
+        }
     }
 }
 
@@ -137,7 +163,7 @@ fn a_streaming_stack_uses_the_window_total() {
     );
 
     let tops = moved.values().expect("the pipeline writes values");
-    assert!((tops[2] - 1.0).abs() < 1e-12);
+    assert!((tops.value_at(2).expect("the third point") - 1.0).abs() < 1e-12);
     assert_eq!(
         request
             .values()

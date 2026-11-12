@@ -31,11 +31,11 @@ fn positive_values_stack_upward_from_zero() {
     let moved = sv_apply_stack_to(&values, &groups, SVMove::stack().into());
 
     assert_eq!(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[0.0, 1.0, 3.0]
     );
     assert_eq!(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[1.0, 3.0, 6.0]
     );
     assert!(moved.values_changed());
@@ -48,11 +48,11 @@ fn negative_values_stack_downward_from_zero() {
     let moved = sv_apply_stack_to(&values, &groups, SVMove::stack().into());
 
     assert_slice_close(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[0.0, -1.0, -3.0],
     );
     assert_slice_close(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[-1.0, -3.0, -7.0],
     );
 }
@@ -65,11 +65,11 @@ fn mixed_signs_diverge_from_the_same_baseline() {
 
     // Positives accumulate upward, negatives downward, independently.
     assert_slice_close(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[0.0, 0.0, 2.0, -1.0],
     );
     assert_slice_close(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[2.0, -1.0, 5.0, -3.0],
     );
 }
@@ -81,11 +81,11 @@ fn groups_accumulate_independently() {
     let moved = sv_apply_stack_to(&values, &groups, SVMove::stack().into());
 
     assert_slice_close(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[0.0, 1.0, 0.0, 10.0],
     );
     assert_slice_close(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[1.0, 3.0, 10.0, 30.0],
     );
 }
@@ -102,11 +102,11 @@ fn centring_moves_the_group_midpoint_onto_zero() {
 
     // The full stack spans 0..6, so the centre mode shifts everything by -3.
     assert_slice_close(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[-3.0, -2.0, 0.0],
     );
     assert_slice_close(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[-2.0, 0.0, 3.0],
     );
 }
@@ -118,11 +118,11 @@ fn a_zero_keeps_its_own_baseline_and_does_not_advance_the_stack() {
     let moved = sv_apply_stack_to(&values, &groups, SVMove::stack().into());
 
     assert_slice_close(
-        moved.baselines().expect("a stack writes baselines"),
+        moved.dense_baselines().expect("a stack writes baselines"),
         &[0.0, 0.0, 1.0],
     );
     assert_slice_close(
-        moved.values().expect("a stack writes values"),
+        moved.dense_values().expect("a stack writes values"),
         &[1.0, 0.0, 3.0],
     );
 }
@@ -134,6 +134,16 @@ fn a_stack_never_touches_widths_or_offsets() {
     let moved = sv_apply_stack_to(&values, &groups, SVMove::stack().into());
 
     assert!(moved.widths().is_none());
-    assert_eq!(moved.horizontal_offsets(), &[0.0, 0.0]);
-    assert_eq!(moved.vertical_offsets(), &[0.0, 0.0]);
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
+    assert_eq!(
+        moved
+            .dense_vertical_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.0]
+    );
 }

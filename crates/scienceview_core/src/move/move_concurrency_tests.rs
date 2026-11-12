@@ -49,7 +49,10 @@ fn different_seeds_jitter_independently_across_threads() {
                     .expect("a single jitter is a valid sequence");
                 (
                     seed,
-                    sv_apply(&sequence, &request).horizontal_offsets().to_vec(),
+                    sv_apply(&sequence, &request)
+                        .dense_horizontal_offsets()
+                        .expect("a dense displacement")
+                        .to_vec(),
                 )
             }));
         }
