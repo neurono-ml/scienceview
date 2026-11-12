@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-label="The native backend split into a pure rasterizer and a present layer, driven by a model clock">
+  <title>The native backend: two layers and a model clock</title>
+  <desc>A caller supplies a frame callback and a model clock to the frame loop. The present layer blits the rasterizer's RGBA buffer into a winit window through softbuffer. The rasterizer draws backend-agnostic primitives into the buffer and records a dirty region, and it runs headlessly in tests.</desc>
+  <style>
+    .box { stroke-width: 2; rx: 14; }
+    .label { font-family: system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #0b2545; text-anchor: middle; }
+    .detail { font-family: system-ui, sans-serif; font-size: 12px; fill: #204060; text-anchor: middle; }
+    .arrow { stroke: #3d5a80; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    .caption { font-family: system-ui, sans-serif; font-size: 13px; fill: #4a5568; text-anchor: middle; }
+    .lane { font-family: system-ui, sans-serif; font-size: 12px; font-weight: 700; fill: #475569; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#3d5a80"/>
+    </marker>
+  </defs>
+
+  <rect x="10" y="20" width="980" height="190" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="8 6"/>
+  <text x="28" y="45" class="lane">RASTERIZER — no window, compiled always, headless tests</text>
+
+  <rect x="35" y="70" width="175" height="110" class="box" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="122" y="105" class="label">Primitives</text>
+  <text x="122" y="128" class="detail">paths · rectangles</text>
+  <text x="122" y="146" class="detail">circles · text boxes</text>
+  <text x="122" y="164" class="detail">borrowed RGBA images</text>
+
+  <rect x="250" y="70" width="175" height="110" class="box" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="337" y="105" class="label">Coverage</text>
+  <text x="337" y="128" class="detail">non-zero winding</text>
+  <text x="337" y="146" class="detail">capsule strokes</text>
+  <text x="337" y="164" class="detail">4×4 supersampling</text>
+
+  <rect x="465" y="70" width="175" height="110" class="box" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="552" y="105" class="label">SVRasterCanvas</text>
+  <text x="552" y="128" class="detail">RGBA device pixels</text>
+  <text x="552" y="146" class="detail">device pixel ratio</text>
+  <text x="552" y="164" class="detail">dirty region</text>
+
+  <rect x="680" y="70" width="145" height="110" class="box" fill="#fae8ff" stroke="#a855f7"/>
+  <text x="752" y="105" class="label">SVNativeFrame</text>
+  <text x="752" y="128" class="detail">width · height</text>
+  <text x="752" y="146" class="detail">device ratio</text>
+  <text x="752" y="164" class="detail">comparable pixels</text>
+
+  <rect x="855" y="70" width="115" height="110" class="box" fill="#e2e8f0" stroke="#334155"/>
+  <text x="912" y="105" class="label">Bytes</text>
+  <text x="912" y="128" class="detail">render</text>
+  <text x="912" y="146" class="detail">update</text>
+  <text x="912" y="164" class="detail">registry</text>
+
+  <path d="M 212 125 L 246 125" class="arrow"/>
+  <path d="M 427 125 L 461 125" class="arrow"/>
+  <path d="M 642 125 L 676 125" class="arrow"/>
+  <path d="M 827 125 L 851 125" class="arrow"/>
+
+  <rect x="10" y="235" width="980" height="165" rx="18" fill="#fff7ed" stroke="#fdba74" stroke-dasharray="8 6"/>
+  <text x="28" y="260" class="lane">PRESENT LAYER — window feature only (winit + softbuffer stay out of a default build)</text>
+
+  <rect x="35" y="280" width="190" height="100" class="box" fill="#ffedd5" stroke="#ea580c"/>
+  <text x="130" y="313" class="label">SVFrameClock</text>
+  <text x="130" y="336" class="detail">the model owns time</text>
+  <text x="130" y="354" class="detail">None = paused</text>
+
+  <rect x="265" y="280" width="190" height="100" class="box" fill="#ffe4e6" stroke="#e11d48"/>
+  <text x="360" y="313" class="label">SVFrameLoop</text>
+  <text x="360" y="336" class="detail">advance → callback</text>
+  <text x="360" y="354" class="detail">Presented / Idle</text>
+
+  <rect x="495" y="280" width="190" height="100" class="box" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="590" y="313" class="label">SVNativeWindow</text>
+  <text x="590" y="336" class="detail">resize → re-solve</text>
+  <text x="590" y="354" class="detail">DPR → new size</text>
+
+  <rect x="725" y="280" width="245" height="100" class="box" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="847" y="313" class="label">softbuffer surface</text>
+  <text x="847" y="336" class="detail">blit frame pixels</text>
+  <text x="847" y="354" class="detail">winit RedrawRequested</text>
+
+  <path d="M 228 330 L 261 330" class="arrow"/>
+  <path d="M 458 330 L 491 330" class="arrow"/>
+  <path d="M 688 330 L 721 330" class="arrow"/>
+  <path d="M 847 280 C 847 250, 700 250, 700 240" class="arrow"/>
+  <text x="720" y="248" class="caption">a frame per presented tick</text>
+
+  <text x="500" y="422" class="caption">The same rasterizer draws a frame for a test and for a window: only the presenter differs.</text>
+</svg>

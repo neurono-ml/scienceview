@@ -31,15 +31,16 @@ examples.
 | 12 | `ch12-svg-backend.md` | The SVG backend: the document builder, deterministic attribute order and number format, escaping, self-contained PNG rasters, grouped paths, accessibility, registry dispatch and the examples |
 | 13 | `ch13-mark-transitions.md` | Transitions: typed match keys and duplicate detection, the enter/update/exit sets, interpolation driven by the mark kernel's property table, theme motion tokens and reduced motion, the clock-free progress model, the backend capability contract, parity and concurrency |
 | 14 | `ch14-animation-timeline.md` | Animation: the model-owned clock, keyframe deltas and the transition seam, fixed and streaming sources over one bounded window, sampling and easing, playback state, looping and direction, interruptible re-targeting, the action vocabulary and the reproducibility, parity and concurrency tests |
+| 15 | `ch15-native-backend.md` | The native backend: two layers, straight-alpha blending, distance and sampled anti-aliasing, the device pixel ratio, dirty regions, the model-clock frame loop, resize and scale change, and the capability refusal of export |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
 covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
-first rendering backend, chapter 13 covers the transition kernel and chapter 14
-covers the animation timeline, each written by its own change. Later chapters
-are planned, one per capability of the
+first rendering backend, chapter 13 covers the transition kernel, chapter 14
+covers the animation timeline and chapter 15 covers the native backend, each
+written by its own change. Later chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
