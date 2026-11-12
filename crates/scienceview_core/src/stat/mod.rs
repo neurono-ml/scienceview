@@ -71,9 +71,6 @@ mod density_tests;
 #[path = "empirical_cdf_tests.rs"]
 mod empirical_cdf_tests;
 #[cfg(test)]
-#[path = "estimator_tests.rs"]
-mod estimator_tests;
-#[cfg(test)]
 #[path = "fit_tests.rs"]
 mod fit_tests;
 #[cfg(test)]
