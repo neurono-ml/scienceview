@@ -9,7 +9,7 @@
 
 use scienceview::recipes::relational::SVRegressionPlotBuilder;
 use scienceview_core::sv_backend::SVBackendKind;
-use scienceview_core::sv_data::{SVColumnRole, SVDataTable, SVColumnView};
+use scienceview_core::sv_data::{SVColumnRole, SVColumnView, SVDataTable};
 use scienceview_core::sv_decoration::{
     SVAxis, SVAxisSide, SVAxisSpace, SVDecorationStyle, SVGrid, SVLegend, SVTitle, SVTitleRole,
 };
@@ -28,18 +28,10 @@ const PLOT_TOP: f64 = 56.0;
 const PLOT_WIDTH: f64 = 492.0;
 const PLOT_HEIGHT: f64 = 272.0;
 
-const FIRST_X: [f64; 12] = [
-    1.2, 1.6, 1.9, 2.3, 2.7, 3.1, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4,
-];
-const SECOND_X: [f64; 12] = [
-    1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4, 5.8,
-];
-const FIRST_Y: [f64; 12] = [
-    2.1, 2.6, 2.9, 3.6, 4.0, 4.8, 5.1, 5.8, 6.3, 6.9, 7.4, 7.9,
-];
-const SECOND_Y: [f64; 12] = [
-    1.4, 1.9, 2.5, 2.8, 3.5, 3.9, 4.6, 5.0, 5.4, 6.1, 6.5, 7.2,
-];
+const FIRST_X: [f64; 12] = [1.2, 1.6, 1.9, 2.3, 2.7, 3.1, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4];
+const SECOND_X: [f64; 12] = [1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4, 5.8];
+const FIRST_Y: [f64; 12] = [2.1, 2.6, 2.9, 3.6, 4.0, 4.8, 5.1, 5.8, 6.3, 6.9, 7.4, 7.9];
+const SECOND_Y: [f64; 12] = [1.4, 1.9, 2.5, 2.8, 3.5, 3.9, 4.6, 5.0, 5.4, 6.1, 6.5, 7.2];
 
 fn manifest_directory() -> Result<PathBuf, Box<dyn Error>> {
     let directory = std::env::var("CARGO_MANIFEST_DIR")?;
