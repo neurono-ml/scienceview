@@ -96,3 +96,31 @@ fn a_custom_estimator_rejects_an_empty_column() {
 
     assert_eq!(error, SVError::EmptyInput { operation: "fit" });
 }
+
+#[test]
+fn a_streaming_custom_fit_reports_that_it_is_windowed() {
+    let independent = [0.0, 1.0, 2.0, 3.0];
+    let values = [1.0, 3.0, 5.0, 7.0];
+    let x = crate::sv_data::SVStreamingView::new(&independent, 9, 5);
+    let y = crate::sv_data::SVStreamingView::new(&values, 9, 5);
+    let input =
+        SVStatInput::new(SVColumnView::Streaming(y)).with_secondary(SVColumnView::Streaming(x));
+
+    let curve = sv_fit_with_estimator(&SVReferenceLineEstimator, input)
+        .expect("the reference estimator fits the window");
+
+    assert!(curve.is_windowed());
+}
+
+#[test]
+fn a_dense_custom_fit_is_not_windowed() {
+    let independent = [0.0, 1.0, 2.0, 3.0];
+    let values = [1.0, 3.0, 5.0, 7.0];
+    let input = SVStatInput::new(SVColumnView::Dense(&values))
+        .with_secondary(SVColumnView::Dense(&independent));
+
+    let curve = sv_fit_with_estimator(&SVReferenceLineEstimator, input)
+        .expect("the reference estimator fits the line");
+
+    assert!(!curve.is_windowed());
+}

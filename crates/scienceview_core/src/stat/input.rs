@@ -68,9 +68,16 @@ impl<'a> SVStatInput<'a> {
         self.weights
     }
 
-    /// Returns `true` when the primary column is a live window.
+    /// Returns `true` when any input column is a live window.
+    ///
+    /// A fit whose independent column is streaming is as windowed as one
+    /// whose value column is; the flag is a property of the whole input, not
+    /// of the column the statistic answers about.
     pub fn is_windowed(&self) -> bool {
-        self.values.representation() == crate::sv_data::SVRepresentation::Streaming
+        [Some(self.values), self.secondary, self.groups, self.weights]
+            .into_iter()
+            .flatten()
+            .any(|column| column.representation() == crate::sv_data::SVRepresentation::Streaming)
     }
 }
 

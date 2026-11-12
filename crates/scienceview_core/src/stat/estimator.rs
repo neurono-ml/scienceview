@@ -30,6 +30,7 @@ pub struct SVFitCurve {
     coefficients: Vec<f64>,
     grid: Vec<f64>,
     predicted: Vec<f64>,
+    windowed: bool,
 }
 
 impl SVFitCurve {
@@ -46,6 +47,12 @@ impl SVFitCurve {
     /// Returns the fitted value at each grid sample.
     pub fn predicted(&self) -> &[f64] {
         &self.predicted
+    }
+
+    /// Returns `true` when the curve describes only the current window of a
+    /// streaming column.
+    pub fn is_windowed(&self) -> bool {
+        self.windowed
     }
 }
 
@@ -145,6 +152,7 @@ pub fn sv_fit_with_estimator<Estimator: SVFitEstimator + ?Sized>(
         coefficients,
         grid,
         predicted,
+        windowed: input.is_windowed(),
     })
 }
 
