@@ -27,3 +27,23 @@ Events, transitions and in-place update are declared; a static export is not a n
 
 - A CPU renderer is slower than a GPU one for very large point sets; the dependency-light constraint is accepted and the point-splat path mitigates it.
 
+
+### D5 — Two layers, one contract
+
+The rasterizer is a pure value over a pixel buffer and the present layer is the
+only module that depends on a window stack. The split is what makes the frames
+comparable in CI and keeps `winit`/`softbuffer` out of the default build; the
+WebAssembly target reuses the rasterizer unchanged.
+
+### D6 — The clock seam takes no animation type
+
+The frame loop asks an `SVFrameClock` for the next playback position and calls a
+frame callback only when there is one. `scienceview_native` therefore compiles
+before `SVAnimation` and `SVTransition` exist and keeps no dependency on them;
+a paused timeline performs no animation work.
+
+### D7 — No export, by the capability matrix
+
+`save` reports the missing export capability instead of inventing a format. The
+frame is still exposed as bytes, so a future export change can build on the
+rasterizer without changing this backend's declared row.
