@@ -5,9 +5,9 @@
 | Id | FDR-006 |
 | Name | `SVAnimation` |
 | Family | Core — temporal |
-| Status | planned |
+| Status | shipped (kernel); backend frame and reduced-motion theme pending |
 | Layer | Core |
-| Public chapter | _pending_ |
+| Public chapter | `ch14-animation-timeline.md` |
 | Example program | _pending_ |
 
 ## Purpose
