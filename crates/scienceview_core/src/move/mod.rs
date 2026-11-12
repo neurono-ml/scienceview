@@ -109,6 +109,9 @@ pub use sequence::SVMoveSequence;
 pub use stage::SVMoveStage;
 
 #[cfg(test)]
+#[path = "column_tests.rs"]
+mod column_tests;
+#[cfg(test)]
 #[path = "dodge_tests.rs"]
 mod dodge_tests;
 #[cfg(test)]
