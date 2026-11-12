@@ -15,4 +15,6 @@ pub(crate) use paint::sv_mark_paint_attributes;
 pub(crate) use shape::sv_serialize_mark_geometry;
 
 #[cfg(test)]
+mod number_tests;
+#[cfg(test)]
 mod serialize_tests;
