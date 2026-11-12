@@ -5,9 +5,9 @@
 | Id | FDR-003 |
 | Name | `SVMove` |
 | Family | Core — computation |
-| Status | planned |
+| Status | shipped |
 | Layer | Core |
-| Public chapter | _pending_ |
+| Public chapter | `docs/src/development-explained/ch11-positional-moves.md` |
 | Example program | _pending_ |
 
 ## Purpose

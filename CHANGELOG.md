@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The positional-move kernel in `scienceview_core::sv_move`: `SVMove` is the
+  closed vocabulary of stack, dodge, jitter, shift, swarm and normalize, applied
+  in data space between the statistic and the scale. `SVMoveSequence::new`
+  enforces the fixed composition order — one displacement move, then shift,
+  then normalize — and rejects any other ordering with typed
+  `SVError::MoveOrderViolation` and `SVError::ConflictingMoveStage` before data
+  is read. Stacking is diverging (positives up, negatives down, zeros kept at
+  zero), dodge widths derive from the per-category group count, jitter and swarm
+  are deterministic from the mark key through an in-crate SplitMix64 generator
+  with no extra dependency, the swarm layout is collision-free and bounded, and
+  normalize divides by the contribution total so a stacked group reaches one
+  (or one hundred) within `1e-12`. Every move accepts dense, sparse and
+  streaming views, dispatches once, never densifies sparse storage and uses the
+  window total over a stream.
+
 - The decoration kernel in `scienceview_core::sv_decoration`: axes on all four
   sides with ticks derived from the space the layout granted (`SVTickSpace` and
   `SVTickDerivation`) and a deterministic label collision pass, grid lines that
