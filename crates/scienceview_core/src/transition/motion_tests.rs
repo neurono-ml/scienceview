@@ -54,7 +54,7 @@ fn progress_follows_the_duration_and_the_delay() {
 
 #[test]
 fn reduced_motion_collapses_every_duration_to_zero() {
-    let motion = SVMotionStyle::built_in().with_reduced_motion(true);
+    let motion = SVMotionStyle::built_in().reduced();
 
     assert!(motion.is_reduced_motion());
     assert_eq!(motion.duration(), Duration::ZERO);
@@ -68,7 +68,7 @@ fn a_reduced_motion_plan_draws_the_final_state_at_any_progress() {
         .with_property(SVMarkPropertyValue::position(SVMarkPoint::new(0.0, 0.0)))];
     let next = [SVMarkState::new(sv_key())
         .with_property(SVMarkPropertyValue::position(SVMarkPoint::new(10.0, 0.0)))];
-    let plan = sv_transition_with(SVMotionStyle::built_in().with_reduced_motion(true))
+    let plan = sv_transition_with(SVMotionStyle::built_in().reduced())
         .plan(&previous, &next)
         .expect("keys are unique");
 

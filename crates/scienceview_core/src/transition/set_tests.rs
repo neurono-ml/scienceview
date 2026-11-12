@@ -150,3 +150,46 @@ fn the_frame_order_is_deterministic_across_calls() {
         "enters and updates follow the next state, exits follow the previous one"
     );
 }
+
+#[test]
+fn two_empty_states_produce_an_empty_plan_and_an_empty_frame() {
+    let plan = SVTransition::new()
+        .plan(&[], &[])
+        .expect("no key can repeat in an empty state");
+
+    assert!(plan.update().is_empty());
+    assert!(plan.enter().is_empty());
+    assert!(plan.exit().is_empty());
+    assert_eq!(
+        plan.evaluate(0.5)
+            .expect("halfway is a valid progress")
+            .number_of_marks(),
+        0
+    );
+}
+
+#[test]
+fn an_empty_previous_state_turns_every_next_mark_into_an_enter() {
+    let next = [sv_state(sv_key(1.0), 0.0), sv_state(sv_key(2.0), 1.0)];
+
+    let plan = SVTransition::new()
+        .plan(&[], &next)
+        .expect("keys are unique");
+
+    assert_eq!(plan.enter().len(), 2);
+    assert!(plan.update().is_empty());
+    assert!(plan.exit().is_empty());
+}
+
+#[test]
+fn an_empty_next_state_turns_every_previous_mark_into_an_exit() {
+    let previous = [sv_state(sv_key(1.0), 0.0), sv_state(sv_key(2.0), 1.0)];
+
+    let plan = SVTransition::new()
+        .plan(&previous, &[])
+        .expect("keys are unique");
+
+    assert_eq!(plan.exit().len(), 2);
+    assert!(plan.update().is_empty());
+    assert!(plan.enter().is_empty());
+}

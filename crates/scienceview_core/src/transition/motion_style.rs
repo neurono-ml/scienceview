@@ -118,9 +118,14 @@ impl SVMotionStyle {
     }
 
     /// Declares reduced motion, collapsing the duration to zero.
+    ///
+    /// The declaration is one-way on purpose (design D4): a style is either
+    /// subject to reduced motion or not, and a caller cannot switch the
+    /// declaration off once it is made. A theme that reduces motion therefore
+    /// keeps every frame at its final state.
     #[must_use]
-    pub fn with_reduced_motion(mut self, reduced_motion: bool) -> Self {
-        self.reduced_motion = reduced_motion;
+    pub fn reduced(mut self) -> Self {
+        self.reduced_motion = true;
         self
     }
 
