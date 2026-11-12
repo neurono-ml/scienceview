@@ -50,3 +50,15 @@ fn one_observation_has_no_sample_variance() {
     assert_eq!(accumulator.sample_variance(), None);
     assert_eq!(accumulator.sample_standard_deviation(), None);
 }
+
+#[test]
+fn the_normal_quantile_matches_the_reference_values() {
+    use crate::sv_stat::numeric::sv_normal_quantile;
+
+    assert_eq!(sv_normal_quantile(0.5), 0.0);
+    assert!((sv_normal_quantile(0.975) - 1.959_963_984_540_054).abs() < 1e-8);
+    assert!((sv_normal_quantile(0.025) + 1.959_963_984_540_054).abs() < 1e-8);
+    assert!(sv_normal_quantile(0.999) > 3.09);
+    assert_eq!(sv_normal_quantile(0.0), f64::NEG_INFINITY);
+    assert_eq!(sv_normal_quantile(1.0), f64::INFINITY);
+}

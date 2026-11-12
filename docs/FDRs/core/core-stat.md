@@ -5,9 +5,9 @@
 | Id | FDR-002 |
 | Name | `SVStat` |
 | Family | Core — computation |
-| Status | planned |
+| Status | shipped |
 | Layer | Core |
-| Public chapter | _pending_ |
+| Public chapter | `docs/src/development-explained/ch10-statistical-transforms.md` |
 | Example program | _pending_ |
 
 ## Purpose
@@ -138,27 +138,29 @@ the render thread, per the asynchrony principle of the foundation.
 
 ## Acceptance
 
-- [ ] Each stat dispatches on `SVColumnView` exactly once per operation.
-- [ ] A sparse input is never densified; the stat reports the same result as
+- [x] Each stat dispatches on `SVColumnView` exactly once per operation.
+- [x] A sparse input is never densified; the stat reports the same result as
       the equivalent dense input within the documented tolerance.
-- [ ] A streaming input never blocks the render thread and never exceeds the
+- [x] A streaming input never blocks the render thread and never exceeds the
       window.
-- [ ] The `Bin`, `Aggregate` and `Count` kernels produce identical output
+- [x] The `Bin`, `Aggregate` and `Count` kernels produce identical output
       for dense, sparse and streaming inputs of the same data.
-- [ ] The window-dependent kernels (`KernelDensity`, `EmpiricalCdf`,
+- [x] The window-dependent kernels (`KernelDensity`, `EmpiricalCdf`,
       `Percentile`, `Fit`) document their window semantics and reject a
       streaming view with `UnsupportedRepresentation` only where the window is
       genuinely insufficient.
-- [ ] Every kernel has companion tests in a `*_tests.rs` module beside its
+- [x] Every kernel has companion tests in a `*_tests.rs` module beside its
       implementation.
 
 ## Open questions
 
 - Should `Fit` support robust regression (Huber, quantile) as a first-class
-  model, or as a user-supplied function? *Current answer: a user-supplied
-  function, behind a trait, so the core stays dependency-light.*
+  model, or as a user-supplied function? *Answered: a user-supplied function
+  behind `SVFitEstimator`, called through `sv_fit_with_estimator`, so the core
+  stays dependency-light and the closed stat set is unchanged.*
 - Should `Aggregate` support a weighted mean over a weight column in the first
-  version? *Open.*
+  version? *Answered: yes — `Mean` and `Sum` accept weights through
+  `SVStatInput::with_weights`; the other methods reject them explicitly.*
 - What tolerance defines "the same pixels" for a sparse input in the
-  `data-view-boundary` sense? *Open — it must be fixed before the first
-  implementation.*
+  `data-view-boundary` sense? *Answered: dense against sparse is exact and
+  dense against streaming uses `SVRepresentationTolerance::DEFAULT`.*

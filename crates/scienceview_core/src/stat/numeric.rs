@@ -114,6 +114,70 @@ impl SVWelford {
     }
 }
 
+/// Returns the standard-normal quantile of a probability.
+///
+/// This is Acklam's rational approximation: it is accurate to roughly one part
+/// in `1e-9`, which is more than a confidence band can express, and it keeps
+/// the core free of a statistics dependency.
+// The published Acklam coefficients are written with their full precision on
+// purpose: truncating them would silently change the approximation error.
+#[allow(clippy::excessive_precision)]
+pub(crate) fn sv_normal_quantile(probability: f64) -> f64 {
+    const A: [f64; 6] = [
+        -3.969_683_028_665_376e+01,
+        2.209_460_984_245_205e+02,
+        -2.759_285_104_469_687e+02,
+        1.383_577_518_672_690e+02,
+        -3.066_479_806_614_716e+01,
+        2.506_628_277_459_239e+00,
+    ];
+    const B: [f64; 5] = [
+        -5.447_609_879_822_406e+01,
+        1.615_858_368_580_409e+02,
+        -1.556_989_798_598_866e+02,
+        6.680_131_188_771_972e+01,
+        -1.328_068_155_288_572e+01,
+    ];
+    const C: [f64; 6] = [
+        -7.784_894_002_430_293e-03,
+        -3.223_964_580_411_365e-01,
+        -2.400_758_277_161_838e+00,
+        -2.549_732_539_343_734e+00,
+        4.374_664_141_464_968e+00,
+        2.938_163_982_698_783e+00,
+    ];
+    const D: [f64; 4] = [
+        7.784_695_709_041_462e-03,
+        3.224_671_290_700_398e-01,
+        2.445_134_137_142_996e+00,
+        3.754_408_661_907_416e+00,
+    ];
+    const LOWER_TAIL: f64 = 0.024_25;
+    const UPPER_TAIL: f64 = 1.0 - LOWER_TAIL;
+
+    if probability <= 0.0 {
+        return f64::NEG_INFINITY;
+    }
+    if probability >= 1.0 {
+        return f64::INFINITY;
+    }
+
+    if probability < LOWER_TAIL {
+        let q = (-2.0 * probability.ln()).sqrt();
+        (((((C[0] * q + C[1]) * q + C[2]) * q + C[3]) * q + C[4]) * q + C[5])
+            / ((((D[0] * q + D[1]) * q + D[2]) * q + D[3]) * q + 1.0)
+    } else if probability <= UPPER_TAIL {
+        let q = probability - 0.5;
+        let r = q * q;
+        (((((A[0] * r + A[1]) * r + A[2]) * r + A[3]) * r + A[4]) * r + A[5]) * q
+            / (((((B[0] * r + B[1]) * r + B[2]) * r + B[3]) * r + B[4]) * r + 1.0)
+    } else {
+        let q = (-2.0 * (1.0 - probability).ln()).sqrt();
+        -(((((C[0] * q + C[1]) * q + C[2]) * q + C[3]) * q + C[4]) * q + C[5])
+            / ((((D[0] * q + D[1]) * q + D[2]) * q + D[3]) * q + 1.0)
+    }
+}
+
 #[cfg(test)]
 #[path = "numeric_tests.rs"]
 mod numeric_tests;

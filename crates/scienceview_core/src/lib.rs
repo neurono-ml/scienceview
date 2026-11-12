@@ -130,6 +130,19 @@
 //! derive axis ticks from the space the layout engine grants, and resolve their
 //! colours from the same compiled theme tokens.
 //!
+//! ## Statistics
+//!
+//! [`sv_stat`] is the statistical transform between the data boundary and the
+//! marks: `SVStat` is the closed set — bin, count, aggregate, kernel density,
+//! empirical CDF, percentile and fit — and each operation resolves the column
+//! representation exactly once, never densifies a sparse view and never blocks
+//! on a stream. The result is always in data space: bin edges and counts,
+//! category counts, group aggregates with their uncertainty band, density
+//! samples, cumulative breakpoints, quantiles and fit coefficients with their
+//! predicted curve. A stat whose mathematics needs the whole dataset reports
+//! that it was evaluated over the streaming window, and the heavy kernels
+//! (density and fit) can be spawned on a scoped compute thread.
+//!
 //! ## Marks
 //!
 //! [`sv_mark`] is the closed vocabulary every recipe draws with: dot, line,

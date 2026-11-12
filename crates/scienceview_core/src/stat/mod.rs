@@ -21,6 +21,10 @@ mod density_result;
 mod empirical_cdf;
 mod empirical_cdf_options;
 mod empirical_cdf_result;
+mod estimator;
+mod fit;
+mod fit_options;
+mod fit_result;
 mod input;
 mod numeric;
 mod observations;
@@ -40,6 +44,9 @@ pub use density_options::{SVKernelDensityOptions, SVKernelShape};
 pub use density_result::SVKernelDensityResult;
 pub use empirical_cdf_options::SVEmpiricalCdfOptions;
 pub use empirical_cdf_result::SVEmpiricalCdfResult;
+pub use estimator::{SVFitCurve, SVFitEstimator, sv_fit_with_estimator};
+pub use fit_options::{SVFitModel, SVFitOptions};
+pub use fit_result::SVFitResult;
 pub use input::SVStatInput;
 pub use percentile_options::SVPercentileOptions;
 pub use percentile_result::SVPercentileResult;
@@ -52,6 +59,9 @@ mod aggregate_tests;
 #[path = "bin_tests.rs"]
 mod bin_tests;
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
 #[path = "count_tests.rs"]
 mod count_tests;
 #[cfg(test)]
@@ -60,6 +70,12 @@ mod density_tests;
 #[cfg(test)]
 #[path = "empirical_cdf_tests.rs"]
 mod empirical_cdf_tests;
+#[cfg(test)]
+#[path = "estimator_tests.rs"]
+mod estimator_tests;
+#[cfg(test)]
+#[path = "fit_tests.rs"]
+mod fit_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;

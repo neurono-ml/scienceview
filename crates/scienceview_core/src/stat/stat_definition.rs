@@ -16,6 +16,9 @@ use crate::sv_stat::density_result::SVKernelDensityResult;
 use crate::sv_stat::empirical_cdf::sv_apply_empirical_cdf;
 use crate::sv_stat::empirical_cdf_options::SVEmpiricalCdfOptions;
 use crate::sv_stat::empirical_cdf_result::SVEmpiricalCdfResult;
+use crate::sv_stat::fit::sv_apply_fit;
+use crate::sv_stat::fit_options::SVFitOptions;
+use crate::sv_stat::fit_result::SVFitResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::percentile::sv_apply_percentile;
 use crate::sv_stat::percentile_options::SVPercentileOptions;
@@ -36,6 +39,8 @@ pub enum SVStatKind {
     KernelDensity,
     /// Empirical cumulative distribution of one continuous column.
     EmpiricalCdf,
+    /// A curve fitted to one independent and one value column.
+    Fit,
 }
 
 impl SVStatKind {
@@ -48,6 +53,7 @@ impl SVStatKind {
             SVStatKind::Percentile => "Percentile",
             SVStatKind::KernelDensity => "KernelDensity",
             SVStatKind::EmpiricalCdf => "EmpiricalCdf",
+            SVStatKind::Fit => "Fit",
         }
     }
 }
@@ -71,6 +77,8 @@ pub enum SVStat {
     KernelDensity(SVKernelDensityOptions),
     /// Accumulates the empirical distribution of one continuous column.
     EmpiricalCdf(SVEmpiricalCdfOptions),
+    /// Fits a model to one independent and one value column.
+    Fit(SVFitOptions),
 }
 
 impl SVStat {
@@ -104,6 +112,11 @@ impl SVStat {
         SVStat::EmpiricalCdf(options)
     }
 
+    /// Builds a fit stat.
+    pub fn fit(options: SVFitOptions) -> Self {
+        SVStat::Fit(options)
+    }
+
     /// Returns the kind of this stat.
     pub fn kind(&self) -> SVStatKind {
         match self {
@@ -113,13 +126,30 @@ impl SVStat {
             SVStat::Percentile(_) => SVStatKind::Percentile,
             SVStat::KernelDensity(_) => SVStatKind::KernelDensity,
             SVStat::EmpiricalCdf(_) => SVStatKind::EmpiricalCdf,
+            SVStat::Fit(_) => SVStatKind::Fit,
         }
     }
 
     /// Returns `true` when the kernel is heavy enough to belong on the compute
     /// pool rather than on the render thread.
     pub fn is_heavy(&self) -> bool {
-        matches!(self, SVStat::KernelDensity(_))
+        matches!(self, SVStat::KernelDensity(_) | SVStat::Fit(_))
+    }
+
+    /// Spawns the stat on a scoped compute thread and returns its handle.
+    ///
+    /// The render thread keeps drawing while the heavy kernels (`KernelDensity`
+    /// and `Fit`) run on the compute pool the caller provides; the borrowed
+    /// input stays valid for the whole scope, so nothing is copied.
+    pub fn spawn_on<'scope, 'environment>(
+        &'environment self,
+        scope: &'scope std::thread::Scope<'scope, 'environment>,
+        input: SVStatInput<'environment>,
+    ) -> std::thread::ScopedJoinHandle<'scope, Result<SVStatResult, SVError>>
+    where
+        'environment: 'scope,
+    {
+        scope.spawn(move || self.apply(input))
     }
 
     /// Applies the stat to the input columns and returns the derived values in
@@ -132,6 +162,7 @@ impl SVStat {
             SVStat::Percentile(options) => sv_apply_percentile(options, &input),
             SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
             SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
+            SVStat::Fit(options) => sv_apply_fit(options, &input),
         }
     }
 }
@@ -151,6 +182,8 @@ pub enum SVStatResult {
     Density(SVKernelDensityResult),
     /// The derived view of an empirical cumulative distribution.
     Cumulative(SVEmpiricalCdfResult),
+    /// The derived view of a fit.
+    Fit(SVFitResult),
 }
 
 impl SVStatResult {
@@ -163,6 +196,7 @@ impl SVStatResult {
             SVStatResult::Quantiles(_) => SVStatKind::Percentile,
             SVStatResult::Density(_) => SVStatKind::KernelDensity,
             SVStatResult::Cumulative(_) => SVStatKind::EmpiricalCdf,
+            SVStatResult::Fit(_) => SVStatKind::Fit,
         }
     }
 
@@ -173,6 +207,7 @@ impl SVStatResult {
             SVStatResult::Quantiles(result) => result.is_windowed(),
             SVStatResult::Density(result) => result.is_windowed(),
             SVStatResult::Cumulative(result) => result.is_windowed(),
+            SVStatResult::Fit(result) => result.is_windowed(),
             _ => false,
         }
     }
