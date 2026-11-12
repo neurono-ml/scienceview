@@ -12,6 +12,22 @@ released.
 
 ### Added
 
+- The SVG rendering backend `scienceview_svg`: a zero-dependency crate that
+  implements `SVRenderBackend` for `SVBackendKind::Svg` and registers itself in
+  the `SVBackendRegistry`, so `SVFigure::render()` works end to end. It
+  serializes every mark shape (path, rectangle, circle, text and an RGBA raster
+  embedded as a deterministic PNG data URI) and every decoration primitive
+  (line, rectangle and rotated text) into a self-contained document with fixed
+  attribute order and a fixed numeric format, making two renders byte
+  identical. Accessibility metadata (`role="img"`, `aria-label`, `<title>`,
+  `<desc>`), `viewBox`, `width` and `height` are always written and every text
+  and attribute value is escaped. Consecutive equal-paint circles are grouped
+  into one `<path>`, keeping a ten-thousand-point scatter openable. `render`
+  and `save` are implemented; `update` and `show` return the typed
+  `UnsupportedBackendCapability` error declared by the export-only capability
+  row. The `line_plot_svg` and `scatter_svg` examples generate the checked-in
+  documentation figures through the backend, and the figures CI job verifies
+  they never drift.
 - The statistical transform kernel in `scienceview_core::sv_stat`: `SVStat` is
   the closed set of binning, counting, aggregation, kernel density, empirical
   CDF, percentiles and fitting, and every operation resolves the
