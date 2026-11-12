@@ -12,6 +12,7 @@ use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::SVRepresentation;
 use crate::sv_mark::SVMarkKind;
+use crate::sv_move::SVMoveStage;
 use thiserror::Error;
 
 /// Everything that can go wrong while configuring, operating or reading a
@@ -80,6 +81,26 @@ pub enum SVError {
     InvalidConfiguration {
         /// What is wrong and how to fix it.
         message: String,
+    },
+
+    /// Two moves claim the same stage of the fixed composition order.
+    #[error("two moves claim the `{stage}` stage of the move order; a stage runs at most once")]
+    ConflictingMoveStage {
+        /// The stage both moves claim.
+        stage: SVMoveStage,
+    },
+
+    /// A move occupies a stage earlier than its predecessor.
+    #[error(
+        "the move at position {position} occupies the `{found_stage}` stage after `{preceding_stage}`; the fixed order is displacement, then shift, then normalize"
+    )]
+    MoveOrderViolation {
+        /// The position of the offending move in the sequence.
+        position: usize,
+        /// The stage of the preceding move.
+        preceding_stage: SVMoveStage,
+        /// The stage of the offending move.
+        found_stage: SVMoveStage,
     },
 
     /// The requested column is not part of the source.

@@ -154,6 +154,18 @@
 //! consumes is exported from the same module, next to the properties it
 //! describes.
 //!
+//! ## Moves
+//!
+//! [`sv_move`] is the closed vocabulary of positional moves — stack, dodge,
+//! jitter, shift, swarm and normalize — applied between the stat and the scale,
+//! in data space. A move displaces a mark, narrows a bar, or changes the value a
+//! bar represents without ever changing the data it was given; several moves
+//! compose only in the fixed order displacement, then shift, then normalize,
+//! which [`sv_move::SVMoveSequence`] enforces at construction. Jitter and swarm
+//! are deterministic from the mark key, so an animated figure keeps every mark
+//! in place, and every move consumes dense, sparse and streaming views on the
+//! same operation.
+//!
 //! ## Decorations
 //!
 //! [`sv_decoration`] is what makes an encoding legible: axes with ticks that
@@ -172,6 +184,8 @@ pub mod sv_decoration;
 pub mod sv_layout;
 #[path = "mark/mod.rs"]
 pub mod sv_mark;
+#[path = "move/mod.rs"]
+pub mod sv_move;
 #[path = "scale/mod.rs"]
 pub mod sv_scale;
 #[path = "stat/mod.rs"]

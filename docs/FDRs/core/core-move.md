@@ -5,10 +5,10 @@
 | Id | FDR-003 |
 | Name | `SVMove` |
 | Family | Core — computation |
-| Status | planned |
+| Status | shipped (kernel); visual example deferred |
 | Layer | Core |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch11-positional-moves.md` |
+| Example program | deferred until the bar recipe exists (see [Example status](#example-status)) |
 
 ## Purpose
 
@@ -67,10 +67,10 @@ displacement and, where relevant, a new value.
 | Move | Dense | Sparse | Streaming | Note |
 |---|---|---|---|---|
 | `Stack` | yes | yes | **windowed** | a stack needs the group total; over a stream the total is of the window |
-| `Dodge` | yes | yes | yes | only needs group sizes |
-| `Jitter` | yes | yes | yes | purely positional |
-| `Swarm` | yes | yes | yes | deterministic given the data and its order |
-| `Shift` | yes | yes | yes | purely positional |
+| `Dodge` | yes | **stored marks** | yes | only needs group sizes; an implicit zero is not a mark and keeps offset and width zero |
+| `Jitter` | yes | **stored marks** | yes | purely positional; an implicit zero is not a mark and keeps the zero displacement |
+| `Swarm` | yes | yes | yes | deterministic given the data and its order; the implicit zero block reserves the zero slot as one representative |
+| `Shift` | yes | yes | yes | purely positional; the uniform displacement is the column's implicit contribution |
 | `Normalize` | yes | yes | **windowed** | same as `Stack` |
 
 ## Visual channels
@@ -123,15 +123,43 @@ in place while the values around it change.
 Moves are backend-independent. The terminal backend receives the same
 displacements and narrows the bars accordingly.
 
+## Example status
+
+The kernel is shipped and exercised by the companion tests, but a standalone
+example program would have to draw its result, and the chart recipes that turn a
+moved column into a figure are not implemented yet. Rather than shipping an
+example that stops at an assertion, the visual example is **deferred**: it lands
+with the bar recipe that consumes `SVMoveOutput`, in the same change that adds
+`examples/` and its tool-generated figure. Tracking: the bar and stack recipes
+in `docs/FDRs/recipes/`, which list this FDR as their move dependency.
+
 ## Acceptance
 
-- [ ] The composition order of moves is fixed and documented.
-- [ ] `Dodge` and `Stack` produce the same result for dense, sparse and
-      streaming inputs of the same data.
-- [ ] `Jitter` with a fixed seed is reproducible across runs.
-- [ ] `Normalize` and `Stack` over a stream use the window total and say so.
-- [ ] A move never copies the data it displaces.
-- [ ] `Swarm` guarantees no two points of a category overlap, and the layout is deterministic for the same data and order.
+- [x] The composition order of moves is fixed and documented
+      (`sequence_tests.rs`).
+- [x] `Stack`, `Shift`, `Swarm` and `Normalize` produce the same result for
+      dense, sparse and streaming inputs of the same data; `Dodge` and `Jitter`
+      displace only the marks a sparse column stores and assert parity at those
+      stored positions (`parity_tests.rs`).
+- [x] `Jitter` with a fixed seed is reproducible across runs
+      (`jitter_tests.rs`).
+- [x] `Normalize` and `Stack` over a stream use the window total and say so
+      (`parity_tests.rs`).
+- [x] A move never copies the data it displaces: dodge, jitter and shift share
+      the borrowed column, and a value-changing move materialises only the new
+      value it computes (`lazy_buffer_tests.rs`).
+- [x] `Swarm` guarantees no two points of a category overlap, and the layout is
+      deterministic for the same data and order (`swarm_tests.rs`).
+- [x] A sparse input is moved without allocating one slot per logical point:
+      all six moves walk only the stored entries and keep one documented
+      implicit contribution — shift stores no slot at all, dodge, jitter and
+      swarm store only the marks, and the swarm reserves the implicit zero slot
+      as one representative (`sparse_boundary_tests.rs`).
+- [x] Non-finite values are rejected with the typed error naming the position
+      (`non_finite_tests.rs`).
+- [x] A swarm width narrower than two marker extents is rejected at sequence
+      construction, and a point the bounded search cannot place is a typed
+      error rather than a colliding candidate (`swarm_tests.rs`).
 
 ## Open questions
 
