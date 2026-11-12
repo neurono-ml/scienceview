@@ -51,3 +51,6 @@ mod serialize;
 pub use backend::{SVSvgBackend, SVSvgBackendProvider, sv_register_svg_backend};
 pub use document::SVSvgDocument;
 pub use serialize::{sv_escape_text, sv_format_number};
+
+#[cfg(test)]
+mod crate_tests;
