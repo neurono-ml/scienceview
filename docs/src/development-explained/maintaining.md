@@ -26,6 +26,7 @@ examples.
 | 7 | `ch07-layout-solver.md` | The layout solver: the length model, constraints, the measure and solve passes, the four responsiveness modes, the viewport and grid-independence, and the property tests |
 | 8 | `ch08-mark-rendering.md` | Marks: the closed nine-variant vocabulary, the representation parity of the geometry kernel, backend-agnostic primitives, theme defaults and overrides, build-time validation and the interpolable-property table |
 | 9 | `ch09-chart-decorations.md` | Decorations: the measure/solve protocol, space-adaptive ticks and label collision avoidance, the legend entry lifecycle and bounded layout, the colour bar as a scale view, titles, text boxes and themed primitives |
+| 11 | `ch11-positional-moves.md` | Moves: the closed six-variant vocabulary, the enforced composition order and its typed errors, diverging stacks, group-count dodges, keyed deterministic jitter and swarm, normalisation by contribution and representation parity |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7

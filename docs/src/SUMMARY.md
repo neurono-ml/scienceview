@@ -14,4 +14,5 @@
 - [Chapter 7 — Place before you paint: the layout solver](development-explained/ch07-layout-solver.md)
 - [Chapter 8 — Marks: the geometry every recipe draws with](development-explained/ch08-mark-rendering.md)
 - [Chapter 9 — Decorations: axes, legends and the two-pass cycle](development-explained/ch09-chart-decorations.md)
+- [Chapter 11 — Moves: making overlapping marks readable](development-explained/ch11-positional-moves.md)
 - [Maintaining this book](development-explained/maintaining.md)
