@@ -78,7 +78,7 @@ impl SVAnimationBuilder {
         for (position, window) in keyframes.windows(2).enumerate() {
             let previous = window[0].timestamp().as_duration();
             let found = window[1].timestamp().as_duration();
-            if found <= previous {
+            if found < previous {
                 return Err(SVError::OutOfOrderKeyframes {
                     position: position + 1,
                     previous_milliseconds: previous.as_millis() as u64,

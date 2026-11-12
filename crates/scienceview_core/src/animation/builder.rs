@@ -81,7 +81,7 @@ impl SVAnimationBuilder {
         self
     }
 
-    /// Configures the default duration between assigned keyframes.
+    /// Configures the default duration used by subsequent [`deltas`](SVAnimationBuilder::deltas) calls.
     #[must_use]
     pub fn duration(mut self, duration: SVDuration) -> Self {
         self.duration = duration;

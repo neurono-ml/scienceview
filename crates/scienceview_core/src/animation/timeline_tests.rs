@@ -3,8 +3,8 @@
 use std::time::Duration;
 
 use crate::sv_animation::{
-    SVAnimation, SVAnimationBuilder, SVAnimationDirection, SVAnimationLoop, SVDuration,
-    SVInterpolation, SVKeyframe, SVKeyframeDelta, SVPlaybackState,
+    SVAnimation, SVAnimationAction, SVAnimationBuilder, SVAnimationDirection, SVAnimationLoop,
+    SVDuration, SVInterpolation, SVKeyframe, SVKeyframeDelta, SVPlaybackState,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVMarkProperty;
@@ -128,21 +128,42 @@ fn a_fixed_source_rejects_out_of_order_timestamps() {
 }
 
 #[test]
-fn a_fixed_source_rejects_duplicate_timestamps() {
-    let error = SVAnimationBuilder::new()
+fn a_duplicate_timestamp_is_a_zero_length_segment_that_swaps_instantly() {
+    let animation = SVAnimationBuilder::new()
         .keyframe(SVKeyframe::new(sv_seconds(1.0), sv_position(0.0)))
         .keyframe(SVKeyframe::new(sv_seconds(1.0), sv_position(1.0)))
         .build()
-        .expect_err("a duplicate timestamp is not strictly increasing");
+        .expect("a zero-length segment is a legal instant swap");
 
     assert_eq!(
-        error,
-        SVError::OutOfOrderKeyframes {
-            position: 1,
-            previous_milliseconds: 1000,
-            found_milliseconds: 1000,
-        }
+        animation
+            .sample_at(sv_seconds(0.5))
+            .expect("a sample")
+            .value_of(SVMarkProperty::Position),
+        Some(0.0)
     );
+    assert_eq!(
+        animation
+            .sample_at(sv_seconds(1.0))
+            .expect("a sample")
+            .value_of(SVMarkProperty::Position),
+        Some(1.0)
+    );
+}
+
+#[test]
+fn a_zero_duration_collapses_the_whole_timeline_to_the_final_state() {
+    let mut animation = SVAnimationBuilder::new()
+        .duration(SVDuration::zero())
+        .deltas([sv_position(0.0), sv_position(10.0), sv_position(20.0)])
+        .build()
+        .expect("a zero duration is a legal instant swap");
+
+    assert_eq!(sv_sample(&animation), 20.0);
+    animation.play();
+    animation.advance(Duration::from_millis(16));
+    assert_eq!(animation.state(), SVPlaybackState::Finished);
+    assert_eq!(sv_sample(&animation), 20.0);
 }
 
 #[test]
@@ -421,4 +442,62 @@ fn a_restart_after_finishing_begins_at_the_start() {
     animation.play();
     assert_eq!(animation.state(), SVPlaybackState::Playing);
     assert!(animation.position_seconds() < 1e-12);
+}
+
+#[test]
+fn changing_the_speed_at_runtime_changes_subsequent_frames_proportionally() {
+    let mut animation = sv_fixed(&[0.0, 10.0, 20.0]);
+    animation.play();
+    animation.advance(Duration::from_millis(250));
+
+    animation
+        .dispatch(SVAnimationAction::SetSpeed(2.0))
+        .expect("a valid speed");
+    animation.advance(Duration::from_millis(250));
+
+    assert!((animation.position_seconds() - 0.75).abs() < 1e-12);
+}
+
+#[test]
+fn the_action_vocabulary_drives_the_whole_playback() {
+    let mut animation = sv_fixed(&[0.0, 10.0, 20.0]);
+
+    animation
+        .dispatch(SVAnimationAction::Play)
+        .expect("play is valid");
+    assert_eq!(animation.state(), SVPlaybackState::Playing);
+    animation.advance(Duration::from_millis(100));
+
+    animation
+        .dispatch(SVAnimationAction::Pause)
+        .expect("pause is valid");
+    assert_eq!(animation.state(), SVPlaybackState::Paused);
+
+    animation
+        .dispatch(SVAnimationAction::Toggle)
+        .expect("toggle is valid");
+    assert_eq!(animation.state(), SVPlaybackState::Playing);
+
+    animation
+        .dispatch(SVAnimationAction::Seek(sv_seconds(1.0)))
+        .expect("seek is valid");
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
+
+    animation
+        .dispatch(SVAnimationAction::SetDirection(
+            SVAnimationDirection::Alternate,
+        ))
+        .expect("a direction is valid");
+    assert_eq!(animation.direction(), SVAnimationDirection::Alternate);
+
+    animation
+        .dispatch(SVAnimationAction::Stop)
+        .expect("stop is valid");
+    assert_eq!(animation.state(), SVPlaybackState::Idle);
+    assert!(animation.position_seconds() < 1e-12);
+
+    assert_eq!(
+        animation.dispatch(SVAnimationAction::SetSpeed(-1.0)),
+        Err(SVError::InvalidPlaybackSpeed)
+    );
 }

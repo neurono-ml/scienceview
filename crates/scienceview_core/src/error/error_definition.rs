@@ -244,7 +244,7 @@ pub enum SVError {
 
     /// A fixed keyframe source is not strictly increasing in time.
     #[error(
-        "the keyframe at position {position} is stamped {found_milliseconds} ms but the preceding keyframe is stamped {previous_milliseconds} ms; timestamps must strictly increase"
+        "the keyframe at position {position} is stamped {found_milliseconds} ms but the preceding keyframe is stamped {previous_milliseconds} ms; timestamps must not decrease"
     )]
     OutOfOrderKeyframes {
         /// The position of the offending keyframe.

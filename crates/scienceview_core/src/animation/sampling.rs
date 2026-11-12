@@ -16,9 +16,18 @@ pub(crate) fn sv_sample_keyframes(
     interpolation: SVInterpolation,
 ) -> Option<SVKeyframeDelta> {
     let first = keyframes.front()?;
+    let last = keyframes.back().unwrap_or(first);
     let first_seconds = first.timestamp().as_seconds();
-    if position <= first_seconds {
+    if position < first_seconds {
         return Some(first.delta().clone());
+    }
+    if position <= first_seconds {
+        let last_seconds = last.timestamp().as_seconds();
+        return Some(if last_seconds == first_seconds {
+            last.delta().clone()
+        } else {
+            first.delta().clone()
+        });
     }
 
     let mut previous = first;
