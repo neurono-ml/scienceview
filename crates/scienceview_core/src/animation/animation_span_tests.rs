@@ -1,9 +1,9 @@
 //! Verifies the animation span fields through a real subscriber (patterns P8).
 //!
-//! The callsite interest cache is global, so a test that installs a plain
-//! subscriber in another thread can briefly disable this callsite. Each test
-//! therefore rebuilds the cache and retries an idempotent operation until the
-//! recorder sees the span, instead of racing the rest of the test binary.
+//! Every test holds the shared span-test guard, so no parallel test can change
+//! the process-wide callsite interest cache while a recorder is installed. The
+//! cache is rebuilt once after the guard is held, which is enough because the
+//! guard serializes every subscriber install.
 
 use std::time::Duration;
 
@@ -11,7 +11,9 @@ use crate::sv_animation::{
     SVAnimation, SVAnimationBuilder, SVDuration, SVKeyframe, SVKeyframeDelta, SVKeyframeSource,
 };
 use crate::sv_mark::SVMarkProperty;
-use crate::sv_observability::span_test_support::{SVSpanFields, SVSpanRecorder};
+use crate::sv_observability::span_test_support::{
+    SVSpanFields, SVSpanRecorder, sv_span_test_guard,
+};
 use tracing_subscriber::Registry;
 use tracing_subscriber::layer::SubscriberExt;
 
@@ -36,20 +38,15 @@ fn sv_streaming() -> SVAnimation {
     animation
 }
 
-fn sv_capture_span(recorder: &SVSpanRecorder, mut operation: impl FnMut()) -> Vec<SVSpanFields> {
-    for _ in 0..64 {
-        tracing::callsite::rebuild_interest_cache();
-        operation();
-        let captured = recorder.captured();
-        if !captured.is_empty() {
-            return captured;
-        }
-    }
-    Vec::new()
+fn sv_capture_span(recorder: &SVSpanRecorder, operation: impl FnOnce()) -> Vec<SVSpanFields> {
+    operation();
+    recorder.captured()
 }
 
 #[test]
 fn an_advance_emits_one_span_with_the_source_and_the_position() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let mut animation = sv_streaming();
@@ -74,6 +71,8 @@ fn an_advance_emits_one_span_with_the_source_and_the_position() {
 
 #[test]
 fn a_push_keyframe_emits_one_span() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let mut animation = sv_streaming();
@@ -93,6 +92,8 @@ fn a_push_keyframe_emits_one_span() {
 
 #[test]
 fn a_sample_emits_one_span() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let animation = sv_streaming();

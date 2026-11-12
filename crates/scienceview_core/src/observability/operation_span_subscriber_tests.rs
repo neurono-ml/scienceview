@@ -9,13 +9,15 @@ use crate::sv_backend::test_support::SVCallRecorder;
 use crate::sv_backend::test_support::sv_registry_with_recording_backend;
 use crate::sv_data::SVColumnView;
 use crate::sv_figure::SVFigureBuilder;
-use crate::sv_observability::span_test_support::SVSpanRecorder;
+use crate::sv_observability::span_test_support::{SVSpanRecorder, sv_span_test_guard};
 use std::sync::Arc;
 use tracing_subscriber::Registry;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[test]
 fn render_emits_one_span_with_the_configured_kind_and_fields() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let values = [1.0, 2.0, 3.0];
@@ -43,6 +45,8 @@ fn render_emits_one_span_with_the_configured_kind_and_fields() {
 
 #[test]
 fn a_failing_operation_records_the_configured_kind_and_the_failure() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
     let values = [1.0, 2.0];

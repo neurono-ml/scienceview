@@ -7,12 +7,30 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
+use std::sync::PoisonError;
 use tracing::Id;
 use tracing::Subscriber;
 use tracing::field::Field;
 use tracing::field::Visit;
 use tracing_subscriber::Layer;
 use tracing_subscriber::layer::Context;
+
+/// Serializes tests that install a subscriber for the shared recorder.
+///
+/// The tracing callsite interest cache is process-wide: a test that installs
+/// its subscriber while another test is between callsites can cache the wrong
+/// interest for a callsite and hide the span from the recorder. Every test that
+/// asserts on captured spans holds this guard and rebuilds the interest cache
+/// once before installing its subscriber, so the tests do not race each other.
+static SV_SPAN_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+/// Acquires the shared span-test guard.
+pub(crate) fn sv_span_test_guard() -> MutexGuard<'static, ()> {
+    SV_SPAN_TEST_LOCK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+}
 
 /// One captured span, field name to rendered value.
 pub(crate) type SVSpanFields = BTreeMap<String, String>;
