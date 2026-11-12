@@ -80,16 +80,23 @@ let stat = SVStat::bin(
 );
 
 match stat.apply(SVStatInput::new(SVColumnView::Dense(&values))) {
-    Ok(SVStatResult::Bins(bins)) => assert_eq!(bins.counts(), &[0.4, 0.6]),
+    Ok(SVStatResult::Bins(bins)) => {
+        // Two bins over [1, 4]: [1, 2.5) holds 1, 2, 2 and [2.5, 4] holds 3, 4.
+        assert_eq!(bins.edges(), &[1.0, 2.5, 4.0]);
+        assert_eq!(bins.counts(), &[0.6, 0.4]);
+    }
     other => panic!("the bin stat produces bins: {other:?}"),
 }
 ```
 
 ## One column, three representations
 
-Every stat reads its columns through `SVColumnView::dispatch`, so the
-representation is resolved exactly once per column. The interesting part is
-what happens *after* the dispatch.
+Every stat reads its columns through `SVObservationValues::from_view`, which
+resolves the representation with `SVColumnView::dispatch` exactly once per
+column. Aggregate, fit and the custom-estimator path are no exception: they
+resolve the value, independent, group and weight columns once and then read
+stored entries, never re-dispatching inside a logical loop. The interesting
+part is what happens *after* the dispatch.
 
 ### Sparse storage is counted, not expanded
 
@@ -206,6 +213,18 @@ time. That is how a sparse column with a million implicit zeros contributes to
 a mean or a standard deviation without a million iterations.
 `welford_folds_repeated_values_in_constant_time` compares the folded result
 with the one-by-one loop.
+
+The aggregate uses that fold. It drives the pass over the value column's
+*stored entries* and then adds the implicit zeros as one multiplicity, so an
+ungrouped aggregate over a sparse view is `O(stored)` in the logical length.
+`a_sparse_column_folds_its_implicit_zeros_in_stored_time` proves it with a
+logical length of a trillion: any accidental `0..length` loop would hang.
+Grouped input reads the group code from the already-resolved column — a sparse
+group column answers its zeros from its stored entries and the implicit zero
+code. The median combines the sorted stored values with the zero multiplicity
+analytically (`a_sparse_median_includes_its_implicit_zeros`), and
+`the_aggregate_agrees_across_the_three_representations` replays one dataset
+through dense, sparse and streaming views for five methods.
 
 `every_aggregate_method_produces_its_hand_computed_value` walks through all
 seven methods on `[1, 2, 3, 4]`, including the sample standard deviation
@@ -327,11 +346,23 @@ The transformations impose domain requirements: exponential and power fits
 need positive `y`, logarithmic and power fits need positive `x`. Violations
 are configuration errors naming the position, not `NaN`s.
 
-The normal equations are assembled once and solved by Gauss-Jordan elimination
-with partial pivoting. A singular design — all `x` equal, or a degree larger
-than the data can support — is reported as a configuration error. The
-coefficient vector is ordered from the constant term upwards; the exponential
-and power models convert their logged intercept back with `exp`.
+The normal equations are **conditioned** before they are assembled. An
+uncentred design around `x ≈ 1.7e9` makes the moments of the matrix span
+eighteen orders of magnitude, and the small curvature information disappears in
+the rounding of the large ones; a line through such data comes back flat. The
+kernel therefore solves in `z = (x − offset) / scale`, where `offset` is the
+compensated mean and `scale` the largest deviation from it, so every moment is
+of order one, then expands the solution back into the caller's coefficients
+(`Σ_{j ≥ i} c_j · C(j, i) · (−offset)^(j−i) / scale^j`). The confidence band
+builds its design vector in the same conditioned coordinate. Regression tests
+pin a line at `x ≈ 1e6` and at `x ≈ 1.7e9`, plus a degree-2 curve at `1e6`
+(`a_linear_fit_survives_a_large_offset_of_a_billion` and its siblings).
+
+The conditioned normal equations are assembled once and solved by Gauss-Jordan
+elimination with partial pivoting. A singular design — all `x` equal, or a
+degree larger than the data can support — is reported as a configuration
+error. The coefficient vector is ordered from the constant term upwards; the
+exponential and power models convert their logged intercept back with `exp`.
 
 `a_linear_fit_recovers_the_line_that_generated_the_data` checks
 `y = 1 + 2x`, and the polynomial, exponential, logarithmic and power tests
@@ -372,14 +403,21 @@ coefficients and an evaluation, so the core stays dependency-light while the
 stat set stays closed. `a_custom_estimator_recovers_the_line_it_fits`
 implements a hand-written least-squares line and checks the recovery.
 
-## Stability, determinism and the compute pool
+## Stability, observability, determinism and the compute pool
 
-Three properties cut across every kernel.
+Four properties cut across every kernel.
 
 **No `NaN` leaks.** Every observation is checked for finiteness before it is
 used, and the error carries the logical position of the offending value
 (`a_non_finite_value_is_rejected_with_its_position`). Zeros are always finite,
 so sparse storage needs no extra pass for its implicit entries.
+
+**Observability.** Every `SVStat::apply` runs inside one `scienceview.stat`
+span recording `stat.kind` (through `SVStatKind::as_str`), the value column's
+`representation`, the logical `points`, the `duration` and the `outcome` — the
+same shape the operation span fixed, so a new kernel cannot invent its own
+fields. `an_apply_emits_one_span_with_the_kind_and_the_representation` asserts
+what an exporter would read.
 
 **Determinism.** A statistic that is order-independent must not depend on the
 input order. Means, variances, sums and quantiles use order-independent
@@ -391,10 +429,10 @@ accumulators or a sort, and
 is not associative, so the compensated sum and Welford update are what make
 "independent of order" true in practice as well as in theory.
 
-**Never on the render thread.** A density over a large sample or a fit over a
-long window is expensive. `SVStat::is_heavy()` reports whether the variant is
-one of those two, and `SVStat::spawn_on(scope, input)` hands it to a scoped
-compute thread:
+**Off the calling thread, when the caller asks.** A density over a large sample
+or a fit over a long window is expensive. `SVStat::is_heavy()` reports whether
+the variant is one of those two, and `SVStat::spawn_on(scope, input)` hands it
+to a scoped compute thread:
 
 ```rust
 use scienceview_core::sv_data::SVColumnView;
@@ -412,9 +450,13 @@ std::thread::scope(|scope| {
 
 The borrowed window stays valid for the whole scope, so nothing is copied and
 no runtime is added to the core. `a_heavy_stat_can_run_on_a_scoped_compute_thread`
-asserts that the spawned result equals the direct one, and
+asserts that the spawned result equals the direct one. Offloading is the
+caller's decision, never an implicit background pool: the core owns no runtime,
+and the owner of the frame loop is the only place that knows whether a spawn
+pays for the frame in flight.
 `every_stat_runs_concurrently_over_the_same_borrowed_columns` runs all six
-borrowed-column stats from four threads at once.
+borrowed-column stats from four threads at once and asserts that every thread
+produces the same result as the calling thread, not merely that none panics.
 
 ## The tests are the specification
 
@@ -426,10 +468,11 @@ borrowed-column stats from four threads at once.
 | `percentile_tests.rs` | quartiles, extremes, sparse zeros, window flag, invalid quantiles |
 | `density_tests.rs` | grid span, kernel constants, bandwidth rule, unit area, sparse parity, degenerate spread |
 | `empirical_cdf_tests.rs` | breakpoints, cumulative counts, sparse zeros, window flag |
-| `fit_tests.rs` | five models, confidence bands, sparse rejection, domain errors, order independence |
+| `fit_tests.rs` | five models, conditioning at large offsets, confidence bands, sparse rejection, domain errors, order independence |
 | `estimator_tests.rs` | the user-supplied estimator trait |
 | `parity_tests.rs` | the parity harness adopted by binning, and counting parity |
-| `concurrency_tests.rs` | thread-safe application and scoped compute threads |
+| `concurrency_tests.rs` | thread-safe application with equal results, scoped compute threads |
+| `stat_span_tests.rs` | the `scienceview.stat` span fields for success and failure |
 | `numeric_tests.rs` | compensated sums, Welford and the normal quantile |
 | `observations_tests.rs` | non-densifying sparse reads and first-appearance order |
 | `sorted_observations_tests.rs` | quantiles over an analytic zero multiplicity |
@@ -444,11 +487,12 @@ borrowed-column stats from four threads at once.
    on.
 4. **Windowed results say so.** Density, CDF, percentile and fit over a stream
    carry the flag; bin, count and aggregate are exact over the view.
-5. **Stability is a feature.** Welford, compensated sums and explicit
-   finiteness checks are why the same data always produces the same answer.
-6. **Heavy kernels belong off the render thread.** `is_heavy` and `spawn_on`
-   make the compute pool the caller's decision without adding a runtime to the
-   core.
+5. **Stability is a feature.** Welford, compensated sums, a conditioned fit
+   design and explicit finiteness checks are why the same data always produces
+   the same answer.
+6. **Heavy kernels belong off the calling thread, when the caller asks.**
+   `is_heavy` and `spawn_on` make offloading the caller's decision without
+   adding a runtime to the core, and the stat never blocks on a stream.
 
 The next wave composes these derived values into positional moves and the
 animation timeline; chapter 11 follows `SVMove` from a stacked bar to a
