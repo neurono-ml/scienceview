@@ -12,6 +12,75 @@ released.
 
 ### Added
 
+- The SVG rendering backend `scienceview_svg`: a zero-dependency crate that
+  implements `SVRenderBackend` for `SVBackendKind::Svg` and registers itself in
+  the `SVBackendRegistry`, so `SVFigure::render()` works end to end. It
+  serializes every mark shape (path, rectangle, circle, text and an RGBA raster
+  embedded as a deterministic PNG data URI) and every decoration primitive
+  (line, rectangle and rotated text) into a self-contained document with fixed
+  attribute order and a fixed numeric format, making two renders byte
+  identical. Accessibility metadata (`role="img"`, `aria-label`, `<title>`,
+  `<desc>`), `viewBox`, `width` and `height` are always written and every text
+  and attribute value is escaped. Consecutive equal-paint circles are grouped
+  into one `<path>`, keeping a ten-thousand-point scatter openable. `render`
+  and `save` are implemented; `update` and `show` return the typed
+  `UnsupportedBackendCapability` error declared by the export-only capability
+  row. The `line_plot_svg` and `scatter_svg` examples generate the checked-in
+  documentation figures through the backend, and the figures CI job verifies
+  they never drift.
+- The statistical transform kernel in `scienceview_core::sv_stat`: `SVStat` is
+  the closed set of binning, counting, aggregation, kernel density, empirical
+  CDF, percentiles and fitting, and every operation resolves the
+  `SVColumnView` representation exactly once. Sparse columns contribute their
+  implicit zeros as a multiplicity and are never densified; streaming columns
+  are read from the bounded window they already carry, and the window-dependent
+  kernels report `windowed` instead of pretending to be exact. Binning supports
+  explicit edges, widths and counts with count, probability and density
+  normalisation; aggregation reports a value plus a standard-deviation, standard
+  error or centred-percentile band, uses Welford variance and accepts weights for
+  weighted means and sums; percentiles and the empirical CDF sort stored values
+  without expanding implicit zeros; kernel density implements Gaussian,
+  Epanechnikov and uniform kernels with Silverman's bandwidth rule; and fitting
+  covers linear, polynomial, exponential, logarithmic and power models with a
+  confidence band, plus the `SVFitEstimator` trait for user-supplied models.
+  Non-finite observations are errors with their position, order-independent
+  statistics ignore input order, and the heavy kernels expose `is_heavy` and
+  `spawn_on` so they can run on a scoped compute thread. The kernel is
+  re-exported from the root facade as `scienceview::sv_stat`.
+- The decoration kernel in `scienceview_core::sv_decoration`: axes on all four
+  sides with ticks derived from the space the layout granted (`SVTickSpace` and
+  `SVTickDerivation`) and a deterministic label collision pass, grid lines that
+  reuse the placed tick coordinates, a legend whose entries follow the series
+  enter/exit lifecycle with a bounded overflow row, a colour bar tied to the
+  very `SVContinuousColourScale` the cells use, and titles, subtitles and
+  captions. Every decoration measures itself in the measure pass, places itself
+  in the solve pass and emits backend-agnostic line, rectangle and text
+  primitives; text is measured as a box until a backend rasterizes glyphs. The
+  decoration style reads the existing `theme` feature's tokens and mirrors the
+  same values in documented built-in defaults when the feature is off.
+- The scale kernel in `scienceview_core::sv_scale`: `SVScale` is the closed
+  model with exactly four kinds — continuous, nominal, temporal and boolean —
+  and each scale owns its data domain and its display range together, so an
+  axis and the marks on it cannot disagree while the domain animates. Domains
+  are explicit when configured and derived from a dense, sparse or streaming
+  `SVColumnView` otherwise, with the representation resolved once and the
+  sparse storage never densified.
+- `SVScaleTransform` with `Linear`, `Logarithmic`, `SymmetricLogarithmic` and
+  `SquareRoot`, each exposing a forward map and its inverse; an undefined value
+  is a configuration error instead of a `NaN`.
+- Colour scales: `SVScalePalette` assigns a stable palette entry per category
+  so a series keeps its colour across updates, while `SVContinuousColourScale`
+  interpolates a colour map. Both work without any theme dependency through
+  the default palette and colour map; with the new core `theme` feature they
+  resolve theme tokens and re-resolve them per call, so a theme recompilation
+  restyles continuous encodings without rebuilding the figure.
+- The tick derivation hook: `SVTickSpace` turns the axis length and minimum
+  label spacing the layout engine grants into a tick budget, and
+  `SVScale::ticks` derives values, positions and labels per kind, including
+  integer-exponent logarithmic ticks and a readable temporal unit ladder.
+  `SVTickDerivation` is the trait a decoration consumes.
+- The scale is the first real kernel to adopt the `SVRepresentationParityHarness`
+  in `sv_data`, proving dense, sparse and streaming domain derivation agree.
 - The layout solver in `scienceview_core` (`sv_layout`): a total length model
   (`SVLength` with absolute, fraction, intrinsic, aspect-ratio and fill
   variants), minimum and maximum constraints, a layout tree solved in two
@@ -90,6 +159,11 @@ released.
 
 ### Changed
 
+- The data boundary is exposed through the public modules `sv_data` and
+  `sv_window` (the on-disk folders stay `data/` and `window/`), its failures are
+  folded into `SVError` so the crate keeps one public error type, and `SVFigure`
+  carries the data layer's `SVColumnView` instead of a duplicate representation
+  enumeration.
 - CI now runs the workspace quality gates — formatting, clippy with warnings as
   errors and the workspace test suite — plus a figures job that reruns every
   example and fails on any drift under `docs/figures/`.

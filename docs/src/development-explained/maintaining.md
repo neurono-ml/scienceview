@@ -26,13 +26,17 @@ examples.
 | 7 | `ch07-layout-solver.md` | The layout solver: the length model, constraints, the measure and solve passes, the four responsiveness modes, the viewport and grid-independence, and the property tests |
 | 8 | `ch08-mark-rendering.md` | Marks: the closed nine-variant vocabulary, the representation parity of the geometry kernel, backend-agnostic primitives, theme defaults and overrides, build-time validation and the interpolable-property table |
 | 9 | `ch09-chart-decorations.md` | Decorations: the measure/solve protocol, space-adaptive ticks and label collision avoidance, the legend entry lifecycle and bounded layout, the colour bar as a scale view, titles, text boxes and themed primitives |
+| 10 | `ch10-statistical-transforms.md` | Statistical transforms: the closed seven-variant `SVStat`, non-densifying sparse reads and streaming windows, binning, counting, aggregation with Welford and weighted means, percentiles without expansion, kernel density and bandwidth rules, the empirical CDF, the five fit models with confidence bands and the estimator trait, determinism and the scoped compute pool |
 | 11 | `ch11-positional-moves.md` | Moves: the closed six-variant vocabulary, the enforced composition order and its typed errors, diverging stacks, group-count dodges, keyed deterministic jitter and swarm, normalisation by contribution and representation parity |
+| 12 | `ch12-svg-backend.md` | The SVG backend: the document builder, deterministic attribute order and number format, escaping, self-contained PNG rasters, grouped paths, accessibility, registry dispatch and the examples |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
-covers the layout solver, chapter 8 covers the mark kernel and chapter 9
-covers the decoration surface, each written by its own change. Later chapters are
-planned, one per capability of the `foundation-core-architecture` change —
+covers the layout solver, chapter 8 covers the mark kernel, chapter 9
+covers the decoration surface, chapter 10 covers the statistical transform
+kernel, chapter 11 covers the positional-move kernel and chapter 12 covers the
+first rendering backend, each written by its own change. Later chapters are planned, one per capability of the
+`foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
 `dashboard` — and are written as the corresponding implementation changes

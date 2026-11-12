@@ -31,11 +31,18 @@ jobs:
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Checkout the code from the code branch
+      # The book is pinned to the exact code revision that produced its
+      # mirrored figures. The pin is a commit, so it stays reachable after the
+      # code branch is merged and deleted; a book change updates the pin when it
+      # regenerates the figures.
+      - name: Read the pinned code revision
+        id: pinned
+        run: echo "commit=$(cat docs/figures-source-commit)" >> "$GITHUB_OUTPUT"
+      - name: Checkout the code from the pinned revision
         uses: actions/checkout@v6
         with:
           repository: neurono-ml/scienceview
-          ref: main
+          ref: ${{ steps.pinned.outputs.commit }}
           path: code
       - name: Install Rust 1.85 toolchain
         uses: dtolnay/rust-toolchain@1.85
@@ -44,8 +51,15 @@ jobs:
       - name: Regenerate the figures with the tool itself
         working-directory: code
         run: |
-          cargo run --example line_plot_svg
-          cargo run --example bar_chart_svg
+          shopt -s nullglob
+          examples=(examples/*.rs)
+          if [ ${#examples[@]} -eq 0 ]; then
+            echo "no example programs found under examples/" >&2
+            exit 1
+          fi
+          for example in "${examples[@]}"; do
+            cargo run --example "$(basename "${example}" .rs)"
+          done
       - name: The mirrored figures must match the code branch
         run: |
           # The code branch owns the figures; its path moved once already, so
