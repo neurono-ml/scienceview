@@ -18,6 +18,39 @@ use crate::sv_move::column::SVMoveColumn;
 /// logical position. Read a column through [`SVMoveColumn::value_at`] or the
 /// per-point accessors below; [`SVMoveColumn::dense_values`] exists for the
 /// common dense case.
+///
+/// ```
+/// use scienceview_core::sv_data::SVColumnView;
+/// use scienceview_core::sv_move::{
+///     SVMove, SVMoveRequest, SVMoveSequence, SVShiftDirection,
+/// };
+///
+/// let values = [1.0, 2.0];
+/// let groups = [0, 1];
+/// let categories = [0, 0];
+/// let sequence = SVMoveSequence::new(vec![
+///     SVMove::dodge().into(),
+///     SVMove::shift().amount(0.5).direction(SVShiftDirection::Vertical).into(),
+/// ])
+/// .expect("dodge then shift is the documented order");
+/// let moved = sequence
+///     .apply(
+///         &SVMoveRequest::new(SVColumnView::Dense(&values), &groups)
+///             .with_category_keys(&categories),
+///     )
+///     .expect("the sequence applies");
+///
+/// // Two groups split the default 0.8 slot: each is 0.4 wide and centred at
+/// // -0.2 and +0.2. The vertical shift moves both marks up by half a unit.
+/// let close = |actual: Option<f64>, expected: f64| {
+///     assert!((actual.expect("a produced displacement") - expected).abs() < 1e-6);
+/// };
+/// close(moved.horizontal_offset(0), -0.2);
+/// close(moved.horizontal_offset(1), 0.2);
+/// close(moved.vertical_offset(0), 0.5);
+/// close(moved.width_at(1), 0.4);
+/// assert_eq!(moved.horizontal_offset(2), None);
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct SVMoveOutput {
     horizontal_offsets: SVMoveColumn,
