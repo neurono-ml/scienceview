@@ -180,7 +180,8 @@
 //! sparse or streaming state resolves its keys with one dispatch, without
 //! densifying sparse storage or blocking the render thread.
 //!
-//! ## Decorations//!
+//! ## Decorations
+//!
 //! [`sv_decoration`] is what makes an encoding legible: axes with ticks that
 //! fit the granted space, grid lines, the legend that follows the series
 //! lifecycle, the colour bar tied to its continuous colour scale, and the
