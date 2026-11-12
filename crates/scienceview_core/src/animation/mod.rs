@@ -48,7 +48,8 @@
 //! ## Fixed and streaming sources are one structure
 //!
 //! [`SVKeyframeSource`] is `Fixed` or `Streaming` (design D3). A fixed list is
-//! validated at build time — timestamps must be strictly increasing — while a
+//! validated at build time — timestamps must not decrease, and an equal
+//! timestamp is the legal zero-length segment that swaps instantly — while a
 //! streaming timeline accepts keyframes through
 //! [`SVAnimation::push_keyframe`] as they arrive, never blocking and never
 //! growing without bound: the retained window holds at most

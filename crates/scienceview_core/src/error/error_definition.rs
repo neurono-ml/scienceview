@@ -242,7 +242,7 @@ pub enum SVError {
         property: SVMarkProperty,
     },
 
-    /// A fixed keyframe source is not strictly increasing in time.
+    /// A fixed keyframe source decreases in time.
     #[error(
         "the keyframe at position {position} is stamped {found_milliseconds} ms but the preceding keyframe is stamped {previous_milliseconds} ms; timestamps must not decrease"
     )]

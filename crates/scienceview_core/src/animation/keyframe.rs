@@ -8,10 +8,12 @@ use super::SVDuration;
 /// One property change carried by a keyframe delta.
 ///
 /// The property belongs to the table [`sv_mark_property_table`] exports, and
-/// the value is the numeric channel the transition kernel interpolates:
-/// positions, sizes, opacity, font size and the colour blend factor. A
-/// discrete property — the shape, the dash pattern, the font family — is
-/// swapped at the end of its segment instead of tweened.
+/// the value is the scalar channel the timeline interpolates: size, opacity,
+/// font size, the colour blend factor and one position component. A discrete
+/// property — the shape, the dash pattern, the font family — is swapped at the
+/// end of its segment instead of tweened. The timeline is deliberately scalar;
+/// adapting a delta to the transition kernel's typed property values is a
+/// separate step.
 ///
 /// [`sv_mark_property_table`]: crate::sv_mark::sv_mark_property_table
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -55,11 +57,12 @@ impl SVKeyframeChange {
 /// A keyframe's state, expressed as a delta over the model's property
 /// vocabulary.
 ///
-/// The delta is the unit `model-events` serializes: the timeline keeps no
-/// parallel state representation, it keeps an ordered list of deltas. Sampling
-/// is [`SVKeyframeDelta::interpolate`], which is also the seam to the
-/// transition kernel: the two neighbouring deltas plus an eased progress are
-/// exactly what a transition consumes.
+/// The timeline keeps no parallel state representation: it keeps an ordered
+/// list of deltas, which is the shape a serialized model event carries.
+/// Sampling is [`SVKeyframeDelta::interpolate`], the future seam to the
+/// transition kernel: two neighbouring deltas plus an eased progress are the
+/// input a transition needs once the scalar properties are mapped onto its
+/// typed property values.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SVKeyframeDelta {
     changes: Vec<SVKeyframeChange>,

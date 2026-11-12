@@ -14,7 +14,7 @@ impl SVAnimationBuilder {
     /// Returns [`SVError::InvalidPlaybackSpeed`] for a speed that is zero,
     /// negative or not finite, [`SVError::EmptyKeyframeSource`] for a fixed
     /// source without keyframes, [`SVError::OutOfOrderKeyframes`] when fixed
-    /// timestamps do not strictly increase,
+    /// timestamps decrease in time,
     /// [`SVError::InvalidAnimationCapacity`] for a streaming window smaller
     /// than one segment, and [`SVError::InvalidConfiguration`] for a preloaded
     /// stream or a counted loop of zero passes.

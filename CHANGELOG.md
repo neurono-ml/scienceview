@@ -20,7 +20,8 @@ released.
   `SVKeyframeDelta::interpolate` is the seam the transition kernel consumes.
   Time is supplied by the caller through `advance(Duration)` — there is no wall
   clock, timer or async runtime — so playback is reproducible. A fixed source
-  validates strictly increasing timestamps at build time; a streaming source
+  validates non-decreasing timestamps at build time (an equal timestamp is a
+  zero-length segment that swaps instantly); a streaming source
   accepts arrivals into a bounded window that drops the oldest frame and counts
   accepted, duplicate, out-of-order and evicted keyframes. A keyframe arriving
   mid-transition re-targets from the interpolated position without a jump, and
