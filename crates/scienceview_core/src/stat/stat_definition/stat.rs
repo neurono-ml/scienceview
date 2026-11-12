@@ -1,62 +1,24 @@
-//! The closed stat vocabulary and its single dispatch point.
+//! The closed stat enumeration and its single dispatch point.
 
 use crate::sv_error::SVError;
 use crate::sv_stat::aggregate::sv_apply_aggregate;
 use crate::sv_stat::aggregate_options::SVAggregateOptions;
-use crate::sv_stat::aggregate_result::SVAggregateResult;
 use crate::sv_stat::bin::sv_apply_bin;
 use crate::sv_stat::bin_options::SVBinOptions;
-use crate::sv_stat::bin_result::SVBinResult;
 use crate::sv_stat::count::sv_apply_count;
 use crate::sv_stat::count_options::SVCountOptions;
-use crate::sv_stat::count_result::SVCountResult;
 use crate::sv_stat::density::sv_apply_kernel_density;
 use crate::sv_stat::density_options::SVKernelDensityOptions;
-use crate::sv_stat::density_result::SVKernelDensityResult;
 use crate::sv_stat::empirical_cdf::sv_apply_empirical_cdf;
 use crate::sv_stat::empirical_cdf_options::SVEmpiricalCdfOptions;
-use crate::sv_stat::empirical_cdf_result::SVEmpiricalCdfResult;
 use crate::sv_stat::fit::sv_apply_fit;
 use crate::sv_stat::fit_options::SVFitOptions;
-use crate::sv_stat::fit_result::SVFitResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::percentile::sv_apply_percentile;
 use crate::sv_stat::percentile_options::SVPercentileOptions;
-use crate::sv_stat::percentile_result::SVPercentileResult;
 
-/// The kind of a statistical transform, for spans and recipe dispatch.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum SVStatKind {
-    /// Binning of one continuous column.
-    Bin,
-    /// Counting of one categorical column.
-    Count,
-    /// Aggregation of one value column, optionally grouped.
-    Aggregate,
-    /// Percentiles of one continuous column.
-    Percentile,
-    /// Kernel density estimate of one continuous column.
-    KernelDensity,
-    /// Empirical cumulative distribution of one continuous column.
-    EmpiricalCdf,
-    /// A curve fitted to one independent and one value column.
-    Fit,
-}
-
-impl SVStatKind {
-    /// Returns the kind name as written in spans and errors.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            SVStatKind::Bin => "Bin",
-            SVStatKind::Count => "Count",
-            SVStatKind::Aggregate => "Aggregate",
-            SVStatKind::Percentile => "Percentile",
-            SVStatKind::KernelDensity => "KernelDensity",
-            SVStatKind::EmpiricalCdf => "EmpiricalCdf",
-            SVStatKind::Fit => "Fit",
-        }
-    }
-}
+use super::stat_kind::SVStatKind;
+use super::stat_result::SVStatResult;
 
 /// A statistical transform (FDR-002).
 ///
@@ -173,51 +135,5 @@ impl SVStat {
                 SVStat::Fit(options) => sv_apply_fit(options, &input),
             },
         )
-    }
-}
-
-/// The derived view a stat produces, in data space.
-#[derive(Clone, Debug, PartialEq)]
-pub enum SVStatResult {
-    /// The derived view of binning.
-    Bins(SVBinResult),
-    /// The derived view of counting.
-    Categories(SVCountResult),
-    /// The derived view of aggregation.
-    Groups(SVAggregateResult),
-    /// The derived view of percentiles.
-    Quantiles(SVPercentileResult),
-    /// The derived view of a kernel density estimate.
-    Density(SVKernelDensityResult),
-    /// The derived view of an empirical cumulative distribution.
-    Cumulative(SVEmpiricalCdfResult),
-    /// The derived view of a fit.
-    Fit(SVFitResult),
-}
-
-impl SVStatResult {
-    /// Returns the kind of the stat that produced this result.
-    pub fn kind(&self) -> SVStatKind {
-        match self {
-            SVStatResult::Bins(_) => SVStatKind::Bin,
-            SVStatResult::Categories(_) => SVStatKind::Count,
-            SVStatResult::Groups(_) => SVStatKind::Aggregate,
-            SVStatResult::Quantiles(_) => SVStatKind::Percentile,
-            SVStatResult::Density(_) => SVStatKind::KernelDensity,
-            SVStatResult::Cumulative(_) => SVStatKind::EmpiricalCdf,
-            SVStatResult::Fit(_) => SVStatKind::Fit,
-        }
-    }
-
-    /// Returns `true` when the result describes only the current window of a
-    /// streaming column.
-    pub fn is_windowed(&self) -> bool {
-        match self {
-            SVStatResult::Quantiles(result) => result.is_windowed(),
-            SVStatResult::Density(result) => result.is_windowed(),
-            SVStatResult::Cumulative(result) => result.is_windowed(),
-            SVStatResult::Fit(result) => result.is_windowed(),
-            _ => false,
-        }
     }
 }

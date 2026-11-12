@@ -101,10 +101,6 @@ impl SVSortedObservations {
     }
 }
 
-#[cfg(test)]
-#[path = "sorted_observations_tests.rs"]
-mod sorted_observations_tests;
-
 /// Folds an ascending segment into the cumulative breakpoints.
 fn sv_push_breakpoints(
     values: &[f64],

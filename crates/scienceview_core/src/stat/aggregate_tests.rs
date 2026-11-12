@@ -461,3 +461,21 @@ fn a_non_finite_sparse_value_reports_its_logical_position() {
         }
     );
 }
+
+#[test]
+fn weights_that_sum_to_zero_are_rejected() {
+    let values = [1.0, 3.0];
+    let weights = [0.0, 0.0];
+    let input = ungrouped(&values).with_weights(SVColumnView::Dense(&weights));
+
+    let error = SVStat::aggregate(SVAggregateOptions::new())
+        .apply(input)
+        .expect_err("a weighted mean needs a positive total weight");
+
+    assert_eq!(
+        error,
+        SVError::InvalidConfiguration {
+            message: "the observation weights of a group sum to zero".to_string(),
+        }
+    );
+}

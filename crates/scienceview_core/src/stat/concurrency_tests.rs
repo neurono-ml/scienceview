@@ -5,7 +5,7 @@ use std::thread;
 use crate::sv_data::SVColumnView;
 use crate::sv_stat::{
     SVAggregateOptions, SVBinOptions, SVCountOptions, SVEmpiricalCdfOptions, SVFitOptions,
-    SVKernelDensityOptions, SVPercentileOptions, SVStat, SVStatInput,
+    SVKernelDensityOptions, SVPercentileOptions, SVStat, SVStatInput, SVStatResult,
 };
 
 fn dataset() -> Vec<f64> {
@@ -25,16 +25,32 @@ fn every_stat_runs_concurrently_over_the_same_borrowed_columns() {
         SVStat::percentile(SVPercentileOptions::new()),
     ];
 
+    let expected: Vec<SVStatResult> = stats
+        .iter()
+        .map(|stat| {
+            stat.apply(
+                SVStatInput::new(SVColumnView::Dense(&values))
+                    .with_secondary(SVColumnView::Dense(&secondary)),
+            )
+            .expect("the calling thread applies the stat")
+        })
+        .collect();
+
     thread::scope(|scope| {
         for _ in 0..4 {
             let stats = &stats;
+            let expected = &expected;
             let values = values.as_slice();
             let secondary = secondary.as_slice();
             scope.spawn(move || {
-                for stat in stats {
+                for (stat, expected) in stats.iter().zip(expected.iter()) {
                     let input = SVStatInput::new(SVColumnView::Dense(values))
                         .with_secondary(SVColumnView::Dense(secondary));
-                    stat.apply(input).expect("each thread applies the stat");
+                    let result = stat.apply(input).expect("each thread applies the stat");
+                    assert_eq!(
+                        &result, expected,
+                        "every thread produces the same result as the calling thread"
+                    );
                 }
             });
         }

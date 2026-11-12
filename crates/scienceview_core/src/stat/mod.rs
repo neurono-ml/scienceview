@@ -5,6 +5,30 @@
 //! probabilities, percentiles and fitted curves. It is backend-independent by
 //! construction: it produces data space only, never geometry, so the scale
 //! kernel and the marks stay the only place a value becomes a visual property.
+//!
+//! # Example
+//!
+//! ```
+//! use scienceview_core::sv_data::SVColumnView;
+//! use scienceview_core::sv_stat::{
+//!     SVBinOptions, SVNormalisation, SVStat, SVStatInput, SVStatResult,
+//! };
+//!
+//! let values = [1.0, 2.0, 2.0, 3.0, 4.0];
+//! let stat = SVStat::bin(
+//!     SVBinOptions::new()
+//!         .bin_count(2)
+//!         .normalise(SVNormalisation::Probability),
+//! );
+//!
+//! match stat.apply(SVStatInput::new(SVColumnView::Dense(&values))) {
+//!     Ok(SVStatResult::Bins(bins)) => {
+//!         assert_eq!(bins.edges(), &[1.0, 2.5, 4.0]);
+//!         assert_eq!(bins.counts(), &[0.6, 0.4]);
+//!     }
+//!     other => panic!("the bin stat produces bins: {other:?}"),
+//! }
+//! ```
 
 mod aggregate;
 mod aggregate_options;
@@ -71,14 +95,29 @@ mod density_tests;
 #[path = "empirical_cdf_tests.rs"]
 mod empirical_cdf_tests;
 #[cfg(test)]
+#[path = "estimator_tests.rs"]
+mod estimator_tests;
+#[cfg(test)]
 #[path = "fit_tests.rs"]
 mod fit_tests;
+#[cfg(test)]
+#[path = "input_tests.rs"]
+mod input_tests;
+#[cfg(test)]
+#[path = "numeric_tests.rs"]
+mod numeric_tests;
+#[cfg(test)]
+#[path = "observations_tests.rs"]
+mod observations_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
 #[cfg(test)]
 #[path = "percentile_tests.rs"]
 mod percentile_tests;
+#[cfg(test)]
+#[path = "sorted_observations_tests.rs"]
+mod sorted_observations_tests;
 #[cfg(test)]
 #[path = "stat_span_tests.rs"]
 mod stat_span_tests;

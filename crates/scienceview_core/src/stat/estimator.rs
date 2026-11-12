@@ -155,7 +155,3 @@ pub fn sv_fit_with_estimator<Estimator: SVFitEstimator + ?Sized>(
         windowed: input.is_windowed(),
     })
 }
-
-#[cfg(test)]
-#[path = "estimator_tests.rs"]
-mod estimator_tests;

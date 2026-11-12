@@ -224,7 +224,3 @@ impl<'a> SVObservationValues<'a> {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "observations_tests.rs"]
-mod observations_tests;

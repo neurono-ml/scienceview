@@ -177,7 +177,3 @@ pub(crate) fn sv_normal_quantile(probability: f64) -> f64 {
             / ((((D[0] * q + D[1]) * q + D[2]) * q + D[3]) * q + 1.0)
     }
 }
-
-#[cfg(test)]
-#[path = "numeric_tests.rs"]
-mod numeric_tests;

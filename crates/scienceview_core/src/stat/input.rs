@@ -80,7 +80,3 @@ impl<'a> SVStatInput<'a> {
             .any(|column| column.representation() == crate::sv_data::SVRepresentation::Streaming)
     }
 }
-
-#[cfg(test)]
-#[path = "input_tests.rs"]
-mod input_tests;
