@@ -198,6 +198,13 @@ fn sv_validate_swarm_options(options: &SVSwarmOptions) -> Result<(), SVError> {
                 ),
             });
         }
+        if f64::from(width) < 2.0 * marker_extent {
+            return Err(SVError::InvalidConfiguration {
+                message: format!(
+                    "swarm width must be at least two marker extents so that a colliding point has a candidate on each side of zero; received width {width} for the marker extent {marker_extent}"
+                ),
+            });
+        }
     }
     Ok(())
 }

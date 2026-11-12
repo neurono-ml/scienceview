@@ -11,7 +11,13 @@
 //! order are; it finishes in bounded time because the candidate list is capped
 //! ([`SV_SWARM_MAXIMUM_ATTEMPTS`]) and the overlap scan stops as soon as the
 //! ascending values leave the marker window.
-
+//!
+//! The guarantee is enforced, never implied: [`SVSwarmOptions`] rejects a width
+//! narrower than two marker extents at sequence construction (the narrowest
+//! bound that still offers a candidate on each side of zero), and a point the
+//! bounded search cannot place without a collision fails with
+//! [`SVError::InvalidConfiguration`] naming the group and the position instead
+//! of silently reusing a colliding candidate.
 //!
 //! A swarm reads the value column through its representation-aware accessor and
 //! lays out only the entries the column stores, so a sparse input is never
@@ -65,7 +71,7 @@ pub(crate) fn sv_apply_swarm(
         .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
     let values = &state.values;
 
-    for indices in groups.values_mut() {
+    for (group_key, indices) in groups.iter_mut() {
         indices.sort_by(|left, right| {
             values
                 .value_at(*left)
@@ -76,7 +82,13 @@ pub(crate) fn sv_apply_swarm(
         let mut placed: Vec<(f64, f64)> = Vec::with_capacity(indices.len());
         for index in indices.iter().copied() {
             let value = values.value_at(index);
-            let offset = sv_place_in_swarm(&placed, value, marker_extent, maximum_offset);
+            let offset = sv_place_in_swarm(&placed, value, marker_extent, maximum_offset)
+                .ok_or_else(|| SVError::InvalidConfiguration {
+                    message: format!(
+                        "the swarm cannot place the point at position {index} of group {group_key} without a collision: the marker extent {marker_extent} and the configured width {:?} leave no free candidate",
+                        options.width_value()
+                    ),
+                })?;
             placed.push((value, offset));
             horizontal_offsets.sv_add(index, offset);
         }
@@ -86,12 +98,16 @@ pub(crate) fn sv_apply_swarm(
 }
 
 /// Finds the offset of one point among the points already placed.
+///
+/// Returns `None` when every candidate the configuration allows collides with
+/// a placed point; the caller turns that into a typed error instead of
+/// returning a colliding offset.
 fn sv_place_in_swarm(
     placed: &[(f64, f64)],
     value: f64,
     marker_extent: f64,
     maximum_offset: Option<f64>,
-) -> f64 {
+) -> Option<f64> {
     let maximum_rank = maximum_offset.map(|limit| (limit / marker_extent).floor() as i64);
     let mut attempt = 0_usize;
     let mut tried = 0_usize;
@@ -111,15 +127,12 @@ fn sv_place_in_swarm(
 
         let offset = rank as f64 * marker_extent;
         if !sv_collides(placed, value, offset, marker_extent) {
-            return offset;
+            return Some(offset);
         }
         tried += 1;
     }
 
-    match maximum_rank {
-        Some(limit) => limit.max(0) as f64 * marker_extent,
-        None => sv_candidate_rank(attempt) as f64 * marker_extent,
-    }
+    None
 }
 
 /// Returns the rank of one candidate in the alternating order.

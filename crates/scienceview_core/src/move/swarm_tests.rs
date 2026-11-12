@@ -118,22 +118,84 @@ fn the_layout_is_deterministic() {
 
 #[test]
 fn the_width_bounds_the_displacement() {
-    let values = [5.0; 64];
-    let groups = [0; 64];
+    // Five identical points need the ranks 0, +1, -1, +2 and -2; a width of two
+    // marker extents offers exactly those candidates and no more.
+    let values = [5.0; 5];
+    let groups = [0; 5];
     let moved = sv_apply_swarm_to(
         &values,
         &groups,
         SVMove::swarm().marker_extent(0.5).width(2.0).into(),
     );
 
+    assert_eq!(
+        moved
+            .dense_horizontal_offsets()
+            .expect("a dense displacement"),
+        &[0.0, 0.5, -0.5, 1.0, -1.0]
+    );
+}
+
+#[test]
+fn a_width_narrower_than_two_marker_extents_is_rejected() {
+    let result = SVMoveSequence::single(SVMove::swarm().marker_extent(0.5).width(0.9).into());
+
+    assert!(
+        matches!(
+            result,
+            Err(crate::sv_error::SVError::InvalidConfiguration { .. })
+        ),
+        "a width below two marker extents leaves a colliding point no candidate"
+    );
+
+    // Exactly two marker extents is the documented narrowest valid bound.
+    SVMoveSequence::single(SVMove::swarm().marker_extent(0.5).width(1.0).into())
+        .expect("two marker extents are enough");
+}
+
+#[test]
+fn a_dense_cluster_that_fits_still_succeeds() {
+    let values = [5.0; 5];
+    let groups = [0; 5];
+    let moved = sv_apply_swarm_to(
+        &values,
+        &groups,
+        SVMove::swarm().marker_extent(0.5).width(2.0).into(),
+    );
+
+    assert_eq!(moved.number_of_points(), 5);
     for offset in moved
         .dense_horizontal_offsets()
         .expect("a dense displacement")
     {
-        assert!(
-            offset.abs() <= 1.0 + 1e-12,
-            "the offset {offset} leaves the half-width 1.0"
-        );
+        assert!(offset.abs() <= 1.0 + 1e-12);
+    }
+}
+
+#[test]
+fn a_cluster_the_bounded_search_cannot_place_is_a_typed_error() {
+    // Six identical points need the rank +3, which a width of two marker
+    // extents does not offer. The layout must refuse instead of reusing a
+    // colliding candidate.
+    let values = [5.0; 6];
+    let groups = [0; 6];
+    let request = SVMoveRequest::new(SVColumnView::Dense(&values), &groups);
+    let result = SVMoveSequence::single(SVMove::swarm().marker_extent(0.5).width(2.0).into())
+        .expect("the configuration is valid")
+        .apply(&request);
+
+    match result {
+        Err(crate::sv_error::SVError::InvalidConfiguration { message }) => {
+            assert!(
+                message.contains("collision"),
+                "the message names the cause: {message}"
+            );
+            assert!(
+                message.contains("group 0"),
+                "the message names the group: {message}"
+            );
+        }
+        other => panic!("expected a typed configuration error, received {other:?}"),
     }
 }
 
