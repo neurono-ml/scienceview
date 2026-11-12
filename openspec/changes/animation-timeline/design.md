@@ -47,9 +47,48 @@ Until `model-events` lands, a caller can inspect the sampled delta but no
 public operation mutates a figure from it. This is why the FDR's first
 acceptance item stays unchecked with the note naming the mutation pipeline.
 
+## Deferred — the typed adapter contract
+
+`SVKeyframeDelta` stores **scalar** values because a keyframe is a serialization
+unit and because the mark kernel's property table is the closed vocabulary both
+layers read. The transition kernel's `SVMarkPropertyValue` is **typed**. The
+adapter between them is deliberately not implemented in this change: the
+transition kernel (`crates/scienceview_core/src/transition/`) is not on `main`,
+and shipping half an adapter would be dead code. When the transition kernel
+lands, the adapter must follow this exact contract.
+
+| Delta property | Scalar meaning | Typed `SVMarkPropertyValue` produced by the adapter |
+|---|---|---|
+| `Position` | one display-space coordinate (x) | `Position(SVMarkPoint::new(value, base.y()))`; the y component is taken from the mark's current state because a delta may not repeat `Position` |
+| `Size` | logical pixels | `Size(value)` |
+| `Opacity` | fraction in `0.0..=1.0` | `Opacity(value)` |
+| `FontSize` | logical pixels | `FontSize(value)` |
+| `Colour` | normalised blend fraction in `0.0..=1.0` in authored gamma space | `Colour(base_colour.interpolate(target_colour, value))`, matching `SVColour::interpolate` |
+| `Shape` | ordinal of the closed `SVDotShape` enumeration | `Shape(SVDotShape)`; the adapter rejects a non-integral or out-of-range ordinal |
+| `DashPattern` | ordinal of the closed `SVDashPattern` enumeration | `DashPattern(SVDashPattern)`; the adapter rejects a non-integral or out-of-range ordinal |
+| `FontFamily` | ordinal of the closed font-family table the text mark carries | `FontFamily(String)`; the adapter rejects a non-integral or out-of-range ordinal |
+
+The scalar `Position` cannot carry both components of `SVMarkPoint`, and the
+delta rejects a repeated property. A model-events delta that must animate both
+components therefore needs a composite position payload; that extension belongs
+to the `model-events` delta and must not be worked around by two `Position`
+entries here.
+
+### Easing follow-up
+
+`SVInterpolation` currently owns the easing curves because the transition
+kernel is absent. When `SVEasing` lands with the transition kernel, `SVEasing`
+becomes the single definition and `SVInterpolation` is deleted. The mapping is
+total for the named curves — `Linear`, `EaseIn`, `EaseOut`, `EaseInOut` — while
+`Step` is a timeline-level hold-and-swap policy, not a cubic Bézier, and stays a
+separate interpolation mode rather than a fake easing curve.
+
 ## Risks / Trade-offs
 
 - A paused timeline silently ignoring a stream can look like data loss; the state is exposed and the UI shows the queue depth.
+- The scalar delta is narrower than the typed mark channel, especially for
+  `Position` and `Colour`; the adapter table above makes the limitation explicit
+  instead of hiding it behind a lossy conversion.
 - The timeline can sample a state no backend can apply until `model-events`
   lands; the kernel is still exercised by its own parity and re-targeting tests,
   and the FDR keeps the application item unchecked.
