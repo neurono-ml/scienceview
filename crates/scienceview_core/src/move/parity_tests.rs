@@ -202,6 +202,54 @@ fn swarm_has_representation_parity() {
 }
 
 #[test]
+fn a_near_zero_swarm_cluster_has_representation_parity() {
+    // The zero is implicit in the sparse view, but the dense twin lays it out
+    // at the middle of the cluster: it occupies the zero slot and pushes the
+    // stored marks aside. The sparse layout must reserve that same slot.
+    let dense_values = [0.4, 0.0, 0.6];
+    let sparse_indices = [0_usize, 2];
+    let sparse_values = [0.4, 0.6];
+    let group_keys = [0_u32; 3];
+
+    let dense_request = SVMoveRequest::new(SVColumnView::Dense(&dense_values), &group_keys);
+    let sparse = SVSparseView::new(&sparse_indices, &sparse_values, dense_values.len())
+        .expect("the sparse view is valid");
+    let sparse_request = SVMoveRequest::new(SVColumnView::Sparse(sparse), &group_keys);
+    let sequence = SVMoveSequence::single(SVMove::swarm().marker_extent(1.0).into())
+        .expect("a valid sequence");
+
+    let dense = sequence
+        .apply(&dense_request)
+        .expect("the dense swarm applies");
+    let sparse = sequence
+        .apply(&sparse_request)
+        .expect("the sparse swarm applies");
+
+    assert_eq!(
+        dense.horizontal_offset(0),
+        Some(1.0),
+        "the 0.4 mark moves off the zero slot"
+    );
+    assert_eq!(
+        dense.horizontal_offset(1),
+        Some(0.0),
+        "the zero keeps slot 0"
+    );
+    assert_eq!(
+        dense.horizontal_offset(2),
+        Some(-1.0),
+        "the 0.6 mark takes the other side"
+    );
+    for index in 0..dense_values.len() {
+        assert_eq!(
+            sparse.horizontal_offset(index),
+            dense.horizontal_offset(index),
+            "the sparse layout differs from the dense twin at position {index}"
+        );
+    }
+}
+
+#[test]
 fn normalize_has_representation_parity() {
     assert_parity(vec![SVMove::normalize().into()]);
 }

@@ -21,7 +21,10 @@
 //!
 //! A swarm reads the value column through its representation-aware accessor and
 //! lays out only the entries the column stores, so a sparse input is never
-//! expanded; an implicit sparse zero is not a stored mark and keeps offset zero.
+//! expanded. The unstored positions of a sparse column are implicit zeros, and
+//! a dense column of the same data lays those zeros out; the swarm accounts for
+//! them as one zero-valued representative per group — they share both their
+//! value and their zero displacement, so the block collides as a single slot.
 
 use crate::sv_error::SVError;
 use crate::sv_move::column::SVMoveColumn;
@@ -35,6 +38,14 @@ use std::collections::BTreeMap;
 /// wide swarm; a point that exhausts it is reported as an invalid
 /// configuration instead of being placed on top of another mark.
 pub(crate) const SV_SWARM_MAXIMUM_ATTEMPTS: usize = 1024;
+
+/// The synthetic position that stands for the block of unstored sparse zeros.
+///
+/// Every implicit position carries the same value and the same zero
+/// displacement, so the block collides as one representative; the sentinel
+/// keeps it out of the produced column, which records the block through its
+/// implicit contribution.
+const SV_IMPLICIT_POSITION: usize = usize::MAX;
 
 /// Applies a swarm layout to the working state.
 ///
@@ -63,6 +74,15 @@ pub(crate) fn sv_apply_swarm(
         groups.entry(group_keys[index]).or_default().push(index);
     }
 
+    // An unstored sparse position is an implicit zero, and the dense column of
+    // the same data lays that zero out: it occupies the zero slot of its
+    // group's layout and pushes its neighbours aside. Every implicit position
+    // carries the same value (zero) and the same zero displacement, so the
+    // whole block collides as one representative instead of one stored entry
+    // per logical position. A dense column stores every position, so it has no
+    // implicit block and keeps its one-mark-per-position layout.
+    let has_implicit_positions = state.values.stored_positions().count() < state.length;
+
     let marker_extent = options.marker_extent_value();
     let maximum_offset = options.width_value().map(|width| f64::from(width) / 2.0);
     let source = state.source;
@@ -71,26 +91,36 @@ pub(crate) fn sv_apply_swarm(
         .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
     let values = &state.values;
 
-    for (group_key, indices) in groups.iter_mut() {
-        indices.sort_by(|left, right| {
-            values
-                .value_at(*left)
-                .total_cmp(&values.value_at(*right))
-                .then(left.cmp(right))
-        });
+    for (group_key, indices) in groups.iter() {
+        let mut points: Vec<(f64, usize)> = indices
+            .iter()
+            .map(|index| (values.value_at(*index), *index))
+            .collect();
+        if has_implicit_positions {
+            points.push((0.0, SV_IMPLICIT_POSITION));
+        }
+        points.sort_by(|left, right| left.0.total_cmp(&right.0).then(left.1.cmp(&right.1)));
 
-        let mut placed: Vec<(f64, f64)> = Vec::with_capacity(indices.len());
-        for index in indices.iter().copied() {
-            let value = values.value_at(index);
+        let mut placed: Vec<(f64, f64)> = Vec::with_capacity(points.len());
+        for (value, index) in points {
             let offset = sv_place_in_swarm(&placed, value, marker_extent, maximum_offset)
                 .ok_or_else(|| SVError::InvalidConfiguration {
-                    message: format!(
-                        "the swarm cannot place the point at position {index} of group {group_key} without a collision: the marker extent {marker_extent} and the configured width {:?} leave no free candidate",
-                        options.width_value()
-                    ),
+                    message: if index == SV_IMPLICIT_POSITION {
+                        format!(
+                            "the swarm cannot place the implicit zero of group {group_key} without a collision: the marker extent {marker_extent} and the configured width {:?} leave no free candidate",
+                            options.width_value()
+                        )
+                    } else {
+                        format!(
+                            "the swarm cannot place the point at position {index} of group {group_key} without a collision: the marker extent {marker_extent} and the configured width {:?} leave no free candidate",
+                            options.width_value()
+                        )
+                    },
                 })?;
             placed.push((value, offset));
-            horizontal_offsets.sv_add(index, offset);
+            if index != SV_IMPLICIT_POSITION {
+                horizontal_offsets.sv_add(index, offset);
+            }
         }
     }
 

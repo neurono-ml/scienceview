@@ -1,6 +1,6 @@
 //! Swarm tests: non-overlap, determinism and a finite run time.
 
-use crate::sv_data::SVColumnView;
+use crate::sv_data::{SVColumnView, SVSparseView};
 use crate::sv_move::{SVMove, SVMoveOutput, SVMoveRequest, SVMoveSequence};
 use std::time::Instant;
 
@@ -235,5 +235,32 @@ fn a_swarm_never_changes_values() {
             .dense_vertical_offsets()
             .expect("a dense displacement"),
         &[0.0, 0.0]
+    );
+}
+
+#[test]
+fn an_implicit_zero_reserves_its_slot_in_a_sparse_layout() {
+    // The unstored position is an implicit zero, and the dense twin lays that
+    // zero out. The sparse layout therefore reserves the zero slot: the two
+    // stored marks cannot both sit on zero, and the middle position stays the
+    // implicit zero without a stored offset of its own.
+    let stored_indices = [0_usize, 2];
+    let stored_values = [0.4, 0.6];
+    let sparse =
+        SVSparseView::new(&stored_indices, &stored_values, 3).expect("the sparse view is valid");
+    let groups = [0_u32; 3];
+    let request = SVMoveRequest::new(SVColumnView::Sparse(sparse), &groups);
+
+    let moved = SVMoveSequence::single(SVMove::swarm().marker_extent(1.0).into())
+        .expect("a valid sequence")
+        .apply(&request)
+        .expect("the swarm applies");
+
+    assert_eq!(moved.horizontal_offset(1), Some(0.0));
+    assert_eq!(moved.horizontal_offset(0), Some(1.0));
+    assert_eq!(moved.horizontal_offset(2), Some(-1.0));
+    assert!(
+        moved.horizontal_offsets().is_sparse(),
+        "the implicit zero is never stored"
     );
 }
