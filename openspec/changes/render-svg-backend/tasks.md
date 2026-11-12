@@ -17,6 +17,6 @@
 
 ## Assertions and figures
 
-- [ ] Add a test asserting byte-identical output across runs.
-- [ ] Add the first example program and its generated figure under `docs/figures/`.
+- [x] Add a test asserting byte-identical output across runs.
+- [x] Add the first example program and its generated figure under `docs/figures/`.
 
