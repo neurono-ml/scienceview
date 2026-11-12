@@ -154,16 +154,25 @@ impl SVStat {
 
     /// Applies the stat to the input columns and returns the derived values in
     /// data space.
+    ///
+    /// The call runs inside one observability span recording the stat kind,
+    /// the value column's representation, the number of logical points, the
+    /// elapsed duration and the outcome (P8).
     pub fn apply(&self, input: SVStatInput<'_>) -> Result<SVStatResult, SVError> {
-        match self {
-            SVStat::Bin(options) => sv_apply_bin(options, &input),
-            SVStat::Count(options) => sv_apply_count(options, &input),
-            SVStat::Aggregate(options) => sv_apply_aggregate(options, &input),
-            SVStat::Percentile(options) => sv_apply_percentile(options, &input),
-            SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
-            SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
-            SVStat::Fit(options) => sv_apply_fit(options, &input),
-        }
+        crate::sv_observability::sv_run_stat_operation(
+            self.kind(),
+            input.values().representation(),
+            input.values().length(),
+            || match self {
+                SVStat::Bin(options) => sv_apply_bin(options, &input),
+                SVStat::Count(options) => sv_apply_count(options, &input),
+                SVStat::Aggregate(options) => sv_apply_aggregate(options, &input),
+                SVStat::Percentile(options) => sv_apply_percentile(options, &input),
+                SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
+                SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
+                SVStat::Fit(options) => sv_apply_fit(options, &input),
+            },
+        )
     }
 }
 

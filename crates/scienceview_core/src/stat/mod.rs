@@ -79,3 +79,6 @@ mod parity_tests;
 #[cfg(test)]
 #[path = "percentile_tests.rs"]
 mod percentile_tests;
+#[cfg(test)]
+#[path = "stat_span_tests.rs"]
+mod stat_span_tests;
