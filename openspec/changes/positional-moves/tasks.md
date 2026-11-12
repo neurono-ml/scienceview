@@ -55,3 +55,21 @@ rewritten.
   note records the granularity; later tasks were committed one per task.
 - The review follow-up was implemented as one scoped code commit per item, with
   the matching openspec update in this worktree.
+
+## Second review follow-up
+
+- [x] Walk only the stored positions in shift, jitter and dodge, and express a
+      uniform shift through the sparse column's implicit contribution. Add
+      sparse boundary coverage for all six moves at ten million logical
+      positions with four stored entries, asserting a bounded stored-slot count
+      and a bounded run time.
+- [x] Reserve the implicit zero slot in the sparse swarm layout and add the
+      near-zero dense-versus-sparse parity case.
+- [x] Retick the FDR sparse acceptance and make the representation-parity table
+      state that dodge and jitter displace only the marks a sparse column
+      stores.
+- [x] Rewrite the book chapter's sparse and parity claims to the tested
+      behaviour.
+- [x] Exercise every public column shape accessor (`is_dense`, `length`,
+      `indices`, `values`, `number_of_stored_values`, `implicit_value`) in a
+      companion test.
