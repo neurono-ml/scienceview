@@ -12,6 +12,22 @@ released.
 
 ### Added
 
+- The animation timeline in `scienceview_core::sv_animation`: `SVAnimation`
+  owns the playback clock and the keyframe window, and `SVAnimationBuilder`
+  requires an explicit `SVKeyframeSource` (`Fixed` or `Streaming`) with the
+  documented `SVExecutionMode::Automatic` default. A keyframe is an
+  `SVKeyframeDelta` over the mark property vocabulary, and
+  `SVKeyframeDelta::interpolate` is the seam the transition kernel consumes.
+  Time is supplied by the caller through `advance(Duration)` — there is no wall
+  clock, timer or async runtime — so playback is reproducible. A fixed source
+  validates non-decreasing timestamps at build time (an equal timestamp is a
+  zero-length segment that swaps instantly); a streaming source
+  accepts arrivals into a bounded window that drops the oldest frame and counts
+  accepted, duplicate, out-of-order and evicted keyframes. A keyframe arriving
+  mid-transition re-targets from the interpolated position without a jump, and
+  playback exposes idle, playing, paused and finished state with loop,
+  direction, speed and the `SVAnimationAction` vocabulary. Every operation
+  emits one `scienceview.animation` span.
 - The transition kernel in `scienceview_core::sv_transition`: `SVTransition`
   matches marks between two states by a stable key — `Category`, `Index`,
   `Identity` or a seeded `Derived` hash, resolved into a typed

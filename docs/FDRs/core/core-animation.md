@@ -5,9 +5,9 @@
 | Id | FDR-006 |
 | Name | `SVAnimation` |
 | Family | Core — temporal |
-| Status | planned |
+| Status | shipped (kernel); backend frame and reduced-motion theme pending |
 | Layer | Core |
-| Public chapter | _pending_ |
+| Public chapter | `ch14-animation-timeline.md` |
 | Example program | _pending_ |
 
 ## Purpose
@@ -69,6 +69,14 @@ A keyframe carries a **delta**, in the same serialized form the foundation's
 `model-events` capability defines. This is the reason animation needs no
 parallel state pipeline: the timeline is a sequence of deltas, and the model
 is the single authority.
+
+The timeline guarantees the delta's storage, ordering, interpolation and
+re-targeting; it does not apply the delta to a figure. Applying a sampled delta
+through the shared mutation pipeline is the `model-events` change's
+responsibility and remains a documented follow-up. The scalar delta also maps
+onto the transition kernel's typed `SVMarkPropertyValue` through an adapter
+contract recorded in the change design; that adapter is not shipped ahead of
+the transition kernel.
 
 ## Visual channels
 
@@ -137,11 +145,15 @@ sources — a backend that cannot host a streaming keyframe source says so.
 ## Acceptance
 
 - [ ] A keyframe is a delta in the format `model-events` defines; there is no
-      second state representation.
-- [ ] A `Fixed` and a `Streaming` source produce the same timeline structure.
-- [ ] Playback state is observable and drivable through the action vocabulary.
-- [ ] A new keyframe arriving mid-animation re-targets without a jump.
-- [ ] A streaming source keeps a bounded window of keyframes.
+      second state representation. _The delta exists and is the only state. The
+      `model-events` mutation pipeline that applies it to a figure is not
+      implemented yet, so application is deferred to that change and the
+      timeline only guarantees storage, ordering, interpolation and
+      re-targeting._
+- [x] A `Fixed` and a `Streaming` source produce the same timeline structure.
+- [x] Playback state is observable and drivable through the action vocabulary.
+- [x] A new keyframe arriving mid-animation re-targets without a jump.
+- [x] A streaming source keeps a bounded window of keyframes.
 - [ ] A theme that reduces motion collapses the timeline to instant swaps.
 - [ ] Every backend that claims animation support renders a mid-animation
       frame that is a correct interpolation of its two neighbouring keyframes.
