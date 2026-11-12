@@ -17,5 +17,7 @@
 - [Chapter 10 — Statistical transforms: what the chart says about the data](development-explained/ch10-statistical-transforms.md)
 - [Chapter 11 — Moves: making overlapping marks readable](development-explained/ch11-positional-moves.md)
 - [Chapter 12 — SVG: turning a figure into a file nobody has to install](development-explained/ch12-svg-backend.md)
+- [Chapter 13 — Transitions: making a figure move without losing track of its marks](development-explained/ch13-mark-transitions.md)
+- [Chapter 14 — Animation: one clock, two keyframe sources](development-explained/ch14-animation-timeline.md)
 - [Chapter 15 — Native: drawing pixels yourself, without a GPU](development-explained/ch15-native-backend.md)
 - [Maintaining this book](development-explained/maintaining.md)
