@@ -23,7 +23,7 @@ fn a_window_is_described_before_it_opens() {
 }
 
 #[test]
-#[ignore = "requires a display server; set SCIENCEVIEW_NATIVE_DISPLAY_TESTS=1 to opt in"]
+#[ignore = "opens a real window; set SCIENCEVIEW_NATIVE_DISPLAY_TESTS=1 and run with --ignored"]
 fn showing_a_figure_opens_and_closes_the_window() {
     if !sv_display_tests_enabled() {
         return;
@@ -38,8 +38,7 @@ fn showing_a_figure_opens_and_closes_the_window() {
     };
     let mut window = SVNativeWindow::new(sv_native_default_viewport());
 
-    let error = window
+    window
         .show(&request)
-        .expect_err("this test closes the window before running the loop");
-    assert!(error.to_string().contains("native window"));
+        .expect("the window opens and returns when the user closes it");
 }

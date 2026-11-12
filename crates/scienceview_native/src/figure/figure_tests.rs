@@ -91,13 +91,14 @@ fn a_resized_viewport_is_re_solved_rather_than_stretched() {
 }
 
 #[test]
-fn a_canvas_and_the_frame_path_produce_the_same_pixels() {
+fn a_canvas_and_the_rendered_frame_share_the_same_device_dimensions() {
     let values = [4.0, 1.0, 3.0];
-    let viewport = SVViewport::new(240.0, 160.0);
+    let viewport = SVViewport::new(240.0, 160.0).with_device_pixel_ratio(2.0);
     let frame =
         sv_rasterize_default_figure(&sv_request(&values), &viewport).expect("the figure renders");
 
-    let mut canvas = SVRasterCanvas::new(&viewport);
-    canvas.fill(SVColour::new(255, 255, 255, 255));
+    let canvas = SVRasterCanvas::new(&viewport);
     assert_eq!(canvas.width(), frame.width());
+    assert_eq!(canvas.height(), frame.height());
+    assert_eq!(canvas.device_pixel_ratio(), frame.device_pixel_ratio());
 }

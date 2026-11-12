@@ -3,8 +3,10 @@
 //! A region is a rectangle in device pixels with an exclusive right and bottom
 //! edge, or nothing at all. Drawing a primitive unions its bounding rectangle
 //! into the region; a resize or a background fill marks the whole frame. The
-//! present layer uses the region to blit only the changed rows, and the
-//! headless tests use it to prove an update is not a full repaint.
+//! region records what an in-place repaint touched; the current present layer
+//! still blits the whole surface, and a later partial-blit optimisation can
+//! consume the region without changing the rasterizer. Headless tests use it
+//! to prove an update is not a full repaint.
 
 /// A rectangle of device pixels with exclusive right and bottom edges.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
