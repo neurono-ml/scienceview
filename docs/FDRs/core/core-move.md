@@ -5,10 +5,10 @@
 | Id | FDR-003 |
 | Name | `SVMove` |
 | Family | Core — computation |
-| Status | shipped |
+| Status | shipped (kernel); visual example deferred |
 | Layer | Core |
 | Public chapter | `docs/src/development-explained/ch11-positional-moves.md` |
-| Example program | _pending_ |
+| Example program | deferred until the bar recipe exists (see [Example status](#example-status)) |
 
 ## Purpose
 
@@ -123,15 +123,39 @@ in place while the values around it change.
 Moves are backend-independent. The terminal backend receives the same
 displacements and narrows the bars accordingly.
 
+## Example status
+
+The kernel is shipped and exercised by the companion tests, but a standalone
+example program would have to draw its result, and the chart recipes that turn a
+moved column into a figure are not implemented yet. Rather than shipping an
+example that stops at an assertion, the visual example is **deferred**: it lands
+with the bar recipe that consumes `SVMoveOutput`, in the same change that adds
+`examples/` and its tool-generated figure. Tracking: the bar and stack recipes
+in `docs/FDRs/recipes/`, which list this FDR as their move dependency.
+
 ## Acceptance
 
-- [ ] The composition order of moves is fixed and documented.
-- [ ] `Dodge` and `Stack` produce the same result for dense, sparse and
-      streaming inputs of the same data.
-- [ ] `Jitter` with a fixed seed is reproducible across runs.
-- [ ] `Normalize` and `Stack` over a stream use the window total and say so.
-- [ ] A move never copies the data it displaces.
-- [ ] `Swarm` guarantees no two points of a category overlap, and the layout is deterministic for the same data and order.
+- [x] The composition order of moves is fixed and documented
+      (`sequence_tests.rs`).
+- [x] `Dodge` and `Stack` produce the same result for dense, sparse and
+      streaming inputs of the same data (`parity_tests.rs`).
+- [x] `Jitter` with a fixed seed is reproducible across runs
+      (`jitter_tests.rs`).
+- [x] `Normalize` and `Stack` over a stream use the window total and say so
+      (`parity_tests.rs`).
+- [x] A move never copies the data it displaces: dodge, jitter and shift share
+      the borrowed column, and a value-changing move materialises only the new
+      value it computes (`lazy_buffer_tests.rs`).
+- [x] `Swarm` guarantees no two points of a category overlap, and the layout is
+      deterministic for the same data and order (`swarm_tests.rs`).
+- [x] A sparse input is moved without allocating one slot per logical point:
+      the working columns keep the stored entries and one documented implicit
+      zero (`sparse_boundary_tests.rs`).
+- [x] Non-finite values are rejected with the typed error naming the position
+      (`non_finite_tests.rs`).
+- [x] A swarm width narrower than two marker extents is rejected at sequence
+      construction, and a point the bounded search cannot place is a typed
+      error rather than a colliding candidate (`swarm_tests.rs`).
 
 ## Open questions
 
