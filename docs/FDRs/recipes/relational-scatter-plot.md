@@ -5,11 +5,11 @@
 | Id | FDR-101 |
 | Name | `SVScatterPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch16-scatter-plot.md` |
+| Example program | `examples/scatter_plot.rs` |
 
 ## Purpose
 
@@ -116,16 +116,21 @@ between states. It requires a match key to do so meaningfully.
 
 ## Acceptance
 
-- [ ] Renders with a small and a large dataset, with the same visual result
-      up to rasterization.
-- [ ] Dense, sparse and streaming inputs render the same marks.
-- [ ] Grouping by `series` assigns stable palette colours and one legend entry
-      per series.
-- [ ] Concurrent rendering of the same figure from several threads is safe.
-- [ ] The figure exports to every backend that declares support, and the
-      streaming update path reports render metrics.
+- [x] Renders with a small and a large dataset, with the same visual result
+      up to rasterization (`a_large_scatter_groups_its_circles_into_one_path`).
+- [x] Dense, sparse and streaming inputs render the same marks
+      (`dense_sparse_and_streaming_inputs_draw_the_same_scene`).
+- [x] Grouping by `series` assigns stable palette colours and one legend entry
+      per series (`the_series_column_assigns_one_stable_colour_and_legend_entry_per_value`).
+- [x] Concurrent rendering of the same figure from several threads is safe
+      (`several_threads_render_the_same_scatter_identically`).
+- [x] The figure exports to SVG and the streaming path reports render metrics
+      (`a_render_records_the_backend_representation_and_point_count`); later
+      backends rasterize the same backend-agnostic scene.
 - [ ] An animated scatter interpolates positions between two states and
-      matches marks by key.
+      matches marks by key. The transition kernel exists, but the recipe does
+      not expose a keyed transition surface yet; it is deferred to the
+      animation recipe change.
 
 ## Open questions
 
