@@ -44,7 +44,7 @@
 
 pub use scienceview_core;
 pub use scienceview_core::{
-    sv_data, sv_decoration, sv_layout, sv_mark, sv_move, sv_scale, sv_window,
+    sv_data, sv_decoration, sv_layout, sv_mark, sv_move, sv_scale, sv_stat, sv_window,
 };
 
 #[cfg(feature = "theme")]
