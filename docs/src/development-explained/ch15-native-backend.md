@@ -81,10 +81,27 @@ count derives from its radius and sweep, never from a clock. `path_flattening.rs
 owns that walk and the dash splitter; `path_rasterizer.rs` fills the result and
 `path_stroking.rs` stamps capsules along it. Caps and joins are geometry, not
 special cases in the blend: a butt cap clips the capsule at the endpoint, a
-square cap extends it by half the stroke width, and a round cap or join adds a
-disc. Miter and bevel joins are accepted by the style surface but not yet
-shaped: they currently leave the overlapping segment capsules as they are,
-while a round join is the one stamped join.
+square cap extends it by half the stroke width, and a round cap adds a disc.
+
+A join has to fill the notch the two capsules leave on the outer side of a
+corner. The stroker computes the direction of the incoming and outgoing
+segments, finds which side is outside from the sign of their cross product, and
+offsets the corner by the stroke radius on that side:
+
+- a **bevel** fills the triangle between the corner and the two offset points,
+  cutting the outer side flat;
+- a **miter** extends the two offset edges to their intersection, so the corner
+  keeps its point;
+- a **round** join stamps a disc at the corner, the same disc a round cap uses.
+
+A miter is only allowed while its tip stays within four times the stroke radius
+from the corner — the usual default miter limit. Past that, as in a needle-thin
+spike, the stroker falls back to the bevel instead of letting the point shoot
+across the frame. The notch polygon is sampled four times per axis, exactly
+like a filled path, so a join anti-aliases with the segments it connects. The
+path test renders the three styles at a sharp corner, asserts that their pixels
+differ pairwise and that the miter tip reaches higher than both, and pins the
+fallback by requiring a miter beyond the limit to be byte-identical to a bevel.
 
 Text has no glyph rasterizer yet. The decoration layer already lays text out as
 a measured box, so `text_rasterizer.rs` draws one filled box per character with
@@ -156,21 +173,65 @@ them. The window's event loop, in `window/native_application.rs`, is one caller:
 on `about_to_wait` it advances the clock, records the position and requests a
 redraw; on `RedrawRequested` it asks the painter for a frame and blits it.
 
-## Resize, scale change and in-place update
+Animation is not the only source of new frames. Data can arrive while the
+timeline is paused, and that path uses a channel rather than the clock; the next
+section describes it.
 
-The event loop handles three environment events:
+## Resize and scale change
+
+The event loop handles two environment events:
 
 - `Resized` recomputes the logical viewport from the new physical size and the
   window's scale factor, then requests a redraw;
 - `ScaleFactorChanged` does the same when the window moves to a display with a
-  different density;
-- `RedrawRequested` renders the current request at the current viewport and
-  blits the result.
+  different density.
 
-`SVNativeBackend::render_frame_with_viewport` is the call behind that redraw:
-the layout re-solves for the new viewport instead of scaling the old pixels.
-`backend_tests.rs` asserts exactly that, including that a device ratio of two
-produces a frame twice as wide and tall.
+`RedrawRequested` renders the current request at the current viewport and blits
+the result. `SVNativeBackend::render_frame_with_viewport` is the call behind
+that redraw: the layout re-solves for the new viewport instead of scaling the
+old pixels. `backend_tests.rs` asserts exactly that, including that a device
+ratio of two produces a frame twice as wide and tall.
+
+## Updating the open window in place
+
+A streaming figure receives data while the window is open. Reopening the window
+for every sample would be wrong — it would flash, lose the user's scroll state
+and multiply windows — so the backend must redraw the *same* window. The
+`update` operation alone is not enough: it returns a headless frame, because a
+backend operation has no window to draw into. The window therefore owns a
+one-slot frame channel, and `SVNativeWindow::publisher` hands out a cloneable
+producer:
+
+```rust
+let mut window = SVNativeWindow::new(sv_native_default_viewport());
+let publisher = window.publisher();
+std::thread::spawn(move || {
+    // Render the newest data, then hand the frame to the window.
+    publisher.publish(frame);
+});
+window.show(&request)?;
+```
+
+Publishing stores the frame and calls the waker the window installed when it
+opened: `Window::request_redraw`. The idle event loop, parked in
+`ControlFlow::Wait`, wakes on that request, `RedrawRequested` drains the slot
+and blits the frame into the existing softbuffer surface. Nothing reopens and
+nothing is re-derived from the old frame.
+
+Two details make the hand-off robust. Only one frame is pending, so a producer
+faster than the window replaces the slot instead of queueing stale frames — the
+viewer always sees the newest state. And if a publish races the moment the
+waker is being installed, the frame is not lost: the `Idle` branch of
+`about_to_wait` checks for a pending frame and requests the redraw itself, so
+the channel never depends on the wake-up arriving after installation.
+
+The channel is pure standard library and the presenting step is an abstract
+`SVPresenter`, so the whole path is testable without a display.
+`present_loop_tests.rs` implements the trait with a recorder, publishes the
+initial frame and then a frame rendered from an updated streaming view, and
+asserts that the same window presented both, with identical dimensions and
+different pixels. The real window test remains `#[ignore]`d and gated behind
+`SCIENCEVIEW_NATIVE_DISPLAY_TESTS`.
 
 ## The contract: render, update, show, and one refusal
 
@@ -180,7 +241,9 @@ end through the process-wide registry.
 
 `render` and `update` rasterize the figure and return its RGBA bytes; the
 comparable-frame surface is `render_frame`, which carries the dimensions and the
-device ratio next to the pixels. `show` presents the frame in a window.
+device ratio next to the pixels. `show` presents the frame in a window, and a
+publisher obtained from that window carries later frames into it without a new
+`show`.
 
 `save` returns the typed `UnsupportedBackendCapability` error for export. This
 is not an omission: the capability matrix declares that a native window has no
@@ -204,8 +267,8 @@ claim is a pixel assertion:
 - `rasterizer_tests.rs` — rectangle and circle interiors, anti-aliased edges,
   rounded corners, a ring that is not a disc.
 - `rasterizer_path_tests.rs` — non-zero winding fills, stroked segments, arcs,
-  dashes, and the acceptance of every cap and join pair (round joins are the
-  only shaped joins so far).
+  dashes, the acceptance of every cap and join pair, three distinct join shapes
+  at a sharp corner, and the miter-limit fallback.
 - `rasterizer_text_tests.rs` — text boxes with alignment, baselines, weight and
   rotation.
 - `rasterizer_composition_tests.rs` — nearest and bilinear image sampling,
@@ -214,6 +277,9 @@ claim is a pixel assertion:
   resized viewport that re-solves instead of stretching.
 - `backend_tests.rs`, `frame_loop_tests.rs` — the trait surface and the clock
   seam.
+- `present_loop_tests.rs` — the in-place update path through a recording
+  presenter: a publish wakes the window, the newest frame wins, and a streaming
+  update changes the pixels of the same window.
 - `crate_tests/` — determinism, representation parity across dense, sparse and
   streaming views, concurrent renders from eight threads, the capability row,
   and the operation span that records `backend.kind=native`.
