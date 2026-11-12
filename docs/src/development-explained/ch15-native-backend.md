@@ -82,7 +82,9 @@ owns that walk and the dash splitter; `path_rasterizer.rs` fills the result and
 `path_stroking.rs` stamps capsules along it. Caps and joins are geometry, not
 special cases in the blend: a butt cap clips the capsule at the endpoint, a
 square cap extends it by half the stroke width, and a round cap or join adds a
-disc.
+disc. Miter and bevel joins are accepted by the style surface but not yet
+shaped: they currently leave the overlapping segment capsules as they are,
+while a round join is the one stamped join.
 
 Text has no glyph rasterizer yet. The decoration layer already lays text out as
 a measured box, so `text_rasterizer.rs` draws one filled box per character with
@@ -120,8 +122,10 @@ bounding box, padded by one pixel so the anti-aliased rim is inside it.
 
 `dirty_region_tests.rs` pins the arithmetic: two rectangles union, an empty one
 changes nothing, a logical rectangle is scaled by the ratio, padded and clamped,
-and a region without extent is not a bounding box at all. The present layer uses
-the same value to decide what to blit.
+and a region without extent is not a bounding box at all. The region records
+what an in-place repaint touched; the present layer currently blits the whole
+surface, and a later partial-blit optimisation can consume the region without
+changing the rasterizer.
 
 ## The frame loop belongs to the model
 
@@ -200,7 +204,8 @@ claim is a pixel assertion:
 - `rasterizer_tests.rs` — rectangle and circle interiors, anti-aliased edges,
   rounded corners, a ring that is not a disc.
 - `rasterizer_path_tests.rs` — non-zero winding fills, stroked segments, arcs,
-  dashes, and every cap and join pair.
+  dashes, and the acceptance of every cap and join pair (round joins are the
+  only shaped joins so far).
 - `rasterizer_text_tests.rs` — text boxes with alignment, baselines, weight and
   rotation.
 - `rasterizer_composition_tests.rs` — nearest and bilinear image sampling,
