@@ -54,6 +54,61 @@ impl<'a> SVObservationValues<'a> {
         }
     }
 
+    /// Runs `visit` over every stored value with its logical position.
+    pub(crate) fn for_each_stored_entry(&self, mut visit: impl FnMut(usize, f64)) {
+        match self {
+            SVObservationValues::Contiguous(values) => values
+                .iter()
+                .copied()
+                .enumerate()
+                .for_each(|(position, value)| visit(position, value)),
+            SVObservationValues::Stored {
+                indices, values, ..
+            } => indices
+                .iter()
+                .copied()
+                .zip(values.iter().copied())
+                .for_each(|(position, value)| visit(position, value)),
+        }
+    }
+
+    /// Returns the value at a logical position by reading stored entries only.
+    pub(crate) fn value_at_position(&self, position: usize) -> Option<f64> {
+        match self {
+            SVObservationValues::Contiguous(values) => values.get(position).copied(),
+            SVObservationValues::Stored {
+                indices, values, ..
+            } => indices
+                .binary_search(&position)
+                .ok()
+                .map(|index| values[index]),
+        }
+    }
+
+    /// Visits every maximal run of implicit zeros as `(start, length)`.
+    ///
+    /// The runs are read from the gaps between stored positions, so a sparse
+    /// column with a billion implicit zeros still reports a handful of runs.
+    pub(crate) fn for_each_implicit_zero_run(&self, mut visit: impl FnMut(usize, usize)) {
+        let SVObservationValues::Stored {
+            indices, length, ..
+        } = self
+        else {
+            return;
+        };
+
+        let mut expected = 0usize;
+        for index in indices.iter().copied() {
+            if index > expected {
+                visit(expected, index - expected);
+            }
+            expected = index + 1;
+        }
+        if expected < *length {
+            visit(expected, length - expected);
+        }
+    }
+
     /// Returns the number of implicit zeros a sparse column contributes.
     pub(crate) fn implicit_zero_count(&self) -> usize {
         match self {

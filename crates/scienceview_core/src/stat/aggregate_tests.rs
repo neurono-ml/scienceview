@@ -279,3 +279,146 @@ fn the_aggregate_is_independent_of_the_input_order() {
 
     assert_eq!(first.groups()[0].value(), second.groups()[0].value());
 }
+
+#[test]
+fn a_sparse_column_folds_its_implicit_zeros_in_stored_time() {
+    // A logical length no loop could traverse turns any accidental
+    // `0..length` iteration into a hang; the fold reads one stored entry and
+    // one multiplicity instead.
+    let indices = [2usize];
+    let values = [4.0];
+    let logical_length = 1_000_000_000_000usize;
+    let sparse = SVSparseView::new(&indices, &values, logical_length).expect("valid sparse");
+    let input = SVStatInput::new(SVColumnView::Sparse(sparse));
+
+    let mean = apply_aggregate(SVAggregateOptions::new(), input);
+    let value = mean.groups()[0].value();
+    assert!(
+        (value - 4.0 / logical_length as f64).abs() < 1e-15,
+        "the mean folds the implicit zeros: {value}"
+    );
+    assert_eq!(mean.groups()[0].number_of_observations(), logical_length);
+
+    let count = apply_aggregate(
+        SVAggregateOptions::new().method(SVAggregateMethod::Count),
+        input,
+    );
+    assert_eq!(count.groups()[0].value(), logical_length as f64);
+}
+
+#[test]
+fn a_sparse_median_includes_its_implicit_zeros() {
+    let indices = [0usize, 5];
+    let values = [-2.0, 8.0];
+    let sparse = SVSparseView::new(&indices, &values, 10).expect("valid sparse storage");
+    let input = SVStatInput::new(SVColumnView::Sparse(sparse));
+
+    let result = apply_aggregate(
+        SVAggregateOptions::new().method(SVAggregateMethod::Median),
+        input,
+    );
+
+    assert_value(&result, 0.0);
+    assert_eq!(result.groups()[0].number_of_observations(), 10);
+}
+
+#[test]
+fn the_aggregate_agrees_across_the_three_representations() {
+    let dataset = [1.0, 0.0, 3.0, 0.0, 5.0, 7.0, 0.0, 2.0, 9.0];
+    let methods = [
+        SVAggregateMethod::Mean,
+        SVAggregateMethod::Sum,
+        SVAggregateMethod::Median,
+        SVAggregateMethod::StandardDeviation,
+        SVAggregateMethod::Count,
+    ];
+
+    for method in methods {
+        let options = SVAggregateOptions::new().method(method);
+        crate::sv_data::sv_assert_representation_parity(&dataset, |view| match SVStat::aggregate(
+            options,
+        )
+        .apply(SVStatInput::new(view))
+        .expect("the dataset aggregates")
+        {
+            SVStatResult::Groups(result) => {
+                result.groups().iter().map(|group| group.value()).collect()
+            }
+            other => panic!("the aggregate stat must produce groups, received {other:?}"),
+        });
+    }
+}
+
+#[test]
+fn a_sparse_value_column_is_grouped_by_a_dense_group_column() {
+    let indices = [1usize, 4];
+    let values = [2.0, 4.0];
+    let sparse = SVSparseView::new(&indices, &values, 6).expect("valid sparse storage");
+    let groups = [1.0, 1.0, 1.0, 2.0, 2.0, 2.0];
+    let input =
+        SVStatInput::new(SVColumnView::Sparse(sparse)).with_groups(SVColumnView::Dense(&groups));
+
+    let result = apply_aggregate(SVAggregateOptions::new(), input);
+
+    assert_eq!(result.groups().len(), 2);
+    assert!((result.groups()[0].value() - 2.0 / 3.0).abs() < 1e-12);
+    assert!((result.groups()[1].value() - 4.0 / 3.0).abs() < 1e-12);
+    assert_eq!(result.groups()[0].number_of_observations(), 3);
+    assert_eq!(result.groups()[1].number_of_observations(), 3);
+}
+
+#[test]
+fn a_sparse_value_column_is_grouped_by_a_sparse_group_column() {
+    let value_indices = [1usize, 4];
+    let values = [2.0, 4.0];
+    let values = SVSparseView::new(&value_indices, &values, 8).expect("valid sparse storage");
+    let group_indices = [0usize, 5, 7];
+    let group_codes = [2.0, 1.0, 3.0];
+    let groups = SVSparseView::new(&group_indices, &group_codes, 8).expect("valid sparse storage");
+    let input =
+        SVStatInput::new(SVColumnView::Sparse(values)).with_groups(SVColumnView::Sparse(groups));
+
+    let result = apply_aggregate(
+        SVAggregateOptions::new().method(SVAggregateMethod::Sum),
+        input,
+    );
+
+    let group_zero = result
+        .groups()
+        .iter()
+        .find(|group| group.group() == Some(0.0))
+        .expect("the stored values sit where the group column is implicit");
+    assert_eq!(group_zero.value(), 6.0);
+    assert_eq!(group_zero.number_of_observations(), 5);
+
+    // A stored group code whose position holds an implicit zero contributes a
+    // zero value, not a missing observation.
+    for code in [1.0, 2.0, 3.0] {
+        let group = result
+            .groups()
+            .iter()
+            .find(|group| group.group() == Some(code))
+            .unwrap_or_else(|| panic!("group {code} exists"));
+        assert_eq!(group.value(), 0.0);
+        assert_eq!(group.number_of_observations(), 1);
+    }
+}
+
+#[test]
+fn a_non_finite_weight_is_rejected_with_its_position() {
+    let values = [1.0, 3.0];
+    let weights = [1.0, f64::INFINITY];
+    let input = ungrouped(&values).with_weights(SVColumnView::Dense(&weights));
+
+    let error = SVStat::aggregate(SVAggregateOptions::new())
+        .apply(input)
+        .expect_err("infinity is not a weight");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "aggregate",
+            position: 1,
+        }
+    );
+}
