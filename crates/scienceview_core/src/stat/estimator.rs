@@ -4,6 +4,7 @@ use crate::sv_data::SVRepresentation;
 use crate::sv_error::SVError;
 use crate::sv_stat::fit::SV_FIT_CURVE_SAMPLE_COUNT;
 use crate::sv_stat::input::SVStatInput;
+use crate::sv_stat::observations::SVObservationValues;
 
 /// A user-supplied fit model.
 ///
@@ -95,14 +96,25 @@ pub fn sv_fit_with_estimator<Estimator: SVFitEstimator + ?Sized>(
         });
     }
 
-    let mut independent_values = Vec::with_capacity(length);
-    let mut value_values = Vec::with_capacity(length);
-    for position in 0..length {
-        let x = sv_finite_at(independent, position)?;
-        let y = sv_finite_at(values, position)?;
-        independent_values.push(x);
-        value_values.push(y);
-    }
+    let independent_observations = SVObservationValues::from_view(independent);
+    let value_observations = SVObservationValues::from_view(values);
+    independent_observations.validate_finite("fit")?;
+    value_observations.validate_finite("fit")?;
+
+    let independent_values = independent_observations
+        .contiguous()
+        .map(<[f64]>::to_vec)
+        .ok_or_else(|| SVError::InvalidConfiguration {
+            message: "the custom fit received a sparse column after rejecting sparse storage"
+                .to_string(),
+        })?;
+    let value_values = value_observations
+        .contiguous()
+        .map(<[f64]>::to_vec)
+        .ok_or_else(|| SVError::InvalidConfiguration {
+            message: "the custom fit received a sparse column after rejecting sparse storage"
+                .to_string(),
+        })?;
 
     let coefficients = estimator.estimate(&independent_values, &value_values)?;
     let low = independent_values
@@ -134,22 +146,6 @@ pub fn sv_fit_with_estimator<Estimator: SVFitEstimator + ?Sized>(
         grid,
         predicted,
     })
-}
-
-/// Reads one logical value and rejects a non-finite one.
-fn sv_finite_at(column: crate::sv_data::SVColumnView<'_>, position: usize) -> Result<f64, SVError> {
-    let value = column
-        .value_at(position)
-        .ok_or(SVError::InvalidConfiguration {
-            message: "the fit read past the end of a column".to_string(),
-        })?;
-    if !value.is_finite() {
-        return Err(SVError::NonFiniteValue {
-            operation: "fit",
-            position,
-        });
-    }
-    Ok(value)
 }
 
 #[cfg(test)]

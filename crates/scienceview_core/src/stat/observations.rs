@@ -46,6 +46,14 @@ impl<'a> SVObservationValues<'a> {
         }
     }
 
+    /// Returns the contiguous slice when every value is stored.
+    pub(crate) fn contiguous(&self) -> Option<&'a [f64]> {
+        match self {
+            SVObservationValues::Contiguous(values) => Some(values),
+            SVObservationValues::Stored { .. } => None,
+        }
+    }
+
     /// Returns the number of implicit zeros a sparse column contributes.
     pub(crate) fn implicit_zero_count(&self) -> usize {
         match self {

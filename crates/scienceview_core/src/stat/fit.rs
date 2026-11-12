@@ -11,6 +11,7 @@ use crate::sv_stat::fit_options::{SVFitModel, SVFitOptions};
 use crate::sv_stat::fit_result::SVFitResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::numeric::{SVCompensatedSum, sv_normal_quantile};
+use crate::sv_stat::observations::SVObservationValues;
 use crate::sv_stat::stat_definition::SVStatResult;
 
 /// The number of samples the predicted curve carries.
@@ -48,7 +49,6 @@ pub(crate) fn sv_apply_fit(
 
     let independent_values = sv_collect_finite(independent, "fit")?;
     let value_values = sv_collect_finite(values, "fit")?;
-
     let degree = options.requested_model().degree(options.requested_order());
     if options.requested_model() == SVFitModel::Polynomial && degree == 0 {
         return Err(SVError::InvalidConfiguration {
@@ -144,23 +144,20 @@ fn sv_reject_sparse(view: SVColumnView<'_>) -> Result<(), SVError> {
 }
 
 /// Reads one column into a vector, rejecting every non-finite value.
+///
+/// The column resolves its representation once, through
+/// [`SVObservationValues::from_view`]; a sparse column never reaches this
+/// function because a paired fit rejects it before reading.
 fn sv_collect_finite(view: SVColumnView<'_>, operation: &'static str) -> Result<Vec<f64>, SVError> {
-    let mut values = Vec::with_capacity(view.length());
-    for position in 0..view.length() {
-        let value = view
-            .value_at(position)
-            .ok_or(SVError::InvalidConfiguration {
-                message: "the fit read past the end of a column".to_string(),
-            })?;
-        if !value.is_finite() {
-            return Err(SVError::NonFiniteValue {
-                operation,
-                position,
-            });
-        }
-        values.push(value);
-    }
-    Ok(values)
+    let observations = SVObservationValues::from_view(view);
+    observations.validate_finite(operation)?;
+
+    observations
+        .contiguous()
+        .map(<[f64]>::to_vec)
+        .ok_or_else(|| SVError::InvalidConfiguration {
+            message: "the fit received a sparse column after rejecting sparse storage".to_string(),
+        })
 }
 
 /// Applies the model's link transformation to the observation pairs.
