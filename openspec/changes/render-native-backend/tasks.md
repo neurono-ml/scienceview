@@ -32,3 +32,15 @@
   `SCIENCEVIEW_NATIVE_DISPLAY_TESTS`, so headless CI stays green.
 - `winit` and `softbuffer` are behind the crate's `window` feature, which the
   root `render-native` feature enables; a default build pulls neither.
+- In-place update is a one-slot frame channel: `SVNativeWindow::publisher`
+  hands a cloneable producer to the streaming figure, publishing wakes the
+  idle (`ControlFlow::Wait`) window with a redraw request, and the redraw blits
+  the published frame into the same surface. `present_loop_tests.rs` presents
+  the initial frame and an updated frame through the same loop and asserts the
+  second differs, without a display.
+- Miter and bevel joins fill the outer notch left by the segment capsules; a
+  miter longer than four times the stroke radius falls back to a bevel.
+  `rasterizer_path_tests.rs` compares the three join styles at a sharp corner
+  and pins the miter-limit fallback.
+- `SVRasterCanvas::clear` is covered by `canvas_definition_tests.rs`, so the
+  transparent reset has a caller in the suite.

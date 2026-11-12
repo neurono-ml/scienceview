@@ -47,3 +47,24 @@ a paused timeline performs no animation work.
 `save` reports the missing export capability instead of inventing a format. The
 frame is still exposed as bytes, so a future export change can build on the
 rasterizer without changing this backend's declared row.
+
+### D8 — A published frame updates the open window in place
+
+The window owns a one-slot frame channel. `SVNativeWindow::publisher` returns a
+cloneable producer that stores the newest frame and wakes the window with a
+redraw request; the redraw presents that frame instead of repainting the
+previous one, so new data never reopens the window. Only one frame is pending,
+so a producer faster than the window cannot queue stale frames. The hand-off is
+driven through an abstract presenter, which a recording presenter exercises
+without a display; the live-window test stays ignored and environment-gated.
+`SVRenderBackend::update` keeps returning the headless frame — publishing that
+frame is what redraws the same window.
+
+### D9 — Joins are geometry, not style metadata
+
+A join fills the outer notch the segment capsules leave at a corner. A bevel
+connects the two outer offset points to the corner, a miter extends them to
+their intersection, and a miter whose tip exceeds four times the stroke radius
+falls back to a bevel. Round joins stamp a disc, as caps already do. The path
+test compares the three styles by pixel outcome and pins the fallback, so a
+join is never merely accepted and ignored.
