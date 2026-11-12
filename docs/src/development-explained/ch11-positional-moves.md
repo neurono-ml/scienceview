@@ -268,19 +268,27 @@ input. `SVMoveColumn` is either dense (one slot per logical point) or sparse
 (the stored indices, their values, and one documented **implicit
 contribution**). Stack and normalize walk only the positions the column stores,
 and their value, baseline and displacement columns keep that sparse shape; an
-untouched displacement column has no stored entry at all. The consequence is the
-guarantee `sparse_boundary_tests.rs` asserts: a sparse column of ten million
-logical points with four stored entries produces four stored values and four
-stored baselines, never a dense buffer. An implicit zero contributes nothing to
-a stack and stays zero after a normalisation, and it keeps the zero baseline
-when a centred stack translates its group.
+untouched displacement column has no stored entry at all.
+
+`sparse_boundary_tests.rs` now asserts the bound for all six moves, over a
+sparse column of ten million logical points with four stored entries: every
+move finishes in bounded time and none writes one slot per logical position.
+Shift writes no slot at all — a uniform displacement is exactly the implicit
+contribution. Stack and normalize keep four stored values and four stored
+baselines; an implicit zero contributes nothing to a stack, stays zero after a
+normalisation and keeps the zero baseline when a centred stack translates its
+group. Dodge, jitter and swarm store only the marks the column actually
+holds, and their implicit contribution stays zero, because an unstored position
+is not a mark. The swarm goes one step further: it reserves the zero slot of the
+implicit block as a single representative, so a dense twin that stores a zero
+there lays the cluster out the same way.
 
 `Stack` and `Normalize` need a group total. Over a stream the total is the total
 of the window the snapshot carries — the data a live render can show — and
 `a_streaming_stack_uses_the_window_total` asserts that the window, not some
 notional full history, is what the stack normalises against.
 
-The parity suite applies every move, and the full pipeline, through all three
+The parity suite runs every move, and the full pipeline, through all three
 representations of one logical column that contains a zero:
 
 ```rust,ignore
@@ -288,10 +296,19 @@ const DENSE_VALUES: [f64; 5] = [2.0, 0.0, 3.0, -1.0, 4.0];
 const SPARSE_INDICES: [usize; 4] = [0, 2, 3, 4];
 ```
 
-Dense, sparse and streaming produce the same offsets, values, baselines and
-widths. `a_sparse_stack_preserves_the_implicit_zero` goes further and checks
-that the unstored position *is* zero after the stack, rather than a baseline
-invented for it.
+The exact claim depends on the move, and that is the honest part. Stack, shift,
+swarm, normalize and the full pipeline produce the same offsets, values,
+baselines and widths at every logical position — dense against sparse exactly,
+streaming within the documented tolerance. Dodge and jitter are per-mark moves:
+they displace the positions the sparse column stores, because an unstored
+position is not a mark of that column, so their parity is asserted at the stored
+positions and the sparse implicit contribution stays zero;
+`dodge_has_representation_parity` and `jitter_has_representation_parity` name
+that scope. `a_sparse_stack_preserves_the_implicit_zero` checks that the
+unstored position *is* zero after the stack, rather than a baseline invented for
+it. `a_near_zero_swarm_cluster_has_representation_parity` pins the case a
+wide-spaced swarm test could not see: the dense twin lays out a zero mark, and
+the sparse swarm reserves that same slot instead of silently skipping it.
 
 ## 8. Concurrency and the span
 
