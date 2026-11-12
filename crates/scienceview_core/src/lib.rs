@@ -154,6 +154,21 @@
 //! consumes is exported from the same module, next to the properties it
 //! describes.
 //!
+//! ## Animation
+//!
+//! [`sv_animation`] is the temporal layer: `SVAnimation` owns a sequence of
+//! keyframes, the playback clock and the controls — play, pause, step, seek,
+//! speed, loop and direction — so every backend renders the same position from
+//! the same model state. A keyframe is a [`sv_animation::SVKeyframeDelta`],
+//! expressed with the same property vocabulary the marks export; animation
+//! decides *when* a property changes, the transition kernel decides *whether*
+//! and *how* it tweens. A fixed list and a streaming source are one structure:
+//! both sample identically, and a stream feeds a bounded window that drops the
+//! oldest keyframe deterministically, never blocking the render thread. A
+//! keyframe arriving mid-transition re-targets from the interpolated position,
+//! and time only moves when the caller supplies it through `advance(Duration)`
+//! — no wall clock, no timer and no async runtime, so playback is reproducible.
+//!
 //! ## Moves
 //!
 //! [`sv_move`] is the closed vocabulary of positional moves — stack, dodge,
@@ -166,6 +181,20 @@
 //! in place, and every move consumes dense, sparse and streaming views on the
 //! same operation.
 //!
+//! ## Transitions
+//!
+//! [`sv_transition`] turns a sequence of static states into a continuous
+//! experience: `SVTransition` matches marks between two states by a stable key,
+//! computes the enter, update and exit sets, and interpolates only the
+//! properties the mark kernel declares interpolable. The kernel owns no clock —
+//! the caller supplies a progress in `0..=1` — consumes the theme's motion
+//! tokens (an optional dependency behind the `theme` feature, with documented
+//! built-in defaults otherwise), honours reduced motion unconditionally, and
+//! resolves a transition to its final state on a backend that declares no
+//! in-place update. Key columns come from [`sv_data::SVColumnView`], so a dense,
+//! sparse or streaming state resolves its keys with one dispatch, without
+//! densifying sparse storage or blocking the render thread.
+//!
 //! ## Decorations
 //!
 //! [`sv_decoration`] is what makes an encoding legible: axes with ticks that
@@ -176,6 +205,8 @@
 //! backend-agnostic primitives; text is laid out as a box until a backend
 //! rasterizes glyphs.
 
+#[path = "animation/mod.rs"]
+pub mod sv_animation;
 #[path = "data/mod.rs"]
 pub mod sv_data;
 #[path = "decoration/mod.rs"]
@@ -190,6 +221,8 @@ pub mod sv_move;
 pub mod sv_scale;
 #[path = "stat/mod.rs"]
 pub mod sv_stat;
+#[path = "transition/mod.rs"]
+pub mod sv_transition;
 #[path = "window/mod.rs"]
 pub mod sv_window;
 
