@@ -17,4 +17,5 @@
 - [Chapter 10 — Statistical transforms: what the chart says about the data](development-explained/ch10-statistical-transforms.md)
 - [Chapter 11 — Moves: making overlapping marks readable](development-explained/ch11-positional-moves.md)
 - [Chapter 12 — SVG: turning a figure into a file nobody has to install](development-explained/ch12-svg-backend.md)
+- [Chapter 15 — Native: drawing pixels yourself, without a GPU](development-explained/ch15-native-backend.md)
 - [Maintaining this book](development-explained/maintaining.md)

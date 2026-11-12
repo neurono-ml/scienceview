@@ -12,6 +12,37 @@ released.
 
 ### Added
 
+- The native rendering backend `scienceview_native`: a from-scratch CPU
+  renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
+  registers itself in the `SVBackendRegistry`. It is split in two layers. A
+  pure rasterizer (`SVRasterCanvas`) owns a straight-alpha RGBA buffer and
+  draws flattened paths with non-zero winding, stroked segments with caps,
+  joins, dashes and anti-aliasing, rectangles with corner radii, circles,
+  text laid out as boxes, and borrowed RGBA images with nearest or bilinear
+  sampling, all scaled by the viewport's device pixel ratio. A present layer
+  (`SVNativeWindow`, compiled only with the `window` feature, which the root
+  `render-native` feature enables) blits the buffer through `softbuffer` in a
+  `winit` window and re-solves the logical viewport on resize or scale change;
+  `winit` and `softbuffer` stay out of the default build. The frame loop takes
+  its clock from the model through `SVFrameClock`, so a paused timeline
+  performs no animation work. `render` and `update` return the comparable RGBA
+  frame, `show` presents it, and `save` reports the missing export capability
+  the native row declares. Dirty regions record what an in-place repaint
+  touched, and the headless rasterizer is deterministic across threads.
+- The positional-move kernel in `scienceview_core::sv_move`: `SVMove` is the
+  closed vocabulary of stack, dodge, jitter, shift, swarm and normalize, applied
+  in data space between the statistic and the scale. `SVMoveSequence::new`
+  enforces the fixed composition order — one displacement move, then shift,
+  then normalize — and rejects any other ordering with typed
+  `SVError::MoveOrderViolation` and `SVError::ConflictingMoveStage` before data
+  is read. Stacking is diverging (positives up, negatives down, zeros kept at
+  zero), dodge widths derive from the per-category group count, jitter and swarm
+  are deterministic from the mark key through an in-crate SplitMix64 generator
+  with no extra dependency, the swarm layout is collision-free and bounded, and
+  normalize divides by the contribution total so a stacked group reaches one
+  (or one hundred) within `1e-12`. Every move accepts dense, sparse and
+  streaming views, dispatches once, never densifies sparse storage and uses the
+  window total over a stream.
 - The SVG rendering backend `scienceview_svg`: a zero-dependency crate that
   implements `SVRenderBackend` for `SVBackendKind::Svg` and registers itself in
   the `SVBackendRegistry`, so `SVFigure::render()` works end to end. It
