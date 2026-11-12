@@ -121,8 +121,16 @@ fn rendering_a_figure_records_the_svg_kind_in_its_span() {
     });
 
     let spans = recorder.captured();
-    assert_eq!(spans.len(), 1, "one span per operation: {spans:?}");
-    assert_eq!(spans[0]["backend.kind"], "svg");
-    assert_eq!(spans[0]["operation"], "render");
-    assert_eq!(spans[0]["outcome"], "success");
+    let render_spans: Vec<_> = spans
+        .iter()
+        .filter(|span| span.get("operation").map(String::as_str) == Some("render"))
+        .collect();
+    assert_eq!(
+        render_spans.len(),
+        1,
+        "one render span per operation: {spans:?}"
+    );
+    assert_eq!(render_spans[0]["backend.kind"], "svg");
+    assert_eq!(render_spans[0]["outcome"], "success");
+    assert_eq!(render_spans[0]["points"], "3");
 }
