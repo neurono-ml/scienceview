@@ -17,6 +17,6 @@
 
 ## Interruption
 
-- [ ] Write failing tests for re-targeting from the current position.
-- [ ] Implement interruptible transitions.
+- [x] Write failing tests for re-targeting from the current position.
+- [x] Implement interruptible transitions.
 
