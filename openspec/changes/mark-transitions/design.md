@@ -47,3 +47,13 @@ A theme that declares reduced motion collapses every duration to zero, and the l
   through the existing in-crate SplitMix64 generator, so the same state resolves
   the same key on every platform and no dependency is added.
 
+- The plan is built from two `SVMarkState` snapshots, not from the model's
+  serialized deltas: the delta seam (`SVKeyframeDelta::interpolate`) belongs to
+  the animation timeline change. D2's "consumes the delta" therefore describes
+  the intent, not this kernel's surface; the transition receives the resolved
+  states a caller derives from its deltas.
+- Reduced motion is one-way: a style declares it and no public method can switch
+  it off, so the accessibility decision stays with the theme.
+- Animation support is derived from the matrix's `in_place_update` capability;
+  the matrix has no separate `animation` field, and adding one would have made
+  two sources of truth for the same question.
