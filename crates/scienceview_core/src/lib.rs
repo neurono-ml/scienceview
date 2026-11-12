@@ -166,6 +166,20 @@
 //! in place, and every move consumes dense, sparse and streaming views on the
 //! same operation.
 //!
+//! ## Transitions
+//!
+//! [`sv_transition`] turns a sequence of static states into a continuous
+//! experience: `SVTransition` matches marks between two states by a stable key,
+//! computes the enter, update and exit sets, and interpolates only the
+//! properties the mark kernel declares interpolable. The kernel owns no clock —
+//! the caller supplies a progress in `0..=1` — consumes the theme's motion
+//! tokens (an optional dependency behind the `theme` feature, with documented
+//! built-in defaults otherwise), honours reduced motion unconditionally, and
+//! resolves a transition to its final state on a backend that declares no
+//! in-place update. Key columns come from [`sv_data::SVColumnView`], so a dense,
+//! sparse or streaming state resolves its keys with one dispatch, without
+//! densifying sparse storage or blocking the render thread.
+//!
 //! ## Decorations
 //!
 //! [`sv_decoration`] is what makes an encoding legible: axes with ticks that
@@ -190,6 +204,8 @@ pub mod sv_move;
 pub mod sv_scale;
 #[path = "stat/mod.rs"]
 pub mod sv_stat;
+#[path = "transition/mod.rs"]
+pub mod sv_transition;
 #[path = "window/mod.rs"]
 pub mod sv_window;
 
