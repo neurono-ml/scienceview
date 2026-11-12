@@ -48,6 +48,12 @@ pub use builder::SVScatterPlotBuilder;
 pub use core_implementation::SVScatterPlot;
 
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
+#[path = "observability_tests.rs"]
+mod observability_tests;
+#[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
 #[cfg(test)]
