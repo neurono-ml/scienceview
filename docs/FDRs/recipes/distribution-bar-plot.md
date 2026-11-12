@@ -66,7 +66,7 @@ Accepted representations: dense, sparse, streaming (windowed).
 | `value` | `SVColumnRef` | — | all three |
 | `series` | `Option<SVColumnRef>` | `None` | all three |
 | `estimator` | `SVAggregateMethod` | `Mean` | seaborn |
-| `error` | `Option<SVErrorKind>` | `None` | seaborn |
+| `error` | `Option<SVAggregateErrorKind>` | `None` | seaborn |
 | `ci` | `Option<f64>` | `0.95` | seaborn |
 | `orient` | `SVBarOrientation` | `Vertical` | seaborn, plotly |
 | `width` | `f32` | `0.8` | seaborn, plotly |

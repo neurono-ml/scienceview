@@ -63,7 +63,7 @@ Accepted representations: dense, sparse, streaming.
 | `orient` | `SVBarOrientation` | `Vertical` | seaborn |
 | `width` | `f32` | `0.8` | seaborn |
 | `normalise` | `SVNormalisation` | `None` | seaborn `normalize` |
-| `sort` | `SVCategoryOrder` | `DataOrder` | seaborn, plotly |
+| `order` | `SVCountOrder` | `DataOrder` | seaborn, plotly |
 | `colour` | `Option<SVColour>` | theme palette | bokeh, plotly |
 
 ## Theme
