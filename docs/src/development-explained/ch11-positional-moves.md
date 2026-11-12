@@ -182,9 +182,21 @@ are tested:
   (`SV_SWARM_MAXIMUM_ATTEMPTS`) is what makes the naive quadratic form finite;
   a sweep-line bound remains an open question in the FDR.
 
-`Swarm::width` bounds the displacement to the category width. When the bound is
-reached, the layout stops at the furthest allowed candidate instead of searching
-forever — a documented overflow, not a silent hang.
+`Swarm::width` bounds the displacement to the category width, and the bound is
+validated before any data is read: a width narrower than **two marker extents**
+leaves a colliding point no candidate on either side of zero, so
+`SVMoveSequence::new` rejects it with `InvalidConfiguration`. The narrowest
+valid bound is exactly two extents, because it still offers the offsets `0`,
+`+1` and `-1`. `a_width_narrower_than_two_marker_extents_is_rejected` asserts
+the rejection and that exactly two extents is accepted.
+
+Even inside a valid bound, a cluster can be too dense for the search: a width of
+two extents offers only five offsets, so six identical points cannot all be
+placed. The layout no longer reuses a colliding candidate — it returns
+`InvalidConfiguration` naming the group and the position, and
+`a_cluster_the_bounded_search_cannot_place_is_a_typed_error` pins the message.
+A cluster that fits still succeeds, which
+`a_dense_cluster_that_fits_still_succeeds` asserts for exactly five points.
 
 ## 5. The order contract and its typed errors
 
@@ -203,6 +215,15 @@ variants:
 "an error": a caller matching on the typed value can tell a user *which* two
 moves conflict and *where*. The empty sequence is the identity, so a recipe
 that has no move to apply pays nothing and special-cases nothing.
+
+The same variant covers non-finite data. A NaN in a stack would otherwise flow
+silently into every top and baseline it touches, and an infinity would only
+fail far from its cause. The working state validates the stored values once,
+before any move reads them, and returns `InvalidConfiguration` naming the value
+and the position; a sparse column is checked only at its stored entries, so the
+pass stays proportional to what it holds. `non_finite_tests.rs` applies NaN and
+both infinities to all six moves, checks the sparse path, and keeps a finite
+zero accepted.
 
 ## 6. Normalise, and the totals it divides by
 
@@ -225,14 +246,34 @@ recorded in the change's design, and
 ## 7. The data boundary, honoured once
 
 Moves consume `SVColumnView`, the only representation type in the project
-(chapter 4), and dispatch exactly once per operation. The working state reads
-the column in one place:
+(chapter 4), and dispatch exactly once per operation. `SVMoveValueAccessor`
+resolves the representation once and is the only place a move reads values:
 
-- a dense column is copied into the working buffer as a slice;
-- a sparse column is read through `stored_entries`, and every unstored position
-  keeps its implicit zero — the input view is never expanded in place;
+- a dense column is read as a borrowed slice;
+- a sparse column is read at its stored entries, and every unstored position is
+  its implicit zero — the accessor never expands the view;
 - a streaming column is read from the bounded window snapshot it already
   carries, so a live figure never waits for a producer.
+
+Reading is not the same as producing. Stacking and normalising change the value
+a mark represents, so they must write a new column; every other move —
+dodge, jitter, shift and swarm — only reads, and it shares the borrowed column
+instead of copying it. `lazy_buffer_tests.rs` turns that into an assertion: its
+test-only counter records zero value-column materialisations and exactly one
+representation resolution for each purely positional move, on dense and sparse
+input, including the empty sequence.
+
+When a value-changing move does materialise, the output keeps the shape of the
+input. `SVMoveColumn` is either dense (one slot per logical point) or sparse
+(the stored indices, their values, and one documented **implicit
+contribution**). Stack and normalize walk only the positions the column stores,
+and their value, baseline and displacement columns keep that sparse shape; an
+untouched displacement column has no stored entry at all. The consequence is the
+guarantee `sparse_boundary_tests.rs` asserts: a sparse column of ten million
+logical points with four stored entries produces four stored values and four
+stored baselines, never a dense buffer. An implicit zero contributes nothing to
+a stack and stays zero after a normalisation, and it keeps the zero baseline
+when a centred stack translates its group.
 
 `Stack` and `Normalize` need a group total. Over a stream the total is the total
 of the window the snapshot carries — the data a live render can show — and
@@ -278,6 +319,10 @@ answering them by accident:
 - **A sweep-line swarm.** The naive layout is quadratic with a bounded attempt
   count. A sweep-line bound would let very large categories lay out faster
   without changing the guarantee the tests assert.
+- **A visual example for the FDR.** The record's example program is deferred
+  until the bar recipe can consume `SVMoveOutput` and draw it; shipping an
+  assertion-only example would not show a move, so the example and its
+  tool-generated figure land with that recipe.
 
 Both are candidates for their own change with their own specification — which
 is the point of a closed kernel: the next capability is a reviewed decision
