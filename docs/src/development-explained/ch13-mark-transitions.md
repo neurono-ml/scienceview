@@ -232,8 +232,9 @@ with the theme and one without it.
 **Reduced motion is an accessibility setting, not a per-call flag.** When the
 theme declares it, `SVMotionStyle::duration` resolves to zero and
 `is_reduced_motion` is true; the plan then draws its final state at *every*
-progress. There is no override, deliberately: design decision D4 says the layer
-honours the theme unconditionally, and the test
+progress. The declaration is one-way — `SVMotionStyle::reduced` can only turn it
+on, and no public method turns it off — deliberately: design decision D4 says
+the layer honours the theme unconditionally. The test
 `a_reduced_motion_plan_draws_the_final_state_at_any_progress` proves it by
 comparing frames at four different progresses against the final one.
 
