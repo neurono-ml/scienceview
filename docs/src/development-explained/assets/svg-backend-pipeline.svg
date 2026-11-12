@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="330" viewBox="0 0 960 330" role="img" aria-label="The SVG backend pipeline: data, scales, marks and decorations, primitives, document and serialized SVG">
+  <title>The SVG backend pipeline</title>
+  <desc>Values flow from a column view through the scale kernel into mark geometry and decoration primitives, then into the document builder and out as SVG text.</desc>
+  <style>
+    .box { stroke-width: 2; rx: 14; }
+    .label { font-family: system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #0b2545; text-anchor: middle; }
+    .detail { font-family: system-ui, sans-serif; font-size: 12px; fill: #204060; text-anchor: middle; }
+    .arrow { stroke: #3d5a80; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    .caption { font-family: system-ui, sans-serif; font-size: 13px; fill: #4a5568; text-anchor: middle; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#3d5a80"/>
+    </marker>
+  </defs>
+
+  <rect x="10" y="70" width="170" height="110" class="box" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="95" y="105" class="label">Data view</text>
+  <text x="95" y="128" class="detail">dense · sparse</text>
+  <text x="95" y="146" class="detail">streaming snapshot</text>
+  <text x="95" y="168" class="detail">SVColumnView</text>
+
+  <rect x="215" y="70" width="160" height="110" class="box" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="295" y="105" class="label">Scale kernel</text>
+  <text x="295" y="128" class="detail">domain + range</text>
+  <text x="295" y="146" class="detail">ticks from space</text>
+  <text x="295" y="168" class="detail">theme colours</text>
+
+  <rect x="410" y="25" width="180" height="100" class="box" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="500" y="60" class="label">Marks</text>
+  <text x="500" y="83" class="detail">path · rect · circle</text>
+  <text x="500" y="101" class="detail">text · rgba raster</text>
+
+  <rect x="410" y="150" width="180" height="100" class="box" fill="#fae8ff" stroke="#a855f7"/>
+  <text x="500" y="185" class="label">Decorations</text>
+  <text x="500" y="208" class="detail">line · rect · text</text>
+  <text x="500" y="226" class="detail">axes · grid · legend</text>
+
+  <rect x="625" y="70" width="160" height="110" class="box" fill="#ffe4e6" stroke="#e11d48"/>
+  <text x="705" y="105" class="label">SVSvgDocument</text>
+  <text x="705" y="128" class="detail">fixed attribute order</text>
+  <text x="705" y="146" class="detail">escaped text</text>
+  <text x="705" y="168" class="detail">grouped paths</text>
+
+  <rect x="820" y="70" width="130" height="110" class="box" fill="#e2e8f0" stroke="#334155"/>
+  <text x="885" y="112" class="label">SVG text</text>
+  <text x="885" y="136" class="detail">self-contained</text>
+  <text x="885" y="154" class="detail">byte-identical</text>
+
+  <path d="M 182 125 L 210 125" class="arrow"/>
+  <path d="M 377 110 C 392 90, 395 80, 407 78" class="arrow"/>
+  <path d="M 377 145 C 392 170, 395 190, 407 198" class="arrow"/>
+  <path d="M 592 78 C 607 90, 610 110, 622 118" class="arrow"/>
+  <path d="M 592 198 C 607 185, 610 160, 622 148" class="arrow"/>
+  <path d="M 787 125 L 817 125" class="arrow"/>
+
+  <text x="480" y="305" class="caption">No stage after the scales invents a position: the backend only writes the numbers it was given.</text>
+</svg>

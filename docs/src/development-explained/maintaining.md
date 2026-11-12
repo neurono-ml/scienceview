@@ -26,12 +26,14 @@ examples.
 | 7 | `ch07-layout-solver.md` | The layout solver: the length model, constraints, the measure and solve passes, the four responsiveness modes, the viewport and grid-independence, and the property tests |
 | 8 | `ch08-mark-rendering.md` | Marks: the closed nine-variant vocabulary, the representation parity of the geometry kernel, backend-agnostic primitives, theme defaults and overrides, build-time validation and the interpolable-property table |
 | 9 | `ch09-chart-decorations.md` | Decorations: the measure/solve protocol, space-adaptive ticks and label collision avoidance, the legend entry lifecycle and bounded layout, the colour bar as a scale view, titles, text boxes and themed primitives |
+| 12 | `ch12-svg-backend.md` | The SVG backend: the document builder, deterministic attribute order and number format, escaping, self-contained PNG rasters, grouped paths, accessibility, registry dispatch and the examples |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
 covers the layout solver, chapter 8 covers the mark kernel and chapter 9
-covers the decoration surface, each written by its own change. Later chapters are
-planned, one per capability of the `foundation-core-architecture` change —
+covers the decoration surface and chapter 12 covers the first rendering backend,
+each written by its own change. Later chapters are planned, one per capability of
+the `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
 `dashboard` — and are written as the corresponding implementation changes
