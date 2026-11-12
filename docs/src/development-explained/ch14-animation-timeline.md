@@ -153,8 +153,9 @@ twenty seconds over a ten-pass, one-second timeline and lands exactly on the
 last frame.
 
 `Seek` clamps to `[0, end]` and leaves a finished timeline paused at the new
-position. `Step` pauses and moves to the neighbouring keyframe. Neither owns a
-clock.
+position. `Step` pauses a playing timeline and moves to the neighbouring
+keyframe; from `Idle` it only moves, leaving the state untouched. Neither owns
+a clock.
 
 ## 5. The bounded window and the interrupt
 
@@ -233,8 +234,8 @@ source enum keeps the parity test trivial and the API uniform.
 the stream's memory proportional to the figure as well as to the window. A
 delta is also the exact unit the model already emits as a serializable change.
 
-**A dropped frame is counted, never silent.** A paused timeline that ignores a
-stream can look like data loss. The counters make the behaviour observable, so
+**A dropped frame is counted, never silent.** A paused timeline that does not
+re-target an arriving stream can look like data loss. The counters make the behaviour observable, so
 a UI can show the queue depth instead of guessing.
 
 ## 8. What comes next
