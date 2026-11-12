@@ -29,13 +29,16 @@ examples.
 | 10 | `ch10-statistical-transforms.md` | Statistical transforms: the closed seven-variant `SVStat`, non-densifying sparse reads and streaming windows, binning, counting, aggregation with Welford and weighted means, percentiles without expansion, kernel density and bandwidth rules, the empirical CDF, the five fit models with confidence bands and the estimator trait, determinism and the scoped compute pool |
 | 11 | `ch11-positional-moves.md` | Moves: the closed six-variant vocabulary, the enforced composition order and its typed errors, diverging stacks, group-count dodges, keyed deterministic jitter and swarm, normalisation by contribution and representation parity |
 | 12 | `ch12-svg-backend.md` | The SVG backend: the document builder, deterministic attribute order and number format, escaping, self-contained PNG rasters, grouped paths, accessibility, registry dispatch and the examples |
+| 14 | `ch14-animation-timeline.md` | Animation: the model-owned clock, keyframe deltas and the transition seam, fixed and streaming sources over one bounded window, sampling and easing, playback state, looping and direction, interruptible re-targeting, the action vocabulary and the reproducibility, parity and concurrency tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
 covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
-kernel, chapter 11 covers the positional-move kernel and chapter 12 covers the
-first rendering backend, each written by its own change. Later chapters are planned, one per capability of the
+kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
+first rendering backend and chapter 14 covers the animation timeline, each
+written by its own change. Chapter 13 is reserved for the transition kernel,
+which lands alongside animation in wave 5. Later chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
