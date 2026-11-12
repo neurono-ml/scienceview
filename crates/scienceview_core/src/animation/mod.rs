@@ -87,14 +87,21 @@
 
 mod action;
 mod admission;
+mod animation_span;
 mod builder;
+mod builder_validation;
 mod core_implementation;
 mod duration;
 mod keyframe;
 mod playback;
+mod playback_control;
+mod playback_navigation;
+mod playback_walk;
+mod retargeting;
 mod sampling;
 mod source;
-mod animation_span;
+mod state_accessors;
+mod streaming_admission;
 
 pub use action::SVAnimationAction;
 pub use admission::SVKeyframeAdmission;
@@ -102,9 +109,7 @@ pub use builder::SVAnimationBuilder;
 pub use core_implementation::SVAnimation;
 pub use duration::SVDuration;
 pub use keyframe::{SVKeyframe, SVKeyframeChange, SVKeyframeDelta};
-pub use playback::{
-    SVAnimationDirection, SVAnimationLoop, SVInterpolation, SVPlaybackState,
-};
+pub use playback::{SVAnimationDirection, SVAnimationLoop, SVInterpolation, SVPlaybackState};
 pub use source::SVKeyframeSource;
 
 #[cfg(test)]
@@ -116,6 +121,9 @@ mod animation_span_tests;
 #[cfg(test)]
 #[path = "keyframe_tests.rs"]
 mod keyframe_tests;
+#[cfg(test)]
+#[path = "retargeting_tests.rs"]
+mod retargeting_tests;
 #[cfg(test)]
 #[path = "streaming_tests.rs"]
 mod streaming_tests;

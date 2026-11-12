@@ -1,7 +1,7 @@
 //! Companion tests for the keyframe vocabulary: durations, deltas, frames.
 
 use crate::sv_animation::{
-    SVDuration, SVKeyframe, SVKeyframeChange, SVKeyframeDelta, SVInterpolation,
+    SVDuration, SVInterpolation, SVKeyframe, SVKeyframeChange, SVKeyframeDelta,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVMarkProperty;
@@ -218,7 +218,10 @@ fn a_keyframe_carries_its_timestamp_and_delta() {
     let keyframe = SVKeyframe::new(SVDuration::milliseconds(250), delta.clone());
 
     assert_eq!(keyframe.timestamp().as_duration().as_millis(), 250);
-    assert_eq!(keyframe.delta().value_of(SVMarkProperty::Position), Some(3.0));
+    assert_eq!(
+        keyframe.delta().value_of(SVMarkProperty::Position),
+        Some(3.0)
+    );
 }
 
 #[test]

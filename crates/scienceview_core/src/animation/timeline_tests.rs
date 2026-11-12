@@ -3,8 +3,8 @@
 use std::time::Duration;
 
 use crate::sv_animation::{
-    SVAnimation, SVAnimationBuilder, SVAnimationDirection, SVAnimationLoop, SVInterpolation,
-    SVDuration, SVKeyframe, SVKeyframeDelta, SVPlaybackState,
+    SVAnimation, SVAnimationBuilder, SVAnimationDirection, SVAnimationLoop, SVDuration,
+    SVInterpolation, SVKeyframe, SVKeyframeDelta, SVPlaybackState,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVMarkProperty;
@@ -203,7 +203,7 @@ fn a_finished_timeline_holds_its_last_state() {
     animation.advance(Duration::from_millis(5000));
 
     assert_eq!(animation.state(), SVPlaybackState::Finished);
-    assert!((animation.position_seconds() - 2.0).abs() < 1e-12);
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
     assert_eq!(sv_sample(&animation), 10.0);
     assert_eq!(animation.normalised_position(), 1.0);
 }
@@ -239,7 +239,7 @@ fn a_counted_loop_finishes_after_the_last_pass() {
         .expect("a counted timeline builds");
     animation.play();
 
-    animation.advance(Duration::from_millis(2000));
+    animation.advance(Duration::from_millis(1000));
     assert_eq!(
         animation.state(),
         SVPlaybackState::Playing,
@@ -247,9 +247,9 @@ fn a_counted_loop_finishes_after_the_last_pass() {
     );
     assert!((animation.position_seconds() - 0.0).abs() < 1e-12);
 
-    animation.advance(Duration::from_millis(2000));
+    animation.advance(Duration::from_millis(1000));
     assert_eq!(animation.state(), SVPlaybackState::Finished);
-    assert!((animation.position_seconds() - 2.0).abs() < 1e-12);
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
 }
 
 #[test]
@@ -264,7 +264,7 @@ fn a_counted_loop_skips_whole_passes_when_the_elapsed_time_is_large() {
     animation.advance(Duration::from_millis(20_000));
 
     assert_eq!(animation.state(), SVPlaybackState::Finished);
-    assert!((animation.position_seconds() - 2.0).abs() < 1e-12);
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
 }
 
 #[test]
@@ -276,22 +276,22 @@ fn the_reverse_direction_starts_at_the_end_and_runs_backwards() {
         .expect("a reversed timeline builds");
 
     animation.play();
-    assert!((animation.position_seconds() - 2.0).abs() < 1e-12);
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
     animation.advance(Duration::from_millis(500));
-    assert!((animation.position_seconds() - 1.5).abs() < 1e-12);
+    assert!((animation.position_seconds() - 0.5).abs() < 1e-12);
     assert_eq!(
         animation
             .sample()
             .expect("a sample")
             .value_of(SVMarkProperty::Position),
-        Some(2.5)
+        Some(5.0)
     );
 }
 
 #[test]
 fn the_alternate_direction_reverses_on_the_next_pass() {
     let mut animation = SVAnimationBuilder::new()
-        .deltas([sv_position(0.0), sv_position(10.0)])
+        .deltas([sv_position(0.0), sv_position(10.0), sv_position(20.0)])
         .direction(SVAnimationDirection::Alternate)
         .loop_mode(SVAnimationLoop::Forever)
         .build()
@@ -305,7 +305,7 @@ fn the_alternate_direction_reverses_on_the_next_pass() {
             .sample()
             .expect("a sample")
             .value_of(SVMarkProperty::Position),
-        Some(2.5)
+        Some(15.0)
     );
 }
 
@@ -396,7 +396,7 @@ fn seeking_clamps_to_the_timeline_and_leaves_a_finished_timeline_paused() {
     assert!((animation.position_seconds() - 0.5).abs() < 1e-12);
 
     animation.seek(sv_seconds(99.0));
-    assert!((animation.position_seconds() - 2.0).abs() < 1e-12);
+    assert!((animation.position_seconds() - 1.0).abs() < 1e-12);
 }
 
 #[test]

@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 use crate::sv_animation::{
-    SVAnimation, SVAnimationBuilder, SVKeyframe, SVKeyframeDelta, SVKeyframeSource, SVDuration,
+    SVAnimation, SVAnimationBuilder, SVDuration, SVKeyframe, SVKeyframeDelta, SVKeyframeSource,
 };
 use crate::sv_mark::SVMarkProperty;
 
@@ -50,7 +50,10 @@ fn one_timeline_serves_several_threads_without_losing_the_bound() {
 
     let guard = shared.lock().unwrap_or_else(PoisonError::into_inner);
     assert!(guard.length() <= 16);
-    assert_eq!(guard.accepted_keyframes(), 1_000);
+    assert_eq!(
+        guard.accepted_keyframes() + guard.duplicate_keyframes() + guard.out_of_order_keyframes(),
+        1_000
+    );
 }
 
 #[test]

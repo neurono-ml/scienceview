@@ -154,6 +154,21 @@
 //! consumes is exported from the same module, next to the properties it
 //! describes.
 //!
+//! ## Animation
+//!
+//! [`sv_animation`] is the temporal layer: `SVAnimation` owns a sequence of
+//! keyframes, the playback clock and the controls — play, pause, step, seek,
+//! speed, loop and direction — so every backend renders the same position from
+//! the same model state. A keyframe is a [`sv_animation::SVKeyframeDelta`],
+//! expressed with the same property vocabulary the marks export; animation
+//! decides *when* a property changes, the transition kernel decides *whether*
+//! and *how* it tweens. A fixed list and a streaming source are one structure:
+//! both sample identically, and a stream feeds a bounded window that drops the
+//! oldest keyframe deterministically, never blocking the render thread. A
+//! keyframe arriving mid-transition re-targets from the interpolated position,
+//! and time only moves when the caller supplies it through `advance(Duration)`
+//! — no wall clock, no timer and no async runtime, so playback is reproducible.
+//!
 //! ## Moves
 //!
 //! [`sv_move`] is the closed vocabulary of positional moves — stack, dodge,

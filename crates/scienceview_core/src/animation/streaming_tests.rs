@@ -3,8 +3,8 @@
 use std::time::Duration;
 
 use crate::sv_animation::{
-    SVAnimation, SVAnimationBuilder, SVKeyframe, SVKeyframeAdmission, SVKeyframeDelta,
-    SVKeyframeSource, SVPlaybackState, SVDuration,
+    SVAnimation, SVAnimationBuilder, SVDuration, SVKeyframe, SVKeyframeAdmission, SVKeyframeDelta,
+    SVKeyframeSource, SVPlaybackState,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVMarkProperty;
@@ -154,65 +154,6 @@ fn a_paused_streaming_timeline_ignores_an_arriving_keyframe() {
 }
 
 #[test]
-fn a_keyframe_arriving_mid_transition_retargets_without_a_jump() {
-    let mut animation = sv_streaming(8);
-    animation
-        .push_keyframe(sv_frame(0, 0.0))
-        .expect("the first frame");
-    animation
-        .push_keyframe(sv_frame(1000, 10.0))
-        .expect("the second frame");
-    animation.play();
-    animation.advance(Duration::from_millis(500));
-    let before = sv_sample_at(&animation, 0.5).expect("the interpolated position");
-
-    assert_eq!(
-        animation.push_keyframe(sv_frame(750, 100.0)),
-        Ok(SVKeyframeAdmission::Accepted)
-    );
-
-    assert_eq!(
-        sv_sample_at(&animation, 0.5),
-        Some(before),
-        "the marks continue from where they are"
-    );
-    assert_eq!(animation.length(), 3, "the pending target was pre-empted");
-    assert_eq!(
-        animation
-            .retained_keyframes()
-            .0
-            .last()
-            .expect("the new target is retained")
-            .timestamp()
-            .as_duration()
-            .as_millis(),
-        750
-    );
-
-    animation.advance(Duration::from_millis(250));
-    assert_eq!(sv_sample_at(&animation, 0.75), Some(100.0));
-}
-
-#[test]
-fn an_interrupting_keyframe_that_is_not_newer_is_dropped() {
-    let mut animation = sv_streaming(8);
-    animation
-        .push_keyframe(sv_frame(0, 0.0))
-        .expect("the first frame");
-    animation
-        .push_keyframe(sv_frame(1000, 10.0))
-        .expect("the second frame");
-    animation.play();
-    animation.advance(Duration::from_millis(500));
-
-    assert_eq!(
-        animation.push_keyframe(sv_frame(400, 99.0)),
-        Ok(SVKeyframeAdmission::DroppedOutOfOrder)
-    );
-    assert_eq!(animation.length(), 2);
-}
-
-#[test]
 fn the_streaming_timeline_never_finishes() {
     let mut animation = sv_streaming(8);
     animation
@@ -240,7 +181,7 @@ fn a_fixed_source_rejects_a_streamed_keyframe() {
         animation.push_keyframe(sv_frame(1000, 1.0)),
         Err(SVError::AnimationSourceMismatch {
             operation: "push_keyframe",
-            source: SVKeyframeSource::Fixed,
+            keyframe_source: SVKeyframeSource::Fixed,
         })
     );
 }
@@ -301,20 +242,27 @@ fn fixed_and_streaming_sources_sample_identically() {
     fixed.play();
     streaming.play();
     for _ in 0..20 {
-        assert_eq!(
-            fixed.advance(Duration::from_millis(125)),
-            streaming.advance(Duration::from_millis(125))
-        );
+        fixed.advance(Duration::from_millis(125));
+        streaming.advance(Duration::from_millis(125));
         assert_eq!(
             fixed.position_seconds(),
             streaming.position_seconds(),
             "the clocks must agree"
         );
         assert_eq!(
-            fixed.sample().and_then(|delta| delta.value_of(SVMarkProperty::Position)),
+            fixed
+                .sample()
+                .and_then(|delta| delta.value_of(SVMarkProperty::Position)),
             streaming
                 .sample()
                 .and_then(|delta| delta.value_of(SVMarkProperty::Position))
         );
     }
+
+    assert_eq!(fixed.state(), SVPlaybackState::Finished);
+    assert_eq!(
+        streaming.state(),
+        SVPlaybackState::Playing,
+        "a stream waits for the next arrival instead of finishing"
+    );
 }

@@ -8,10 +8,11 @@
 //! The data boundary used to carry its own `SVDataError`; its variants now live
 //! here so callers match on one enumeration instead of translating between two.
 
+use crate::sv_animation::SVKeyframeSource;
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::SVRepresentation;
-use crate::sv_mark::SVMarkKind;
+use crate::sv_mark::{SVMarkKind, SVMarkProperty};
 use crate::sv_move::SVMoveStage;
 use thiserror::Error;
 
@@ -213,5 +214,66 @@ pub enum SVError {
         first: usize,
         /// The length of the second column.
         second: usize,
+    },
+
+    /// An animation duration is negative or not finite.
+    #[error("an animation duration must be finite and non-negative")]
+    InvalidAnimationDuration,
+
+    /// A playback speed is zero, negative or not finite.
+    #[error("a playback speed must be finite and greater than zero")]
+    InvalidPlaybackSpeed,
+
+    /// A keyframe carries a value that is not finite.
+    #[error(
+        "the keyframe change at position {position} sets `{property:?}` to a value that is not finite"
+    )]
+    NonFiniteAnimationValue {
+        /// The property the non-finite value belongs to.
+        property: SVMarkProperty,
+        /// The position of the change inside its delta.
+        position: usize,
+    },
+
+    /// One keyframe delta sets the same property twice.
+    #[error("a keyframe delta sets `{property:?}` more than once")]
+    DuplicateAnimationProperty {
+        /// The repeated property.
+        property: SVMarkProperty,
+    },
+
+    /// A fixed keyframe source is not strictly increasing in time.
+    #[error(
+        "the keyframe at position {position} is stamped {found_milliseconds} ms but the preceding keyframe is stamped {previous_milliseconds} ms; timestamps must strictly increase"
+    )]
+    OutOfOrderKeyframes {
+        /// The position of the offending keyframe.
+        position: usize,
+        /// The timestamp of the preceding keyframe, in milliseconds.
+        previous_milliseconds: u64,
+        /// The timestamp of the offending keyframe, in milliseconds.
+        found_milliseconds: u64,
+    },
+
+    /// A fixed keyframe source was built without any keyframe.
+    #[error("a fixed keyframe source needs at least one keyframe")]
+    EmptyKeyframeSource,
+
+    /// A keyframe arrived on a source that does not accept arrivals.
+    #[error(
+        "`{operation}` requires a streaming keyframe source; this timeline is `{keyframe_source}`"
+    )]
+    AnimationSourceMismatch {
+        /// The operation that needed a stream.
+        operation: &'static str,
+        /// The configured keyframe source.
+        keyframe_source: SVKeyframeSource,
+    },
+
+    /// A streaming keyframe window is too small to hold one transition.
+    #[error("a streaming animation needs a keyframe capacity of at least two, received {capacity}")]
+    InvalidAnimationCapacity {
+        /// The rejected capacity.
+        capacity: usize,
     },
 }
