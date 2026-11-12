@@ -29,29 +29,29 @@
 
 ## 4. Example and generated figure
 
-- [x] Add `examples/scatter_plot.rs` demonstrating the documented configuration.
-- [x] Generate `docs/figures/scatter_plot.svg` with `cargo run --example scatter_plot` and
+- [ ] Add `examples/scatter_plot.rs` demonstrating the documented configuration.
+- [ ] Generate `docs/figures/scatter_plot.svg` with `cargo run --example scatter_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
 
-- [x] Create the documentation branch from `docs/documentations` and add the
+- [ ] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [x] Mirror the figure into `docs/src/assets/scatter_plot.svg` and embed it in the
+- [ ] Mirror the figure into `docs/src/assets/scatter_plot.svg` and embed it in the
   chapter.
-- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/relational-scatter-plot.md` status to `shipped`, linking the
+- [ ] Change `docs/FDRs/relational-scatter-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [x] Add the `CHANGELOG.md` entry.
+- [ ] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
-- [x] Run the four gates locally: `cargo fmt --all --check`,
+- [ ] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [x] Trigger the independent acceptance review against
+- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [ ] Trigger the independent acceptance review against
   `docs/FDRs/relational-scatter-plot.md` before opening the code PR.
