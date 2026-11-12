@@ -48,5 +48,8 @@ pub use builder::SVScatterPlotBuilder;
 pub use core_implementation::SVScatterPlot;
 
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "scatter_plot_tests.rs"]
 mod scatter_plot_tests;

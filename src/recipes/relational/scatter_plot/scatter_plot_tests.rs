@@ -88,7 +88,6 @@ pub(crate) fn sv_full_source() -> SVTestSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     const HORIZONTAL_INDICES: [usize; 5] = [0, 1, 2, 3, 4];
     const VERTICAL_INDICES: [usize; 5] = [0, 1, 2, 3, 4];
@@ -105,7 +104,6 @@ pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_streaming_source() -> SVTestSource<'static> {
     SVTestSource {
         horizontal: SVColumnView::Streaming(SVStreamingView::new(&HORIZONTAL, 5, 0)),
@@ -359,6 +357,21 @@ fn the_title_and_axis_labels_become_decorations() {
     assert!(text.contains("Measurements"));
     assert!(text.contains("width"));
     assert!(text.contains("length"));
+}
+
+pub(crate) fn sv_scene_to_svg(
+    scene: &crate::recipes::relational::scatter_plot::SVScatterScene,
+) -> String {
+    let mut document = scienceview_svg::SVSvgDocument::new(scene.viewport())
+        .with_title(scene.title().unwrap_or("scatter plot"))
+        .with_description(scene.description().unwrap_or("scatter plot"))
+        .with_background(scene.background());
+    document.push_decoration_primitives(scene.decoration_primitives_before_marks());
+    for geometry in scene.mark_geometries() {
+        document.push_mark_geometry(geometry);
+    }
+    document.push_decoration_primitives(scene.decoration_primitives_after_marks());
+    document.to_svg()
 }
 
 pub(crate) fn sv_scene_text(
