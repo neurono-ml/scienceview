@@ -121,6 +121,9 @@ mod lazy_buffer_tests;
 #[path = "move_concurrency_tests.rs"]
 mod move_concurrency_tests;
 #[cfg(test)]
+#[path = "non_finite_tests.rs"]
+mod non_finite_tests;
+#[cfg(test)]
 #[path = "normalize_tests.rs"]
 mod normalize_tests;
 #[cfg(test)]

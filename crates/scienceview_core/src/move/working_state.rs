@@ -180,6 +180,7 @@ impl<'a> SVMoveState<'a> {
 
         let source = *request.values();
         let accessor = SVMoveValueAccessor::sv_resolve(source);
+        sv_validate_finite_values(&accessor)?;
         Ok(Self {
             values: SVMoveValues::Borrowed(accessor),
             baselines: None,
@@ -213,6 +214,24 @@ impl<'a> SVMoveState<'a> {
             representation,
         )
     }
+}
+
+/// Rejects a non-finite stored value before any move reads it.
+///
+/// A sparse column is checked at the entries it stores, so the pass never
+/// visits every logical position; its implicit zeros are finite by definition.
+fn sv_validate_finite_values(accessor: &SVMoveValueAccessor<'_>) -> Result<(), SVError> {
+    for index in accessor.stored_positions() {
+        let value = accessor.value_at(index);
+        if !value.is_finite() {
+            return Err(SVError::InvalidConfiguration {
+                message: format!(
+                    "the move received the non-finite value {value} at position {index}; moves require finite values"
+                ),
+            });
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
