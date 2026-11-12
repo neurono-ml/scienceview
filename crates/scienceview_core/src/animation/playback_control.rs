@@ -35,13 +35,7 @@ impl SVAnimation {
             self.keyframes.len(),
             self.position,
             || {
-                if matches!(
-                    self.state,
-                    SVPlaybackState::Idle | SVPlaybackState::Finished
-                ) {
-                    self.sv_restart();
-                }
-                self.state = SVPlaybackState::Playing;
+                self.sv_play_without_span();
                 Ok(())
             },
         );
@@ -55,9 +49,7 @@ impl SVAnimation {
             self.keyframes.len(),
             self.position,
             || {
-                if self.state == SVPlaybackState::Playing {
-                    self.state = SVPlaybackState::Paused;
-                }
+                self.sv_pause_without_span();
                 Ok(())
             },
         );
@@ -71,12 +63,44 @@ impl SVAnimation {
             self.keyframes.len(),
             self.position,
             || {
-                self.sv_restart();
-                self.position = 0.0;
-                self.state = SVPlaybackState::Idle;
+                self.sv_stop_without_span();
                 Ok(())
             },
         );
+    }
+
+    /// Starts playback unless it is already playing.
+    pub(super) fn sv_play_without_span(&mut self) {
+        if matches!(
+            self.state,
+            SVPlaybackState::Idle | SVPlaybackState::Finished
+        ) {
+            self.sv_restart();
+        }
+        self.state = SVPlaybackState::Playing;
+    }
+
+    /// Holds the position unless it is already held.
+    pub(super) fn sv_pause_without_span(&mut self) {
+        if self.state == SVPlaybackState::Playing {
+            self.state = SVPlaybackState::Paused;
+        }
+    }
+
+    /// Returns to the start and becomes idle.
+    pub(super) fn sv_stop_without_span(&mut self) {
+        self.sv_restart();
+        self.position = 0.0;
+        self.state = SVPlaybackState::Idle;
+    }
+
+    /// Pauses a playing timeline and plays a paused one.
+    pub(super) fn sv_toggle_without_span(&mut self) {
+        if self.state == SVPlaybackState::Playing {
+            self.sv_pause_without_span();
+        } else {
+            self.sv_play_without_span();
+        }
     }
 
     /// Changes the playback multiplier.
@@ -112,16 +136,10 @@ impl SVAnimation {
             self.position,
             || {
                 match action {
-                    SVAnimationAction::Play => self.play(),
-                    SVAnimationAction::Pause => self.pause(),
-                    SVAnimationAction::Toggle => {
-                        if self.state == SVPlaybackState::Playing {
-                            self.pause();
-                        } else {
-                            self.play();
-                        }
-                    }
-                    SVAnimationAction::Stop => self.stop(),
+                    SVAnimationAction::Play => self.sv_play_without_span(),
+                    SVAnimationAction::Pause => self.sv_pause_without_span(),
+                    SVAnimationAction::Toggle => self.sv_toggle_without_span(),
+                    SVAnimationAction::Stop => self.sv_stop_without_span(),
                     SVAnimationAction::Step { forward } => self.sv_step_to_neighbour(forward),
                     SVAnimationAction::Seek(position) => self.sv_seek_without_span(position),
                     SVAnimationAction::SetSpeed(speed) => {

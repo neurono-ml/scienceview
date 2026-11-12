@@ -8,7 +8,8 @@
 use std::time::Duration;
 
 use crate::sv_animation::{
-    SVAnimation, SVAnimationBuilder, SVDuration, SVKeyframe, SVKeyframeDelta, SVKeyframeSource,
+    SVAnimation, SVAnimationAction, SVAnimationBuilder, SVAnimationDirection, SVDuration,
+    SVKeyframe, SVKeyframeDelta, SVKeyframeSource,
 };
 use crate::sv_mark::SVMarkProperty;
 use crate::sv_observability::span_test_support::{
@@ -41,6 +42,20 @@ fn sv_streaming() -> SVAnimation {
 fn sv_capture_span(recorder: &SVSpanRecorder, operation: impl FnOnce()) -> Vec<SVSpanFields> {
     operation();
     recorder.captured()
+}
+
+/// Returns every playback action with a fresh value for the payload variants.
+fn sv_actions() -> Vec<SVAnimationAction> {
+    vec![
+        SVAnimationAction::Play,
+        SVAnimationAction::Pause,
+        SVAnimationAction::Toggle,
+        SVAnimationAction::Stop,
+        SVAnimationAction::Step { forward: true },
+        SVAnimationAction::Seek(SVDuration::milliseconds(500)),
+        SVAnimationAction::SetSpeed(2.0),
+        SVAnimationAction::SetDirection(SVAnimationDirection::Reverse),
+    ]
 }
 
 #[test]
@@ -107,4 +122,30 @@ fn a_sample_emits_one_span() {
     assert_eq!(spans.len(), 1, "one span per sample: {spans:?}");
     assert_eq!(spans[0]["operation"], "sample");
     assert_eq!(spans[0]["backend.kind"], "backend-independent");
+}
+
+#[test]
+fn every_dispatch_action_emits_exactly_one_span() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
+    let recorder = SVSpanRecorder::default();
+    let subscriber = Registry::default().with(recorder.clone());
+    let mut animation = sv_streaming();
+
+    tracing::subscriber::with_default(subscriber, || {
+        for action in sv_actions() {
+            let before = recorder.captured().len();
+            animation
+                .dispatch(action)
+                .expect("every action is valid on a streaming timeline");
+            let spans = recorder.captured();
+            assert_eq!(
+                spans.len(),
+                before + 1,
+                "one span per dispatch of {action:?}, not a nested duplicate: {spans:?}"
+            );
+            assert_eq!(spans[before]["operation"], "dispatch", "{action:?}");
+            assert_eq!(spans[before]["outcome"], "success", "{action:?}");
+        }
+    });
 }
