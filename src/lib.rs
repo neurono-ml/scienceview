@@ -44,9 +44,12 @@
 
 pub use scienceview_core;
 pub use scienceview_core::{
-    sv_animation, sv_data, sv_decoration, sv_layout, sv_mark, sv_move, sv_scale, sv_stat,
-    sv_transition, sv_window,
+    sv_animation, sv_backend, sv_data, sv_decoration, sv_error, sv_figure, sv_layout, sv_mark,
+    sv_move, sv_observability, sv_scale, sv_stat, sv_transition, sv_window,
 };
+
+/// Charts built by composing the core kernels.
+pub mod recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
