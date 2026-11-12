@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1160 640" role="img" aria-label="One SVColumnView in any of three representations enters a single SVStat dispatch, which produces derived values in data space: bins, category counts, group aggregates, density samples, cumulative breakpoints, quantiles or fit coefficients">
+  <defs>
+    <marker id="stat-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d3557"/>
+    </marker>
+    <marker id="stat-arrow-warm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+    <marker id="stat-arrow-cool" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+    <linearGradient id="stat-background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f6f8fa"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1160" height="640" fill="url(#stat-background)"/>
+  <text x="580" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#1f2328">
+    One dispatch from observations to derived values
+  </text>
+  <text x="580" y="66" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#59636e">
+    The representation is resolved once; the result is always in data space, never in pixels
+  </text>
+
+  <!-- Data boundary -->
+  <rect x="32" y="110" width="236" height="220" rx="14" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="150" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#0a3069">sv_data · SVColumnView</text>
+  <rect x="54" y="158" width="192" height="42" rx="9" fill="#ffffff" stroke="#0969da" stroke-width="1.5"/>
+  <text x="150" y="184" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Dense · borrowed slice</text>
+  <rect x="54" y="208" width="192" height="54" rx="9" fill="#ffffff" stroke="#8250df" stroke-width="1.5"/>
+  <text x="150" y="230" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Sparse · indices + values</text>
+  <text x="150" y="249" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">implicit zeros counted, never expanded</text>
+  <rect x="54" y="270" width="192" height="42" rx="9" fill="#ffffff" stroke="#1a7f37" stroke-width="1.5"/>
+  <text x="150" y="296" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Streaming · bounded window</text>
+
+  <!-- Dispatch -->
+  <rect x="330" y="118" width="240" height="204" rx="14" fill="#fff8c5" stroke="#9a6700" stroke-width="2"/>
+  <text x="450" y="148" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#7d4e00">sv_stat · SVStat</text>
+  <text x="450" y="172" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">closed enumeration · one per operation</text>
+  <rect x="352" y="188" width="196" height="122" rx="10" fill="#ffffff" stroke="#9a6700" stroke-width="1.5"/>
+  <text x="450" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Bin · Count · Aggregate</text>
+  <text x="450" y="236" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">KernelDensity · EmpiricalCdf</text>
+  <text x="450" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Percentile · Fit</text>
+  <text x="450" y="290" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">typed options, validated once</text>
+
+  <!-- Derived values -->
+  <rect x="632" y="102" width="268" height="236" rx="14" fill="#dafbe1" stroke="#1a7f37" stroke-width="2"/>
+  <text x="766" y="132" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#0f5323">SVStatResult · data space</text>
+  <text x="766" y="160" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Bins · edges + normalised counts</text>
+  <text x="766" y="184" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Categories · counts per code</text>
+  <text x="766" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Groups · value + error band</text>
+  <text x="766" y="232" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Density · grid + density samples</text>
+  <text x="766" y="256" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Cumulative · breakpoints + P(x)</text>
+  <text x="766" y="280" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Quantiles · q → value</text>
+  <text x="766" y="304" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">Fit · coefficients + predicted curve</text>
+
+  <!-- Consumer -->
+  <rect x="956" y="138" width="176" height="164" rx="14" fill="#fbefff" stroke="#8250df" stroke-width="2"/>
+  <text x="1044" y="168" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#5a32a3">Next kernels</text>
+  <text x="1044" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVMove</text>
+  <text x="1044" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVScale</text>
+  <text x="1044" y="248" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1f2328">SVMark</text>
+  <text x="1044" y="278" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">geometry lives here,</text>
+  <text x="1044" y="294" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">never in the stat</text>
+
+  <!-- Arrows -->
+  <line x1="268" y1="220" x2="328" y2="220" stroke="#1d3557" stroke-width="2.5" marker-end="url(#stat-arrow)"/>
+  <line x1="570" y1="220" x2="630" y2="220" stroke="#1d3557" stroke-width="2.5" marker-end="url(#stat-arrow)"/>
+  <line x1="900" y1="220" x2="954" y2="220" stroke="#1d3557" stroke-width="2.5" marker-end="url(#stat-arrow)"/>
+
+  <!-- Window semantics card -->
+  <rect x="32" y="382" width="340" height="216" rx="14" fill="#ffebe9" stroke="#cf222e" stroke-width="2"/>
+  <text x="202" y="412" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#82071e">Window semantics</text>
+  <text x="202" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">A stream is read from the window it already carries,</text>
+  <text x="202" y="459" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">so the call returns promptly and never waits.</text>
+  <text x="202" y="486" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">KernelDensity · EmpiricalCdf · Percentile · Fit</text>
+  <text x="202" y="505" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">report windowed = true for a streaming input.</text>
+  <text x="202" y="532" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">Bin · Count · Aggregate are exact over the view.</text>
+  <text x="202" y="566" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">the recipe documents the approximation</text>
+
+  <!-- Numeric card -->
+  <rect x="398" y="382" width="356" height="216" rx="14" fill="#fff8c5" stroke="#9a6700" stroke-width="2"/>
+  <text x="576" y="412" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#7d4e00">Stable and deterministic</text>
+  <text x="576" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">Welford updates the mean and M2 in one pass,</text>
+  <text x="576" y="459" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">including a run of implicit zeros in constant time.</text>
+  <text x="576" y="486" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">Neumaier-compensated sums guard every total.</text>
+  <text x="576" y="513" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">Non-finite observations are rejected with their</text>
+  <text x="576" y="532" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">position; no NaN reaches the result.</text>
+  <text x="576" y="566" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">order-independent statistics ignore input order</text>
+
+  <!-- Compute pool card -->
+  <rect x="780" y="382" width="348" height="216" rx="14" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="954" y="412" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#0a3069">Off the render thread</text>
+  <text x="954" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">KernelDensity and Fit report is_heavy().</text>
+  <text x="954" y="467" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">spawn_on(scope, input) runs the stat on a</text>
+  <text x="954" y="486" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">scoped compute thread and returns a handle;</text>
+  <text x="954" y="505" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">the borrowed window stays valid, nothing copies.</text>
+  <text x="954" y="532" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#1f2328">The render thread keeps drawing its frame.</text>
+  <text x="954" y="566" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">the caller provides the pool, the core owns no runtime</text>
+</svg>
