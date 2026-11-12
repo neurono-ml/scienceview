@@ -76,9 +76,9 @@ and the missing capability.
 - **WHEN** a user calls `show` on an SVG figure
 - **THEN** the call fails with `UnsupportedBackendCapability` for presentation
 
-#### Scenario: saving matches rendering
-- **WHEN** a user saves a figure and renders the same figure
-- **THEN** the file contains exactly the rendered bytes
+#### Scenario: saving writes the document
+- **WHEN** a user saves a figure
+- **THEN** the destination receives the serialized SVG document
 
 ### Requirement: Every mark and decoration renders
 
