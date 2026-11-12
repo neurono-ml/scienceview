@@ -148,6 +148,31 @@ fn save_writes_the_rendered_document_to_disk() {
 }
 
 #[test]
+fn save_reports_a_typed_failure_when_the_destination_cannot_be_written() {
+    let backend = SVSvgBackend::new();
+    let values = [1.0, 2.0, 3.0];
+    let unwritable_destination = std::env::temp_dir();
+
+    let error = backend
+        .save(&SVSaveRequest {
+            backend_kind: SVBackendKind::Svg,
+            execution_mode: SVExecutionMode::Automatic,
+            view: SVColumnView::Dense(&values),
+            destination: &unwritable_destination,
+        })
+        .expect_err("a directory is not a writable file");
+
+    assert!(matches!(
+        error,
+        SVError::BackendFailure {
+            backend_kind: SVBackendKind::Svg,
+            operation: "save",
+            ..
+        }
+    ));
+}
+
+#[test]
 fn the_provider_answers_only_for_svg() {
     let provider = SVSvgBackendProvider::new();
 
