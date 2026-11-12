@@ -42,6 +42,8 @@
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.
 
+pub mod recipes;
+
 pub use scienceview_core;
 pub use scienceview_core::{
     sv_animation, sv_data, sv_decoration, sv_layout, sv_mark, sv_move, sv_scale, sv_stat,
