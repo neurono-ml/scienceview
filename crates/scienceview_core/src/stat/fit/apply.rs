@@ -1,8 +1,4 @@
 //! The fit entry point: validation, column reading and orchestration.
-//!
-//! The kernel is split by concern: [`apply`] validates and orchestrates,
-//! [`conditioning`] centres the design, [`least_squares`] solves it and
-//! [`curve`] transforms, evaluates and brackets the fitted model.
 
 use crate::sv_data::{SVColumnView, SVRepresentation};
 use crate::sv_error::SVError;
