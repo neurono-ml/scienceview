@@ -52,6 +52,26 @@ fn filling_sets_every_pixel_and_marks_the_whole_frame_dirty() {
 }
 
 #[test]
+fn clearing_resets_the_frame_to_transparent() {
+    let mut canvas = SVRasterCanvas::new(&SVViewport::new(2.0, 2.0));
+    canvas.fill(SVColour::new(10, 20, 30, 255));
+    canvas.clear_dirty_region();
+
+    canvas.clear();
+
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(canvas.pixel(x, y), Some(SVColour::new(0, 0, 0, 0)));
+        }
+    }
+    let bounds = canvas
+        .dirty_region()
+        .bounds()
+        .expect("a clear dirties the frame");
+    assert_eq!((bounds.width(), bounds.height()), (2, 2));
+}
+
+#[test]
 fn resizing_reallocates_and_dirties_the_frame() {
     let mut canvas = SVRasterCanvas::new(&SVViewport::new(4.0, 3.0));
     canvas.clear_dirty_region();
