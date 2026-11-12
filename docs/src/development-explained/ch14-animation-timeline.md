@@ -34,8 +34,10 @@ updates are the same data structure with different arrival rules.
 the properties that change, expressed with the vocabulary the mark kernel
 already exports (`SVMarkProperty`: position, size, colour, opacity, font size,
 shape, dash pattern, font family). The timeline therefore keeps no parallel
-state representation: it keeps an ordered list of deltas, which is exactly what
-the `model-events` capability serializes.
+state representation: it keeps an ordered list of deltas, in the same shape the
+`model-events` capability serializes. What the timeline does *not* do is apply
+that delta to a figure — the transactional mutation pipeline belongs to
+`model-events`, and this chapter stops at the sampled delta.
 
 **One clock lives in the model.** The backend renders `sample()`; it never owns
 the timing. Time is supplied by the caller through `advance(Duration)`. There
@@ -70,11 +72,19 @@ One change is a property plus a value. A delta is an ordered set of changes.
 knows which change was wrong.
 
 `SVKeyframeDelta::interpolate(&target, progress)` is the heart of the timeline
-and the **seam to the transition kernel** (`sv_transition`, landing in the same
-wave): it takes the two neighbouring deltas plus an eased progress and returns
-the state in between. The transition layer will decide *whether* and *how* a
-property tweens; the timeline only decides *when*. Because the seam is a pair
-of deltas and a number, the two features can evolve independently.
+and the **seam to the transition kernel** (`sv_transition`, still pending): it
+takes the two neighbouring deltas plus an eased progress and returns the state
+in between. The transition layer will decide *whether* and *how* a property
+tweens; the timeline only decides *when*. Because the seam is a pair of deltas
+and a number, the two features can evolve independently.
+
+The delta stores scalar values, while the transition kernel consumes typed
+`SVMarkPropertyValue` values. That adapter is deliberately not shipped before
+the kernel: the change design records the exact contract — `Size`, `Opacity`
+and `FontSize` map directly, `Colour` is a blend fraction passed to
+`SVColour::interpolate`, `Position` pairs the scalar x with the mark's current
+y, and the discrete properties use the ordinal of their closed enumeration.
+Shipping half of that adapter now would be dead code.
 
 An interpolable property (`is_interpolable`) is tweened linearly in the
 delta's own units. A discrete property — shape, dash pattern, font family —
@@ -240,11 +250,13 @@ a UI can show the queue depth instead of guessing.
 
 ## 8. What comes next
 
-The transition kernel (`sv_transition`) consumes the same property table and
-the same pair of deltas; the timeline hands it `sample()` and the eased
-progress. The UI kit will dispatch `SVAnimationAction` from its controls, and
-every backend will read `sample()` each frame. None of those changes needs to
-touch the clock.
+The transition kernel (`sv_transition`) will consume the same property table
+and the same pair of deltas once it lands; the timeline hands it `sample()` and
+the eased progress. Applying that sampled delta to a figure is the
+`model-events` change's job, so the timeline currently stops at the sample and
+the FDR keeps the application item unchecked. The UI kit will dispatch
+`SVAnimationAction` from its controls, and every backend will read `sample()`
+each frame. None of those changes needs to touch the clock.
 
 The FDR's remaining acceptance items — a backend rendering a mid-animation
 frame, and a reduced-motion theme collapsing durations to zero — belong to the

@@ -37,8 +37,10 @@ covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend and chapter 14 covers the animation timeline, each
-written by its own change. Chapter 13 is reserved for the transition kernel,
-which lands alongside animation in wave 5. Later chapters are planned, one per capability of the
+written by its own change. Chapter 13 remains reserved for the transition
+kernel, which has not landed yet, so chapter 14 currently follows chapter 12
+and the numbering leaves room for the transition chapter when it ships. Later
+chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
