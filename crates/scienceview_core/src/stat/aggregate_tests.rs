@@ -422,3 +422,42 @@ fn a_non_finite_weight_is_rejected_with_its_position() {
         }
     );
 }
+
+#[test]
+fn a_non_finite_group_code_is_rejected_with_its_position() {
+    let values = [1.0, 2.0];
+    let groups = [1.0, f64::NAN];
+    let input = ungrouped(&values).with_groups(SVColumnView::Dense(&groups));
+
+    let error = SVStat::aggregate(SVAggregateOptions::new())
+        .apply(input)
+        .expect_err("NaN is not a group code");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "aggregate",
+            position: 1,
+        }
+    );
+}
+
+#[test]
+fn a_non_finite_sparse_value_reports_its_logical_position() {
+    let indices = [1usize, 4];
+    let values = [2.0, f64::NAN];
+    let sparse = SVSparseView::new(&indices, &values, 6).expect("valid sparse storage");
+    let input = SVStatInput::new(SVColumnView::Sparse(sparse));
+
+    let error = SVStat::aggregate(SVAggregateOptions::new())
+        .apply(input)
+        .expect_err("NaN is not an observation");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "aggregate",
+            position: 4,
+        }
+    );
+}

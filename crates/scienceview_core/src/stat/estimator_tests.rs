@@ -124,3 +124,21 @@ fn a_dense_custom_fit_is_not_windowed() {
 
     assert!(!curve.is_windowed());
 }
+
+#[test]
+fn a_non_finite_observation_is_rejected_with_its_position() {
+    let error = sv_fit_with_estimator(
+        &SVReferenceLineEstimator,
+        SVStatInput::new(SVColumnView::Dense(&[1.0, f64::NAN, 5.0]))
+            .with_secondary(SVColumnView::Dense(&[0.0, 1.0, 2.0])),
+    )
+    .expect_err("NaN is not an observation");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "fit",
+            position: 1,
+        }
+    );
+}

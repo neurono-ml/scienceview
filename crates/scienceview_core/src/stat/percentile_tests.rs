@@ -123,3 +123,20 @@ fn one_observation_is_every_quantile() {
 
     assert_eq!(result.values(), &[7.0, 7.0, 7.0]);
 }
+
+#[test]
+fn a_non_finite_observation_is_rejected_with_its_position() {
+    let values = [1.0, 2.0, f64::NAN, 4.0];
+
+    let error = SVStat::percentile(SVPercentileOptions::new())
+        .apply(SVStatInput::new(SVColumnView::Dense(&values)))
+        .expect_err("NaN is not an observation");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "percentile",
+            position: 2,
+        }
+    );
+}

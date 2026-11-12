@@ -392,3 +392,21 @@ fn the_fit_is_independent_of_the_input_order() {
         assert!((left - right).abs() < 1e-12);
     }
 }
+
+#[test]
+fn a_non_finite_value_observation_is_rejected_with_its_position() {
+    let error = SVStat::fit(SVFitOptions::new())
+        .apply(
+            SVStatInput::new(SVColumnView::Dense(&[1.0, f64::INFINITY]))
+                .with_secondary(SVColumnView::Dense(&[0.0, 1.0])),
+        )
+        .expect_err("infinity is not an observation");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "fit",
+            position: 1,
+        }
+    );
+}
