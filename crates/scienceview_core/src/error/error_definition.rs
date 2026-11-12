@@ -164,4 +164,33 @@ pub enum SVError {
         /// The column that was requested.
         requested: String,
     },
+
+    /// A statistical kernel received a column with no observations.
+    #[error("`{operation}` needs at least one observation but the column is empty")]
+    EmptyInput {
+        /// The stat operation that rejected the column.
+        operation: &'static str,
+    },
+
+    /// A statistical kernel received a value that is not finite.
+    #[error("`{operation}` received a non-finite value at position {position}")]
+    NonFiniteValue {
+        /// The stat operation that rejected the value.
+        operation: &'static str,
+        /// The logical position of the offending value.
+        position: usize,
+    },
+
+    /// Two columns given to one statistical kernel have different lengths.
+    #[error(
+        "`{operation}` needs columns of equal length; the first has {first} values and the second has {second}"
+    )]
+    MismatchedStatisticLengths {
+        /// The stat operation that rejected the columns.
+        operation: &'static str,
+        /// The length of the first column.
+        first: usize,
+        /// The length of the second column.
+        second: usize,
+    },
 }

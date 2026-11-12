@@ -5,10 +5,10 @@
 | Id | FDR-002 |
 | Name | `SVStat` |
 | Family | Core — computation |
-| Status | planned |
+| Status | in-progress |
 | Layer | Core |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch10-statistical-transforms.md` |
+| Example program | none yet — the executable example is the `sv_stat` module doctest |
 
 ## Purpose
 
@@ -90,15 +90,15 @@ space.
 
 | Kernel | Option | Type | Default |
 |---|---|---|---|
-| `Bin` | `bin_count` | `usize` | derived from the available width |
+| `Bin` | `bin_count` | `Option<usize>` | `None` — defaults to 30 bins when no width or edges are given |
 | `Bin` | `bin_width` | `Option<f64>` | `None` |
 | `Bin` | `bin_edges` | `Option<Vec<f64>>` | `None` — explicit edges win |
-| `Bin` | `range` | `Option<(f64, f64)>` | `None` |
-| `Bin` | `normalise` | `SVNormalisation` | `None` (`Count`, `Probability`, `Density`) |
+| `Bin` | `range` | `Option<(f64, f64)>` | `None` — derived from the observations |
+| `Bin` | `normalise` | `SVNormalisation` | `Count` (`Count`, `Probability`, `Density`) |
 | `Bin` | `cumulative` | `bool` | `false` |
-| `Count` | `sort` | `SVCategoryOrder` | `DataOrder` |
-| `Aggregate` | `method` | `SVAggregateMethod` | `Mean` (`Mean`, `Median`, `Sum`, `Min`, `Max`, `StdDev`, `Count`) |
-| `Aggregate` | `error` | `Option<SVErrorKind>` | `None` (`StdDev`, `StdError`, `Percentile`) |
+| `Count` | `order` | `SVCountOrder` | `DataOrder` (`DataOrder`, `Ascending`, `Descending`) |
+| `Aggregate` | `method` | `SVAggregateMethod` | `Mean` (`Mean`, `Median`, `Sum`, `Minimum`, `Maximum`, `StandardDeviation`, `Count`) |
+| `Aggregate` | `error` | `Option<SVAggregateErrorKind>` | `None` (`StandardDeviation`, `StandardError`, `Percentile`) |
 | `KernelDensity` | `bandwidth` | `Option<f64>` | `None` — derived by rule of thumb |
 | `KernelDensity` | `kernel` | `SVKernelShape` | `Gaussian` |
 | `KernelDensity` | `grid_count` | `usize` | `256` |
@@ -133,32 +133,45 @@ implicit, continuously updated target.
 Stats are backend-independent by construction: they run before any backend is
 consulted. The backend only ever sees the derived values.
 
-The heavy kernels (`KernelDensity`, `Fit`) run on the compute pool, never on
-the render thread, per the asynchrony principle of the foundation.
+The heavy kernels (`KernelDensity`, `Fit`) expose a scoped compute path:
+`SVStat::spawn_on(scope, input)` hands the kernel to a caller-provided thread
+scope while the borrowed columns stay alive, and `SVStat::is_heavy()` reports
+whether a variant is one of them. Offloading is the caller's decision; the
+kernel never starts a runtime of its own.
 
 ## Acceptance
 
-- [ ] Each stat dispatches on `SVColumnView` exactly once per operation.
-- [ ] A sparse input is never densified; the stat reports the same result as
+- [x] Each stat dispatches on `SVColumnView` exactly once per operation.
+- [x] A sparse input is never densified; the stat reports the same result as
       the equivalent dense input within the documented tolerance.
-- [ ] A streaming input never blocks the render thread and never exceeds the
+- [x] A streaming input never blocks the render thread and never exceeds the
       window.
-- [ ] The `Bin`, `Aggregate` and `Count` kernels produce identical output
+- [x] The `Bin`, `Aggregate` and `Count` kernels produce identical output
       for dense, sparse and streaming inputs of the same data.
-- [ ] The window-dependent kernels (`KernelDensity`, `EmpiricalCdf`,
-      `Percentile`, `Fit`) document their window semantics and reject a
-      streaming view with `UnsupportedRepresentation` only where the window is
-      genuinely insufficient.
-- [ ] Every kernel has companion tests in a `*_tests.rs` module beside its
+- [x] The window-dependent kernels (`KernelDensity`, `EmpiricalCdf`,
+      `Percentile`, `Fit`) accept a streaming view, operate on its bounded
+      window and report `windowed`; none of them blocks on the stream.
+- [x] `Fit` rejects only sparse storage, and only as a documented static-only
+      exception: two independently sparse columns describe implicit zeros at
+      different positions. The error names the alternative path (bind dense or
+      streaming columns, or pre-aggregate the sparse view).
+- [x] The fit conditions its independent column before solving, so a line at
+      `x ≈ 1.7e9` is recovered rather than flattened; regression tests cover
+      `x ≈ 1e6` and `x ≈ 1.7e9`, including a degree-2 case.
+- [x] Every `SVStat::apply` records one span with `stat.kind`, the value
+      column's `representation`, `points`, `duration` and `outcome`.
+- [x] Every kernel has companion tests in a `*_tests.rs` module beside its
       implementation.
 
 ## Open questions
 
 - Should `Fit` support robust regression (Huber, quantile) as a first-class
-  model, or as a user-supplied function? *Current answer: a user-supplied
-  function, behind a trait, so the core stays dependency-light.*
+  model, or as a user-supplied function? *Answered: a user-supplied function
+  behind `SVFitEstimator`, called through `sv_fit_with_estimator`, so the core
+  stays dependency-light and the closed stat set is unchanged.*
 - Should `Aggregate` support a weighted mean over a weight column in the first
-  version? *Open.*
+  version? *Answered: yes — `Mean` and `Sum` accept weights through
+  `SVStatInput::with_weights`; the other methods reject them explicitly.*
 - What tolerance defines "the same pixels" for a sparse input in the
-  `data-view-boundary` sense? *Open — it must be fixed before the first
-  implementation.*
+  `data-view-boundary` sense? *Answered: dense against sparse is exact and
+  dense against streaming uses `SVRepresentationTolerance::DEFAULT`.*

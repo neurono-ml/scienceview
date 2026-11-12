@@ -74,7 +74,7 @@ rather than being redrawn.
 | `series` | `Option<SVColumnRef>` | `None` | all three |
 | `aggregate` | `Option<SVStat>` | `None` | seaborn |
 | `estimator` | `SVAggregateMethod` | `Mean` | seaborn |
-| `error` | `Option<SVErrorKind>` | `None` | seaborn |
+| `error` | `Option<SVAggregateErrorKind>` | `None` | seaborn |
 | `ci` | `Option<f64>` | `None` — draw the interval | seaborn |
 | `markers` | `bool` | `false` | seaborn, plotly |
 | `line_width` | `SVLength` | token `mark.line_width` | bokeh, plotly |

@@ -68,7 +68,7 @@ mode).
 | `x` | `SVColumnRef` | — | all three |
 | `lower`, `upper` | `Option<SVColumnRef>` | `None` | all three |
 | `derive` | `Option<SVStat>` | `None` | seaborn |
-| `error` | `SVErrorKind` | `StdDev` | seaborn (`ci`) |
+| `error` | `SVAggregateErrorKind` | `StdDev` | seaborn (`ci`) |
 | `confidence` | `f64` | `0.95` | seaborn |
 | `opacity` | `f32` | token `mark.area_opacity` | all three |
 | `fill` | `bool` | `true` | plotly `fill` |
