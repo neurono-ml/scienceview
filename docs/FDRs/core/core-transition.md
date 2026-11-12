@@ -5,10 +5,10 @@
 | Id | FDR-005 |
 | Name | `SVTransition` |
 | Family | Core — rendering |
-| Status | planned |
+| Status | shipped (kernel); animated example deferred |
 | Layer | Core |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch13-mark-transitions.md` |
+| Example program | deferred until a live recipe exists |
 
 ## Purpose
 
