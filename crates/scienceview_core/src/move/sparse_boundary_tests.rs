@@ -101,8 +101,11 @@ fn a_sparse_normalize_allocates_only_the_stored_entries() {
     let moved = sequence.apply(&request).expect("the normalize applies");
 
     let values = moved.values().expect("a normalize writes values");
+    let baselines = moved.baselines().expect("a normalize writes baselines");
     assert!(values.is_sparse());
+    assert!(baselines.is_sparse());
     assert_eq!(sv_stored_count(values), STORED_VALUES.len());
+    assert_eq!(sv_stored_count(baselines), STORED_VALUES.len());
     // The positive total is 9 and the negative total is 1.
     let first = values.value_at(STORED_INDICES[0]).expect("stored entry");
     assert!((first - 2.0 / 9.0).abs() < 1e-12);
