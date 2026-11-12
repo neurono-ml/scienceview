@@ -176,6 +176,8 @@
 //! backend-agnostic primitives; text is laid out as a box until a backend
 //! rasterizes glyphs.
 
+#[path = "animation/mod.rs"]
+pub mod sv_animation;
 #[path = "data/mod.rs"]
 pub mod sv_data;
 #[path = "decoration/mod.rs"]
