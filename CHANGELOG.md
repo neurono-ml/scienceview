@@ -16,14 +16,17 @@ released.
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
   pure rasterizer (`SVRasterCanvas`) owns a straight-alpha RGBA buffer and
-  draws flattened paths with non-zero winding, stroked segments with caps,
-  joins, dashes and anti-aliasing, rectangles with corner radii, circles,
+  draws flattened paths with non-zero winding, stroked segments with butt,
+  round and square caps, round, miter and bevel joins (a miter past the limit
+  falls back to a bevel), dashes and anti-aliasing, rectangles with corner radii, circles,
   text laid out as boxes, and borrowed RGBA images with nearest or bilinear
   sampling, all scaled by the viewport's device pixel ratio. A present layer
   (`SVNativeWindow`, compiled only with the `window` feature, which the root
   `render-native` feature enables) blits the buffer through `softbuffer` in a
   `winit` window and re-solves the logical viewport on resize or scale change;
-  `winit` and `softbuffer` stay out of the default build. The frame loop takes
+  a streaming producer publishes frames into the open window, which presents
+  the newest one in place without reopening. `winit` and `softbuffer` stay out
+  of the default build. The frame loop takes
   its clock from the model through `SVFrameClock`, so a paused timeline
   performs no animation work. `render` and `update` return the comparable RGBA
   frame, `show` presents it, and `save` reports the missing export capability
