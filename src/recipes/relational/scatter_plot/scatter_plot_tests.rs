@@ -7,12 +7,14 @@ use crate::recipes::relational::scatter_plot::{
     SVScatterLegendPlacement, SVScatterPlot, SVScatterSizeScale,
 };
 use crate::sv_data::{
-    SVColumnSnapshot, SVColumnView, SVDataSource, SVRepresentation, SVSparseView, SVSourceSchema,
+    SVColumnSnapshot, SVColumnView, SVDataSource, SVRepresentation, SVSourceSchema, SVSparseView,
     SVStreamingView,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVDotShape;
-use crate::{sv_backend::SVBackendKind, sv_decoration::SVDecorationPrimitive, sv_figure::SVExecutionMode};
+use crate::{
+    sv_backend::SVBackendKind, sv_decoration::SVDecorationPrimitive, sv_figure::SVExecutionMode,
+};
 
 const HORIZONTAL: [f64; 5] = [0.0, 1.0, 2.0, 3.0, 4.0];
 const VERTICAL: [f64; 5] = [1.0, 4.0, 2.0, 5.0, 3.0];
@@ -86,6 +88,7 @@ pub(crate) fn sv_full_source() -> SVTestSource<'static> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     const HORIZONTAL_INDICES: [usize; 5] = [0, 1, 2, 3, 4];
     const VERTICAL_INDICES: [usize; 5] = [0, 1, 2, 3, 4];
@@ -102,6 +105,7 @@ pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn sv_streaming_source() -> SVTestSource<'static> {
     SVTestSource {
         horizontal: SVColumnView::Streaming(SVStreamingView::new(&HORIZONTAL, 5, 0)),
@@ -198,9 +202,7 @@ fn the_alpha_option_is_applied_to_every_mark() {
     let scene = sv_build_default(&source)
         .render()
         .expect("the default scatter renders");
-    let opaque = scene.mark_geometries()[0].primitives()[0]
-        .paint()
-        .opacity();
+    let opaque = scene.mark_geometries()[0].primitives()[0].paint().opacity();
 
     let plot = SVScatterPlot::builder()
         .data_source(&source)
@@ -211,9 +213,7 @@ fn the_alpha_option_is_applied_to_every_mark() {
         .build()
         .expect("the configuration is complete");
     let scene = plot.render().expect("the scatter renders");
-    let translucent = scene.mark_geometries()[0].primitives()[0]
-        .paint()
-        .opacity();
+    let translucent = scene.mark_geometries()[0].primitives()[0].paint().opacity();
 
     assert!((opaque - 1.0).abs() < 1e-6);
     assert!((translucent - 0.4).abs() < 1e-6);
@@ -310,7 +310,10 @@ fn the_edge_options_paint_a_stroke() {
         .expect("the scatter renders");
 
     let paint = scene.mark_geometries()[0].primitives()[0].paint();
-    assert_eq!(paint.stroke(), Some(crate::sv_scale::SVColour::new(0, 0, 0, 255)));
+    assert_eq!(
+        paint.stroke(),
+        Some(crate::sv_scale::SVColour::new(0, 0, 0, 255))
+    );
     assert!((paint.stroke_width() - 1.5).abs() < 1e-9);
 }
 
@@ -358,7 +361,9 @@ fn the_title_and_axis_labels_become_decorations() {
     assert!(text.contains("length"));
 }
 
-pub(crate) fn sv_scene_text(scene: &crate::recipes::relational::scatter_plot::SVScatterScene<'_>) -> String {
+pub(crate) fn sv_scene_text(
+    scene: &crate::recipes::relational::scatter_plot::SVScatterScene,
+) -> String {
     scene
         .decoration_primitives_before_marks()
         .iter()
