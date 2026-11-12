@@ -115,6 +115,9 @@ mod dodge_tests;
 #[path = "jitter_tests.rs"]
 mod jitter_tests;
 #[cfg(test)]
+#[path = "lazy_buffer_tests.rs"]
+mod lazy_buffer_tests;
+#[cfg(test)]
 #[path = "move_concurrency_tests.rs"]
 mod move_concurrency_tests;
 #[cfg(test)]

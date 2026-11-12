@@ -217,7 +217,7 @@ impl<'a> SVMoveState<'a> {
 
 #[cfg(test)]
 pub(crate) use sv_materialisation_counter::{
-    sv_materialisation_count, sv_reset_materialisation_count,
+    sv_materialisation_count, sv_reset_materialisation_count, sv_resolution_count,
 };
 
 /// Test-only count of the value columns a move materialised on this thread.
@@ -243,6 +243,11 @@ mod sv_materialisation_counter {
     /// Returns the number of value columns materialised by the current thread.
     pub(crate) fn sv_materialisation_count() -> usize {
         MATERIALISATIONS.with(Cell::get)
+    }
+
+    /// Returns the number of representations resolved by the current thread.
+    pub(crate) fn sv_resolution_count() -> usize {
+        RESOLUTIONS.with(Cell::get)
     }
 
     /// Records one materialisation on the current thread.
