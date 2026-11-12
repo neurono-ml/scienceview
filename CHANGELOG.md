@@ -12,6 +12,22 @@ released.
 
 ### Added
 
+- The transition kernel in `scienceview_core::sv_transition`: `SVTransition`
+  matches marks between two states by a stable key — `Category`, `Index`,
+  `Identity` or a seeded `Derived` hash, resolved into a typed
+  `SVMatchKeyValue` from a dense, sparse or streaming `SVColumnView` with one
+  dispatch and duplicate-key detection — and computes the enter, update and exit
+  sets. Interpolation follows the mark kernel's interpolable-property table:
+  position, size, colour, opacity and font size tween while shape, dash pattern
+  and font family hold their previous value and swap at the end. Enter and exit
+  rules (`None`, `FadeIn`/`ScaleIn`/`SlideIn`, `FadeOut`/`ScaleOut`/`SlideOut`)
+  govern appearances and disappearances. Durations and easings resolve from the
+  theme's motion tokens behind the `theme` feature, with documented built-in
+  defaults otherwise, and a reduced-motion theme collapses every frame to its
+  final state. The kernel owns no clock: evaluation is a pure function of a
+  caller-supplied progress in `0..=1`, so it is deterministic and safe to run
+  from several threads, and a backend without in-place update resolves the
+  transition to its final state.
 - The positional-move kernel in `scienceview_core::sv_move`: `SVMove` is the
   closed vocabulary of stack, dodge, jitter, shift, swarm and normalize, applied
   in data space between the statistic and the scale. `SVMoveSequence::new`
