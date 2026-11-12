@@ -6,6 +6,7 @@
 //! logic of its own.
 
 use crate::canvas::SVNativeFrame;
+use crate::present::SVPresenter;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_error::SVError;
 use std::num::NonZeroU32;
@@ -52,6 +53,12 @@ impl SVPresentSurface {
         }
 
         buffer.present().map_err(sv_window_failure)
+    }
+}
+
+impl SVPresenter for SVPresentSurface {
+    fn present(&mut self, frame: &SVNativeFrame) -> Result<(), SVError> {
+        self.blit(frame)
     }
 }
 

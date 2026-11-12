@@ -20,6 +20,24 @@
 //! `scienceview_native` depends on no animation or transition type, so the
 //! animation and transition crates plug in without this crate changing.
 //!
+//! ## Updating a window in place
+//!
+//! [`SVNativeWindow::publisher`] hands the caller a cloneable
+//! [`SVFramePublisher`]. A streaming figure publishes every new frame and the
+//! open window presents it without reopening: the publisher wakes the window,
+//! and the redraw blits the newest frame instead of repainting the previous
+//! one. Only the newest pending frame is kept.
+//!
+//! ```ignore
+//! let mut window = SVNativeWindow::new(sv_native_default_viewport());
+//! let publisher = window.publisher();
+//! std::thread::spawn(move || {
+//!     // Render the newest data, then hand the frame to the window.
+//!     publisher.publish(frame);
+//! });
+//! window.show(&request)?;
+//! ```
+//!
 //! ## Capabilities
 //!
 //! The backend declares events, scripting, streaming, in-place update and
@@ -44,6 +62,7 @@
 mod backend;
 mod canvas;
 mod figure;
+mod present;
 
 #[cfg(feature = "window")]
 mod window;
@@ -60,6 +79,7 @@ pub use canvas::SVDirtyRegion;
 pub use canvas::SVNativeFrame;
 pub use canvas::SVRasterBounds;
 pub use canvas::SVRasterCanvas;
+pub use present::SVFramePublisher;
 
 #[cfg(feature = "window")]
 pub use window::SVNativeWindow;

@@ -11,6 +11,9 @@ use crate::backend::SVFrameClock;
 use crate::backend::SVFrameLoop;
 use crate::backend::SVNativeBackend;
 use crate::canvas::SVNativeFrame;
+use crate::present::SVFrameChannel;
+use crate::present::SVFramePublisher;
+use crate::present::SVPresentLoop;
 use scienceview_core::sv_backend::SVRenderRequest;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::SVViewport;
@@ -20,17 +23,31 @@ use winit::event_loop::EventLoop;
 /// A native window that presents the backend's frames.
 pub struct SVNativeWindow {
     viewport: SVViewport,
+    channel: SVFrameChannel,
 }
 
 impl SVNativeWindow {
     /// Describes the window's initial logical viewport.
     pub fn new(viewport: SVViewport) -> Self {
-        Self { viewport }
+        Self {
+            viewport,
+            channel: SVFrameChannel::default(),
+        }
     }
 
     /// Returns the initial logical viewport.
     pub const fn viewport(&self) -> SVViewport {
         self.viewport
+    }
+
+    /// Returns a publisher that updates the window in place.
+    ///
+    /// A streaming figure clones the publisher and publishes every new frame.
+    /// Publishing wakes the running window, which blits the frame without
+    /// reopening; only the newest frame is kept, so a producer faster than the
+    /// window never queues stale frames.
+    pub fn publisher(&self) -> SVFramePublisher {
+        self.channel.publisher()
     }
 
     /// Opens the window and runs its event loop until it closes.
@@ -48,6 +65,8 @@ impl SVNativeWindow {
         let mut application = SVNativeApplication {
             viewport: self.viewport,
             frame_loop: SVFrameLoop::new(clock),
+            present_loop: SVPresentLoop::new(self.channel.clone()),
+            channel: self.channel.clone(),
             painter,
             position: 0.0,
             surface: None,

@@ -9,6 +9,8 @@ use crate::backend::SVFrameClock;
 use crate::backend::SVFrameLoop;
 use crate::backend::SVFrameOutcome;
 use crate::canvas::SVNativeFrame;
+use crate::present::SVFrameChannel;
+use crate::present::SVPresentLoop;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::SVViewport;
 use std::sync::Arc;
@@ -27,6 +29,8 @@ where
 {
     pub(crate) viewport: SVViewport,
     pub(crate) frame_loop: SVFrameLoop<C>,
+    pub(crate) present_loop: SVPresentLoop,
+    pub(crate) channel: SVFrameChannel,
     pub(crate) painter: F,
     pub(crate) position: f64,
     pub(crate) surface: Option<SVPresentSurface>,
@@ -61,6 +65,11 @@ where
         let Some(surface) = self.surface.as_mut() else {
             return Ok(());
         };
+        // A published frame is the newest state of the figure; it replaces the
+        // frame the painter would reproduce from the clock position.
+        if self.present_loop.present_pending(surface)? {
+            return Ok(());
+        }
         let frame = (self.painter)(self.position)?;
         surface.blit(&frame)
     }
@@ -93,7 +102,14 @@ where
         let size = window.inner_size();
         self.update_viewport(size.width, size.height, scale);
         match SVPresentSurface::new(window) {
-            Ok(surface) => self.surface = Some(surface),
+            Ok(surface) => {
+                // Waking the window is what turns a publish into a redraw, and
+                // the redraw is what presents the published frame.
+                let window = Arc::clone(surface.window());
+                self.channel
+                    .set_waker(Arc::new(move || window.request_redraw()));
+                self.surface = Some(surface);
+            }
             Err(error) => {
                 self.failure = Some(error);
                 event_loop.exit();
@@ -153,7 +169,16 @@ where
                 event_loop.set_control_flow(ControlFlow::Poll);
                 self.request_redraw();
             }
-            SVFrameOutcome::Idle => event_loop.set_control_flow(ControlFlow::Wait),
+            SVFrameOutcome::Idle => {
+                // A producer may have published a frame before the waker was
+                // installed; that pending frame still earns one redraw.
+                if self.channel.has_pending() {
+                    event_loop.set_control_flow(ControlFlow::Poll);
+                    self.request_redraw();
+                } else {
+                    event_loop.set_control_flow(ControlFlow::Wait);
+                }
+            }
         }
     }
 }
