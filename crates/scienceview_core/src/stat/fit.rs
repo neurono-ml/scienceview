@@ -10,7 +10,7 @@ use crate::sv_error::SVError;
 use crate::sv_stat::fit_options::{SVFitModel, SVFitOptions};
 use crate::sv_stat::fit_result::SVFitResult;
 use crate::sv_stat::input::SVStatInput;
-use crate::sv_stat::numeric::sv_normal_quantile;
+use crate::sv_stat::numeric::{SVCompensatedSum, sv_normal_quantile};
 use crate::sv_stat::stat_definition::SVStatResult;
 
 /// The number of samples the predicted curve carries.
@@ -90,7 +90,7 @@ pub(crate) fn sv_apply_fit(
         &independent_values,
         &value_values,
     )?;
-    let (coefficients, inverse) = sv_least_squares(&design_x, &design_y, degree)?;
+    let (conditioning, coefficients, inverse) = sv_least_squares(&design_x, &design_y, degree)?;
     let coefficients = sv_model_coefficients(options.requested_model(), coefficients);
 
     let (low, high) = sv_curve_range(&independent_values)?;
@@ -108,8 +108,11 @@ pub(crate) fn sv_apply_fit(
         Some(confidence) => sv_confidence_band(
             &grid,
             &predicted,
-            &coefficients,
-            &inverse,
+            &SVFitEstimate {
+                coefficients: &coefficients,
+                inverse: &inverse,
+                conditioning,
+            },
             &design_x,
             &design_y,
             confidence,
@@ -224,21 +227,92 @@ fn sv_model_coefficients(model: SVFitModel, coefficients: Vec<f64>) -> Vec<f64> 
     }
 }
 
-/// Estimates the polynomial by solving the normal equations once.
+/// The centring and scaling applied to the independent column before solving.
 ///
-/// The function returns the coefficients and the inverse of the normal matrix,
-/// which the confidence band needs; the inverse is `None` when the solve found
-/// the design singular.
+/// The normal equations are uncentred by nature: a column around `1e9` makes
+/// the matrix entries span eighteen orders of magnitude, and the small
+/// curvature information is lost in the rounding of the large moments. Solving
+/// in `z = (x - offset) / scale` keeps every moment of order one; the solution
+/// is then mapped back into the caller's coefficients.
+#[derive(Clone, Copy, Debug)]
+struct SVFitConditioning {
+    offset: f64,
+    scale: f64,
+}
+
+impl SVFitConditioning {
+    /// Derives the offset and scale of one independent column.
+    fn from_values(independent: &[f64]) -> Self {
+        let anchor = independent.first().copied().unwrap_or(0.0);
+        let mut deviation = SVCompensatedSum::new();
+        independent
+            .iter()
+            .copied()
+            .for_each(|value| deviation.add(value - anchor));
+        let offset = anchor + deviation.value() / independent.len() as f64;
+        let scale = independent
+            .iter()
+            .copied()
+            .map(|value| (value - offset).abs())
+            .fold(0.0, f64::max);
+
+        Self {
+            offset,
+            scale: if scale > 0.0 { scale } else { 1.0 },
+        }
+    }
+
+    /// Maps one independent value onto its conditioned coordinate.
+    fn condition(&self, value: f64) -> f64 {
+        (value - self.offset) / self.scale
+    }
+
+    /// Expands conditioned coefficients back into the caller's parameterisation.
+    ///
+    /// With `z = (x - offset) / scale`, the coefficient of `x^i` is
+    /// `Σ_{j ≥ i} c_j · C(j, i) · (−offset)^(j−i) / scale^j`.
+    fn unscale(&self, coefficients: &[f64]) -> Vec<f64> {
+        let degree = coefficients.len().saturating_sub(1);
+        (0..=degree)
+            .map(|power| {
+                let mut coefficient = 0.0;
+                let mut binomial = 1.0;
+                for (index, scaled) in coefficients.iter().copied().enumerate().skip(power) {
+                    if index > power {
+                        // C(index, power) = C(index - 1, power) * index / (index - power)
+                        binomial *= index as f64 / (index - power) as f64;
+                    }
+                    coefficient += scaled * binomial * (-self.offset).powi((index - power) as i32)
+                        / self.scale.powi(index as i32);
+                }
+                coefficient
+            })
+            .collect()
+    }
+}
+
+/// The conditioning, the coefficients and the inverse of the conditioned
+/// normal matrix one solve produces.
+type SVFitSolution = (SVFitConditioning, Vec<f64>, Vec<Vec<f64>>);
+
+/// Estimates the polynomial by solving the conditioned normal equations once.
+///
+/// The function returns the conditioning, the coefficients in the caller's
+/// parameterisation and the inverse of the conditioned normal matrix, which the
+/// confidence band needs; the inverse is `None` when the solve found the design
+/// singular.
 fn sv_least_squares(
     independent: &[f64],
     values: &[f64],
     degree: usize,
-) -> Result<(Vec<f64>, Vec<Vec<f64>>), SVError> {
+) -> Result<SVFitSolution, SVError> {
+    let conditioning = SVFitConditioning::from_values(independent);
     let size = degree + 1;
     let mut normal = vec![vec![0.0; size]; size];
     let mut right_hand_side = vec![0.0; size];
 
     for (x, y) in independent.iter().copied().zip(values.iter().copied()) {
+        let x = conditioning.condition(x);
         let mut power = 1.0;
         for row in 0..size {
             let mut row_power = 1.0;
@@ -255,7 +329,7 @@ fn sv_least_squares(
         message: "the fit design is singular; the independent values do not span the model"
             .to_string(),
     })?;
-    let coefficients = (0..size)
+    let conditioned: Vec<f64> = (0..size)
         .map(|row| {
             (0..size)
                 .map(|column| inverse[row][column] * right_hand_side[column])
@@ -263,7 +337,7 @@ fn sv_least_squares(
         })
         .collect();
 
-    Ok((coefficients, inverse))
+    Ok((conditioning, conditioning.unscale(&conditioned), inverse))
 }
 
 /// Inverts a square matrix with Gauss-Jordan elimination and partial pivoting.
@@ -351,16 +425,25 @@ fn sv_evaluate(model: SVFitModel, coefficients: &[f64], point: f64) -> f64 {
 /// The lower and upper confidence samples of a fit, when one was requested.
 type SVFitConfidenceBand = (Option<Vec<f64>>, Option<Vec<f64>>);
 
+/// The solved model a confidence band is computed around.
+struct SVFitEstimate<'a> {
+    coefficients: &'a [f64],
+    inverse: &'a [Vec<f64>],
+    conditioning: SVFitConditioning,
+}
+
 /// Computes the two-sided confidence band of a linear or polynomial fit.
 fn sv_confidence_band(
     grid: &[f64],
     predicted: &[f64],
-    coefficients: &[f64],
-    inverse: &[Vec<f64>],
+    estimate: &SVFitEstimate<'_>,
     independent: &[f64],
     values: &[f64],
     confidence: f64,
 ) -> Result<SVFitConfidenceBand, SVError> {
+    let coefficients = estimate.coefficients;
+    let inverse = estimate.inverse;
+    let conditioning = &estimate.conditioning;
     let size = coefficients.len();
     let degrees_of_freedom = independent.len().saturating_sub(size);
     let residual_sum: f64 = independent
@@ -379,10 +462,11 @@ fn sv_confidence_band(
     let mut upper = Vec::with_capacity(grid.len());
     for (point, fitted) in grid.iter().copied().zip(predicted.iter().copied()) {
         let mut design = vec![0.0; size];
+        let conditioned_point = conditioning.condition(point);
         let mut power = 1.0;
         for value in design.iter_mut() {
             *value = power;
-            power *= point;
+            power *= conditioned_point;
         }
 
         let mut variance = 0.0;

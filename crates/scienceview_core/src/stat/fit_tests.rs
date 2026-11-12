@@ -95,6 +95,81 @@ fn a_power_fit_recovers_its_exponent() {
     assert_coefficients(&result, &[2.0, 1.5]);
 }
 
+/// Asserts that every predicted sample lies on `intercept + slope * point`.
+fn assert_predictions_follow_the_line(result: &SVFitResult, intercept: f64, slope: f64) {
+    for (point, predicted) in result.grid().iter().copied().zip(result.predicted()) {
+        let expected = intercept + slope * point;
+        let tolerance = 1.0e-9 * expected.abs().max(1.0);
+        assert!(
+            (predicted - expected).abs() <= tolerance,
+            "the prediction {predicted} at {point} differs from {expected}"
+        );
+    }
+}
+
+#[test]
+fn a_linear_fit_survives_a_large_offset_of_a_million() {
+    let independent: Vec<f64> = (0..11).map(|step| 1.0e6 + step as f64).collect();
+    let values: Vec<f64> = independent.iter().map(|x| 1.0 + 2.0 * x).collect();
+
+    let result = apply_fit(SVFitOptions::new(), &independent, &values);
+
+    assert!((result.coefficients()[1] - 2.0).abs() < 1.0e-9);
+    assert_predictions_follow_the_line(&result, 1.0, 2.0);
+}
+
+#[test]
+fn a_linear_fit_survives_a_large_offset_of_a_billion() {
+    let independent: Vec<f64> = (0..11).map(|step| 1.7e9 + step as f64).collect();
+    let values: Vec<f64> = independent.iter().map(|x| 1.0 + 2.0 * x).collect();
+
+    let result = apply_fit(SVFitOptions::new(), &independent, &values);
+
+    // The generated value column is rounded at 3.4e9, so the recovered slope
+    // carries that rounding rather than the solver's error.
+    assert!((result.coefficients()[1] - 2.0).abs() < 1.0e-6);
+    assert_predictions_follow_the_line(&result, 1.0, 2.0);
+}
+
+#[test]
+fn a_quadratic_fit_survives_a_large_offset_around_a_million() {
+    let independent: Vec<f64> = (-6..=6).map(|step| 1.0e6 + step as f64).collect();
+    let values: Vec<f64> = independent.iter().map(|x| x * x - 3.0 * x + 7.0).collect();
+
+    let result = apply_fit(
+        SVFitOptions::new().model(SVFitModel::Polynomial).order(2),
+        &independent,
+        &values,
+    );
+
+    for (point, predicted) in result.grid().iter().copied().zip(result.predicted()) {
+        let expected = point * point - 3.0 * point + 7.0;
+        let tolerance = 1.0e-9 * expected.abs().max(1.0);
+        assert!(
+            (predicted - expected).abs() <= tolerance,
+            "the prediction {predicted} at {point} differs from {expected}"
+        );
+    }
+}
+
+#[test]
+fn a_confidence_band_survives_a_large_offset() {
+    let independent: Vec<f64> = (0..11).map(|step| 1.7e9 + step as f64).collect();
+    let values: Vec<f64> = independent
+        .iter()
+        .map(|x| 1.0 + 2.0 * x + 0.25 * ((x - 1.7e9) as i64 % 3) as f64)
+        .collect();
+
+    let result = apply_fit(SVFitOptions::new().confidence(0.95), &independent, &values);
+
+    let lower = result.lower().expect("the band is configured");
+    let upper = result.upper().expect("the band is configured");
+    for ((low, predicted), high) in lower.iter().zip(result.predicted()).zip(upper) {
+        assert!(low.is_finite() && high.is_finite());
+        assert!(*low <= predicted + 1.0e-3 && *predicted <= high + 1.0e-3);
+    }
+}
+
 #[test]
 fn a_confidence_band_brackets_the_predicted_curve() {
     let result = apply_fit(
