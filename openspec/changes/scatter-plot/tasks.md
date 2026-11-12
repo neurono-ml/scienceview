@@ -29,8 +29,8 @@
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/scatter_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/scatter_plot.svg` with `cargo run --example scatter_plot` and
+- [x] Add `examples/scatter_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/scatter_plot.svg` with `cargo run --example scatter_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
@@ -43,9 +43,9 @@
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/relational-scatter-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/relational-scatter-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
