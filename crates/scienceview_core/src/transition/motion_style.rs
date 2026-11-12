@@ -3,7 +3,7 @@
 //! # The built-in defaults
 //!
 //! With the `theme` feature a caller resolves the style from the compiled
-//! theme's motion tokens ([`SVMotionStyle::from_motion_tokens`]). Without it,
+//! theme's motion tokens (`SVMotionStyle::from_motion_tokens`). Without it,
 //! [`SVMotionStyle::built_in`] supplies the same documented defaults the default
 //! theme carries, so the same figure looks the same either way:
 //!

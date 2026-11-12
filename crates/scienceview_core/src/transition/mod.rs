@@ -69,7 +69,7 @@
 //! ## Motion follows the theme
 //!
 //! Durations and easings are motion tokens (design D4). With the `theme`
-//! feature [`SVMotionStyle::from_motion_tokens`] reads them from a compiled
+//! feature `SVMotionStyle::from_motion_tokens` reads them from a compiled
 //! theme; without it [`SVMotionStyle::built_in`] supplies the documented
 //! defaults (fast 120 ms, normal 240 ms, slow 400 ms, standard easing). A theme
 //! that declares reduced motion collapses every duration to zero and the plan
