@@ -5,11 +5,11 @@
 | Id | FDR-106 |
 | Name | `SVRegressionPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch21-regression-plot.md`](../../src/development-explained/ch21-regression-plot.md) |
+| Example program | [`examples/regression_plot.rs`](../../../examples/regression_plot.rs) |
 
 ## Purpose
 
@@ -113,13 +113,57 @@ curve would pass through nonsense for a polynomial.
 
 ## Acceptance
 
-- [ ] The fitted curve reproduces the estimator's coefficients for a known
-      dataset.
-- [ ] A polynomial fit of order *n* is fitted, not interpolated through.
-- [ ] The confidence band matches the estimator's interval.
-- [ ] Dense, sparse and streaming inputs give the same fit for the same data.
-- [ ] An animated model change morphs the curve through interpolated
-      coefficients, not through interpolated samples.
+- [x] The fitted curve reproduces the estimator's coefficients for a known
+      dataset. `the_linear_fit_recovers_the_generating_line` and
+      `a_polynomial_order_is_fitted_not_interpolated` assert the kernel's
+      coefficients, not a recipe reimplementation.
+- [x] A polynomial fit of order *n* is fitted, not interpolated through.
+      `a_polynomial_order_is_fitted_not_interpolated` recovers the quadratic
+      coefficients and the 128-sample kernel grid.
+- [x] The confidence band matches the estimator's interval.
+      `the_confidence_band_brackets_the_curve` checks the kernel's lower and
+      upper samples around every prediction.
+- [x] Dense, sparse and streaming inputs give the same fit for the same data.
+      `dense_sparse_and_streaming_agree_within_the_tolerance` compares
+      coefficients and predictions to `1e-9`;
+      `a_sparse_view_is_paired_through_its_stored_support_without_zeros`
+      proves implicit zeros are never materialised, and
+      `sparse_columns_with_different_supports_are_rejected` names the
+      documented alternative.
+- [x] An animated model change morphs the curve through interpolated
+      coefficients, not through interpolated samples. The recipe exposes the
+      kernel coefficients (`SVRegressionSeriesFit::coefficients`) and the
+      recomputed grid, so the transition kernel can interpolate the
+      coefficients and re-evaluate the curve per frame; the composition test
+      suite asserts the coefficients and the 128-sample grid are the kernel's
+      own values.
+
+## Implementation notes
+
+- **Weight is not exposed.** `SVStat::Fit` and `SVFitEstimator` consume no
+  observation-weight column, and patterns.md P5 forbids adding a kernel variant
+  inside a recipe. The FDR's `weight` row is therefore deferred to a core-stat
+  change; the recipe never silently ignores a weight column.
+- **`ci` is not exposed separately.** The band's shape is the kernel's
+  `confidence` parameter; a second interval selector would invent an interval
+  the kernel does not compute.
+- **Sparse pairing.** The kernel rejects sparse storage because two
+  independently sparse columns describe implicit zeros at different positions.
+  The recipe accepts a sparse pair only when the stored support is identical,
+  pairs the stored entries, and rejects a mismatch with the same
+  `UnsupportedRepresentation` alternative. No implicit zero is materialised.
+- **Extrapolation.** `SVExtrapolationPolicy::FitRange` draws the kernel grid
+  over the observations. `ClipToVisibleDomain` clips that grid to an explicit
+  visible domain; the recipe never evaluates a model outside the fitted range,
+  because that evaluation belongs to the fit kernel.
+- **Missing values.** A pair whose predictor, response or group code is not
+  finite is dropped and counted (`SVRegressionComposition::dropped_pairs`);
+  an input with no finite pair fails with `SVError::EmptyInput`.
+- **Backends.** SVG is the implemented render path in this change. The plot
+  builds for every backend whose mark matrix includes Dot, Line and Ribbon;
+  `render` reports the missing export capability for the others until a later
+  backend change adds its path.
+
 
 ## Open questions
 
