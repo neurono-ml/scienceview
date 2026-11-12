@@ -7,7 +7,10 @@
 //!
 //! A dodge is purely positional: it reads the value column through its
 //! representation-aware accessor and never copies it. Only the displacement and
-//! the narrowed width are materialised.
+//! the narrowed width are materialised, and only at the positions the value
+//! column stores: a sparse column of huge logical length is dodged at its
+//! entries, while an unstored position is not a mark and keeps offset and width
+//! zero.
 
 use crate::sv_error::SVError;
 use crate::sv_move::column::SVMoveColumn;
@@ -39,8 +42,12 @@ pub(crate) fn sv_apply_dodge(
     }
 
     // Category -> (group -> ordinal), sorted by code so the layout is stable.
+    // Only the positions the value column stores are real marks: an unstored
+    // sparse position is not a mark, so it neither creates a group nor widens
+    // the slot. Walking the stored positions keeps a sparse column of huge
+    // logical length cheap.
     let mut ordinals: BTreeMap<u32, BTreeMap<u32, usize>> = BTreeMap::new();
-    for index in 0..number_of_points {
+    for index in state.values.stored_positions() {
         let groups = ordinals.entry(category_keys[index]).or_default();
         let number_of_groups = groups.len();
         groups.entry(group_keys[index]).or_insert(number_of_groups);
@@ -56,7 +63,7 @@ pub(crate) fn sv_apply_dodge(
         .widths
         .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
 
-    for index in 0..number_of_points {
+    for index in state.values.stored_positions() {
         let category_key = category_keys[index];
         let group_key = group_keys[index];
         let groups = ordinals

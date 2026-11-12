@@ -139,6 +139,28 @@ impl SVMoveColumn {
         self.sv_set(index, current + delta);
     }
 
+    /// Adds one displacement to every logical position.
+    ///
+    /// A dense column adds the amount to each slot. A sparse column adds it to
+    /// the implicit contribution and to each stored value, so a uniform
+    /// displacement — a shift — costs no stored slot at all and the logical
+    /// length stays intact.
+    pub(crate) fn sv_add_uniform(&mut self, delta: f64) {
+        match self {
+            Self::Dense(values) => {
+                for value in values.iter_mut() {
+                    *value += delta;
+                }
+            }
+            Self::Sparse(sparse) => {
+                sparse.implicit_value += delta;
+                for value in &mut sparse.values {
+                    *value += delta;
+                }
+            }
+        }
+    }
+
     /// Returns the logical positions the column stores.
     ///
     /// A dense column returns `0..length`; a sparse column returns the indices

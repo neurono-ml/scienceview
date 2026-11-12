@@ -7,7 +7,10 @@
 //! width so a jittered and a dodged mark share the same slot.
 //!
 //! A jitter is purely positional: it shares the borrowed value column and never
-//! copies it.
+//! copies it. Only the positions the value column stores are jittered, so a
+//! sparse column of huge logical length is displaced at its stored entries and
+//! never densified; an unstored position is not a mark and keeps the zero
+//! displacement.
 
 use crate::sv_error::SVError;
 use crate::sv_move::column::SVMoveColumn;
@@ -56,7 +59,8 @@ pub(crate) fn sv_apply_jitter(
         .horizontal_offsets
         .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
 
-    for (index, group_key) in group_keys.iter().copied().enumerate() {
+    for index in state.values.stored_positions() {
+        let group_key = group_keys[index];
         let mut generator_state = sv_mix_mark_key(seed, group_key, index);
         let unit = match mode {
             SVJitterMode::Uniform => sv_signed_unit_interval(sv_split_mix_64(&mut generator_state)),

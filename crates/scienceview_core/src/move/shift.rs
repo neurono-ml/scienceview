@@ -11,6 +11,11 @@ use crate::sv_move::{SVShiftDirection, SVShiftOptions};
 /// one move that composes after every displacement and before normalising. It
 /// shares the borrowed value column and never copies it; only the shifted
 /// displacement column is materialised.
+///
+/// The displacement is uniform, so a sparse column records it once in its
+/// implicit contribution instead of storing one offset per logical position:
+/// the shift walks no logical position and keeps the column's stored entry
+/// count unchanged.
 pub(crate) fn sv_apply_shift(
     state: &mut SVMoveState<'_>,
     options: &SVShiftOptions,
@@ -23,8 +28,6 @@ pub(crate) fn sv_apply_shift(
     }
     .get_or_insert_with(|| SVMoveColumn::sv_zeroed_like(source));
 
-    for index in 0..state.length {
-        offsets.sv_add(index, amount);
-    }
+    offsets.sv_add_uniform(amount);
     Ok(())
 }
