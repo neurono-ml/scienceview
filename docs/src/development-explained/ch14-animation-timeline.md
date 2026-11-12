@@ -98,8 +98,12 @@ The builder is the only constructor. `deltas(...)` appends deltas one default
 duration apart; `keyframe(...)` appends an explicit timestamp; `duration`,
 `capacity`, `interpolation`, `loop_mode`, `direction`, `speed` and
 `execution_mode` refine the timeline. `build()` validates everything once
-(patterns P7): a fixed list must be non-empty and strictly increasing in time;
+(patterns P7): a fixed list must be non-empty and non-decreasing in time —
+an equal timestamp is a zero-length segment that swaps instantly, which is how
+a reduced-motion theme collapses durations to zero;
 a streaming timeline must start empty and have room for at least one segment.
+A stream, by contrast, drops an equal timestamp as a duplicate, because two
+arrivals at the same instant are ambiguous.
 
 `SVAnimation` exposes the playback state (`source`, `state`, `position`,
 `normalised_position`, `speed`, `loop_mode`, `direction`, `interpolation`,
@@ -188,7 +192,8 @@ order:
   `a_fixed_source_samples_every_keyframe_in_order` checks the endpoints and
   `a_fixed_source_interpolates_the_midpoint_of_a_segment` checks 5.0 at 500 ms.
   `a_fixed_source_rejects_out_of_order_timestamps` proves the build-time
-  failure, and `a_counted_loop_finishes_after_the_last_pass` proves that
+  failure, `a_duplicate_timestamp_is_a_zero_length_segment_that_swaps_instantly`
+  proves the instant swap, and `a_counted_loop_finishes_after_the_last_pass` proves that
   reaching the end is a pass boundary, not an error.
 - `streaming_tests.rs` — the window. `the_keyframe_window_stays_bounded_under_a_long_stream`
   feeds ten thousand frames into a window of eight and checks eight retained,
@@ -243,5 +248,7 @@ touch the clock.
 The FDR's remaining acceptance items — a backend rendering a mid-animation
 frame, and a reduced-motion theme collapsing durations to zero — belong to the
 changes that add backends and theme-driven motion. The timeline already
-supports them: `SVDuration::zero()` is a valid duration, and a zero-length
-segment swaps at once.
+supports them: `SVDuration::zero()` is a valid duration, a fixed list may repeat
+a timestamp to create a zero-length segment, and such a segment — like a
+timeline whose every frame shares one instant — samples its final state at
+once.
