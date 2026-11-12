@@ -77,7 +77,7 @@ the fit line morphs.
 | `show_points` | `bool` | `true` | seaborn |
 | `show_fit` | `bool` | `true` | — |
 | `confidence` | `Option<f64>` | `None` | seaborn `ci` |
-| `ci` | `Option<SVErrorKind>` | `None` | seaborn |
+| `ci` | `Option<SVAggregateErrorKind>` | `None` | seaborn |
 | `marker` | `SVDotShape` | `Circle` | — |
 | `line_width` | `SVLength` | token `mark.line_width` | — |
 

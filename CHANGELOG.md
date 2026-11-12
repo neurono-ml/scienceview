@@ -12,6 +12,41 @@ released.
 
 ### Added
 
+- The SVG rendering backend `scienceview_svg`: a zero-dependency crate that
+  implements `SVRenderBackend` for `SVBackendKind::Svg` and registers itself in
+  the `SVBackendRegistry`, so `SVFigure::render()` works end to end. It
+  serializes every mark shape (path, rectangle, circle, text and an RGBA raster
+  embedded as a deterministic PNG data URI) and every decoration primitive
+  (line, rectangle and rotated text) into a self-contained document with fixed
+  attribute order and a fixed numeric format, making two renders byte
+  identical. Accessibility metadata (`role="img"`, `aria-label`, `<title>`,
+  `<desc>`), `viewBox`, `width` and `height` are always written and every text
+  and attribute value is escaped. Consecutive equal-paint circles are grouped
+  into one `<path>`, keeping a ten-thousand-point scatter openable. `render`
+  and `save` are implemented; `update` and `show` return the typed
+  `UnsupportedBackendCapability` error declared by the export-only capability
+  row. The `line_plot_svg` and `scatter_svg` examples generate the checked-in
+  documentation figures through the backend, and the figures CI job verifies
+  they never drift.
+- The statistical transform kernel in `scienceview_core::sv_stat`: `SVStat` is
+  the closed set of binning, counting, aggregation, kernel density, empirical
+  CDF, percentiles and fitting, and every operation resolves the
+  `SVColumnView` representation exactly once. Sparse columns contribute their
+  implicit zeros as a multiplicity and are never densified; streaming columns
+  are read from the bounded window they already carry, and the window-dependent
+  kernels report `windowed` instead of pretending to be exact. Binning supports
+  explicit edges, widths and counts with count, probability and density
+  normalisation; aggregation reports a value plus a standard-deviation, standard
+  error or centred-percentile band, uses Welford variance and accepts weights for
+  weighted means and sums; percentiles and the empirical CDF sort stored values
+  without expanding implicit zeros; kernel density implements Gaussian,
+  Epanechnikov and uniform kernels with Silverman's bandwidth rule; and fitting
+  covers linear, polynomial, exponential, logarithmic and power models with a
+  confidence band, plus the `SVFitEstimator` trait for user-supplied models.
+  Non-finite observations are errors with their position, order-independent
+  statistics ignore input order, and the heavy kernels expose `is_heavy` and
+  `spawn_on` so they can run on a scoped compute thread. The kernel is
+  re-exported from the root facade as `scienceview::sv_stat`.
 - The decoration kernel in `scienceview_core::sv_decoration`: axes on all four
   sides with ticks derived from the space the layout granted (`SVTickSpace` and
   `SVTickDerivation`) and a deterministic label collision pass, grid lines that

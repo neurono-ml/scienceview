@@ -102,3 +102,6 @@ scienceview_dioxus = { path = "crates/scienceview_dioxus", version = "0.1.0", op
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+scienceview_svg = { path = "crates/scienceview_svg", version = "0.1.0" }
