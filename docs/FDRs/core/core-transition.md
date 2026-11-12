@@ -5,10 +5,10 @@
 | Id | FDR-005 |
 | Name | `SVTransition` |
 | Family | Core — rendering |
-| Status | planned |
+| Status | shipped (kernel); animated example deferred |
 | Layer | Core |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch13-mark-transitions.md` |
+| Example program | deferred until a live recipe exists |
 
 ## Purpose
 
@@ -75,8 +75,10 @@ into a cross-fade.
 
 ## Visual channels
 
-A transition governs position, size, colour and opacity. It does not govern
-shape, dash pattern or font family: those are discrete and swap.
+A transition governs the properties the mark kernel declares interpolable:
+position, size, colour, opacity and font size. It does not govern shape, dash
+pattern or font family: those are discrete and swap. The list is
+`sv_mark_property_table()`, so the two layers cannot disagree about it.
 
 ## Configuration
 
@@ -98,7 +100,7 @@ of a figure follow its visual identity:
 | Token | Meaning |
 |---|---|
 | `motion.duration.fast`, `motion.duration.normal`, `motion.duration.slow` | named durations |
-| `motion.easing.standard`, `motion.easing.entrance`, `motion.easing.exit` | named easings |
+| `motion.easing.standard`, `motion.easing.emphasized`, `motion.easing.decelerate` | named easings |
 
 A theme may declare that motion is reduced — the accessibility setting that
 collapses all durations to zero. The transition layer honours it
@@ -116,12 +118,14 @@ A transition requires a backend that supports in-place update, per the
 foundation's `backend-capabilities`. A backend that only exports a single
 file resolves a transition to its final state — it has no clock, so it draws
 the end of the animation. This is a legitimate degradation *provided* the
-backend declares it: the capability matrix lists `animation` explicitly.
+backend declares it: animation support derives from the matrix's
+`in_place_update` capability, so a backend that does not declare it is
+`FinalStateOnly` instead of inventing a clock.
 
 | Backend | Support |
 |---|---|
-| `Svg` | CSS transitions inside the SVG document, when the output is a live document; a static file resolves to the final state |
-| `Html` | JavaScript-driven, in-place |
+| `Svg` | export-only: a static file resolves to the final state |
+| `Html` | export-only document today: resolves to the final state |
 | `Native` | frame loop on the render thread, in-place |
 | `Wasm` | request-animation-frame driven |
 | `Tui` | redraw per tick |
@@ -130,13 +134,18 @@ backend declares it: the capability matrix lists `animation` explicitly.
 
 ## Acceptance
 
-- [ ] Marks are matched by key; a mark that persists across states is
+- [x] Marks are matched by key; a mark that persists across states is
       recognized as the same mark and interpolates.
-- [ ] Enter, update and exit are computed from the delta between two states.
-- [ ] A property that is not interpolable swaps rather than tweens.
-- [ ] A theme that reduces motion collapses all durations to zero.
-- [ ] A backend without in-place update resolves the animation to its final
-      state and declares `animation: unsupported` in its capability matrix.
+- [x] Enter, update and exit are computed between two states, and a key that
+      repeats within one state is rejected before interpolation.
+- [x] A property that is not interpolable swaps rather than tweens.
+- [x] A theme that reduces motion collapses all durations to zero and draws the
+      final state at every progress, with no way to switch the declaration off.
+- [x] A backend without in-place update resolves the animation to its final
+      state, with animation support derived from the `in_place_update`
+      capability of the matrix.
+- [x] Evaluation owns no clock: a finite progress outside `0..=1` is clamped and
+      a non-finite one is rejected.
 
 ## Open questions
 
