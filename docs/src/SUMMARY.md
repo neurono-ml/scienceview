@@ -46,4 +46,5 @@
 - [Chapter 39 — Hexbin plots: a million points read as a few thousand hexagons](development-explained/ch39-hexbin-plot.md)
 - [Chapter 40 — Parallel coordinates: many variables, one polyline per observation](development-explained/ch40-parallel-coordinates-plot.md)
 - [Chapter 41 — Parallel categories plots: reading combinations of categories](development-explained/ch41-parallel-categories-plot.md)
+- [Chapter 42 — Scatterplot matrices: reading every pair at once](development-explained/ch42-splom-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)

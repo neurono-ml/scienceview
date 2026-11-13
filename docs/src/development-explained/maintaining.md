@@ -56,6 +56,7 @@ examples.
 | 39 | `ch39-hexbin-plot.md` | Hexbin plots: the pointy-top hexagonal lattice and its exact axial inverse, count and mean aggregation, grid size and extent, the minimum-count filter, the continuous colour scale and colour bar, the missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
 | 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
 | 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
+| 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
@@ -103,3 +104,9 @@ theme; ASCII-art diagrams are forbidden. A diagram is authored as Mermaid
 source and rendered to SVG, and the SVG is checked in under
 `docs/src/development-explained/assets/` so the book renders without a
 JavaScript dependency.
+
+Chapter 42 covers the scatterplot matrix recipe, which arranges one scatter cell
+per variable pair and a univariate diagonal into a grid solved by the layout
+kernel: it explains the shared observations, the missing-value policy, the
+independent and common scale domains, the three diagonal modes, the colour
+grouping and the parity, concurrency and observability tests.
