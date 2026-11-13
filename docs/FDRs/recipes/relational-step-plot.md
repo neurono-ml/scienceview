@@ -5,11 +5,11 @@
 | Id | FDR-104 |
 | Name | `SVStepPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch19 — Step plots`](../../src/development-explained/ch19-step-plot.md) |
+| Example program | [`examples/step_plot.rs`](../../../examples/step_plot.rs) |
 
 ## Purpose
 
@@ -32,9 +32,9 @@ interval — where a sloped line would imply interpolation that does not exist.
 data -> [SVStat::Aggregate] -> values -> [no move] -> [SVScale] -> SVMark::Line
 ```
 
-with the step geometry selected on the line mark. The step shape is a
-*geometry* option of the line, not a separate mark, because it produces the
-same vertices plus one extra per corner.
+with the step geometry expanded by the recipe into explicit line vertices.
+The step shape is a *geometry* expansion of the line, not a separate mark,
+because it produces the same vertices plus one extra per corner.
 
 ## Data contract
 
@@ -63,18 +63,20 @@ Accepted representations: dense, sparse, streaming.
 
 | Option | Type | Default | Source |
 |---|---|---|---|
-| `x`, `y` | `SVColumnRef` | — | bokeh, plotly |
-| `series` | `Option<SVColumnRef>` | `None` | all three |
+| `x`, `y` | named column | — | bokeh, plotly |
+| `series` | `Option<named column>` | `None` | all three |
 | `step` | `SVStepPosition` | `After` | bokeh `Step` (`before`, `after`, `center`), plotly `hv`/`vh`/`hvh`/`vhv` |
-| `where` | `SVStepWhere` | `After` | — |
 | `line_width` | `SVLength` | token `mark.line_width` | bokeh, plotly |
 | `dash` | `Option<SVDashPattern>` | `None` | bokeh, plotly |
 | `markers` | `bool` | `true` | bokeh `Step` draws markers by default |
 | `aggregate` | `Option<SVStat>` | `None` | — |
+| `duplicate_policy` | `SVStepDuplicatePolicy` | `LastWins` | — |
+| `x_scale` | `SVScaleKind` | `Continuous` | the `x` type is continuous or temporal |
 
-`SVStepPosition` has the values `Before`, `After` and `Center`; `SVStepWhere`
-selects the horizontal edge the vertical segment is drawn on (`Horizontal`
-before the value, `Vertical` after it, and both). The bokeh vocabulary is kept
+`SVStepPosition` has the values `Before`, `After` and `Center`. The three
+values fully express the pre/post/mid geometry, so the provisional
+`SVStepWhere` column was folded into `SVStepPosition` rather than shipping a
+second control that selects the same corner. The bokeh vocabulary is kept
 because it names the geometry precisely.
 
 ## Theme
@@ -92,21 +94,56 @@ Consumes `mark.line_width`, `mark.palette`, `text.*`, axis tokens.
 
 ## Backend notes
 
+### Recipe-level scene contract
+
+Every operation resolves the source columns once and composes an
+`SVStepPlotComposition` — the scales, the expanded step vertices and the
+decoration primitives. The scene is backend-neutral and owns no pixels. The
+configured `SVBackendKind` selects the serializer per operation: this change
+ships the SVG serializer, so `render`, `update` and `save` return
+`SVError::BackendUnavailable` for every kind whose serializer does not exist
+yet. `build()` accepts any explicit kind because the scene does not depend on
+it; no operation degrades silently to SVG.
+
 | Backend | Notes |
 |---|---|
 | `Svg` | a `<path>` with explicit horizontal and vertical segments |
-| `Html` | same |
-| `Native` / `Wasm` | polyline rasterization |
+| `Html` | same scene, through the HTML serializer that a later change ships |
+| `Native` / `Wasm` | polyline rasterization of the same vertices |
 | `Tui` | the step is drawn with box-drawing characters |
 | `React` / `Vue` / `Angular` | one `<path>` per series |
 | `Tauri` / `Dioxus` | same as native |
 
 ## Acceptance
 
-- [ ] The drawn geometry matches the requested step position exactly.
+- [x] The drawn geometry matches the requested step position exactly —
+      `option_tests::each_step_position_expands_different_vertices`.
 - [ ] A step over a streaming source extends without redrawing the history.
-- [ ] Dense, sparse and streaming inputs give the same steps.
-- [ ] An animated step interpolates its corners.
+      Deferred: `update` re-resolves the source and recomposes the current
+      window (`svg_tests::update_rerenders_the_current_window_after_a_live_append`),
+      so an appended sample changes the output and preserves the prior samples,
+      but this change ships no incremental append buffer. The incremental path
+      waits for the transition integration.
+- [x] Dense, sparse and streaming inputs give the same steps —
+      `parity_tests::dense_sparse_and_streaming_agree`.
+- [ ] An animated step interpolates its corners. Deferred to the transition
+      integration: the expansion already turns every corner into an explicit
+      `SVMark::Line` vertex, but this change ships no transition API or
+      transition test. The animation chapter will consume the same vertices.
+
+## Implementation
+
+- Module: `scienceview::sv_recipes::sv_relational::sv_step_plot`, stored under
+  `src/recipes/relational/step_plot/` and exposed through `#[path]`
+  (`builder/`, `core_implementation/`, `extraction/`, `composition.rs`,
+  `decorations.rs`, `render_svg.rs`).
+- Tests: `src/recipes/relational/step_plot/step_plot_tests/` — options, data
+  contract, parity, concurrency, SVG and observability.
+- Observability: each operation span records the configured backend kind, the
+  representation, the number of observations the scene actually draws (not the
+  logical column length) and the duration.
+- Example: `examples/step_plot.rs` → `docs/figures/step_plot.svg`.
+- Chapter: `docs/src/development-explained/ch19-step-plot.md`.
 
 ## Open questions
 

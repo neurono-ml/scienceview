@@ -1,23 +1,26 @@
-//! Relational recipes: charts whose two visual channels are positions.
+//! Relational charts: one position against another.
 //!
-//! Every chart in this family appends one `pub mod` and one `pub use` to the
-//! marked block below. The block is shared by the whole family batch, so a
-//! recipe change only ever adds its own lines and never reorders its siblings
-//! (patterns P4).
+//! The family module is the registration boundary: each recipe appends one
+//! `pub mod` and one `pub use` here, and the family batch integrator resolves
+//! the ordering (patterns.md, P4).
 //!
-//! The family re-exports the plot types only. Option enumerations stay
-//! qualified under their recipe module, so two recipes that grow an option with
-//! the same bare name never collide in the family scope.
+//! The public module is `sv_relational`; the folder keeps its physical name
+//! through `#[path]`, so the public surface follows the mandatory `sv_`
+//! prefix while siblings can append their own registrations without moving
+//! files.
 
-// ## Relational recipe registrations (append one pair of lines per chart)
-#[path = "scatter_plot/mod.rs"]
-pub mod sv_scatter_plot;
-pub use sv_scatter_plot::{SVScatterPlot, SVScatterPlotBuilder, SVScatterScene};
+#[path = "area_plot/mod.rs"]
+pub mod sv_area_plot;
+pub use sv_area_plot::{SVAreaPlot, SVAreaPlotBuilder, SVAreaRendering};
 
 #[path = "line_plot/mod.rs"]
 pub mod sv_line_plot;
 pub use sv_line_plot::{SVLinePlot, SVLinePlotBuilder};
 
-#[path = "area_plot/mod.rs"]
-pub mod sv_area_plot;
-pub use sv_area_plot::{SVAreaPlot, SVAreaPlotBuilder, SVAreaRendering};
+#[path = "scatter_plot/mod.rs"]
+pub mod sv_scatter_plot;
+pub use sv_scatter_plot::{SVScatterPlot, SVScatterPlotBuilder, SVScatterScene};
+
+#[path = "step_plot/mod.rs"]
+pub mod sv_step_plot;
+pub use sv_step_plot::{SVStepDuplicatePolicy, SVStepPlot, SVStepPlotBuilder, SVStepPosition};
