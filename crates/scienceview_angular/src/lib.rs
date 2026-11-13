@@ -5,3 +5,31 @@
 //! matching root feature only makes the backend *available*; the figure still
 //! selects it explicitly through `backend(...)`, because there is no automatic
 //! backend.
+//!
+//! ## What the backend produces
+//!
+//! The backend renders a **self-contained JSX component source string**: the
+//! inline SVG markup of the figure, the figure data, a theme object and the
+//! action event name are embedded in the source. No npm dependency is used at
+//! build time — the crate only writes text, and the consuming application
+//! compiles that text with its own Angular toolchain.
+//!
+//! The component exposes the shared framework contract:
+//!
+//! - properties `data`, `markup`, `theme` and `title`;
+//! - the `scienceview-action` event, carrying `select` and `zoom` actions.
+//!
+//! It swaps the inline markup for a newer `markup` property, so a host applies
+//! the output of [`SVRenderBackend::update`] without reloading the component.
+
+mod backend;
+mod component;
+
+pub use backend::{SVAngularBackend, SVAngularBackendProvider, sv_register_angular_backend};
+pub use component::{
+    SV_ANGULAR_COMPONENT_CONTRACT, SVAngularComponentContract, sv_render_angular_component,
+};
+pub use scienceview_core::sv_backend::SVRenderBackend;
+
+#[cfg(test)]
+mod crate_tests;
