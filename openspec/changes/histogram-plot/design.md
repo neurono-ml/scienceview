@@ -3,7 +3,7 @@
 ## Context
 
 `SVHistogramPlot` is one of the scientific-core recipes specified in
-`docs/FDRs/distribution-histogram-plot.md`. This change implements exactly that record on top of
+`docs/FDRs/recipes/distribution-histogram-plot.md`. This change implements exactly that record on top of
 the core kernels already landed by the earlier waves, and touches nothing else.
 
 
@@ -25,7 +25,23 @@ P6).
 
 ### D3 — Temporal behaviour
 
-bar height: interpolates. bin edge: interpolates when the domain shifts; a bin that changes identity is an exit plus an enter. new bin: enters with the enter rule and grows to its height.
+The FDR target is: bar height interpolates; a bin edge interpolates when the
+domain shifts; a new bin enters with the enter rule. **Deferred:** this change
+ships no transition wiring. `update` recomposes the current window and returns
+a fresh artifact, and the in-place bar growth belongs to the
+transition/streaming integration. The spec records the deferral instead of
+claiming the animation path.
+
+### D5 — Deferred gaps
+
+Two parts of the FDR data contract are explicitly out of scope, with a typed
+error or a documented alternative rather than a silent reimplementation:
+
+- **Weights** — the shipped `SVStat::Bin` kernel does not consume observation
+  weights; a configured `weight` fails at build with an error naming the kernel
+  gap.
+- **In-place streaming update** — a streaming window renders without blocking,
+  but the bars are recomposed rather than incrementally grown.
 
 ### D4 — Registration
 
