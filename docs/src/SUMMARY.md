@@ -32,4 +32,5 @@
 - [Chapter 25 — ECDF plots: describing a distribution without choosing a shape](development-explained/ch25-ecdf-plot.md)
 - [Chapter 26 — Rug plots: keeping the raw sample visible](development-explained/ch26-rug-plot.md)
 - [Chapter 27 — Box plots: five numbers that describe a whole distribution](development-explained/ch27-box-plot.md)
+- [Chapter 32 — Bar plots: saying one number about each category](development-explained/ch32-bar-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
