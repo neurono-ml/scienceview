@@ -1,11 +1,14 @@
 //! The derived mode: `SVStat::Aggregate` supplies the estimate and interval.
 
 use scienceview_core::sv_backend::SVBackendKind;
-use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
+use scienceview_core::sv_data::{
+    SVColumnRole, SVColumnView, SVDataTable, SVSparseView, SVStreamingView,
+};
 use scienceview_core::sv_mark::{SVMarkShape, SVPathCommand};
 use scienceview_core::sv_stat::SVAggregateErrorKind;
 
 use super::SVBandPlotBuilder;
+use super::band_plot_test_support::{SVTestSource, assert_close};
 
 #[test]
 fn derived_mode_aggregates_mean_and_standard_deviation() {
@@ -82,4 +85,57 @@ fn points(output: &super::SVBandRenderOutput) -> Vec<(f64, f64)> {
             _ => None,
         })
         .collect()
+}
+
+const DERIVED_X: [f64; 6] = [0.0, 0.0, 1.0, 1.0, 2.0, 2.0];
+const DERIVED_Y: [f64; 6] = [1.0, 3.0, 2.0, 4.0, 3.0, 5.0];
+const DERIVED_INDICES: [usize; 6] = [0, 1, 2, 3, 4, 5];
+
+fn derived_render(
+    source: &dyn scienceview_core::sv_data::SVDataSource,
+) -> super::SVBandRenderOutput {
+    SVBandPlotBuilder::new()
+        .data_source(source)
+        .x("x")
+        .derive()
+        .values("y")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .render()
+        .expect("the band draws")
+}
+
+fn dense_derived_source<'values>() -> SVTestSource<'values> {
+    SVTestSource::new(vec![
+        ("x", SVColumnRole::X, SVColumnView::Dense(&DERIVED_X)),
+        ("y", SVColumnRole::Y, SVColumnView::Dense(&DERIVED_Y)),
+    ])
+}
+
+#[test]
+fn derived_sparse_input_matches_dense() {
+    let dense = derived_render(&dense_derived_source());
+    let x = SVSparseView::new(&DERIVED_INDICES, &DERIVED_X, 6).expect("valid sparse view");
+    let y = SVSparseView::new(&DERIVED_INDICES, &DERIVED_Y, 6).expect("valid sparse view");
+    let sparse = SVTestSource::new(vec![
+        ("x", SVColumnRole::X, SVColumnView::Sparse(x)),
+        ("y", SVColumnRole::Y, SVColumnView::Sparse(y)),
+    ]);
+    let sparse_output = derived_render(&sparse);
+    assert_close(&points(&dense), &points(&sparse_output));
+}
+
+#[test]
+fn derived_streaming_window_is_approximate_and_matches_dense() {
+    let dense = derived_render(&dense_derived_source());
+    let x = SVStreamingView::new(&DERIVED_X, 6, 0);
+    let y = SVStreamingView::new(&DERIVED_Y, 6, 0);
+    let streaming = SVTestSource::new(vec![
+        ("x", SVColumnRole::X, SVColumnView::Streaming(x)),
+        ("y", SVColumnRole::Y, SVColumnView::Streaming(y)),
+    ]);
+    let streaming_output = derived_render(&streaming);
+    assert!(streaming_output.is_approximate());
+    assert_close(&points(&dense), &points(&streaming_output));
 }
