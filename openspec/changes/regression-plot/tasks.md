@@ -81,7 +81,7 @@
   module.
 - [x] Route the example through the public `render()`/`save()`, gate it on
   `render-svg`, regenerate the figure and compare it to the checked-in copy.
-- [ ] Document the recipe-level scene contract and test the typed error for an
+- [x] Document the recipe-level scene contract and test the typed error for an
   unavailable backend kind.
 - [ ] Strengthen the tests: model-specific coefficients and a band compared to
   the kernel's interval values.
