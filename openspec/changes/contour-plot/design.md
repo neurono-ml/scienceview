@@ -1,5 +1,7 @@
 # Design
 
+ADR: #156.
+
 ## Context
 
 `SVContourPlot` is one of the scientific-core recipes specified in
