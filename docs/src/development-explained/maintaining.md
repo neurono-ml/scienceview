@@ -70,6 +70,10 @@ land, so that each one can walk through real code and real companion tests.
 The plan lives in
 `openspec/changes/foundation-core-architecture/documentation-plan.md`.
 
+Chapter 29 covers the boxen plot recipe, which nests letter values from the
+percentile kernel into `SVBoxenPlot`: it explains the depth rules, the nested
+widths and the sparse and streaming parity tests.
+
 ## Diagrams
 
 Diagrams are always Mermaid or SVG, colourful and harmonized with the mdBook
