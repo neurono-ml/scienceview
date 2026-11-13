@@ -1,7 +1,7 @@
 //! The render span carries the configured backend, representation and points.
 
 use std::collections::BTreeMap;
-use std::sync::{Arc, Mutex, PoisonError};
+use std::sync::{Arc, Mutex, Once, PoisonError};
 
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
@@ -70,8 +70,45 @@ impl Subscriber for SVRecorder {
     fn exit(&self, _span: &Id) {}
 }
 
+/// Keeps the global callsite interest enabled for the whole test binary.
+///
+/// `tracing` caches, per callsite, whether any subscriber is interested. When
+/// the first render runs outside a subscriber the callsite can be cached as
+/// `never` and later scoped recorders never see it. A global subscriber whose
+/// `enabled` always answers `true` prevents that cache from short-circuiting,
+/// so each test's own scoped recorder still receives the spans.
+struct SVInterestSubscriber;
+
+impl Subscriber for SVInterestSubscriber {
+    fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
+        true
+    }
+
+    fn new_span(&self, _attributes: &span::Attributes<'_>) -> Id {
+        Id::from_u64(1)
+    }
+
+    fn record(&self, _identifier: &Id, _values: &span::Record<'_>) {}
+
+    fn record_follows_from(&self, _identifier: &Id, _follows: &Id) {}
+
+    fn event(&self, _event: &Event<'_>) {}
+
+    fn enter(&self, _identifier: &Id) {}
+
+    fn exit(&self, _identifier: &Id) {}
+}
+
+fn sv_keep_callsite_interest_enabled() {
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        let _ = tracing::subscriber::set_global_default(SVInterestSubscriber);
+    });
+}
+
 #[test]
 fn render_span_records_backend_representation_and_points() {
+    sv_keep_callsite_interest_enabled();
     let table = SVDataTable::builder()
         .with_column("value", SVColumnRole::Y, &VALUES)
         .with_column("category", SVColumnRole::Grouping, &CATEGORY)
@@ -112,6 +149,7 @@ fn render_span_records_backend_representation_and_points() {
 
 #[test]
 fn render_span_counts_only_the_finite_observations() {
+    sv_keep_callsite_interest_enabled();
     let values = [1.0, f64::NAN, 3.0, 4.0, 5.0];
     let category = [0.0; 5];
     let table = SVDataTable::builder()

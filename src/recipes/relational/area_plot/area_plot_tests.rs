@@ -740,21 +740,19 @@ impl Visit for SVFieldVisitor {
     }
 }
 
-fn sv_install_span_recorder() {
-    static INSTALLED: std::sync::OnceLock<()> = std::sync::OnceLock::new();
-    INSTALLED.get_or_init(|| {
-        let subscriber = SVSpanFields(sv_span_records().clone());
-        let _ = tracing::subscriber::set_global_default(subscriber);
-    });
-    tracing::callsite::rebuild_interest_cache();
-}
-
 #[test]
 fn the_operation_span_carries_the_backend_representation_and_points() {
-    sv_install_span_recorder();
     let source = SVTestSource::sparse(true);
     let plot = build_plot(&source);
-    plot.rendering().expect("the chart draws");
+    // A scoped recorder never claims the process-wide subscriber, so this test
+    // coexists with every other test binary component that records spans.
+    let records_handle = sv_span_records().clone();
+    let recorder = SVSpanFields(records_handle);
+    tracing::callsite::rebuild_interest_cache();
+    tracing::subscriber::with_default(recorder, || {
+        tracing::callsite::rebuild_interest_cache();
+        plot.rendering().expect("the chart draws");
+    });
 
     let records = sv_span_records()
         .lock()
