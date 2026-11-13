@@ -22,9 +22,10 @@ released.
   and a title. Dense, sparse and streaming columns are read through the single
   `SVDataSource` boundary without densifying sparse storage or blocking on a
   stream; the operation span carries the configured backend kind, the
-  representation and the point count. The chart renders through the real SVG
-  backend, and `examples/step_plot.rs` produces
-  `docs/figures/step_plot.svg`.
+  representation and the number of observations the scene actually draws. The
+  chart renders through the real SVG backend; a configured kind without a
+  serializer returns the typed `BackendUnavailable` error, and
+  `examples/step_plot.rs` produces `docs/figures/step_plot.svg`.
 
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
