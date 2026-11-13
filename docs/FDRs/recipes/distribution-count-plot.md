@@ -5,11 +5,11 @@
 | Id | FDR-122 |
 | Name | `SVCountPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 33 — Count plots](../../src/development-explained/ch33-count-plot.md) |
+| Example program | [`examples/count_plot.rs`](../../../examples/count_plot.rs) |
 
 ## Purpose
 
@@ -95,10 +95,17 @@ and slide, because the category is the match key.
 
 ## Acceptance
 
-- [ ] The count equals the number of observations in the category.
-- [ ] With `normalise`, the counts become fractions of the total.
-- [ ] The category order follows the requested ordering rule.
-- [ ] Dense, sparse and streaming inputs give the same counts.
+- [x] The count equals the number of observations in the category.
+      `count_plot_tests::the_default_configuration_counts_every_category`,
+      `parity_tests::a_large_dense_column_counts_without_losing_observations`.
+- [x] With `normalise`, the counts become fractions of the total.
+      `count_plot_tests::probability_normalisation_divides_by_the_grand_total`.
+- [x] The category order follows the requested ordering rule.
+      `count_plot_tests::the_ascending_order_sorts_the_categories`,
+      `count_plot_tests::the_descending_order_reverses_the_categories`.
+- [x] Dense, sparse and streaming inputs give the same counts.
+      `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_scene`,
+      `parity_tests::a_sparse_input_with_implicit_zeros_counts_them_as_category_zero`.
 
 ## Open questions
 

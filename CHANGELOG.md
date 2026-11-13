@@ -12,6 +12,29 @@ released.
 
 ### Added
 
+- The distributional recipe `SVCountPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the number of observations in every category, drawn as a bar. The chart is
+  the composition of FDR-122 —
+  `data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge] -> [SVScale] -> SVMark::Bar` —
+  and its configuration surface is `category`, `series`, `category_labels`,
+  `series_labels`, `orient`, `width`, `normalise`, `order`, `colour`, `multiple`
+  and `missing_value_policy`, with `backend(...)` required and `execution_mode`
+  defaulting to `Automatic`. Counting is never reimplemented:
+  `SVStat::Count` counts each series' category column and applies the requested
+  `SVCountOrder`, while the recipe only aligns the returned category sets on one
+  shared axis. `SVMove::Stack` and `SVMove::Dodge` arrange several series inside
+  a category slot; `normalise` divides the counted values by the grand total.
+  A sparse category column keeps its implicit zeros as category-zero
+  observations and is never densified; a streaming window renders without
+  blocking and `update(...)` recomposes the current window. The composed scene
+  serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error
+  instead of being ignored. Weighted counting is rejected with a typed
+  configuration error naming the `SVStat::Count` kernel gap. Transition and
+  animation wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/count_plot.rs` writes
+  `docs/figures/count_plot.svg`.
+
 - The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
   the five-number summary of every category, drawn as a box with whiskers,
   median line and — optionally — the observations outside the whiskers. The
