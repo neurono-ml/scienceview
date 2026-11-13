@@ -124,6 +124,16 @@ kernel: it explains the shared observations, the missing-value policy, the
 independent and common scale domains, the three diagonal modes, the colour
 grouping and the parity, concurrency and observability tests.
 
+Chapter 51 covers runtime scripting: why the engine is a trait rather than an
+embedded interpreter, the documented statement subset both shipped front-ends
+read, prepare-once/execute-many and how it makes a reload atomic, the decision
+that scripts dispatch only the control action vocabulary through
+`SVControlOrigin::Script`, the persistent state and its `Preserve`/`Reset` reload
+policy, the additive sandbox whose capability requests the host services, typed
+failures with line/column/byte spans, the statement budget, and the concurrency
+and placement tests. It states the limitation honestly: full-language scripts
+need an `SVScriptEngine` implementation over a real interpreter.
+
 Chapter 50 covers dashboard composition (`scienceview_dashboard`): why a
 dashboard is a separate crate, how a grid of rows, columns and spans is solved
 through the layout kernel, how one shared source fans a single read out to
