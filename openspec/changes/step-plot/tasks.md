@@ -62,3 +62,21 @@
   the recipe-owned vertex expansion in `design.md` and the spec delta.
 - [x] Align the step geometry and acceptance evidence with the shipped tests,
   example and chapter.
+
+## 9. Acceptance re-review
+
+- [x] Make the update test append a real sample through a live source and
+  assert that the advanced window changes the output while preserving the
+  prior samples; rename the claim to what the recipe does.
+- [x] Record the drawn point count in every operation span, not the logical
+  column length, and cover a 100k-logical sparse column with two drawn points.
+- [x] Consume `SVStepPosition::ALL` in the step-position geometry test.
+- [x] Untick the incremental-append and animation acceptance items with an
+  explicit deferral to the transition integration.
+- [x] Dispatch the serializer from the configured backend kind and return
+  `SVError::BackendUnavailable` for a kind without a serializer; document the
+  recipe-level scene contract.
+- [x] Expose `scienceview::sv_recipes::sv_relational::sv_step_plot` through
+  `#[path]` and update the example and README import path.
+- [x] Refresh the mdBook chapter, its figure mirror and the pinned code
+  revision.
