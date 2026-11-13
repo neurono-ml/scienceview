@@ -5,11 +5,11 @@
 | Id | FDR-111 |
 | Name | `SVHistogramPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 22 — Histograms](../../src/development-explained/ch22-histogram-plot.md) |
+| Example program | [`examples/histogram_plot.rs`](../../../examples/histogram_plot.rs) |
 
 ## Purpose
 
@@ -43,7 +43,14 @@ data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge]
 | `weight` | observation weight | continuous | no |
 
 Accepted representations: dense, sparse, streaming. For a streaming source the
-bins are computed over the rolling window and the histogram updates in place.
+bins are computed over the rolling window. The in-place update of the drawn
+bars is deferred (see Temporal and Acceptance).
+
+Weighted binning is deferred: the shipped `SVStat::Bin` kernel does not consume
+observation weights, so a configured `weight` is rejected at build time with a
+configuration error that names the kernel gap. The recipe never reimplements
+weighted binning; it belongs to a change of the `statistical-transforms`
+capability.
 
 ### Match key
 
@@ -67,9 +74,9 @@ their edge value, so that a bin keeps its identity when the domain shifts.
 | `bin_count` | `Option<usize>` | derived from the axis width | seaborn, plotly |
 | `bin_width` | `Option<f64>` | `None` | seaborn, plotly |
 | `bin_edges` | `Option<Vec<f64>>` | `None` | seaborn |
-| `normalise` | `SVNormalisation` | `None` | seaborn, plotly `histfunc` |
+| `normalise` | `SVNormalisation` | `Count` | seaborn, plotly `histfunc` |
 | `cumulative` | `bool` | `false` | seaborn `cumulative` |
-| `common_norm` | `bool` | `false` | seaborn |
+| `common_normalisation` | `bool` | `false` | seaborn |
 | `common_bins` | `bool` | `true` | seaborn |
 | `shrink` | `f32` | `1.0` | seaborn `shrink` — the gap between bars |
 | `element` | `SVBarElement` | `Bar` | seaborn (`bars`, `step`, `poly`) |
@@ -98,6 +105,13 @@ palette.
 A streaming histogram is the archetypal live chart: bins grow in height as
 observations arrive, and the bin boundaries stay put.
 
+Transition wiring is deferred in this change. The recipe produces
+transition-ready geometry — bins keep their identity by index and the heights
+live in data space — and `update` recomposes the current window, but no
+enter/update/exit animation path runs yet. That integration belongs to the
+transition/streaming capability; the FDR records the target behaviour above and
+the acceptance checklist does not tick it.
+
 ## Backend notes
 
 | Backend | Notes |
@@ -111,22 +125,30 @@ observations arrive, and the bin boundaries stay put.
 
 ## Acceptance
 
-- [ ] The bin edges follow the requested count, width or explicit edges.
-- [ ] `normalise` yields counts, probabilities or densities that sum or
-      integrate as documented.
-- [ ] `cumulative` yields a monotone non-decreasing series.
-- [ ] Dense, sparse and streaming inputs give the same histogram for the same
-      data, within the documented tolerance.
+- [x] The bin edges follow the requested count, width or explicit edges. The
+      companion tests cover the count, width and explicit-edge modes.
+- [x] `normalise` yields counts, probabilities or densities that sum or
+      integrate as documented. Probability sums to one; density integrates to
+      one over the bin widths.
+- [x] `cumulative` yields a monotone non-decreasing series.
+- [x] Dense, sparse and streaming inputs give the same histogram for the same
+      data, within the documented tolerance. The parity tests compare the
+      serialized SVG byte for byte.
 - [ ] A streaming histogram updates in place, without redrawing the whole
-      figure.
-- [ ] The number of bins adapts to the space available, per `layout-engine`.
+      figure. *Deferred:* `update` recomposes the current window; a
+      backend-incremental bin update belongs to the transition/streaming
+      integration.
+- [x] The number of bins adapts to the space available. With no boundary option
+      the recipe derives the count from its plot extent at 14 logical pixels per
+      bin, clamped to `4..=40`; a layout-driven composition supplies that extent.
 
 ## Open questions
 
 - Should the bin count be derived from the *pixel* width of the axis, or from
       the data only? *Current answer: derived from the available width, with
-      the data range as the other input — the layout engine owns the width,
-      the stat owns the range.*
+      the data range as the other input — the composition owns the width, the
+      stat owns the range. The recipe's plot extent stands in for the width a
+      layout-driven composition will supply.*
 - Should `shrink` be a mark option rather than a recipe option? *Current
       answer: a recipe option, since it changes the bar width, and the bar
       mark carries a width that the recipe computes.*
