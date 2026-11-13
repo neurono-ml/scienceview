@@ -6,6 +6,10 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "contour_plot/mod.rs"]
+pub mod sv_contour_plot;
+pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};
+
 #[path = "heatmap_plot/mod.rs"]
 pub mod sv_heatmap_plot;
 pub use sv_heatmap_plot::{
