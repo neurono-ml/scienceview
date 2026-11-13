@@ -122,10 +122,10 @@ renders a streaming scene on another thread and reads the result with a
 two-second timeout, which is how the chapter states "never blocks the render
 thread" as an executable claim.
 
-## The jitter move, and nothing else
+## The displacement move, and nothing else
 
-Jitter is the one move FDR-101 accepts. It belongs to `sv_move`, not to the
-recipe: the move kernel derives a deterministic displacement from the mark key,
+Jitter and dodge are the displacement moves FDR-101 accepts. They belong to
+`sv_move`, not to the recipe: the move kernel derives a deterministic displacement from the mark key,
 so the same seeded jitter gives the same picture on every render. The recipe
 adds the displacement to the horizontal column before the scale is built:
 
