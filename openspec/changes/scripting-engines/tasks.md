@@ -2,21 +2,21 @@
 
 ## Engine abstraction
 
-- [ ] Write the failing tests for loading, invoking and reloading.
-- [ ] Implement the engine trait and the host execution path.
+- [x] Write the failing tests for loading, invoking and reloading.
+- [x] Implement the engine trait and the host execution path.
 
 ## Lua and TypeScript engines
 
-- [ ] Write the failing conformance tests shared by both engines.
-- [ ] Implement the Lua engine and the TypeScript front-end plus JavaScript engine.
+- [x] Write the failing conformance tests shared by both engines.
+- [x] Implement the Lua engine and the TypeScript front-end plus JavaScript engine.
 
 ## Sandboxing and failure containment
 
-- [ ] Write the failing test: a failing script does not terminate the host.
-- [ ] Implement the sandbox policy and error reporting.
+- [x] Write the failing test: a failing script does not terminate the host.
+- [x] Implement the sandbox policy and error reporting.
 
 ## Acceptance
 
-- [ ] Add the example, generated figure and book chapter (book branch).
-- [ ] Run the four gates and open the ADR issue.
+- [x] Add the runnable example (`crates/scienceview_script/examples/scripting_engines.rs`; scripting produces actions, not pixels, so there is no generated figure) and the book chapter.
+- [x] Run the four gates and open the ADR issue.
 
