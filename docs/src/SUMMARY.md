@@ -34,4 +34,5 @@
 - [Chapter 27 — Box plots: five numbers that describe a whole distribution](development-explained/ch27-box-plot.md)
 - [Chapter 28 — Violin plots: the whole shape of a distribution](development-explained/ch28-violin-plot.md)
 - [Chapter 29 — Boxen plots: a nest of letter values](development-explained/ch29-boxen-plot.md)
+- [Chapter 30 — Strip plots: every observation, never a summary](development-explained/ch30-strip-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
