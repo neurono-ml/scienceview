@@ -23,6 +23,7 @@ const SERIES: [f64; 8] = [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0];
 struct SVTestSource {
     value: SVTestView,
     series: Option<SVTestView>,
+    weight: Option<SVTestView>,
     reads: Option<Arc<AtomicUsize>>,
 }
 
@@ -45,6 +46,7 @@ impl SVTestSource {
         Self {
             value: SVTestView::Dense(&VALUES),
             series: None,
+            weight: None,
             reads: None,
         }
     }
@@ -53,6 +55,7 @@ impl SVTestSource {
         Self {
             value: SVTestView::Dense(&VALUES),
             series: Some(SVTestView::Dense(&SERIES)),
+            weight: None,
             reads: None,
         }
     }
@@ -65,6 +68,7 @@ impl SVTestSource {
                 length,
             },
             series: None,
+            weight: None,
             reads: None,
         }
     }
@@ -76,6 +80,7 @@ impl SVTestSource {
                 sequence: 8,
             },
             series: None,
+            weight: None,
             reads: None,
         }
     }
@@ -107,6 +112,9 @@ impl SVDataSource for SVTestSource {
         if self.series.is_some() {
             columns.push(SVColumnDescriptor::new("series", SVColumnRole::Grouping));
         }
+        if self.weight.is_some() {
+            columns.push(SVColumnDescriptor::new("weight", SVColumnRole::Weight));
+        }
         SVSourceSchema::owned(columns)
     }
 
@@ -117,6 +125,9 @@ impl SVDataSource for SVTestSource {
         let view = match name {
             "value" => self.value,
             "series" => self.series.ok_or_else(|| SVError::ColumnNotFound {
+                name: name.to_string(),
+            })?,
+            "weight" => self.weight.ok_or_else(|| SVError::ColumnNotFound {
                 name: name.to_string(),
             })?,
             other => {
@@ -544,6 +555,7 @@ fn a_grouped_sparse_column_is_rejected_with_the_alternative() {
             length: VALUES.len(),
         },
         series: Some(SVTestView::Dense(&SERIES)),
+        weight: None,
         reads: None,
     };
     let error = SVDensityPlot::new()
@@ -582,6 +594,7 @@ fn a_missing_observation_is_dropped_or_rejected_by_policy() {
         value: SVTestView::Dense(&WITH_MISSING),
         series: None,
         reads: None,
+        weight: None,
     };
     let omitted = SVDensityPlot::new()
         .data_source(&source)
@@ -612,6 +625,7 @@ fn a_column_without_any_finite_observation_reports_the_empty_input() {
         value: SVTestView::Dense(&MISSING),
         series: None,
         reads: None,
+        weight: None,
     };
     let error = build_plot(&source)
         .rendering()
@@ -636,6 +650,7 @@ fn a_grouped_column_without_any_finite_observation_reports_the_empty_input() {
         value: SVTestView::Dense(&MISSING),
         series: Some(SVTestView::Dense(&SERIES)),
         reads: None,
+        weight: None,
     };
     let error = build_grouped_plot(&source)
         .rendering()
@@ -713,6 +728,7 @@ fn large_data_is_estimated_over_the_fixed_grid() {
         value: SVTestView::Dense(values),
         series: None,
         reads: None,
+        weight: None,
     };
     let rendering = build_plot(&source).rendering().expect("the chart draws");
 
@@ -876,4 +892,190 @@ fn native_save_reports_the_missing_export_capability() {
             ..
         }
     ));
+}
+
+const WEIGHTS: [f64; 8] = [2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
+fn weighted_source(weights: &'static [f64]) -> SVTestSource {
+    SVTestSource {
+        value: SVTestView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVTestView::Dense(weights)),
+        reads: None,
+    }
+}
+
+fn build_weighted(source: &SVTestSource) -> SVDensityPlot<'_> {
+    SVDensityPlot::new()
+        .data_source(source)
+        .value("value")
+        .weight("weight")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the weighted configuration is complete")
+}
+
+#[test]
+fn all_ones_weights_reproduce_the_unweighted_curve_exactly() {
+    let unweighted = SVDensityPlot::new()
+        .data_source(&SVTestSource::dense())
+        .value("value")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .rendering()
+        .expect("the unweighted curve draws");
+    let weighted = build_weighted(&weighted_source(&[1.0; 8]))
+        .rendering()
+        .expect("the weighted curve draws");
+
+    assert_eq!(unweighted.curves()[0].grid(), weighted.curves()[0].grid());
+    assert_eq!(
+        unweighted.curves()[0].density(),
+        weighted.curves()[0].density()
+    );
+}
+
+#[test]
+fn a_weight_shifts_the_density_towards_the_heavier_observations() {
+    let unweighted = build_weighted(&weighted_source(&[1.0; 8]))
+        .rendering()
+        .expect("the unweighted curve draws");
+    let weighted = build_weighted(&weighted_source(&WEIGHTS))
+        .rendering()
+        .expect("the weighted curve draws");
+
+    let left_half = unweighted.curves()[0].grid().len() / 2;
+    let left_density: f64 = unweighted.curves()[0].density()[..left_half].iter().sum();
+    let weighted_left_density: f64 = weighted.curves()[0].density()[..left_half].iter().sum();
+    assert!(
+        weighted_left_density > left_density,
+        "the double-weighted low observation raises the left tail"
+    );
+}
+
+#[test]
+fn a_weighted_density_integrates_to_one() {
+    let weighted = build_weighted(&weighted_source(&WEIGHTS))
+        .rendering()
+        .expect("the weighted curve draws");
+
+    assert!((sv_trapezoid_integral(&weighted.curves()[0]) - 1.0).abs() < 1e-3);
+}
+
+#[test]
+fn a_negative_weight_is_rejected_with_its_position() {
+    const NEGATIVE: [f64; 8] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0];
+    let source = weighted_source(&NEGATIVE);
+    let error = build_weighted(&source)
+        .rendering()
+        .expect_err("weights cannot be negative");
+
+    assert_eq!(
+        error,
+        SVError::NegativeWeight {
+            operation: "kernel_density",
+            position: 7,
+        }
+    );
+}
+
+#[test]
+fn a_weight_column_of_a_different_length_is_rejected() {
+    const SHORT: [f64; 2] = [1.0, 1.0];
+    let source = SVTestSource {
+        value: SVTestView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVTestView::Dense(&SHORT)),
+        reads: None,
+    };
+    let error = build_weighted(&source)
+        .rendering()
+        .expect_err("columns must agree in length");
+
+    assert!(matches!(error, SVError::MismatchedLengths { .. }));
+}
+
+#[test]
+fn a_weighted_sparse_column_matches_its_dense_equivalent() {
+    const INDICES: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+    let sparse_source = SVTestSource {
+        value: SVTestView::Sparse {
+            indices: &INDICES,
+            values: &VALUES,
+            length: VALUES.len(),
+        },
+        series: None,
+        weight: Some(SVTestView::Dense(&WEIGHTS)),
+        reads: None,
+    };
+
+    let sparse = build_weighted(&sparse_source)
+        .rendering()
+        .expect("the weighted sparse curve draws");
+    let dense = build_weighted(&weighted_source(&WEIGHTS))
+        .rendering()
+        .expect("the weighted dense curve draws");
+
+    sparse.curves()[0]
+        .density()
+        .iter()
+        .zip(dense.curves()[0].density())
+        .for_each(|(sparse, dense)| assert!((sparse - dense).abs() < 1e-12));
+}
+
+#[test]
+fn a_weighted_grouped_column_keeps_each_weight_with_its_series() {
+    const GROUPED_WEIGHTS: [f64; 8] = [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0];
+    let weighted_source = SVTestSource {
+        value: SVTestView::Dense(&VALUES),
+        series: Some(SVTestView::Dense(&SERIES)),
+        weight: Some(SVTestView::Dense(&GROUPED_WEIGHTS)),
+        reads: None,
+    };
+    let unweighted_source = SVTestSource::grouped();
+
+    let weighted = SVDensityPlot::new()
+        .data_source(&weighted_source)
+        .value("value")
+        .series("series")
+        .weight("weight")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the weighted grouped configuration is complete")
+        .rendering()
+        .expect("the weighted grouped curves draw");
+    let unweighted = SVDensityPlot::new()
+        .data_source(&unweighted_source)
+        .value("value")
+        .series("series")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the grouped configuration is complete")
+        .rendering()
+        .expect("the grouped curves draw");
+
+    assert_eq!(weighted.curves().len(), 2);
+    for (weighted_curve, unweighted_curve) in
+        weighted.curves().iter().zip(unweighted.curves().iter())
+    {
+        weighted_curve
+            .density()
+            .iter()
+            .zip(unweighted_curve.density())
+            .for_each(|(weighted, unweighted)| {
+                assert!(
+                    (weighted - unweighted).abs() < 1e-12,
+                    "a uniform weight within a series leaves its curve unchanged"
+                );
+            });
+    }
 }

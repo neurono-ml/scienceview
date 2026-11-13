@@ -31,6 +31,18 @@ impl<'values, BackendState> SVDensityPlotBuilder<'values, BackendState> {
         self
     }
 
+    /// Names the optional observation weight column.
+    ///
+    /// The weights reach `SVStat::KernelDensity` unchanged: they are resolved
+    /// once per series and the estimate is normalised by their total. Negative
+    /// or non-finite weights are rejected with a typed error naming the
+    /// position.
+    #[must_use]
+    pub fn weight(mut self, weight: &'values str) -> Self {
+        self.weight = Some(weight);
+        self
+    }
+
     /// Fixes the bandwidth instead of deriving it with Silverman's rule.
     #[must_use]
     pub fn bandwidth(mut self, bandwidth: f64) -> Self {

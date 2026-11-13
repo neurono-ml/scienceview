@@ -64,7 +64,7 @@ pub(crate) fn sv_apply_kernel_density(
         .collect();
 
     let total_weight = sv_total_weight(&observations, weights.as_ref());
-    if !(total_weight > 0.0) {
+    if total_weight <= 0.0 || !total_weight.is_finite() {
         return Err(SVError::InvalidConfiguration {
             message: "a weighted density needs a positive total weight".to_string(),
         });
