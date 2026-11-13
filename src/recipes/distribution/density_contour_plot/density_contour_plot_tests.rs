@@ -480,6 +480,15 @@ fn an_all_equal_input_composes_without_a_degenerate_grid_error() {
 }
 
 #[test]
+fn a_single_observation_is_not_a_degenerate_grid_error() {
+    let single = SVTestSource::dense(&[1.0], &[1.0]);
+    let composition = sv_compose_default(&single);
+
+    assert_eq!(composition.grids().len(), 1);
+    assert!(composition.number_of_levels() > 0);
+}
+
+#[test]
 fn an_explicit_range_above_the_field_leaves_only_the_background() {
     let source = sv_dense_source();
     let composition = sv_builder(&source)
