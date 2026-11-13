@@ -44,8 +44,14 @@
 #[path = "grid/mod.rs"]
 pub mod sv_grid;
 
+#[path = "panel/mod.rs"]
+pub mod sv_panel;
+
 #[path = "selection/mod.rs"]
 pub mod sv_selection;
+
+#[path = "source/mod.rs"]
+pub mod sv_source;
 
 pub use scienceview_core::{sv_control, sv_data, sv_error, sv_layout, sv_observability};
 
