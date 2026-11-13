@@ -1,7 +1,7 @@
 //! The backend dispatch: a configured kind is resolved, never ignored.
 
 use super::SVSplomPlot;
-#[cfg(all(feature = "render-svg", feature = "render-native"))]
+#[cfg(feature = "render-svg")]
 use super::test_support::sv_build_default;
 use super::test_support::sv_dense_source;
 use crate::sv_backend::{SVBackendCapability, SVBackendKind};

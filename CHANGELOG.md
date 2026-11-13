@@ -12,6 +12,20 @@ released.
 
 ### Added
 
+- Python bindings (`scienceview_python`, feature `python`): a PyO3 extension
+  module exposing the validated builder surface with keyword arguments and an
+  explicit `backend=` selection (`MissingBackendSelection` instead of an
+  automatic default), `render()`/`render_svg()`/`save()` returning bytes and
+  paths, dashboards, and the `ControlState` action vocabulary. `pyo3` is
+  optional and never part of the default build. A pure-Rust conversion layer
+  (`sv_spec`) owns the data, the specification and the builder calls, so the
+  binding's semantics are tested without a Python interpreter; interpreter tests
+  are double-gated behind the `python-tests` feature and
+  `SCIENCEVIEW_PYTHON_TESTS`. Dense, sparse and streaming inputs are preserved,
+  `StreamingColumn` pushes into a bounded rolling window and `update()` renders
+  the advanced window, and every `SVError` family maps to a typed exception
+  under `SVBindingError`. `pyproject.toml` builds the wheel with maturin;
+  `examples/python_bindings.py` generates `docs/figures/python_bindings.svg`.
 - Runtime scripting (`scienceview_script`, feature `scripting`): `SVScriptEngine`
   is the pluggable contract, with `SVLuaScriptEngine` and
   `SVTypeScriptScriptEngine` as the two shipped front-ends and
