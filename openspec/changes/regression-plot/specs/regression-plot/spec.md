@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVRegressionPlot` SHALL consume `x`, `y`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVRegressionPlot` SHALL consume `x`, `y` and the optional `series`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. The FDR's optional `weight` column is deferred to the `core-stat` capability because the closed fit kernel consumes no observation weights; the recipe SHALL NOT pretend to apply a weight it cannot pass to the kernel.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
