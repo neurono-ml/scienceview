@@ -91,10 +91,10 @@ The kernel decides the edges with a documented precedence:
 | none | Uses the recipe's derived count (see below) |
 
 When the caller requests none of the first three, the recipe derives a count
-from the space the layout engine granted: one bin per 14 logical pixels,
-clamped to `4..=40`. The layout engine owns the width; the stat kernel still
-owns the data range. This is the answer the FDR records to its open question
-about bin counts in pixels versus data.
+from its plot extent, the width a layout-driven composition will supply: one
+bin per 14 logical pixels, clamped to `4..=40`. The composition owns the width;
+the stat kernel still owns the data range. This is the answer the FDR records
+to its open question about bin counts in pixels versus data.
 
 Normalisation also belongs to the kernel:
 
