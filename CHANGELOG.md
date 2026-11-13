@@ -12,6 +12,60 @@ released.
 
 ### Added
 
+- The distributional recipe `SVDensityContourPlot`
+  (`scienceview::sv_recipes::sv_distribution`): the joint distribution of two
+  continuous variables drawn as filled contour bands or contour lines. The
+  configuration surface follows FDR-113 — `x`, `y`, `series`, `weight`,
+  `levels`, `level_range`, `bandwidth`, `bandwidth_adjustment`, `grid_count`, `style`,
+  `colour_map` and `colour_scale` — and the builder requires an explicit backend
+  selection. The density is never reimplemented: `SVStat::Bin` derives the two
+  edge vectors and the recipe folds the observation pairs into the joint grid,
+  normalised so it integrates to one; sparse views are walked through their
+  stored entries and streaming views through their current window. A
+  marching-squares step turns the scalar field into backend-agnostic paths, and
+  the filled style paints each threshold region as one closed compound path
+  from the lowest level up, so the bands nest without gaps. SVG and native
+  serialize the same composition; every other kind reports a typed
+  unsupported-capability error. The example is `examples/density_contour_plot.rs`
+  and the generated figure is `docs/figures/density_contour_plot.svg`.
+- The distribution recipe `SVDensityPlot`
+  (`scienceview::sv_recipes::sv_distribution::sv_density_plot`): a smoothed
+  estimate of one continuous variable, composed exactly as
+  `data -> [SVStat::KernelDensity] -> (grid, density) -> [no move] -> [SVScale]
+  -> SVMark::Line | SVMark::Area`. The configuration surface follows FDR-112 —
+  `value`, `series`, `bandwidth`, `bandwidth_adjustment`, `kernel`, `grid_count`, `cut`,
+  `fill`, `normalise`, `line_width` — and the builder requires an explicit
+  backend selection. The estimate is never reimplemented:
+  `SVStat::KernelDensity` supplies the grid, the density and the Silverman
+  bandwidth for the Gaussian, Epanechnikov and uniform kernels. The recipe
+  scales the bandwidth linearly with `bandwidth_adjustment`, groups observations by
+  `series` into one curve per group with a palette colour, drops non-finite
+  observations by policy, and places `SVMark::Line` plus an optional
+  `SVMark::Area` fill over one axes pair. Dense, sparse and streaming input
+  agree within tolerance; a sparse value column is read through its stored
+  support without materialising implicit zeros, and grouping a sparse column is
+  rejected with the documented alternative rather than densified. The new
+  example `examples/density_plot.rs` generates `docs/figures/density_plot.svg`.
+- The distributional recipe `SVHistogramPlot` in
+  `scienceview::sv_recipes::sv_distribution::sv_histogram_plot`: a continuous
+  variable binned and drawn as bars, composed exactly as
+  `data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge] ->
+  [SVScale x, y, colour] -> SVMark::Bar`. The builder requires an explicit
+  backend, defaults `execution_mode` to `Automatic`, and exposes the FDR-111
+  surface: `value`, `series`, `bin_count`, `bin_width`, `bin_edges`,
+  `normalise`, `cumulative`, `common_normalisation`, `common_bins`, `shrink`,
+  `element`, `orientation`, `multiple` and a missing-value policy. Binning is
+  never reimplemented: `SVStat::Bin` supplies the edges and the count,
+  probability or density heights, and `SVMove` supplies stacking and dodging.
+  Dense, sparse and streaming input resolve once per operation; a sparse column
+  keeps its stored support and its implicit zeros, and a streaming window
+  renders without blocking. The composed geometry serializes through `to_svg()`
+  and, with `render-native`, through `to_native_frame()`; any other configured
+  kind fails with a typed error instead of being ignored. Weighted binning is
+  not implemented because the shipped bin kernel does not consume weights, and
+  a configured weight fails with a configuration error naming that gap. The
+  example `examples/histogram_plot.rs` calls the public `to_svg()` and writes
+  `docs/figures/histogram_plot.svg`.
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,

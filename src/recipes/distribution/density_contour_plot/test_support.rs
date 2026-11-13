@@ -1,0 +1,143 @@
+//! Shared mock data and scene helpers for the density-contour tests.
+//!
+//! Mock columns are borrowed slices, sparse views and synthetic streaming
+//! snapshots; nothing here touches the network or the filesystem.
+
+use super::SVDensityContourComposition;
+use super::{SVDensityContourPlot, SVDensityContourPlotBuilder};
+use crate::sv_backend::SVBackendKind;
+use crate::sv_data::{
+    SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema, SVSparseView, SVStreamingView,
+};
+use crate::sv_error::SVError;
+use crate::sv_mark::SVMarkPrimitive;
+
+pub(crate) const HORIZONTAL: [f64; 10] = [0.0, 1.0, 0.5, 2.0, 2.5, 2.2, 1.2, 3.0, 0.2, 2.8];
+pub(crate) const VERTICAL: [f64; 10] = [0.1, 0.2, 1.0, 2.0, 2.2, 1.5, 2.6, 1.0, 2.8, 0.6];
+pub(crate) const SERIES: [f64; 10] = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+pub(crate) const WEIGHTS: [f64; 10] = [1.0, 2.0, 1.0, 1.0, 3.0, 1.0, 1.0, 2.0, 1.0, 1.0];
+
+/// A synthetic source serving every representation through one seam.
+pub(crate) struct SVTestSource<'a> {
+    pub(crate) horizontal: SVColumnView<'a>,
+    pub(crate) vertical: SVColumnView<'a>,
+    pub(crate) series: Option<SVColumnView<'a>>,
+    pub(crate) weight: Option<SVColumnView<'a>>,
+}
+
+impl<'a> SVTestSource<'a> {
+    pub(crate) fn dense(horizontal: &'a [f64], vertical: &'a [f64]) -> SVTestSource<'a> {
+        SVTestSource {
+            horizontal: SVColumnView::Dense(horizontal),
+            vertical: SVColumnView::Dense(vertical),
+            series: None,
+            weight: None,
+        }
+    }
+}
+
+impl SVDataSource for SVTestSource<'_> {
+    fn schema(&self) -> SVSourceSchema<'_> {
+        unreachable!("the density-contour recipe resolves columns by name, not by schema")
+    }
+
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
+        let view = match name {
+            "x" => self.horizontal,
+            "y" => self.vertical,
+            "series" => self.series.ok_or_else(|| SVError::ColumnNotFound {
+                name: name.to_string(),
+            })?,
+            "weight" => self.weight.ok_or_else(|| SVError::ColumnNotFound {
+                name: name.to_string(),
+            })?,
+            _ => {
+                return Err(SVError::ColumnNotFound {
+                    name: name.to_string(),
+                });
+            }
+        };
+        Ok(SVColumnSnapshot::Borrowed(view))
+    }
+}
+
+pub(crate) fn sv_dense_source() -> SVTestSource<'static> {
+    SVTestSource::dense(&HORIZONTAL, &VERTICAL)
+}
+
+pub(crate) fn sv_full_source() -> SVTestSource<'static> {
+    SVTestSource {
+        horizontal: SVColumnView::Dense(&HORIZONTAL),
+        vertical: SVColumnView::Dense(&VERTICAL),
+        series: Some(SVColumnView::Dense(&SERIES)),
+        weight: Some(SVColumnView::Dense(&WEIGHTS)),
+    }
+}
+
+pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
+    const INDICES: [usize; 10] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let horizontal = SVSparseView::new(&INDICES, &HORIZONTAL, 10)
+        .expect("the sparse horizontal view is well formed");
+    let vertical =
+        SVSparseView::new(&INDICES, &VERTICAL, 10).expect("the sparse view is well formed");
+    SVTestSource {
+        horizontal: SVColumnView::Sparse(horizontal),
+        vertical: SVColumnView::Sparse(vertical),
+        series: None,
+        weight: None,
+    }
+}
+
+pub(crate) fn sv_streaming_source() -> SVTestSource<'static> {
+    SVTestSource {
+        horizontal: SVColumnView::Streaming(SVStreamingView::new(&HORIZONTAL, 10, 0)),
+        vertical: SVColumnView::Streaming(SVStreamingView::new(&VERTICAL, 10, 0)),
+        series: None,
+        weight: None,
+    }
+}
+
+pub(crate) fn sv_build_default(source: &dyn SVDataSource) -> SVDensityContourPlot<'_> {
+    sv_builder(source)
+        .build()
+        .expect("the default configuration is complete")
+}
+
+pub(crate) fn sv_builder(source: &dyn SVDataSource) -> SVDensityContourPlotBuilder<'_> {
+    SVDensityContourPlot::builder()
+        .data_source(source)
+        .x("x")
+        .y("y")
+        .grid_count(16)
+        .levels(4)
+        .backend(SVBackendKind::Svg)
+}
+
+pub(crate) fn sv_compose_default(source: &dyn SVDataSource) -> SVDensityContourComposition {
+    sv_build_default(source)
+        .compose()
+        .expect("the composition succeeds")
+}
+
+pub(crate) fn sv_primitives(
+    composition: &SVDensityContourComposition,
+) -> Vec<SVMarkPrimitive<'static>> {
+    let mut primitives = Vec::new();
+    composition
+        .visit_mark_geometries(|geometry| primitives.extend(geometry.primitives().iter().cloned()))
+        .expect("the contour geometry builds");
+    primitives
+}
+
+pub(crate) fn sv_scene_to_svg(composition: &SVDensityContourComposition) -> String {
+    let mut document = scienceview_svg::SVSvgDocument::new(composition.viewport())
+        .with_title(composition.title().unwrap_or("density contour plot"))
+        .with_description("Density contour plot generated by scienceview")
+        .with_background(composition.background());
+    document.push_decoration_primitives(composition.decoration_primitives_before_marks());
+    composition
+        .visit_mark_geometries(|geometry| document.push_mark_geometry(geometry))
+        .expect("the contour geometry builds");
+    document.push_decoration_primitives(composition.decoration_primitives_after_marks());
+    document.to_svg()
+}
