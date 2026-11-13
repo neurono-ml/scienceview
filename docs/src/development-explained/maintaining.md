@@ -35,6 +35,7 @@ examples.
 | 16 | `ch16-scatter-plot.md` | The first relational recipe: the channel surface, dense/sparse/streaming parity, the jitter and dodge displacement moves, per-point size and colour on top of the dot kernel, the overplotting policy, the backend-agnostic scene and its SVG/native dispatch, concurrency and the operation span |
 | 17 | `ch17-line-plot.md` | The second relation recipe: long-format columns, three representations, stable ordering, gaps and bridging, aggregation with an interval, step and spline vertices, multi-series colour, markers, observability and SVG rendering |
 | 18 | `ch18-area-plot.md` | The first relational recipe: the area chart, the baseline modes, stacking through `SVMove::Stack`, the ribbon versus area decision, the missing-value policy, representation parity and the generated figure |
+| 19 | `ch19-step-plot.md` | The relational step recipe: `SVStepPosition` pre/post/mid geometry, ordered and deduplicated samples, missing values, aggregation, multi-series colouring, backend-neutral composition and the real SVG document |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
@@ -42,8 +43,9 @@ covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend, chapter 13 covers the transition kernel, chapter 14
-covers the animation timeline and chapter 15 covers the native backend, each
-written by its own change. Later chapters are planned, one per capability of the
+covers the animation timeline, chapter 15 covers the native backend and chapter
+19 covers the first relational recipe, each written by its own change. Later
+chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and

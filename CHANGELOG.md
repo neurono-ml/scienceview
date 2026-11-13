@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The `SVStepPlot` relational recipe: a value held constant between discrete
+  events, drawn as explicit step vertices through the existing line mark. It
+  composes the documented pipeline — source columns, optional
+  `SVStat::Aggregate`, scales and `SVMark::Line` — and exposes `SVStepPosition`
+  (`Before`, `After`, `Center`), `SVStepDuplicatePolicy` (`LastWins`,
+  `FirstWins`), `x`/`y`/`series` columns, a continuous or temporal `x` scale,
+  line width, dash, markers, aggregate
+  and a title. Dense, sparse and streaming columns are read through the single
+  `SVDataSource` boundary without densifying sparse storage or blocking on a
+  stream; the operation span carries the configured backend kind, the
+  representation and the number of observations the scene actually draws. The
+  chart renders through the real SVG backend; a configured kind without a
+  serializer returns the typed `BackendUnavailable` error, and
+  `examples/step_plot.rs` produces `docs/figures/step_plot.svg`.
+
 - The relational recipe `SVAreaPlot` in `scienceview::sv_recipes::sv_relational::sv_area_plot`: an
   area chart that fills the region between an ordered boundary and a baseline.
   The builder requires an explicit backend and defaults to
