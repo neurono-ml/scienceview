@@ -79,7 +79,7 @@
   wiring or an explicit deferral in the FDR.
 - [ ] Split `regression_plot_tests.rs` into a `regression_plot_tests/` folder
   module.
-- [ ] Route the example through the public `render()`/`save()`, gate it on
+- [x] Route the example through the public `render()`/`save()`, gate it on
   `render-svg`, regenerate the figure and compare it to the checked-in copy.
 - [ ] Document the recipe-level scene contract and test the typed error for an
   unavailable backend kind.
