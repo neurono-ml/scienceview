@@ -2,56 +2,75 @@
 
 ## 1. Module, builder and composition
 
-- [ ] Write the failing tests first: the chart builds with its documented
+- [x] Write the failing tests first: the chart builds with its documented
   defaults, and each option changes the output.
-- [ ] Create `src/recipes/relational/line_plot/{mod.rs, builder.rs,
+- [x] Create `src/recipes/relational/line_plot/{mod.rs, builder.rs,
   core_implementation.rs}` following patterns.md P3; `mod.rs` is a pure
   dispatcher.
-- [ ] Implement the builder state machine, the required `backend(...)` and the
+- [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVLinePlot` carrying its configured kind.
-- [ ] Wire the composition `data -> [SVStat::Aggregate] -> values -> [no move] -> [SVScale x, y, colour] -> SVMark::Line` through the core kernels.
+- [x] Wire the composition `data -> [SVStat::Aggregate] -> values -> [no move] -> [SVScale x, y, colour] -> SVMark::Line` through the core kernels.
 
 ## 2. Data contract and parity
 
-- [ ] Write the failing parity test: dense, sparse and streaming input of the
+- [x] Write the failing parity test: dense, sparse and streaming input of the
   same data produce the same marks within the documented tolerance.
-- [ ] Implement the column resolution and the explicit error for a missing or
+- [x] Implement the column resolution and the explicit error for a missing or
   mistyped column.
-- [ ] Verify a sparse input is never densified and a streaming input never
+- [x] Verify a sparse input is never densified and a streaming input never
   blocks; assert the window behaviour where the recipe depends on it.
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
+- [x] Assert the operation span carries the backend kind, the representation
   and the point count.
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/line_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/line_plot.svg` with `cargo run --example line_plot` and
+- [x] Add `examples/line_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/line_plot_recipe.svg` with `cargo run --example line_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/line_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/line_plot_recipe.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/relational-line-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/recipes/relational-line-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
+- [x] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
-  `docs/FDRs/relational-line-plot.md` before opening the code PR.
+- [x] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [x] Trigger the independent acceptance review against
+  `docs/FDRs/recipes/relational-line-plot.md` before opening the code PR.
+
+## 8. Review fixes
+
+- [x] Split the aggregation into one line per `(series, group)` and add the
+  same-`x` and several-`x` regression tests.
+- [x] Bind an `SVDataSource` and named columns, with typed `ColumnNotFound`
+  errors and an in-memory adapter for borrowed views.
+- [x] Render the composed scene on the SVG and native backends and reject an
+  unwired backend explicitly.
+- [x] Record the transition-ready geometry in the spec/design and leave the
+  keyed-transition acceptance criterion unchecked with its deferral note.
+- [x] Expose `SVLegendPlacement` (default `Auto`, `legend(false)` hides it),
+  per-series dash encoding and temporal `x` scale support.
+- [x] Report drawn marks in the operation span, rename the public modules to
+  `sv_recipes::sv_relational::sv_line_plot`, and update the example, README and
+  chapter paths.
+- [x] Compare the SVG test with the checked-in figure through the public render
+  path and cover `group`, `legend(false)`, `execution_mode`, `save`, parity and
+  streaming growth.
