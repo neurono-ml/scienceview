@@ -4,7 +4,7 @@ A scatter plot shows that two quantities move together. A regression plot goes
 one step further: it fits a model to the points and draws that model on top of
 them, so the reader sees both the evidence and the claim. This chapter follows
 `SVRegressionPlot`, the recipe specified by
-[FDR-106](../../FDRs/recipes/relational-regression-plot.md), from the idea of a
+[FDR-106](https://github.com/neurono-ml/scienceview/blob/main/docs/FDRs/recipes/relational-regression-plot.md), from the idea of a
 fit to the three marks that share one pair of axes.
 
 ## The question the chart answers
