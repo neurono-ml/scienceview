@@ -26,4 +26,5 @@
 - [Chapter 19 — Step plots: honesty about a value that does not interpolate](development-explained/ch19-step-plot.md)
 - [Chapter 20 — Band plots: filling the space between two lines](development-explained/ch20-band-plot.md)
 - [Chapter 21 — Regression: turning a cloud of points into a statement](development-explained/ch21-regression-plot.md)
+- [Chapter 23 — Density plots: the shape of a distribution, smoothed](development-explained/ch23-density-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
