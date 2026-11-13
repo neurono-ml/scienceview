@@ -10,7 +10,7 @@ is, how `SVAreaPlot` is built from the kernels the previous chapters described,
 and how its companion tests prove the behaviour. No Rust or numerical
 computing background is assumed.
 
-![The SVAreaPlot recipe: the data source enters the data boundary, the missing-value policy orders and splits it, the optional stack supplies the cumulative baseline, the scales place the values and the area, ribbon and line marks feed the SVG document](assets/area-plot-recipe.svg)
+![The SVAreaPlot recipe: the data source enters the data boundary, the missing-value policy orders and splits it, the optional stack supplies the cumulative baseline, the scales place the values and the area, ribbon and line marks feed the backend-agnostic scene](assets/area-plot-recipe.svg)
 
 ## What an area chart is
 
@@ -70,7 +70,7 @@ execution mode defaults to `Automatic`, and `build` performs no backend
 dispatch.
 
 ```rust
-use scienceview::recipes::relational::SVAreaPlot;
+use scienceview::sv_recipes::sv_relational::sv_area_plot::SVAreaPlot;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 
@@ -107,7 +107,7 @@ fail at run time — it does not compile.
 | `opacity` | `f32` | theme token | Fill opacity |
 | `line` | `bool` | `true` | Draw the boundary stroke |
 | `interpolate` | `SVAreaInterpolation` | `Linear` | Boundary interpolation |
-| `missing_value_policy` | `SVMissingValuePolicy` | `Omit` | Omit or reject a gap |
+| `missing_value_policy` | `SVAreaMissingValuePolicy` | `Omit` | Omit or reject a gap |
 | `theme` | `SVMarkTheme` | built-in | Mark defaults |
 | `title`, `x_title`, `y_title` | strings | none | Figure and axis titles |
 | `x_scale_kind` | `SVScaleKind` | `Continuous` | Continuous or temporal |
@@ -162,10 +162,10 @@ contributes nothing.
 Real data has holes. A missing sample is expressed as a non-finite `f64`, and
 the recipe makes the handling explicit:
 
-- `SVMissingValuePolicy::Omit` (default) drops the sample and splits the area.
+- `SVAreaMissingValuePolicy::Omit` (default) drops the sample and splits the area.
   Two finite runs on either side of the gap become two filled regions, so the
   chart never draws a straight line across data it does not have.
-- `SVMissingValuePolicy::Error` rejects the render with
+- `SVAreaMissingValuePolicy::Error` rejects the render with
   `SVError::InvalidConfiguration`, naming the column and the position.
 
 When the chart is stacked, an omitted sample contributes zero to the stack.
@@ -179,10 +179,19 @@ in one of three representations. A recipe reads each column exactly once and
 never calls a dense-buffer accessor on a sparse view.
 
 For the area chart, the value column decides the representation recorded in
-the operation span. The preparation reads the logical positions of a sparse
-column, so implicit zeros remain logical points of the area; a streaming column
-is drawn from the bounded window snapshot it already carries, so a live update
-never blocks the render thread.
+the operation span. The preparation does not expand a sparse column: it walks
+the stored entries once and, between them, adds only the two logical positions
+that border an implicit-zero run. The zeros inside a run are collinear in data
+space, so they add no pixel. A column with a million logical slots and three
+stored values therefore draws seven vertices instead of a million, and the
+allocation test pins the operation below one mebibyte. A streaming column is
+drawn from the bounded window snapshot it already carries, so a live read never
+blocks the render thread.
+
+The sparse stack runs on the same reduced grid, so stacking does not
+reintroduce the logical-length expansion. A non-finite stored value is still
+reported under `SVAreaMissingValuePolicy::Error` before the stack aligns
+anything.
 
 This is what makes the parity test meaningful:
 
@@ -231,6 +240,12 @@ chapter. The most important tests read as a checklist of the FDR:
 | `the_operation_span_carries_the_backend_representation_and_points` | Observability is part of the operation |
 | `concurrent_renders_agree` | The figure is safe to render from several threads |
 | `large_data_draws_every_point` | Ten thousand points are not silently dropped |
+| `a_million_logical_sparse_column_is_not_expanded` | A sparse column draws only the vertices it needs |
+| `a_million_logical_sparse_column_allocates_proportionally_to_its_stored_slots` | Sparse allocation stays bounded |
+| `a_stacked_million_logical_sparse_column_is_bounded` | The stack keeps the reduced grid |
+| `a_strict_missing_value_policy_rejects_a_sparse_stacked_render` | The strict policy survives the sparse stack |
+| `a_backend_without_a_recipe_serializer_fails_at_build_time` | The configured kind is never ignored |
+| `the_native_backend_rasterizes_the_same_scene` | The native serializer replays the same scene |
 
 The concurrency test is not decorative. A recipe carries borrowed column
 names and a shared data source; if it cached mutation state between renders,
@@ -248,9 +263,27 @@ composition with three ordered layers:
 
 The order matters: the marks must paint over the grid and under the axes.
 Because the primitives are owned geometry, a backend serializes them without
-re-deriving anything. With the `render-svg` feature, `render()` and `save()`
-push the layers into `SVSvgDocument`; the example program uses the same surface
-directly.
+re-deriving anything. This is the recipe-level **scene contract**, and it is
+what makes the backend choice honest instead of decorative:
+
+- `SVBackendKind::Svg` replays the scene into an `SVSvgDocument`;
+- `SVBackendKind::Native` replays it through `SVRasterCanvas` into an RGBA
+  frame;
+- any other kind fails at build with
+  `SVError::UnsupportedBackendCapability { capability: Export }`, rather than
+  receiving bytes another backend produced.
+
+`save()` exports only the SVG document. The native backend presents a frame,
+so it reports the missing export capability instead of writing raw pixels
+under a document extension. `show()` is unsupported for the recipe: the native
+backend's own present loop owns the window.
+
+The recipe has no `update(appended_points)` method. An append-based update
+needs a mutable subscription to the live window and the transition wiring that
+interpolates between frames; neither belongs to this change. Rendering a
+streaming source already recomputes the stack from the bounded window on every
+`render()`, so a caller that wants the newest window renders again. The
+in-place path is recorded as deferred in FDR-103.
 
 ## A generated figure
 
@@ -296,7 +329,8 @@ copy, so the displayed figure cannot drift from the code.
 - **Animating the stack in the recipe.** The transition kernel owns
   interpolation between frames. The recipe recomputes the stack on each render,
   so the areas take their new positions frame by frame; wiring the transition
-  plan into the recipe is a future change.
+  plan into the recipe, together with the append-based `update` that observes
+  the new samples, is the deferred streaming change.
 
 ## Where to go next
 

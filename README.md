@@ -148,7 +148,7 @@ byte-identical output, accessible metadata (`role`, `aria-label`, `<title>`,
 the composed primitives through the SVG document serializer:
 
 ```rust
-use scienceview::recipes::relational::SVAreaPlot;
+use scienceview::sv_recipes::sv_relational::sv_area_plot::SVAreaPlot;
 
 let plot = SVAreaPlot::new()
     .data_source(&table)
