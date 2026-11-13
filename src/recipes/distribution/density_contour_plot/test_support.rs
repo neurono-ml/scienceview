@@ -129,7 +129,6 @@ pub(crate) fn sv_primitives(
     primitives
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_scene_to_svg(composition: &SVDensityContourComposition) -> String {
     let mut document = scienceview_svg::SVSvgDocument::new(composition.viewport())
         .with_title(composition.title().unwrap_or("density contour plot"))
