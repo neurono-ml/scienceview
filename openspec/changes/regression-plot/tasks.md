@@ -62,3 +62,6 @@
   core-stat change because the closed fit kernel consumes neither.
 - [x] Record the identical-support sparse pairing rule that keeps the kernel's
   no-densification guarantee.
+- [x] Align the spec delta's data contract with the deferred `weight` option,
+  so the normative requirements no longer promise a column the closed fit
+  kernel cannot consume.
