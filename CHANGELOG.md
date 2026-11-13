@@ -12,6 +12,17 @@ released.
 
 ### Added
 
+- The WebAssembly canvas backend `scienceview_wasm` (`SVBackendKind::Wasm`):
+  the browser target compiles the from-scratch CPU rasterizer of
+  `scienceview_native` instead of reimplementing rendering in JavaScript, so a
+  canvas frame is the frame the desktop target presents. A `SVCanvasSurface`
+  seam captures frames headlessly on the host and blits them through `web-sys`
+  on `wasm32`; a host presentation without a surface reports a typed
+  `BackendUnavailable`. `requestAnimationFrame` only schedules redraws: its
+  timestamp is handed to the model clock and a paused model performs no
+  animation work. The JavaScript bindings expose construction, update and
+  render only. The `wasm` feature is opt-in and never part of the default
+  build; `examples/wasm_backend.rs` writes `docs/figures/wasm_backend.svg`.
 - The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
   two variables shown together with the marginal distribution of each — a
   central bivariate panel (scatter, hexbin, density contour or regression)
