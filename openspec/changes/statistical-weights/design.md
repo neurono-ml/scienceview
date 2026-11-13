@@ -39,7 +39,10 @@ without a stored weight carries zero weight, so neither column is materialised.
 `SVError::NegativeWeight { operation, position }` is added next to
 `NonFiniteValue`, and the shared validator reports the first offending logical
 position. Aggregates adopt it too, replacing their message-only configuration
-error. No public name is abbreviated.
+error. Kernels that cannot consume a weight (`Count`, `Percentile`,
+`EmpiricalCdf`, `Fit`, and the non-`Mean`/`Sum` aggregate methods) reject a
+configured weight column with a typed configuration error naming the kernel,
+so a weight is never silently ignored. No public name is abbreviated.
 
 ### D4 — Normalisation
 

@@ -132,3 +132,9 @@ Every stat SHALL take a typed option builder, and an invalid configuration SHALL
 - **WHEN** every weight of a density is zero
 - **THEN** the operation fails with a typed configuration error instead of
   dividing by zero
+
+#### Scenario: a kernel that cannot use weights rejects the column
+- **WHEN** a weight column is configured on `Count`, `Percentile`,
+  `EmpiricalCdf`, `Fit`, or an `Aggregate` method other than `Mean` and `Sum`
+- **THEN** the operation fails with a typed configuration error naming the
+  kernel instead of silently ignoring the weight
