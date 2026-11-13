@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 420" role="img" aria-label="A value column and a weight column cross the data boundary into the statistic kernel, which produces weighted bins and a weighted density">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1d3557"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="420" fill="#ffffff"/>
+  <text x="560" y="38" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#1d3557">Weighted statistics: the weight travels the same boundary as the value</text>
+
+  <rect x="40" y="80" width="240" height="120" rx="12" fill="#e8f1fb" stroke="#118ab2" stroke-width="2"/>
+  <text x="160" y="110" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#0b4f6c">Value column</text>
+  <text x="160" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">dense · sparse · streaming</text>
+  <text x="160" y="162" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">resolved once, never densified</text>
+  <text x="160" y="184" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#457b9d">0.5, 1.5, 2.5</text>
+
+  <rect x="40" y="230" width="240" height="120" rx="12" fill="#fff4e6" stroke="#e9c46a" stroke-width="2"/>
+  <text x="160" y="260" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#8a5a00">Weight column</text>
+  <text x="160" y="288" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">dense · sparse · streaming</text>
+  <text x="160" y="312" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">implicit zero = zero weight</text>
+  <text x="160" y="334" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#8a5a00">1.0, 3.0, 2.0</text>
+
+  <line x1="285" y1="140" x2="395" y2="185" stroke="#1d3557" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="285" y1="290" x2="395" y2="235" stroke="#1d3557" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <rect x="400" y="150" width="250" height="120" rx="12" fill="#e9f7ef" stroke="#06d6a0" stroke-width="2"/>
+  <text x="525" y="180" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#046c4e">SVStatInput::with_weights</text>
+  <text x="525" y="208" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">length checked first</text>
+  <text x="525" y="232" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">negative → NegativeWeight</text>
+  <text x="525" y="254" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">non-finite → NonFiniteValue</text>
+
+  <line x1="655" y1="210" x2="755" y2="210" stroke="#1d3557" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <rect x="760" y="80" width="320" height="120" rx="12" fill="#f3e8ff" stroke="#8338ec" stroke-width="2"/>
+  <text x="920" y="110" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#5a189a">SVStat::Bin</text>
+  <text x="920" y="138" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">count / probability / density</text>
+  <text x="920" y="162" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">denominator = Σ weight</text>
+  <text x="920" y="184" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#5a189a">all-ones ≡ unweighted</text>
+
+  <rect x="760" y="230" width="320" height="120" rx="12" fill="#fde8ef" stroke="#ef476f" stroke-width="2"/>
+  <text x="920" y="260" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#9b1b3b">SVStat::KernelDensity</text>
+  <text x="920" y="288" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">Σ weight_i × K(...)</text>
+  <text x="920" y="312" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d3557">÷ (Σ weight × bandwidth)</text>
+  <text x="920" y="334" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#9b1b3b">bandwidth stays unweighted</text>
+</svg>

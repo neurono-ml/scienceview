@@ -54,6 +54,14 @@ option `bw_adjust`). `2.0` doubles the smoothing; `0.5` halves it. An explicit
 `bandwidth(...)` replaces the derived value, and is still
 scaled by the adjustment so the two options compose predictably.
 
+**Weight.** An optional `weight(...)` column makes one observation count for
+several. The builder resolves the column once per series and passes it to
+`SVStat::KernelDensity`, which normalises the estimate by the total weight times
+the bandwidth; the bandwidth rule above deliberately stays unweighted, so a
+weight changes how much each observation contributes, never how smooth the
+curve is. Chapter 53 covers the weighted kernel, including the all-ones and
+scale-invariance properties.
+
 **Evaluation grid.** A density is a function; to draw it we evaluate it at a
 finite set of points. `grid_count` chooses how many (256 by default), and
 `cut` chooses how far beyond the data the grid extends, in bandwidths (3 by
@@ -196,13 +204,9 @@ plot.save(&destination)?;
 
 ## What this recipe does not do
 
-Two things are deliberately out of scope, and the chapter says so rather than
-implying them:
+One thing is deliberately out of scope, and the chapter says so rather than
+implying it:
 
-- **Weights.** The kernel-density kernel applies an unweighted estimate.
-  Weighting an observation would be a new kernel variant — a core change with
-  its own spec delta — not something the recipe may add on its own
-  (patterns.md P5).
 - **Animation.** The recipe emits transition-ready geometry: one curve per
   series over a fixed grid, so every frame shares its grid positions. The
   transition kernel owns the interpolation between frames, and this recipe
