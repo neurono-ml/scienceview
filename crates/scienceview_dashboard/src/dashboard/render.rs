@@ -1,0 +1,157 @@
+//! Rendering a dashboard to one self-contained document.
+
+use super::core_implementation::SVDashboard;
+use super::panel_placement::sv_place_panel_fragment;
+use crate::sv_backend::{SVBackendCapability, SVBackendKind};
+use crate::sv_data::SVRepresentation;
+use crate::sv_error::SVError;
+use crate::sv_layout::SVViewport;
+use crate::sv_observability::sv_run_operation;
+use crate::sv_panel::SVPanelRenderRequest;
+
+/// What one dashboard render produced.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SVDashboardRenderOutput {
+    /// A self-contained SVG document.
+    Svg(Vec<u8>),
+    /// A self-contained HTML page around the SVG document.
+    #[cfg(feature = "render-html")]
+    Html(Vec<u8>),
+}
+
+impl SVDashboardRenderOutput {
+    /// Returns the rendered bytes.
+    pub fn bytes(&self) -> &[u8] {
+        match self {
+            Self::Svg(bytes) => bytes,
+            #[cfg(feature = "render-html")]
+            Self::Html(bytes) => bytes,
+        }
+    }
+}
+
+impl SVDashboard<'_> {
+    /// Renders through the configured backend kind.
+    ///
+    /// `Svg` produces one self-contained document with every panel embedded as
+    /// a nested inline SVG; `Html` wraps the same document in the self-contained
+    /// page. Any other kind reports the missing recipe-level serializer, and a
+    /// compiled-out HTML feature reports the unavailable backend.
+    ///
+    /// # Errors
+    ///
+    /// Propagates the panel, layout or backend errors.
+    pub fn render(&self) -> Result<SVDashboardRenderOutput, SVError> {
+        sv_run_operation(
+            "render",
+            self.backend_kind,
+            SVRepresentation::Dense,
+            self.panels.len(),
+            || self.sv_dispatch_render(),
+        )
+    }
+
+    /// Renders the self-contained SVG document.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::UnsupportedBackendCapability`] when the configured
+    /// kind is not `Svg`, and propagates panel and layout errors.
+    pub fn render_svg(&self) -> Result<String, SVError> {
+        if self.backend_kind != SVBackendKind::Svg {
+            return Err(SVError::UnsupportedBackendCapability {
+                backend_kind: self.backend_kind,
+                capability: SVBackendCapability::Export,
+            });
+        }
+        sv_run_operation(
+            "render-svg",
+            self.backend_kind,
+            SVRepresentation::Dense,
+            self.panels.len(),
+            || self.sv_render_svg_document(),
+        )
+    }
+
+    /// Renders the self-contained HTML page around the dashboard SVG.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::UnsupportedBackendCapability`] when the configured
+    /// kind is not `Html`, and propagates panel and layout errors.
+    #[cfg(feature = "render-html")]
+    pub fn render_html(&self) -> Result<String, SVError> {
+        if self.backend_kind != SVBackendKind::Html {
+            return Err(SVError::UnsupportedBackendCapability {
+                backend_kind: self.backend_kind,
+                capability: SVBackendCapability::Export,
+            });
+        }
+        sv_run_operation(
+            "render-html",
+            self.backend_kind,
+            SVRepresentation::Dense,
+            self.panels.len(),
+            || {
+                let svg = self.sv_render_svg_document()?;
+                let payload = scienceview_html::SVHtmlDataPayload::new(
+                    crate::sv_data::SVColumnView::Dense(&[]),
+                    svg,
+                );
+                Ok(scienceview_html::SVHtmlDocument::new(payload)
+                    .with_title(self.title.clone())
+                    .to_html())
+            },
+        )
+    }
+
+    fn sv_dispatch_render(&self) -> Result<SVDashboardRenderOutput, SVError> {
+        match self.backend_kind {
+            SVBackendKind::Svg => Ok(SVDashboardRenderOutput::Svg(
+                self.sv_render_svg_document()?.into_bytes(),
+            )),
+            #[cfg(feature = "render-html")]
+            SVBackendKind::Html => Ok(SVDashboardRenderOutput::Html(
+                self.render_html()?.into_bytes(),
+            )),
+            #[cfg(not(feature = "render-html"))]
+            SVBackendKind::Html => Err(SVError::BackendUnavailable {
+                backend_kind: SVBackendKind::Html,
+            }),
+            backend_kind => Err(SVError::UnsupportedBackendCapability {
+                backend_kind,
+                capability: SVBackendCapability::Export,
+            }),
+        }
+    }
+
+    fn sv_render_svg_document(&self) -> Result<String, SVError> {
+        let solution = self.solve_layout()?;
+        let mut document = scienceview_svg::SVSvgDocument::new(self.viewport)
+            .with_title(self.title.clone())
+            .with_accessibility_label(self.title.clone())
+            .with_description(
+                self.description
+                    .clone()
+                    .unwrap_or_else(|| "Dashboard generated by scienceview".to_string()),
+            );
+        for panel in &self.panels {
+            let rectangle = solution.rectangle_for(&panel.placement());
+            let panel_viewport = SVViewport::new(rectangle.width, rectangle.height);
+            let filter = self.selection.filter_for(panel.source_identifier());
+            let request = SVPanelRenderRequest::new(
+                panel.identifier(),
+                panel.source_identifier(),
+                panel_viewport,
+                filter,
+            );
+            let fragment = panel.render_svg(&request)?;
+            let placed = sv_place_panel_fragment(&fragment, &rectangle, panel.identifier())?;
+            document.push_element(format!(
+                "<g role=\"group\" aria-label=\"{}\">{placed}</g>",
+                scienceview_svg::sv_escape_text(panel.title())
+            ));
+        }
+        Ok(document.to_svg())
+    }
+}

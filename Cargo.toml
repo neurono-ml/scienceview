@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/scienceview_core",
+    "crates/scienceview_dashboard",
     "crates/scienceview_svg",
     "crates/scienceview_html",
     "crates/scienceview_tui",
@@ -8355,6 +8356,11 @@ required-features = ["render-svg"]
 name = "ui_controls"
 path = "examples/ui_controls.rs"
 
+[[example]]
+name = "dashboard_composition"
+path = "examples/dashboard_composition.rs"
+required-features = ["render-svg"]
+
 # The root package is a facade: it re-exports the core crate and every backend
 # crate whose feature is enabled. Every rendering backend is a Cargo feature and
 # maps 1:1 to a workspace crate under crates/scienceview_* (see PRD §3.1).
@@ -8414,6 +8420,7 @@ scienceview_dioxus = { path = "crates/scienceview_dioxus", version = "0.1.0", op
 workspace = true
 
 [dev-dependencies]
+scienceview_dashboard = { path = "crates/scienceview_dashboard", version = "0.1.0" }
 scienceview_svg = { path = "crates/scienceview_svg", version = "0.1.0" }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "registry", "std"] }
