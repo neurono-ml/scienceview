@@ -48,11 +48,11 @@
 
 ## 5. Book chapter (book branch)
 
-- [ ] Add the chapter `ch54-clustered-heatmap-plot.md` under
+- [x] Add the chapter `ch54-clustered-heatmap-plot.md` under
   `docs/src/development-explained/`.
-- [ ] Mirror the figure into `docs/src/assets/clustered_heatmap_plot.svg` and
+- [x] Mirror the figure into `docs/src/assets/clustered_heatmap_plot.svg` and
   embed it in the chapter with an SVG diagram.
-- [ ] Register the chapter in `docs/src/SUMMARY.md`, update
+- [x] Register the chapter in `docs/src/SUMMARY.md`, update
   `maintaining.md` and `docs/src/examples.md`, and verify `mdbook build`.
 
 ## 6. FDR and changelog
@@ -60,11 +60,11 @@
 - [x] Rewrite `docs/FDRs/recipes/matrix-clustered-heatmap-plot.md` to the
   supplied-clustering contract and set the status to `shipped`, ticking only
   tested acceptance items.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Gates and review
 
-- [ ] Run the gates locally: `cargo fmt --all --check`,
+- [x] Run the gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets -- -D warnings`,
   `cargo test --workspace --all-targets`, doctests and the figures drift check,
   plus the `--all-features` variants.
