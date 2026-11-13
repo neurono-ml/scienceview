@@ -30,8 +30,10 @@ released.
   through `to_svg()` (a PNG data URI) and, with `render-native`, through
   `to_native_frame()`; any other configured kind fails with a typed error, and
   the terminal backend is rejected at build time because it cannot express a
-  raster. The example `examples/image_plot.rs` computes its field analytically
-  and writes the deterministic figure `docs/figures/image_plot.svg`.
+  raster. Transition and animation wiring — including the pixel cross-fade the
+  FDR names — is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/image_plot.rs` computes its field
+  analytically and writes the deterministic figure `docs/figures/image_plot.svg`.
 - The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
   the point estimate of every category with its uncertainty, optionally joined
   by a line. The chart is the composition of FDR-123 —
