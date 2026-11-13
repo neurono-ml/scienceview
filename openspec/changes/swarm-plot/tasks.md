@@ -2,35 +2,35 @@
 
 ## 1. Module, builder and composition
 
-- [ ] Write the failing tests first: the chart builds with its documented
+- [x] Write the failing tests first: the chart builds with its documented
   defaults, and each option changes the output.
-- [ ] Create `src/recipes/distribution/swarm_plot/{mod.rs, builder.rs,
+- [x] Create `src/recipes/distribution/swarm_plot/{mod.rs, builder.rs,
   core_implementation.rs}` following patterns.md P3; `mod.rs` is a pure
   dispatcher.
-- [ ] Implement the builder state machine, the required `backend(...)` and the
+- [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVSwarmPlot` carrying its configured kind.
-- [ ] Wire the composition `data -> [no stat] -> values -> [SVMove::Swarm (collision-avoiding displacement)] -> [SVScale] -> SVMark::Dot` through the core kernels.
+- [x] Wire the composition `data -> [no stat] -> values -> [SVMove::Swarm (collision-avoiding displacement)] -> [SVScale] -> SVMark::Dot` through the core kernels.
 
 ## 2. Data contract and parity
 
-- [ ] Write the failing parity test: dense, sparse and streaming input of the
+- [x] Write the failing parity test: dense, sparse and streaming input of the
   same data produce the same marks within the documented tolerance.
-- [ ] Implement the column resolution and the explicit error for a missing or
+- [x] Implement the column resolution and the explicit error for a missing or
   mistyped column.
-- [ ] Verify a sparse input is never densified and a streaming input never
+- [x] Verify a sparse input is never densified and a streaming input never
   blocks; assert the window behaviour where the recipe depends on it.
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
+- [x] Assert the operation span carries the backend kind, the representation
   and the point count.
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/swarm_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/swarm_plot.svg` with `cargo run --example swarm_plot` and
+- [x] Add `examples/swarm_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/swarm_plot.svg` with `cargo run --example swarm_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
@@ -43,9 +43,9 @@
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/distribution-swarm-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/distribution-swarm-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
