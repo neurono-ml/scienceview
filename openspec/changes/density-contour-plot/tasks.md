@@ -9,7 +9,7 @@
   dispatcher.
 - [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVDensityContourPlot` carrying its configured kind.
-- [x] Wire the composition `data -> [SVStat::KernelDensity (2D)] -> (grid, density) -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` through the core kernels.
+- [x] Wire the composition `data -> [SVStat::Bin on x] + [SVStat::Bin on y] -> joint grid of counts -> density -> [Gaussian smoothing when bandwidth is set] -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` through the core kernels.
 
 ## 2. Data contract and parity
 

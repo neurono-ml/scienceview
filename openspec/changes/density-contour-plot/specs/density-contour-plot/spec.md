@@ -8,7 +8,7 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVDensityContourPlot` SHALL be produced by exactly the composition `data -> [SVStat::KernelDensity (2D)] -> (grid, density) -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` and SHALL expose the configuration surface recorded in its FDR.
+`SVDensityContourPlot` SHALL be produced by exactly the composition `data -> [SVStat::Bin on x] + [SVStat::Bin on y] -> joint grid of counts -> density -> [Gaussian smoothing when bandwidth is set] -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` and SHALL expose the configuration surface recorded in its FDR. The two-dimensional density is a composition of the existing one-dimensional bin kernel on each axis, not a new stat variant.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
@@ -30,13 +30,17 @@
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
 
+#### Scenario: Missing values
+- **WHEN** an `x` or `y` value is not finite
+- **THEN** the pair is omitted; an input with no finite pair fails with `EmptyInput`, and a non-finite or negative weight fails explicitly
+
 ### Requirement: Representations are equivalent
 
-`SVDensityContourPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream.
+`SVDensityContourPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream. A streaming window SHALL be rejected at build on a backend that does not declare the streaming capability.
 
 #### Scenario: Dense sparse and streaming agree
 - **WHEN** the same data is presented as dense, sparse and streaming
-- **THEN** the output agrees within the documented tolerance
+- **THEN** the output agrees within the documented tolerance, which is zero (bit-identical grids and paths)
 
 #### Scenario: Sparse is not densified
 - **WHEN** a sparse input is supplied
