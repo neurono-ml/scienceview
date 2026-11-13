@@ -55,3 +55,18 @@
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
   `docs/FDRs/matrix-heatmap-plot.md` before opening the code PR.
+
+## Implementation notes
+
+- The FDR's `missing` option is implemented as
+  `SVMissingValue::{Omit, Transparent, Neutral}`; `Neutral` paints the theme
+  surface colour. The FDR text now names those three rules instead of the
+  earlier "colour of the map's lowest value".
+- The recipe also exposes `orientation`, `row_labels`, `column_labels`,
+  `x_label`, `y_label`, `title` and the viewport, which the FDR discusses but
+  does not list as named options.
+- `robust` uses linearly interpolated 2nd/98th percentiles, matching numpy and
+  seaborn. The independent acceptance review found that rounding the rank
+  included the outermost value at small sample counts; the fix and the option
+  tests (`robust_derives_the_domain_from_the_central_percentiles`,
+  `a_positive_line_width_strokes_every_cell`) ship in the code branch.
