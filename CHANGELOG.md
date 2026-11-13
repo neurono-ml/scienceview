@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The React, Vue and Angular rendering backends (`scienceview_react`,
+  `scienceview_vue`, `scienceview_angular`, features `render-react`,
+  `render-vue` and `render-angular`). Each backend emits a self-contained
+  component source string — JSX, a Vue single-file component or an Angular
+  `@Component` class — that embeds the inline SVG markup produced by the SVG
+  backend together with the figure data, a theme object and the action event.
+  The three wrappers share one contract: properties `data`, `markup`, `theme`
+  and `title`, and the `scienceview-action` event carrying `select` and `zoom`.
+  The component replaces its markup through the `markup` property, so the
+  output of `update` applies without remounting. Sparse data is embedded as
+  index/value pairs and never densified. No npm dependency is used at build
+  time: the crate only writes source text. Golden component sources, hostile
+  label escaping, determinism, ten-thousand-point output, concurrency,
+  capability and observability tests cover each backend.
+
 - The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
   two variables shown together with the marginal distribution of each — a
   central bivariate panel (scatter, hexbin, density contour or regression)
