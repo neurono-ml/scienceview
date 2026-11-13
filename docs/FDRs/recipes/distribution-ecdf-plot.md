@@ -8,7 +8,7 @@
 | Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | [Chapter 25 — Ecdf plots](../../src/development-explained/ch25-ecdf-plot.md) |
+| Public chapter | [Chapter 25 — ECDF plots](https://neurono-ml.github.io/scienceview/development-explained/ch25-ecdf-plot.html) |
 | Example program | [`examples/ecdf_plot.rs`](../../../examples/ecdf_plot.rs) |
 
 ## Purpose
@@ -79,6 +79,10 @@ Consumes `mark.palette`, `text.*`, axis tokens.
 | step vertices | interpolate |
 | new observation | the step rises at the new value |
 | series removed | exits |
+
+Transition and animation wiring is deferred to the transition integration: this
+recipe ships the transition-ready step geometry and the current-window
+re-render only (recorded in `openspec/changes/ecdf-plot/tasks.md`, task 6b).
 
 ## Backend notes
 
