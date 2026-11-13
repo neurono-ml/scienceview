@@ -75,6 +75,7 @@ cargo run --example histogram_plot --features render-svg
 cargo run --example line_plot
 cargo run --example area_plot
 cargo run --example hexbin_plot --features render-svg
+cargo run --example joint_plot --features render-svg
 cargo run --example image_plot --features render-svg
 cargo run --example heatmap_plot --features render-svg
 ```
@@ -537,6 +538,24 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](docs/figures/hexbin_plot.svg)
+
+Joint plot (`examples/joint_plot.rs`) composes the `SVJointPlot` recipe: a
+central bivariate panel with the marginal distribution of each variable on the
+top and the right, all sharing the central scales:
+
+```rust
+use scienceview::sv_recipes::sv_multivariate::sv_joint_plot::SVJointPlot;
+
+let scene = SVJointPlot::builder()
+    .data_source(&table)
+    .x("height")
+    .y("weight")
+    .backend(SVBackendKind::Svg)
+    .build()?;
+let document = scene.compose()?.to_svg()?;
+```
+
+![Joint distribution of height and weight](docs/figures/joint_plot.svg)
 An image plot (`examples/image_plot.rs`) maps a computed field through a colour
 map and places it on its data extent, with a colour bar:
 
