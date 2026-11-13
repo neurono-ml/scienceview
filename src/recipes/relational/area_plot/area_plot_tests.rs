@@ -399,6 +399,33 @@ fn a_strict_missing_value_policy_rejects_the_render() {
 }
 
 #[test]
+fn a_strict_missing_value_policy_rejects_a_stacked_render() {
+    const X: [f64; 3] = [0.0, 1.0, 2.0];
+    const Y: [f64; 3] = [1.0, f64::NAN, 3.0];
+    const SERIES_CODES: [f64; 3] = [0.0, 0.0, 0.0];
+    let source = SVTestSource {
+        x: SVTestView::Dense(&X),
+        y: SVTestView::Dense(&Y),
+        series: Some(SVTestView::Dense(&SERIES_CODES)),
+        reads: None,
+    };
+    let error = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .series("series")
+        .stack(true)
+        .missing_value_policy(SVMissingValuePolicy::Error)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .rendering()
+        .expect_err("the strict policy rejects the missing sample while stacked");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
+
+#[test]
 fn the_configured_baseline_moves_the_area() {
     let source = SVTestSource::dense();
     let zero = SVAreaPlot::new()
@@ -507,6 +534,33 @@ fn the_stacked_areas_tile_against_the_cumulative_baseline() {
         .rendering()
         .expect("the stacked chart draws");
     assert_eq!(stacked.primitives().len(), 2);
+
+    let paths: Vec<Vec<(f64, f64)>> = stacked
+        .primitives()
+        .iter()
+        .filter_map(|primitive| match primitive.shape() {
+            SVMarkShape::Path(path) => Some(
+                path.commands()
+                    .iter()
+                    .filter_map(|command| match command {
+                        SVPathCommand::MoveTo(point) | SVPathCommand::LineTo(point) => {
+                            Some((point.x(), point.y()))
+                        }
+                        SVPathCommand::ArcTo(_) | SVPathCommand::Close => None,
+                    })
+                    .collect(),
+            ),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(paths.len(), 2, "the two areas are two closed paths");
+    let boundary = paths[0].len() / 2;
+    let lower_top: Vec<(f64, f64)> = paths[0][..boundary].to_vec();
+    let upper_baseline: Vec<(f64, f64)> = paths[1][boundary..].iter().rev().copied().collect();
+    assert_eq!(
+        lower_top, upper_baseline,
+        "the upper area closes on the lower area's top, so the areas tile without gaps or overlaps"
+    );
 }
 
 const INTERLEAVED_X: [f64; 6] = [0.0, 0.0, 1.0, 1.0, 2.0, 2.0];

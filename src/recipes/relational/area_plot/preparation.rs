@@ -86,7 +86,7 @@ pub(crate) fn sv_prepare_area(
     let palette = sv_default_scale_palette();
 
     if configuration.stack {
-        let series = sv_stack_series(&groups, &x_values, &y_values, &palette)?;
+        let series = sv_stack_series(configuration, &groups, &x_values, &y_values, &palette)?;
         let point_count = series
             .iter()
             .flat_map(|series| series.segments.iter())
@@ -222,11 +222,29 @@ fn sv_flush_run(current: &mut Vec<(f64, f64)>, segments: &mut Vec<SVPreparedSegm
 /// Stacks every series over the shared horizontal grid with
 /// [`SVMove::Stack`], then writes one cumulative-baseline segment per series.
 fn sv_stack_series(
+    configuration: &SVAreaPlotConfiguration<'_>,
     groups: &[Vec<usize>],
     x_values: &[f64],
     y_values: &[f64],
     palette: &scienceview_core::sv_scale::SVScalePalette,
 ) -> Result<Vec<SVPreparedSeries>, SVError> {
+    // The stack aligns every series on a shared grid, so the missing-value
+    // policy is applied here too: `Omit` drops the sample from the grid and
+    // `Error` rejects the render before any alignment happens.
+    for indices in groups {
+        for index in indices.iter().copied() {
+            if !x_values[index].is_finite() {
+                configuration
+                    .missing_value_policy
+                    .report(configuration.x, index)?;
+            } else if !y_values[index].is_finite() {
+                configuration
+                    .missing_value_policy
+                    .report(configuration.y, index)?;
+            }
+        }
+    }
+
     let mut grid: Vec<f64> = groups
         .iter()
         .flatten()

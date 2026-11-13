@@ -69,7 +69,7 @@ stacking needs the group total).
 | `baseline` | `SVBaselineMode` | `Zero` | plotly `fill` (`tozeroy`, `tonexty`, `toself`) |
 | `opacity` | `f32` | token `mark.area_opacity` | all three |
 | `line` | `bool` | `true` | plotly `line` |
-| `interpolate` | `SVLineInterpolation` | `Linear` | plotly `line_shape` |
+| `interpolate` | `SVAreaInterpolation` | `Linear` | plotly `line_shape` |
 
 ## Theme
 
