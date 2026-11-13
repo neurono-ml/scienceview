@@ -15,10 +15,7 @@ pub struct SVSharedSource<'a> {
 impl<'a> SVSharedSource<'a> {
     /// Registers a source under an identifier.
     pub fn new(identifier: &'a str, source: &'a dyn SVDataSource) -> Self {
-        Self {
-            identifier,
-            source,
-        }
+        Self { identifier, source }
     }
 
     /// Returns the dashboard identifier.

@@ -41,6 +41,12 @@
 //! the same document in the self-contained HTML page, and the configured
 //! backend kind is recorded in every operation span.
 
+#[path = "dashboard/mod.rs"]
+pub mod sv_dashboard;
+
+#[path = "events/mod.rs"]
+pub mod sv_events;
+
 #[path = "grid/mod.rs"]
 pub mod sv_grid;
 
@@ -53,7 +59,9 @@ pub mod sv_selection;
 #[path = "source/mod.rs"]
 pub mod sv_source;
 
-pub use scienceview_core::{sv_control, sv_data, sv_error, sv_layout, sv_observability};
+pub use scienceview_core::{
+    sv_backend, sv_control, sv_data, sv_error, sv_figure, sv_layout, sv_observability, sv_scale,
+};
 
 #[cfg(test)]
 mod workspace_tests;

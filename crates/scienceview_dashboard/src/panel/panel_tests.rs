@@ -5,11 +5,9 @@ use std::sync::{Arc, Mutex};
 use crate::sv_control::SVControlAxis;
 use crate::sv_error::SVError;
 use crate::sv_grid::SVGridPlacement;
-use crate::sv_panel::{
-    SVDashboardPanel, SVDashboardPanelContent, SVPanelRenderRequest,
-};
-use crate::sv_selection::{SVSelectionConstraint, SVSelectionFilter};
 use crate::sv_layout::SVViewport;
+use crate::sv_panel::{SVDashboardPanel, SVDashboardPanelContent, SVPanelRenderRequest};
+use crate::sv_selection::{SVSelectionConstraint, SVSelectionFilter};
 
 #[test]
 fn a_panel_needs_a_placement() {
@@ -94,7 +92,10 @@ fn the_content_receives_the_cell_viewport_and_the_linked_filter() {
     assert!(markup.starts_with("<svg"));
     assert_eq!(panel.title(), "left");
     assert_eq!(
-        recording.lock().expect("the recording lock is free").as_ref(),
+        recording
+            .lock()
+            .expect("the recording lock is free")
+            .as_ref(),
         Some(&(320.0, 180.0, true))
     );
 }

@@ -2,9 +2,11 @@
 
 mod definition;
 mod placement;
+mod solution;
 
-pub use definition::{SVDashboardGrid, SVGridSolution};
+pub use definition::SVDashboardGrid;
 pub use placement::SVGridPlacement;
+pub use solution::SVGridSolution;
 
 #[cfg(test)]
 #[path = "grid_tests.rs"]

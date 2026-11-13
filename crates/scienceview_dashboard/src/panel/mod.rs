@@ -2,11 +2,11 @@
 
 mod builder;
 mod definition;
+mod request;
 
 pub use builder::SVDashboardPanelBuilder;
-pub use definition::{
-    SVDashboardAxisBinding, SVDashboardPanel, SVDashboardPanelContent, SVPanelRenderRequest,
-};
+pub use definition::{SVDashboardAxisBinding, SVDashboardPanel, SVDashboardPanelContent};
+pub use request::SVPanelRenderRequest;
 
 #[cfg(test)]
 #[path = "panel_tests.rs"]

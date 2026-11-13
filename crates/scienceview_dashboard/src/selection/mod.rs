@@ -9,3 +9,6 @@ pub use state::{SVLinkedSelectionChange, SVLinkedSelectionState, SVSelectionCasc
 #[cfg(test)]
 #[path = "selection_tests.rs"]
 mod selection_tests;
+#[cfg(test)]
+#[path = "state_tests.rs"]
+mod state_tests;

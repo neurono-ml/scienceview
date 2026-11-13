@@ -89,10 +89,7 @@ impl SVLinkedSelectionState {
     }
 
     /// Applies one filter, replacing the filter of its source.
-    pub fn apply(
-        &mut self,
-        filter: SVSelectionFilter,
-    ) -> Result<SVLinkedSelectionChange, SVError> {
+    pub fn apply(&mut self, filter: SVSelectionFilter) -> Result<SVLinkedSelectionChange, SVError> {
         let previous = self
             .filters
             .insert(filter.source_identifier().to_owned(), filter.clone());

@@ -2,8 +2,8 @@
 
 use super::{SVDashboardAxisBinding, SVDashboardPanel, SVDashboardPanelContent};
 use crate::sv_control::SVControlAxis;
-use crate::sv_grid::SVGridPlacement;
 use crate::sv_error::SVError;
+use crate::sv_grid::SVGridPlacement;
 
 /// Builds one dashboard panel.
 ///
@@ -88,10 +88,7 @@ impl<'a> SVDashboardPanelBuilder<'a> {
 
     /// Sets the object that draws the panel.
     #[must_use]
-    pub fn content(
-        mut self,
-        content: impl SVDashboardPanelContent + Send + Sync + 'a,
-    ) -> Self {
+    pub fn content(mut self, content: impl SVDashboardPanelContent + 'a) -> Self {
         self.content = Some(Box::new(content));
         self
     }
@@ -105,9 +102,13 @@ impl<'a> SVDashboardPanelBuilder<'a> {
     /// bound twice in the same panel.
     pub fn build(self) -> Result<SVDashboardPanel<'a>, SVError> {
         let identifier = sv_required_identifier(self.identifier)?;
-        let placement = self.placement.ok_or_else(|| SVError::InvalidConfiguration {
-            message: format!("the panel `{identifier}` needs a placement; pass it with `placement(...)`"),
-        })?;
+        let placement = self
+            .placement
+            .ok_or_else(|| SVError::InvalidConfiguration {
+                message: format!(
+                    "the panel `{identifier}` needs a placement; pass it with `placement(...)`"
+                ),
+            })?;
         let source_identifier =
             self.source_identifier
                 .ok_or_else(|| SVError::InvalidConfiguration {

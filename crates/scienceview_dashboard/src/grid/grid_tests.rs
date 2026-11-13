@@ -34,8 +34,11 @@ fn a_spanning_cell_covers_the_union_of_rows_and_columns() {
         .solve(SVViewport::new(200.0, 100.0))
         .expect("the viewport is valid");
 
-    let rectangle =
-        solution.rectangle_for(&SVGridPlacement::new(0, 0).with_row_span(2).with_column_span(2));
+    let rectangle = solution.rectangle_for(
+        &SVGridPlacement::new(0, 0)
+            .with_row_span(2)
+            .with_column_span(2),
+    );
 
     sv_assert_close(rectangle.x, 0.0);
     sv_assert_close(rectangle.y, 0.0);
