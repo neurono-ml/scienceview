@@ -73,5 +73,8 @@ mod observability_tests;
 #[path = "parity_tests.rs"]
 mod parity_tests;
 #[cfg(test)]
+#[path = "render_tests.rs"]
+mod render_tests;
+#[cfg(test)]
 #[path = "test_support.rs"]
 mod test_support;
