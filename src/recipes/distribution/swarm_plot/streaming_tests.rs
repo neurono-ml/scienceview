@@ -47,6 +47,7 @@ fn a_streaming_input_returns_promptly_and_shows_the_window() {
     assert_eq!(points, VALUES.len());
 }
 
+#[cfg(feature = "render-svg")]
 #[test]
 fn a_streaming_scene_can_be_serialized_as_svg() {
     let source = SVTestSource::new(vec![

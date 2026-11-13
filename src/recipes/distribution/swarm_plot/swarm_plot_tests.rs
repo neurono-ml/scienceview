@@ -1,7 +1,7 @@
 //! The documented defaults, the composition and the collision guarantee.
 
 use super::test_support::{
-    CATEGORY, SVTestSource, VALUES, circle_centres, default_builder, dense_source, render, scene,
+    CATEGORY, SVTestSource, VALUES, circle_centres, default_builder, dense_source, scene,
     scene_svg, scene_text,
 };
 use super::{SVSwarmPlot, SVSwarmPlotBuilder};
@@ -267,11 +267,4 @@ fn the_figure_title_and_axis_labels_reach_the_scene() {
     let text = scene_text(&scene);
     assert!(text.contains("species"));
     assert!(text.contains("body mass"));
-}
-
-#[test]
-fn the_public_render_produces_the_configured_artifact() {
-    let output = render(&dense_source());
-    assert_eq!(output.backend_kind(), SVBackendKind::Svg);
-    assert!(output.as_svg().is_some());
 }

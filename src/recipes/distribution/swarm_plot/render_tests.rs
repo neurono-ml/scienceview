@@ -1,8 +1,15 @@
 //! The SVG and native serializers of one swarm scene.
 
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use super::SVSwarmPlot;
-use super::test_support::{circle_centres, dense_source, scene, scene_svg};
-use crate::sv_backend::{SVBackendCapability, SVBackendKind};
+#[cfg(feature = "render-native")]
+use super::test_support::circle_centres;
+use super::test_support::{dense_source, scene, scene_svg};
+#[cfg(feature = "render-native")]
+use crate::sv_backend::SVBackendCapability;
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
+use crate::sv_backend::SVBackendKind;
+#[cfg(feature = "render-native")]
 use crate::sv_error::SVError;
 
 #[test]
@@ -20,6 +27,7 @@ fn the_svg_document_is_self_contained_and_deterministic() {
     assert!(first.contains("<circle") || first.contains("<path"));
 }
 
+#[cfg(feature = "render-svg")]
 #[test]
 fn render_serializes_the_configured_svg_backend() {
     let source = dense_source();

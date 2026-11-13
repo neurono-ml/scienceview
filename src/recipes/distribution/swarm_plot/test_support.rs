@@ -3,7 +3,7 @@
 //! Mock columns are borrowed slices, sparse views and synthetic streaming
 //! snapshots; nothing here touches the network or the filesystem.
 
-use super::{SVSwarmPlot, SVSwarmPlotBuilder, SVSwarmRenderOutput, SVSwarmScene};
+use super::{SVSwarmPlot, SVSwarmPlotBuilder, SVSwarmScene};
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
@@ -120,14 +120,6 @@ pub(crate) fn scene(source: &dyn SVDataSource) -> SVSwarmScene {
         .expect("the configuration is complete")
         .compose()
         .expect("the swarm composes")
-}
-
-pub(crate) fn render(source: &dyn SVDataSource) -> SVSwarmRenderOutput {
-    default_builder(source)
-        .build()
-        .expect("the configuration is complete")
-        .render()
-        .expect("the swarm renders")
 }
 
 pub(crate) fn scene_svg(scene: &SVSwarmScene) -> String {
