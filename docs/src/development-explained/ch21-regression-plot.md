@@ -49,25 +49,7 @@ by the numeric codes of the `series` column and fits once per group.
 The chart is exactly the composition the FDR records. No new mark, stat, move
 or scale variant is introduced (patterns.md P5).
 
-```mermaid
-flowchart LR
-  A["data source<br/>x, y, series"] --> B["pair + drop<br/>non-finite"]
-  B --> C["SVStat::Fit<br/>one per series"]
-  C --> D["coefficients<br/>grid, predicted<br/>lower, upper"]
-  D --> E["SVScale<br/>continuous x / y"]
-  E --> F["SVMark::Ribbon<br/>confidence band"]
-  E --> G["SVMark::Line<br/>fitted curve"]
-  E --> H["SVMark::Dot<br/>observations"]
-  F --> I["one SVG document"]
-  G --> I
-  H --> I
-  style A fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
-  style C fill:#fef3c7,stroke:#b45309,color:#0f172a
-  style F fill:#dcfce7,stroke:#15803d,color:#0f172a
-  style G fill:#ede9fe,stroke:#6d28d9,color:#0f172a
-  style H fill:#fee2e2,stroke:#b91c1c,color:#0f172a
-  style I fill:#f3f4f6,stroke:#374151,color:#0f172a
-```
+![The regression composition: data source, pairing, fit, scale, ribbon, line, dot and one SVG document](assets/regression-plot-composition.svg)
 
 The three marks are deliberately drawn in that order: the band is behind, the
 line sits on it, and the observations sit on top. The order of pushes into the
