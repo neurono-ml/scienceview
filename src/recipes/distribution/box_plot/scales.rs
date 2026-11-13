@@ -60,18 +60,16 @@ pub(crate) fn sv_build_scales<'labels>(
             .build()?,
     };
 
+    // A category slot is exactly one unit wide, and the slot of category `i`
+    // is centred on `i`. Half-unit bounds keep that true for a single category
+    // too, where a `0..0` domain would collapse every box to a zero-width line.
+    let category_count = grouping.categories.len().max(1) as f64;
     let (category_start, category_end) = match configuration.orientation {
-        SVBarOrientation::Vertical => {
-            let inset = plot.width / (2.0 * categories as f64);
-            (plot.x + inset, plot.right() - inset)
-        }
-        SVBarOrientation::Horizontal => {
-            let inset = plot.height / (2.0 * categories as f64);
-            (plot.bottom() - inset, plot.y + inset)
-        }
+        SVBarOrientation::Vertical => (plot.x, plot.right()),
+        SVBarOrientation::Horizontal => (plot.bottom(), plot.y),
     };
     let category = SVScaleBuilder::new(SVScaleKind::Continuous)
-        .domain(0.0, (grouping.categories.len().saturating_sub(1)) as f64)
+        .domain(-0.5, category_count - 0.5)
         .range(category_start, category_end)
         .build()?;
 

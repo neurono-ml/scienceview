@@ -162,19 +162,31 @@ fn quartiles_option_moves_the_box_edges() {
 }
 
 #[test]
-fn notch_option_narrows_the_median_band() {
+fn notch_option_draws_three_stacked_segments() {
     let data = table(&VALUES);
-    let output = plot(&data)
+    let plain = plot(&data)
+        .build()
+        .expect("completes")
+        .render()
+        .expect("draws");
+    let notched = plot(&data)
         .notch(true)
         .build()
         .expect("completes")
         .render()
         .expect("draws");
-    let summary = output.summaries().first().expect("one summary");
+    let summary = notched.summaries().first().expect("one summary");
 
     assert!(summary.notch_half_width() > 0.0);
     assert!(
         summary.notch_half_width() < (summary.upper_quartile() - summary.lower_quartile()) / 2.0
+    );
+    assert_eq!(filled_box_widths(&plain).len(), 1);
+    let widths = filled_box_widths(&notched);
+    assert_eq!(widths.len(), 3, "the notch stacks three ribbon segments");
+    assert!(
+        widths[2] < widths[0] * 0.75 && widths[2] < widths[1] * 0.75,
+        "the middle segment around the median is the narrowed one: {widths:?}"
     );
 }
 
@@ -230,20 +242,67 @@ fn series_draws_one_box_per_group() {
 }
 
 #[test]
-fn horizontal_orientation_places_the_summary_along_x() {
+fn a_constant_distribution_renders_a_flat_box_without_a_notch() {
+    let values = [5.0; 6];
+    let data = table(&values);
+    let output = plot(&data)
+        .notch(true)
+        .build()
+        .expect("completes")
+        .render()
+        .expect("draws");
+    let summary = output.summaries().first().expect("one summary");
+
+    assert_eq!(summary.notch_half_width(), 0.0);
+    assert_eq!(
+        filled_box_boxes(&output).len(),
+        1,
+        "a zero IQR draws no notch"
+    );
+    assert!(summary.lower_quartile() == summary.upper_quartile());
+}
+
+#[test]
+fn a_single_category_box_keeps_its_slot_width() {
     let data = table(&VALUES);
     let output = plot(&data)
+        .build()
+        .expect("completes")
+        .render()
+        .expect("draws");
+    let (width, height) = filled_box_extent(&output);
+    assert!(
+        (width - 0.8 * output.plot_area().width).abs() < 1e-3,
+        "one category still owns a full slot: {width}"
+    );
+    assert!(height > 0.0);
+}
+
+#[test]
+fn horizontal_orientation_places_the_summary_along_x() {
+    let data = table(&VALUES);
+    let vertical = plot(&data)
+        .build()
+        .expect("completes")
+        .render()
+        .expect("draws");
+    let horizontal = plot(&data)
         .orient(SVBarOrientation::Horizontal)
         .build()
         .expect("completes")
         .render()
         .expect("draws");
 
-    let extent = path_extent(&output);
-    assert!(
-        extent.0 > extent.1,
-        "the box and whiskers span the horizontal value axis"
-    );
+    let (vertical_width, vertical_height) = filled_box_extent(&vertical);
+    let (horizontal_width, horizontal_height) = filled_box_extent(&horizontal);
+    let plot = vertical.plot_area();
+    // The category slot is one unit wide, so the box occupies `width` of it.
+    // The quartile span (`q3 - q1` = 0.5 of the value domain) runs along the
+    // value axis: y for vertical, x for horizontal.
+    assert!((vertical_width - 0.8 * plot.width).abs() < 1e-3);
+    assert!((vertical_height - 0.5 * plot.height).abs() < 1e-3);
+    assert!((horizontal_width - 0.5 * plot.width).abs() < 1e-3);
+    assert!((horizontal_height - 0.8 * plot.height).abs() < 1e-3);
 }
 
 #[test]
@@ -258,6 +317,18 @@ fn a_missing_value_is_skipped_without_failing_the_render() {
 
     assert_eq!(output.number_of_points(), 4);
     assert_eq!(output.summaries().len(), 1);
+}
+
+#[test]
+fn an_all_missing_input_fails_with_empty_input() {
+    let values = [f64::NAN, f64::INFINITY, f64::NEG_INFINITY];
+    let data = table(&values);
+    let error = plot(&data)
+        .build()
+        .expect("completes")
+        .render()
+        .expect_err("no finite observation remains");
+    assert!(matches!(error, SVError::EmptyInput { .. }));
 }
 
 #[test]
@@ -340,21 +411,48 @@ impl SVBoxBuildResult for SVBoxPlotBuilder<'_> {
     }
 }
 
-fn path_extent(output: &super::SVBoxRenderOutput) -> (f64, f64) {
-    let mut minimum = f64::INFINITY;
-    let mut maximum = f64::NEG_INFINITY;
-    for geometry in output.geometries() {
-        for primitive in geometry.primitives() {
-            let SVMarkShape::Path(path) = primitive.shape() else {
-                continue;
-            };
-            for command in path.commands() {
+/// The bounding boxes of the filled paths, in draw order.
+fn filled_box_boxes(output: &super::SVBoxRenderOutput) -> Vec<(f64, f64, f64, f64)> {
+    output
+        .geometries()
+        .iter()
+        .flat_map(|geometry| geometry.primitives())
+        .filter(|primitive| primitive.paint().fill().is_some())
+        .filter_map(|primitive| match primitive.shape() {
+            SVMarkShape::Path(path) => Some(path.commands()),
+            _ => None,
+        })
+        .map(|commands| {
+            let mut minimum_x = f64::INFINITY;
+            let mut minimum_y = f64::INFINITY;
+            let mut maximum_x = f64::NEG_INFINITY;
+            let mut maximum_y = f64::NEG_INFINITY;
+            for command in commands {
                 if let SVPathCommand::MoveTo(point) | SVPathCommand::LineTo(point) = command {
-                    minimum = minimum.min(point.x());
-                    maximum = maximum.max(point.x());
+                    minimum_x = minimum_x.min(point.x());
+                    minimum_y = minimum_y.min(point.y());
+                    maximum_x = maximum_x.max(point.x());
+                    maximum_y = maximum_y.max(point.y());
                 }
             }
-        }
-    }
-    (maximum - minimum, output.plot_area().height)
+            (minimum_x, minimum_y, maximum_x, maximum_y)
+        })
+        .collect()
+}
+
+/// The width and height of the first filled box body.
+fn filled_box_extent(output: &super::SVBoxRenderOutput) -> (f64, f64) {
+    let (minimum_x, minimum_y, maximum_x, maximum_y) = filled_box_boxes(output)
+        .first()
+        .copied()
+        .expect("the box body is a filled path");
+    (maximum_x - minimum_x, maximum_y - minimum_y)
+}
+
+/// The horizontal extent of every filled box segment.
+fn filled_box_widths(output: &super::SVBoxRenderOutput) -> Vec<f64> {
+    filled_box_boxes(output)
+        .into_iter()
+        .map(|(minimum_x, _, maximum_x, _)| maximum_x - minimum_x)
+        .collect()
 }
