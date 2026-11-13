@@ -16,6 +16,13 @@ The chart is exactly the composition
 implementation reveals a missing variant, that is a change to the core
 capability first (patterns.md P5).
 
+The closed stat vocabulary has no bivariate density variant. The two-dimensional
+step is therefore realised by composing the existing `SVStat::Bin` kernel on
+each axis and folding the observation pairs into the joint grid; `bandwidth`
+and `bw_adjust` request an optional Gaussian smoothing pass over that grid. This
+is a composition of existing kernels, not a second stat implementation, and the
+FDR records the difference from the conceptual `KernelDensity (2D)` label.
+
 ### D2 — Data contract
 
 The chart consumes `x`, `y`, `series`, `weight`. Dense,
