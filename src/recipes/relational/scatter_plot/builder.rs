@@ -148,10 +148,10 @@ fn sv_validate_jitter(jitter: Option<&SVMove>) -> Result<(), SVError> {
     let Some(jitter) = jitter else {
         return Ok(());
     };
-    if !matches!(jitter, SVMove::Jitter(_)) {
+    if !matches!(jitter, SVMove::Jitter(_) | SVMove::Dodge(_)) {
         return Err(SVError::InvalidConfiguration {
             message:
-                "a scatter applies only the jitter move; other moves belong to their own recipe"
+                "a scatter applies only the displacement moves Jitter and Dodge; other moves belong to their own recipe"
                     .to_string(),
         });
     }

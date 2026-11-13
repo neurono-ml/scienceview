@@ -98,7 +98,7 @@ impl<'data> SVScatterPlotBuilder<'data> {
         self
     }
 
-    /// Applies a positional move before the scales; the scatter supports jitter.
+    /// Applies a displacement move before the scales; the scatter supports jitter and dodge.
     #[must_use]
     pub fn jitter(mut self, jitter: SVMove) -> Self {
         self.jitter = Some(jitter);

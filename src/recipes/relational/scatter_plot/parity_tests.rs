@@ -204,3 +204,19 @@ fn jitter_rejects_a_sparse_column_instead_of_densifying_it() {
         }
     ));
 }
+
+#[test]
+fn a_dodge_move_is_accepted_as_the_displacement() {
+    let source = sv_dense_source();
+    let scene = SVScatterPlot::builder()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .jitter(crate::sv_move::SVMove::dodge().into())
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("dodge is a documented displacement move")
+        .render()
+        .expect("the dodged scatter renders");
+    assert_eq!(scene.number_of_marks(), HORIZONTAL.len());
+}
