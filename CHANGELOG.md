@@ -12,6 +12,24 @@ released.
 
 ### Added
 
+- The distribution recipe `SVDensityPlot`
+  (`scienceview::sv_recipes::sv_distribution::sv_density_plot`): a smoothed
+  estimate of one continuous variable, composed exactly as
+  `data -> [SVStat::KernelDensity] -> (grid, density) -> [no move] -> [SVScale]
+  -> SVMark::Line | SVMark::Area`. The configuration surface follows FDR-112 —
+  `value`, `series`, `bandwidth`, `bandwidth_adjustment`, `kernel`, `grid_count`, `cut`,
+  `fill`, `normalise`, `line_width` — and the builder requires an explicit
+  backend selection. The estimate is never reimplemented:
+  `SVStat::KernelDensity` supplies the grid, the density and the Silverman
+  bandwidth for the Gaussian, Epanechnikov and uniform kernels. The recipe
+  scales the bandwidth linearly with `bandwidth_adjustment`, groups observations by
+  `series` into one curve per group with a palette colour, drops non-finite
+  observations by policy, and places `SVMark::Line` plus an optional
+  `SVMark::Area` fill over one axes pair. Dense, sparse and streaming input
+  agree within tolerance; a sparse value column is read through its stored
+  support without materialising implicit zeros, and grouping a sparse column is
+  rejected with the documented alternative rather than densified. The new
+  example `examples/density_plot.rs` generates `docs/figures/density_plot.svg`.
 - The distributional recipe `SVHistogramPlot` in
   `scienceview::sv_recipes::sv_distribution::sv_histogram_plot`: a continuous
   variable binned and drawn as bars, composed exactly as
