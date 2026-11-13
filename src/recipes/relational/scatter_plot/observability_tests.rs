@@ -3,8 +3,12 @@
 use super::SVScatterPlot;
 use super::test_support::{sv_dense_source, sv_streaming_source};
 use crate::sv_backend::SVBackendKind;
-use crate::sv_data::SVRepresentation;
+use crate::sv_data::{
+    SVColumnSnapshot, SVColumnView, SVDataSource, SVRepresentation, SVSourceSchema,
+};
+use crate::sv_error::SVError;
 use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use tracing::field::{Field, Visit};
 use tracing::{Id, Subscriber};
@@ -161,4 +165,79 @@ fn the_compose_span_reports_the_dense_representation_and_the_configured_kind() {
         .expect("a compose span was recorded");
     assert_eq!(span["backend.kind"], "svg");
     assert_eq!(span["representation"], SVRepresentation::Dense.to_string());
+}
+
+/// A source whose window shrinks after `build` probed it once.
+///
+/// `build` resolves both required columns (two calls) to validate the figure;
+/// the next operation must resolve them again and report what it actually drew,
+/// not the count the build carried.
+struct SVShrinkingSource {
+    calls: AtomicUsize,
+}
+
+impl SVShrinkingSource {
+    fn new() -> Self {
+        Self {
+            calls: AtomicUsize::new(0),
+        }
+    }
+
+    fn length(&self) -> usize {
+        let call = self.calls.fetch_add(1, Ordering::SeqCst);
+        if call < 2 { 5 } else { 3 }
+    }
+}
+
+impl SVDataSource for SVShrinkingSource {
+    fn schema(&self) -> SVSourceSchema<'_> {
+        unreachable!("the scatter recipe resolves columns by name")
+    }
+
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
+        const HORIZONTAL: [f64; 5] = [0.0, 1.0, 2.0, 3.0, 4.0];
+        let length = self.length();
+        match name {
+            "x" => Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(
+                &HORIZONTAL[..length],
+            ))),
+            "y" => Ok(SVColumnSnapshot::Borrowed(SVColumnView::Dense(
+                &HORIZONTAL[..length],
+            ))),
+            _ => Err(SVError::ColumnNotFound {
+                name: name.to_string(),
+            }),
+        }
+    }
+}
+
+#[test]
+fn the_span_reports_the_points_the_current_operation_drew() {
+    let _guard = sv_span_test_guard();
+    let recorder = SVSpanRecorder::default();
+    let subscriber = Registry::default().with(recorder.clone());
+    let source = SVShrinkingSource::new();
+    let plot = SVScatterPlot::builder()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    assert_eq!(plot.point_count(), 5, "build probed the wide window");
+
+    let scene = tracing::subscriber::with_default(subscriber, || {
+        plot.compose().expect("the shrunken window composes")
+    });
+
+    assert_eq!(scene.number_of_marks(), 3);
+    let spans = recorder.captured();
+    let span = spans
+        .iter()
+        .find(|span| span.get("operation").map(String::as_str) == Some("compose"))
+        .expect("a compose span was recorded");
+    assert_eq!(
+        span["points"], "3",
+        "the span reports the resolved columns, not the build-time count"
+    );
 }
