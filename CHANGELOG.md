@@ -13,6 +13,25 @@ released.
 ### Added
 
 - The matrix recipe `SVDensityHeatmapPlot` (`scienceview::sv_recipes::sv_matrix`):
+  the two-dimensional density of two continuous variables drawn as a raster of
+  coloured cells. The chart is the composition of FDR-133 —
+  `data -> [SVStat::Bin (2D)] -> (grid, counts) -> [SVScale::Continuous over a colour map] -> SVMark::Image` —
+  and its configuration surface is `x`, `y`, `series`, `weight`, `bin_count_x`,
+  `bin_count_y`, `normalise`, `colour_map`, `colour_bar`, `opacity`,
+  `empty_bin_policy`, the titles and the viewport, with `backend(...)` required
+  and `execution_mode` defaulting to `Automatic`. Both edge vectors come from
+  `SVStat::Bin` per axis and the per-cell fold from `SVStat::Aggregate` (`Sum`)
+  over derived row-major cell codes; the recipe adds no kernel variant.
+  `SVNormalisation` normalises the cells (`Count`, `Probability`, `Density`) and
+  `SVEmptyBinPolicy` paints an empty bin with the map's lowest value or omits
+  it. A sparse column is walked through its stored entries plus the implicit-zero
+  run and is never densified; a streaming column is read from its current window
+  and never blocks. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/density_heatmap_plot.rs` writes
+  `docs/figures/density_heatmap_plot.svg`.
 
 - The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
   the point estimate of every category with its uncertainty, optionally joined
