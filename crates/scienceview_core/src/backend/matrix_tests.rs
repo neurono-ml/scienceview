@@ -20,18 +20,28 @@ fn every_kind_has_a_matrix_row() {
 
 #[test]
 fn export_only_backends_are_export_only() {
-    for backend_kind in [SVBackendKind::Svg, SVBackendKind::Html] {
-        let capabilities = sv_backend_capabilities(backend_kind);
+    let capabilities = sv_backend_capabilities(SVBackendKind::Svg);
 
-        assert!(capabilities.export, "`{backend_kind}` exports");
-        assert!(!capabilities.events, "`{backend_kind}` has no events");
-        assert!(!capabilities.scripting, "`{backend_kind}` has no scripting");
-        assert!(!capabilities.streaming, "`{backend_kind}` has no streaming");
-        assert!(
-            !capabilities.in_place_update,
-            "`{backend_kind}` cannot update in place"
-        );
-    }
+    assert!(capabilities.export, "`Svg` exports");
+    assert!(!capabilities.events, "`Svg` has no events");
+    assert!(!capabilities.scripting, "`Svg` has no scripting");
+    assert!(!capabilities.streaming, "`Svg` has no streaming");
+    assert!(
+        !capabilities.in_place_update,
+        "`Svg` cannot update in place"
+    );
+}
+
+#[test]
+fn the_html_row_declares_a_live_document() {
+    let capabilities = sv_backend_capabilities(SVBackendKind::Html);
+
+    assert!(capabilities.export, "`Html` exports a page");
+    assert!(capabilities.events, "`Html` delivers gesture actions");
+    assert!(capabilities.streaming, "`Html` accepts a snapshot");
+    assert!(capabilities.in_place_update, "`Html` updates in place");
+    assert!(!capabilities.scripting, "`Html` hosts no script engine");
+    assert!(!capabilities.presentation, "`Html` presents no window");
 }
 
 #[test]
@@ -71,11 +81,11 @@ fn a_streaming_figure_is_rejected_by_an_export_only_backend() {
 }
 
 #[test]
-fn scripting_is_rejected_by_an_export_only_backend() {
+fn scripting_is_rejected_by_a_document_backend_without_scripting() {
     let requirements = SVBackendRequirements::default().requiring_scripting();
 
     let error = sv_verify_backend_requirements(SVBackendKind::Html, requirements)
-        .expect_err("an export-only backend cannot host a script engine");
+        .expect_err("a document backend cannot host a script engine");
 
     assert_eq!(
         error,
