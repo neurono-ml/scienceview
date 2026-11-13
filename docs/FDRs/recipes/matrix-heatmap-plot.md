@@ -5,11 +5,11 @@
 | Id | FDR-131 |
 | Name | `SVHeatmapPlot` |
 | Family | Matrix and field |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 35](../../src/development-explained/ch35-heatmap-plot.md) |
+| Example program | [`examples/heatmap_plot.rs`](../../../examples/heatmap_plot.rs) |
 
 ## Purpose
 
@@ -113,12 +113,12 @@ bottom and new columns at the right.
 
 ## Acceptance
 
-- [ ] Every cell's colour is the colour map's colour for its value.
-- [ ] The colour bar spans the value domain and matches the cells.
-- [ ] A sparse matrix draws only the occupied cells and is never densified.
-- [ ] Dense, sparse and streaming inputs give the same matrix.
-- [ ] The annotation text, when enabled, matches the requested format.
-- [ ] Missing values are rendered according to the configured rule.
+- [x] Every cell's colour is the colour map's colour for its value. (`heatmap_plot_tests::every_cell_takes_the_colour_map_colour_of_its_value`)
+- [x] The colour bar spans the value domain and matches the cells. (the cells and the `SVColourBar` share one `SVContinuousColourScale`; `heatmap_plot_tests::the_colour_bar_can_be_switched_off`)
+- [x] A sparse matrix draws only the occupied cells and is never densified. (`parity_tests::a_sparse_input_is_never_densified`)
+- [x] Dense, sparse and streaming inputs give the same matrix. (`parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_scene`)
+- [x] The annotation text, when enabled, matches the requested format. (`heatmap_plot_tests::annotations_use_the_requested_format`)
+- [x] Missing values are rendered according to the configured rule. (`heatmap_plot_tests::the_missing_cell_rule_decides_what_is_drawn`)
 
 ## Open questions
 
