@@ -118,16 +118,36 @@ and drawing one legend entry when more than one group exists.
 
 #### Scenario: Transition: new sample
 - **WHEN** a new sample arrives
-- **THEN** the step extends to it without recomputing the configuration
+- **THEN** the operation re-resolves the source, the step extends to the new
+  sample and the prior samples are preserved; this change recomposes the
+  current window and does not ship an incremental append buffer
 
 ### Requirement: The chart renders through its declared backend
 
-`SVStepPlot` SHALL render through the real SVG backend in this change, and SHALL fail at build time with an explicit error for a backend that does not yet have a recipe-aware serializer.
+`SVStepPlot` SHALL compose a backend-neutral scene on every operation and
+SHALL dispatch the serializer from the configured `SVBackendKind`. This change
+ships the real SVG serializer; a kind whose serializer does not exist yet
+SHALL make the operation fail with `SVError::BackendUnavailable` naming the
+configured kind, never degrade silently to SVG.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
 - **THEN** the figure is self-contained, contains a polyline path and is deterministic
 
 #### Scenario: Unsupported backend
-- **WHEN** a backend without a recipe-aware serializer is selected
-- **THEN** the build fails explicitly and names the configured backend
+- **WHEN** a backend without a recipe-aware serializer is selected and an
+  operation runs
+- **THEN** the operation fails with `SVError::BackendUnavailable` naming the
+  configured backend, and the scene is never serialized as SVG
+
+### Requirement: The operation span counts drawn observations
+
+`SVStepPlot` SHALL record one operation span per `render`, `update` or `save`
+carrying the configured backend kind, the combined representation and the
+number of observations the composed scene actually draws, not the logical
+column length.
+
+#### Scenario: Sparse logical length
+- **WHEN** a sparse column has a large logical length and only two stored
+  samples survive the data contract
+- **THEN** the operation span reports two drawn points
