@@ -54,9 +54,11 @@
   figures check.
 - [x] Open the ADR issue (#147) and reference it from both PRs with a closing
   keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/recipes/matrix-image-plot.md` before opening the code PR.
-  Deferred to the integration owner's review agent.
+  Performed by the review agent: the README example, the changelog deferral and
+  the encoded-image spec wording were corrected on the documentation and code
+  branches.
 
 ## Implementation notes
 
