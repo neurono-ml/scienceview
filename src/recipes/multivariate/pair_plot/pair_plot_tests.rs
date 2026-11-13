@@ -195,6 +195,70 @@ fn the_missing_value_policy_can_reject() {
 }
 
 #[test]
+fn a_missing_hue_stays_aligned_with_its_observation() {
+    const FIRST_WITH_MISSING_HUE: [f64; 9] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    const SECOND_WITH_MISSING_HUE: [f64; 9] = [1.0, 4.0, 2.0, 5.0, 3.0, 6.0, 2.5, 7.5, 4.5];
+    const HUE_WITH_MISSING: [f64; 9] = [0.0, f64::NAN, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0];
+    const FIRST_WITHOUT_THE_ROW: [f64; 8] = [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    const SECOND_WITHOUT_THE_ROW: [f64; 8] = [1.0, 2.0, 5.0, 3.0, 6.0, 2.5, 7.5, 4.5];
+    const HUE_WITHOUT_THE_ROW: [f64; 8] = [0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0];
+
+    let with_missing = crate::sv_data::SVDataTableBuilder::new()
+        .with_column(
+            "first",
+            crate::sv_data::SVColumnRole::X,
+            &FIRST_WITH_MISSING_HUE,
+        )
+        .with_column(
+            "second",
+            crate::sv_data::SVColumnRole::Y,
+            &SECOND_WITH_MISSING_HUE,
+        )
+        .with_column(
+            "species",
+            crate::sv_data::SVColumnRole::Grouping,
+            &HUE_WITH_MISSING,
+        )
+        .build()
+        .expect("the table is well formed");
+    let without_the_row = crate::sv_data::SVDataTableBuilder::new()
+        .with_column(
+            "first",
+            crate::sv_data::SVColumnRole::X,
+            &FIRST_WITHOUT_THE_ROW,
+        )
+        .with_column(
+            "second",
+            crate::sv_data::SVColumnRole::Y,
+            &SECOND_WITHOUT_THE_ROW,
+        )
+        .with_column(
+            "species",
+            crate::sv_data::SVColumnRole::Grouping,
+            &HUE_WITHOUT_THE_ROW,
+        )
+        .build()
+        .expect("the table is well formed");
+
+    let build = |source: &dyn crate::sv_data::SVDataSource| {
+        SVPairPlot::builder()
+            .data_source(source)
+            .variables(&["first", "second"])
+            .hue("species")
+            .backend(SVBackendKind::Svg)
+            .build()
+            .expect("the configuration is complete")
+            .compose()
+            .expect("the grid composes")
+    };
+    assert_eq!(
+        sv_scene_to_svg(&build(&with_missing)),
+        sv_scene_to_svg(&build(&without_the_row)),
+        "omitting a missing hue drops exactly that observation"
+    );
+}
+
+#[test]
 fn the_jitter_option_displaces_the_scatter_cells() {
     let source = sv_dense_source();
     let still = SVPairPlot::builder()

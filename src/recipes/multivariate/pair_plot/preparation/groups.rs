@@ -43,6 +43,11 @@ pub(crate) fn sv_hue_groups(
         let value = sv_value_at(view, index)?;
         if !value.is_finite() {
             sv_report_missing(configuration.missing_value_policy, hue, index)?;
+            // The index vector is positional: keep one slot per logical
+            // observation so a missing hue never shifts the group of the rows
+            // that follow it. The readers skip this row because its hue is not
+            // finite.
+            indices.push(usize::MAX);
             continue;
         }
         let group_index = match groups.iter().position(|group| group.value == value) {
