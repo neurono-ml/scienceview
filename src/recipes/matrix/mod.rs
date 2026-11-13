@@ -10,6 +10,12 @@
 pub mod sv_contour_plot;
 pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};
 
+#[path = "density_heatmap_plot/mod.rs"]
+pub mod sv_density_heatmap_plot;
+pub use sv_density_heatmap_plot::{
+    SVDensityHeatmapComposition, SVDensityHeatmapPlot, SVDensityHeatmapPlotBuilder,
+};
+
 #[path = "heatmap_plot/mod.rs"]
 pub mod sv_heatmap_plot;
 pub use sv_heatmap_plot::{
