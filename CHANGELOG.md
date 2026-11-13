@@ -12,8 +12,9 @@ released.
 
 ### Added
 
-- The band plot recipe `SVBandPlot` in `scienceview::recipes::relational`: the
-  filled region between two boundary lines, composed exactly as
+- The band plot recipe `SVBandPlot` in
+  `scienceview::sv_recipes::sv_relational::sv_band_plot`: the filled region
+  between two boundary lines, composed exactly as
   `data -> [SVStat::Aggregate + error] -> (lower, upper) -> [SVScale] ->
   SVMark::Ribbon`. The builder requires an explicit backend, defaults
   `execution_mode` to `Automatic`, and accepts either explicit `lower`/`upper`
@@ -21,12 +22,19 @@ released.
   `SVAggregateErrorKind` (standard deviation by default, or a centred
   percentile interval selected with `confidence`). One optional `series`
   column draws one band per series. Fill opacity, an optional dashed or solid
-  border, an optional centre line and an explicit `SVBandMissingValuePolicy`
-  (omit and split the band at a gap, or fail at build time) are part of the
-  surface. Dense, sparse and streaming input resolve once per operation,
-  sparse storage is never densified by the mark kernel and a streaming window
-  renders without blocking and reports `is_approximate`. The example
-  `examples/band_plot.rs` writes `docs/figures/band_plot.svg`.
+  border, an optional centre line, titles and an explicit
+  `SVBandMissingValuePolicy` (omit and split the band at a gap, or reject the
+  render) are part of the surface. The x scale and the columns are validated
+  at `build`, so a nominal/boolean axis or a missing/wrong-role column fails
+  there rather than at `render`. Dense, sparse and streaming input resolve once
+  per operation; a sparse column contributes only its stored entries (a huge
+  logical length with a few stored values draws a few points) and a streaming
+  window renders without blocking and reports `is_approximate`. The composed
+  geometry serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error
+  instead of being ignored. Transition and animation behaviour is deferred to
+  the transition integration. The example `examples/band_plot.rs` calls the
+  public `to_svg()` and writes `docs/figures/band_plot.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
