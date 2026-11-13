@@ -124,8 +124,10 @@ chosen by `diagonal_kind`:
 - **Histogram** asks `SVStat::Bin` for edges and counts and draws one
   `SVMark::Bar` per occupied bin, again per hue group.
 
-Both forms use the same hue palette as the off-diagonal cells, so a colour means
-the same category everywhere in the matrix.
+Both forms use the same hue palette as the scatter cells, so a colour means the
+same category across the diagonal and the scatter cells. The hexbin and
+binned-contour forms encode observation density instead; their cells are painted
+through a continuous colour scale, not the hue palette.
 
 ## The off-diagonal forms
 
@@ -137,25 +139,33 @@ points into geometry.
 gets one paint. The points are placed through the two shared scales; the marker
 shape and opacity are configuration, not a new mark.
 
-**Hexbin** owns a hexagonal lattice. The lattice is chart geometry, exactly as
-the hexbin recipe documents: a pointy-top hexagon of radius *r* tiles the plane
-with horizontal spacing `sqrt(3) * r` and vertical spacing `1.5 * r`; each point
-is rounded to the nearest cell in cube coordinates. Every occupied cell becomes
-one filled path, coloured by its count through a continuous colour scale.
+**Hexbin** owns a hexagonal lattice. The lattice is chart-owned geometry: a
+pointy-top hexagon of radius *r* tiles the plane with horizontal spacing
+`sqrt(3) * r` and vertical spacing `1.5 * r`; each point is rounded to the
+nearest cell in cube coordinates. Every occupied cell becomes one filled path,
+coloured by its count through a continuous colour scale. The geometry mirrors
+what `SVHexbinPlot` (FDR-135) owns; `SVHexbinPlot` composes its own figure, so a
+pair cell cannot delegate to it without either losing the shared per-variable
+domain or widening that recipe's public surface. ADR #182 records this as a
+trade-off, and the two lattices must be kept in step.
 
 **DensityContour** has no bivariate density variant in the closed stat
-vocabulary, so it follows the density-contour recipe: `SVStat::Bin` derives the
-horizontal and vertical edges, every observation pair is folded into the joint
-grid, and a marching-squares pass turns the threshold crossing into line
-segments. The occupied cells are filled with the same colour scale, which makes
-the contour readable before the eye follows the line.
+vocabulary, so it derives the horizontal and vertical edges with `SVStat::Bin`,
+folds every observation pair into the joint grid, fills the occupied cells
+through a continuous colour scale, and runs a chart-owned marching-squares pass
+over the threshold crossing. This is a **binned** contour, not a kernel-density
+contour: it is a different estimator from `SVDensityContourPlot`, which smooths
+the field with a two-dimensional kernel-density grid. The distinction is
+deliberate and recorded in ADR #182.
 
 ## Grouping and missing values
 
 When `hue` is present, the hue column is resolved once into groups in first
 appearance order. The group index follows each observation into every cell and
 into the diagonal, so the same category keeps its colour across the matrix. The
-legend is built from the same group list.
+index vector is positional: a missing hue keeps its slot, so one absent value
+never shifts the category of the observations after it. The legend is built from
+the same group list.
 
 A non-finite observation is a missing value, not a zero. `Omit` drops it from
 every cell that would read it; `Error` rejects the operation with
