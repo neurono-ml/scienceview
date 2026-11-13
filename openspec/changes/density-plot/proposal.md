@@ -13,7 +13,7 @@ implementation exists for `SVDensityPlot`.
 - Implement `SVDensityPlot` as a recipe composed of the core kernels, following the
   contract in `docs/FDRs/patterns.md`:
   `data -> [SVStat::KernelDensity] -> (grid, density) -> [no move] -> [SVScale] -> SVMark::Line | SVMark::Area`
-- Expose the configuration surface recorded in the FDR: `value` (—); `series` (None); `bandwidth` (None — rule of thumb); `bw_adjust` (1.0); `kernel` (Gaussian); `grid_count` (256); `cut` (3.0).
+- Expose the configuration surface recorded in the FDR: `value` (—); `series` (None); `bandwidth` (None — rule of thumb); `bandwidth_adjustment` (1.0); `kernel` (Gaussian); `grid_count` (256); `cut` (3.0).
 - Ship the eight tasks of P10: module and builder, parity and concurrency
   tests, example program, generated figure, book chapter, FDR status,
   CHANGELOG entry and independent acceptance review.
