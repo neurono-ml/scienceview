@@ -5,11 +5,11 @@
 | Id | FDR-117 |
 | Name | `SVViolinPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 28 — Violin plots](https://neurono-ml.github.io/scienceview/development-explained/ch28-violin-plot.html) |
+| Example program | [`examples/violin_plot.rs`](../../../examples/violin_plot.rs) |
 
 ## Purpose
 
@@ -104,16 +104,29 @@ Consumes `mark.palette`, `mark.area_opacity`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The silhouette matches the density estimate for the chosen bandwidth.
-- [ ] The scale mode is honoured: equal area, proportional to count, or equal
-      width.
-- [ ] The violin is symmetric about the category centre.
-- [ ] Dense, sparse and streaming inputs give the same silhouette for the
-      same data.
-- [ ] The optional inner box and points do not change the silhouette.
+- [x] The silhouette matches the density estimate for the chosen bandwidth
+      (`violin_plot_tests::default_estimate_matches_the_kernel_density`,
+      `bandwidth_option_changes_the_silhouette`,
+      `bandwidth_adjustment_scales_the_derived_bandwidth`).
+- [x] The scale mode is honoured: equal area, proportional to count, or equal
+      width (`width_option_scales_the_maximum_half_width`,
+      `width_scale_mode_makes_every_violin_the_same_width`,
+      `count_scale_mode_grows_the_area_with_the_sample_count`).
+- [x] The violin is symmetric about the category centre
+      (`vertical_violin_is_symmetric_about_the_category_centre`).
+- [x] Dense, sparse and streaming inputs give the same silhouette for the
+      same data (`violin_plot_parity_tests::dense_sparse_and_streaming_agree`);
+      the sparse support is never densified and a streaming window reports
+      `is_approximate`.
+- [x] The optional inner box and points do not change the silhouette
+      (`inner_box_and_points_add_geometry_without_moving_the_silhouette`).
+- [x] The split mode places two series in the two halves of one category
+      (`split_series_share_a_category_and_opposite_halves`).
+- [x] Both orientations render (`horizontal_orientation_swaps_the_value_axis`).
 
 ## Open questions
 
 - Should the violin support "split" mode, where two series share one
-      category and are drawn against each other? *Open — plotly supports it;
-      it is a variant of the dodge move.*
+      category and are drawn against each other? *Resolved: `split(true)` draws
+      at most two series on opposite sides of the category centre; three or
+      more series are rejected in favour of the dodge layout.*
