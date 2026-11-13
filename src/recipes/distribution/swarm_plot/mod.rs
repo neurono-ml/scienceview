@@ -60,6 +60,9 @@ pub use render_output::{SVSwarmFrame, SVSwarmRenderOutput};
 pub use scene::SVSwarmScene;
 
 #[cfg(test)]
+#[path = "error_tests.rs"]
+mod error_tests;
+#[cfg(test)]
 #[path = "large_swarm_tests.rs"]
 mod large_swarm_tests;
 #[cfg(test)]
@@ -69,8 +72,14 @@ mod option_tests;
 #[path = "orientation_tests.rs"]
 mod orientation_tests;
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "render_tests.rs"]
 mod render_tests;
+#[cfg(test)]
+#[path = "streaming_tests.rs"]
+mod streaming_tests;
 #[cfg(test)]
 #[path = "swarm_plot_tests.rs"]
 mod swarm_plot_tests;

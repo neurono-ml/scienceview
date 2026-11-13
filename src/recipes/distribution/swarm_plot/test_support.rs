@@ -7,6 +7,7 @@ use super::{SVSwarmPlot, SVSwarmPlotBuilder, SVSwarmRenderOutput, SVSwarmScene};
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
+    SVSparseView, SVStreamingView,
 };
 use crate::sv_decoration::SVDecorationPrimitive;
 use crate::sv_error::SVError;
@@ -15,6 +16,8 @@ use crate::sv_mark::SVMarkShape;
 pub(crate) const CATEGORY: [f64; 10] = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 pub(crate) const VALUES: [f64; 10] = [1.0, 2.0, 3.0, 4.0, 5.0, 1.5, 2.5, 3.5, 4.5, 5.5];
 pub(crate) const SERIES: [f64; 10] = [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0];
+
+const INDICES: [usize; 10] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 pub(crate) struct SVTestSource<'values> {
     pub(crate) columns: Vec<(&'values str, SVColumnRole, SVColumnView<'values>)>,
@@ -59,6 +62,46 @@ pub(crate) fn dense_source<'values>() -> SVTestSource<'values> {
             "series",
             SVColumnRole::Grouping,
             SVColumnView::Dense(&SERIES),
+        ),
+    ])
+}
+
+pub(crate) fn sparse_source<'values>() -> SVTestSource<'values> {
+    let values = SVSparseView::new(&INDICES, &VALUES, VALUES.len()).expect("valid sparse storage");
+    let categories =
+        SVSparseView::new(&INDICES, &CATEGORY, CATEGORY.len()).expect("valid sparse storage");
+    let series = SVSparseView::new(&INDICES, &SERIES, SERIES.len()).expect("valid sparse storage");
+    SVTestSource::new(vec![
+        ("value", SVColumnRole::Y, SVColumnView::Sparse(values)),
+        (
+            "category",
+            SVColumnRole::Grouping,
+            SVColumnView::Sparse(categories),
+        ),
+        (
+            "series",
+            SVColumnRole::Grouping,
+            SVColumnView::Sparse(series),
+        ),
+    ])
+}
+
+pub(crate) fn streaming_source<'values>() -> SVTestSource<'values> {
+    SVTestSource::new(vec![
+        (
+            "value",
+            SVColumnRole::Y,
+            SVColumnView::Streaming(SVStreamingView::new(&VALUES, 10, 0)),
+        ),
+        (
+            "category",
+            SVColumnRole::Grouping,
+            SVColumnView::Streaming(SVStreamingView::new(&CATEGORY, 10, 0)),
+        ),
+        (
+            "series",
+            SVColumnRole::Grouping,
+            SVColumnView::Streaming(SVStreamingView::new(&SERIES, 10, 0)),
         ),
     ])
 }
@@ -123,4 +166,12 @@ pub(crate) fn scene_text(scene: &SVSwarmScene) -> String {
         })
         .collect::<Vec<_>>()
         .join(" ")
+}
+
+pub(crate) fn assert_close(first: &[(f64, f64)], second: &[(f64, f64)]) {
+    assert_eq!(first.len(), second.len(), "the same number of dots");
+    for (left, right) in first.iter().zip(second) {
+        assert!((left.0 - right.0).abs() < 1e-9, "x agrees");
+        assert!((left.1 - right.1).abs() < 1e-9, "y agrees");
+    }
 }
