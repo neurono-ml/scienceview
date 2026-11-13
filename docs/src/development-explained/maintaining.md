@@ -161,3 +161,11 @@ the embedded payload keeps the Rust model the authority, how an update replaces
 only the payload element, how gestures become actions and view deltas, and how
 the golden, determinism, concurrency, 10k-point and observability tests make
 those claims executable.
+Chapter 52 covers the Python binding (`scienceview_python`): why a binding is a
+translation of a validated surface, how the pure conversion layer keeps the
+semantics testable without a Python interpreter, how the optional `pyo3`
+extension stays thin, how explicit backend selection, the three data
+representations, streaming `update`, dashboards and controls reach Python, and
+how `SVError` variants become typed exceptions. It also states the limitation:
+recipes are bound one adapter at a time, and `plot_kinds()` names exactly the
+bound set.

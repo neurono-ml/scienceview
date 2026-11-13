@@ -56,4 +56,5 @@
 - [Chapter 49 — Controls: the figure listens without a user-interface toolkit](development-explained/ch49-ui-kit-controls.md)
 - [Chapter 50 — Dashboards: many figures that behave as one](development-explained/ch50-dashboard-composition.md)
 - [Chapter 51 — Scripts: behaviour edited while the program runs](development-explained/ch51-scripting-engines.md)
+- [Chapter 52 — Python: binding a surface that is already proven](development-explained/ch52-python-bindings.md)
 - [Maintaining this book](development-explained/maintaining.md)
