@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVHistogramPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVHistogramPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. Weighted binning itself is deferred: the shipped bin kernel does not consume weights, so a configured `weight` SHALL fail with an explicit configuration error naming that gap.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
@@ -29,6 +29,10 @@
 #### Scenario: Missing column
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
+
+#### Scenario: Configured weight
+- **WHEN** a `weight` column is configured
+- **THEN** the build fails with an explicit configuration error naming the bin-kernel gap
 
 ### Requirement: Representations are equivalent
 
