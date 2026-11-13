@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVBarPlot` SHALL consume `category`, `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVBarPlot` SHALL consume `category`, `value`, `series`, `weight`, with the roles and types recorded in its FDR — including the optional `weight` column, accepted only by the `Mean` and `Sum` estimators — and SHALL reject a configuration whose columns are missing or of the wrong kind.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
@@ -29,6 +29,38 @@
 #### Scenario: Missing column
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
+
+### Requirement: The series are arranged and the categories ordered
+
+`SVBarPlot` SHALL arrange several series inside a category through
+`SVMove::Dodge` or `SVMove::Stack`, and SHALL order the categories as-is, by
+ascending total aggregate value or by descending total aggregate value.
+
+#### Scenario: Series are dodged
+- **WHEN** a series column is supplied with the default arrangement
+- **THEN** each series occupies its own slice of the category slot with the offsets and widths the dodge returns
+
+#### Scenario: Series are stacked
+- **WHEN** the arrangement is `Stack`
+- **THEN** each series grows from the top of the preceding one and the width is the full configured slot width
+
+#### Scenario: Sorted categories
+- **WHEN** the ordering is ascending or descending
+- **THEN** the categorical axis lists the categories by their total aggregate value and ties keep the data order
+
+### Requirement: Missing observations follow a declared policy
+
+`SVBarPlot` SHALL apply `SVBarMissingValuePolicy` to every non-finite value,
+category, series code or weight: `Omit` drops it and counts the remaining
+observations, `Error` rejects the operation naming the position.
+
+#### Scenario: Omit drops the observation
+- **WHEN** a non-finite value is present and the policy is `Omit`
+- **THEN** the bar is aggregated from the finite observations only
+
+#### Scenario: Error reports the position
+- **WHEN** a non-finite value is present and the policy is `Error`
+- **THEN** the render fails with a non-finite-value error naming the position
 
 ### Requirement: Representations are equivalent
 
@@ -46,17 +78,20 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The geometry is transition-ready
 
-`SVBarPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVBarPlot` SHALL produce backend-agnostic geometry whose bar height, error-bar
+extent and colour carry the properties the transition kernel interpolates. This
+change ships no animation driver: the driver and the slide-into-stacked-position
+behaviour belong to the transition integration change and are not claimed here.
 
-#### Scenario: Transition: bar height
-- **WHEN** the state changes and bar height is affected
-- **THEN** interpolates
+#### Scenario: Transition-ready bar height
+- **WHEN** the same figure is rendered for two states
+- **THEN** the bar geometry exposes the height as an interpolable value
 
-#### Scenario: Transition: colour
-- **WHEN** the state changes and colour is affected
-- **THEN** interpolates
+#### Scenario: Transition-ready colour
+- **WHEN** the same figure is rendered for two states
+- **THEN** the bar paint exposes the colour as an interpolable value
 
 ### Requirement: The chart renders on every declared backend
 

@@ -3,7 +3,7 @@
 ## Context
 
 `SVStripPlot` is one of the scientific-core recipes specified in
-`docs/FDRs/distribution-strip-plot.md`. This change implements exactly that record on top of
+`docs/FDRs/recipes/distribution-strip-plot.md`. This change implements exactly that record on top of
 the core kernels already landed by the earlier waves, and touches nothing else.
 
 
