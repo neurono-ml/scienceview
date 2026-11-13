@@ -83,8 +83,8 @@ path = "examples/histogram_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
-name = "violin_plot"
-path = "examples/violin_plot.rs"
+name = "swarm_plot"
+path = "examples/swarm_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
