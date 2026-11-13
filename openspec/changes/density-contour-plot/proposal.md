@@ -12,11 +12,12 @@ implementation exists for `SVDensityContourPlot`.
 
 - Implement `SVDensityContourPlot` as a recipe composed of the core kernels, following the
   contract in `docs/FDRs/patterns.md`:
-  `data -> [SVStat::KernelDensity (2D)] -> (grid, density) -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area`
-- Expose the configuration surface recorded in the FDR: `x, y` (—); `series` (None); `levels` (10); `level_range` (None); `bandwidth` (None); `bw_adjust` (1.0); `grid_count` (256).
+  `data -> [SVStat::Bin on x] + [SVStat::Bin on y] -> joint grid of counts -> density -> [Gaussian smoothing when bandwidth is set] -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area`
+- Expose the configuration surface recorded in the FDR: `x, y` (—); `series` (None); `levels` (10); `level_range` (None); `bandwidth` (None); `bandwidth_adjustment` (1.0); `grid_count` (256).
 - Ship the eight tasks of P10: module and builder, parity and concurrency
   tests, example program, generated figure, book chapter, FDR status,
   CHANGELOG entry and independent acceptance review.
+- Defer transition wiring: the change claims no contour morphing.
 
 ## Capabilities
 
