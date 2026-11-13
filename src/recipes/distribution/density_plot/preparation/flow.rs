@@ -39,6 +39,11 @@ pub(crate) fn sv_prepare_density(
     }
 
     let groups = sv_extract_groups(configuration, value_view, series_view)?;
+    if groups.is_empty() {
+        return Err(SVError::EmptyInput {
+            operation: "kernel_density",
+        });
+    }
     let palette = sv_default_scale_palette();
 
     let mut series = Vec::with_capacity(groups.len());

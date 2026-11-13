@@ -407,7 +407,7 @@ fn every_option_that_changes_output_is_reflected() {
         .expect("the chart draws");
     assert!(
         sv_maximum_density(&probability.curves()[0]) < sv_maximum_density(&default.curves()[0]),
-        "probability normalisation divides the density by the grid spacing"
+        "probability normalisation scales the density by the grid spacing"
     );
 
     let fitted = SVDensityPlot::new()
@@ -616,6 +616,30 @@ fn a_column_without_any_finite_observation_reports_the_empty_input() {
     let error = build_plot(&source)
         .rendering()
         .expect_err("an empty estimate cannot be drawn");
+
+    assert!(matches!(error, SVError::EmptyInput { .. }));
+}
+
+#[test]
+fn a_grouped_column_without_any_finite_observation_reports_the_empty_input() {
+    const MISSING: [f64; 8] = [
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::NAN,
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::NAN,
+    ];
+    let source = SVTestSource {
+        value: SVTestView::Dense(&MISSING),
+        series: Some(SVTestView::Dense(&SERIES)),
+        reads: None,
+    };
+    let error = build_grouped_plot(&source)
+        .rendering()
+        .expect_err("no group survives, so an empty estimate cannot be drawn");
 
     assert!(matches!(error, SVError::EmptyInput { .. }));
 }
