@@ -1,9 +1,13 @@
-//! The off-diagonal cells: scatter, hexbin and density contour.
+//! The off-diagonal cells: scatter, hexbin and binned density contour.
 //!
 //! Every shape is built from the closed kernel vocabulary: points go through
-//! [`SVMark::dot`], the histogram and density grids through [`SVStat::Bin`],
-//! and the hexagon and contour paths are chart geometry placed through
-//! [`sv_scale`](crate::sv_scale), exactly as the hexbin and contour recipes do.
+//! `SVMark::Dot`, the histogram and density grids through `SVStat::Bin`, and
+//! the hexagon and contour paths are chart-owned geometry placed through the
+//! scale kernel. The hexbin lattice mirrors the lattice `SVHexbinPlot` owns,
+//! and the contour is a binned contour rather than the KDE-based
+//! `SVDensityContourPlot`; ADR #182 records why the cells own this geometry
+//! instead of delegating it (the composed recipes solve their own figure and
+//! cannot preserve the pair grid's shared per-variable domain).
 
 mod contour;
 mod hexbin;
