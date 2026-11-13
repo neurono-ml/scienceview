@@ -12,6 +12,26 @@ released.
 
 ### Added
 
+- The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  two variables shown together with the marginal distribution of each — a
+  central bivariate panel (scatter, hexbin, density contour or regression)
+  with a histogram, density curve or rug on the top and the right, all sharing
+  the central scales. The chart is the composition of FDR-145 —
+  `data -> [no stat] -> values -> central cell -> marginal cells ->
+  [shared SVScale per axis] -> three panels sharing a layout` — and its
+  configuration surface is `x`, `y`, `series`, `kind`, `marginal_kind`,
+  `marker`, `alpha`, `regression_model`, `missing_value_policy`, the titles,
+  with `backend(...)` required and `execution_mode` defaulting to `Automatic`.
+  The central panel reuses the scatter mark, the hexbin recipe, the density
+  contour recipe and the fit kernel; the marginals reuse `SVStat::Bin`,
+  `SVStat::KernelDensity` and the bar and line marks; the three panel
+  rectangles are solved by `sv_layout`. Dense, sparse and streaming inputs
+  agree, a sparse column is never densified and a streaming window renders
+  without blocking. The scene serializes through `to_svg()` and, with
+  `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/joint_plot.rs` writes `docs/figures/joint_plot.svg`.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is
