@@ -70,6 +70,8 @@
   plus the `--all-features` variants.
 - [x] Open the ADR issue and reference it from the three PRs with a closing
   keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/recipes/matrix-clustered-heatmap-plot.md` before opening the code
-  PR.
+  PR. The review confirmed the supplied-clustering contract and fixed one
+  deviation: a long table without both trees now fails at `build`, as the spec
+  requires, instead of waiting for `compose`.
