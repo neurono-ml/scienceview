@@ -60,10 +60,18 @@
 
 ## Follow-ups (not this change)
 
-- [ ] Add the `weight` column once a weighted kernel-density variant exists in
-  the statistical-transform capability. The shipped kernel applies an
-  unweighted estimate, so the recipe deliberately omits the column instead of
-  reimplementing the kernel (patterns.md P5); the FDR amendment records it.
-- [ ] Wire transition animation once the transition integration reaches the
-  distribution recipes. The scene already emits transition-ready geometry (one
-  curve per series over a fixed grid).
+- Deferred (decision 2026-11-13): the `weight` column stays out of scope because
+  no weighted kernel-density estimator ships yet — `SVStat::KernelDensity`
+  applies an unweighted estimate, and reimplementing the kernel inside the
+  recipe is forbidden (patterns.md P5). The weights support belongs to the
+  future `statistical-weights` change (weighted `SVStat::KernelDensity`); this
+  change makes no acceptance claim for it.
+- Deferred (decision 2026-11-13): recipe-level animation wiring is out of scope;
+  recipes ship transition-ready geometry and the wiring belongs to a future
+  recipe-animation integration change. No acceptance claim is made.
+
+## Implementation notes
+
+- 2026-11-13: the two follow-ups above are recorded as explicit deferrals with
+  their reason and owner change; neither box is ticked because neither
+  capability shipped here.
