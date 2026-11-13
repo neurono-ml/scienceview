@@ -30,6 +30,68 @@
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
 
+### Requirement: The step position is explicit
+
+`SVStepPlot` SHALL expand each ordered pair of samples into the pre, post or
+mid geometry selected by `SVStepPosition`, and `After` SHALL be the default.
+
+#### Scenario: Pre, post and mid geometry
+- **WHEN** the chart is built with `Before`, `After` or `Center`
+- **THEN** the expanded vertices place the riser at the current `x`, at the
+  next `x`, or halfway between the two `x` values respectively
+
+### Requirement: Ordering and duplicate positions are deterministic
+
+`SVStepPlot` SHALL order the samples by `x` within each series before expanding
+the step, and SHALL resolve equal `x` values with `SVStepDuplicatePolicy`:
+`LastWins` (the default) keeps the last observation in input order, and
+`FirstWins` keeps the first.
+
+#### Scenario: Unordered input
+- **WHEN** the rows arrive out of `x` order
+- **THEN** the step is expanded from the samples sorted by `x`
+
+#### Scenario: Duplicate positions
+- **WHEN** two rows share the same `x` in a series
+- **THEN** exactly one observation survives, chosen by the configured policy
+
+### Requirement: Missing values are omitted
+
+`SVStepPlot` SHALL omit every observation whose `x` or `y` is not finite, and
+SHALL fail with `SVError::EmptyInput` when no finite observation remains.
+
+#### Scenario: A missing sample
+- **WHEN** one sample has a non-finite value
+- **THEN** the step is drawn through the remaining samples without a gap mark
+
+#### Scenario: Every observation missing
+- **WHEN** no finite observation remains
+- **THEN** the operation fails explicitly instead of drawing an empty frame
+
+### Requirement: Aggregation collapses duplicate positions
+
+When an aggregate stat is configured, `SVStepPlot` SHALL collapse duplicate `x`
+values per series with that statistic before expanding the geometry, and SHALL
+reject any non-aggregate stat at build time.
+
+#### Scenario: Aggregate stat
+- **WHEN** two rows share an `x` and `SVStat::Aggregate` is configured
+- **THEN** their statistic becomes the single value at that position
+
+#### Scenario: Non-aggregate stat
+- **WHEN** a stat other than `SVStat::Aggregate` is configured
+- **THEN** the build fails with an explicit configuration error
+
+### Requirement: One step line per series
+
+The optional `series` column SHALL split the observations into one step line per
+group, preserving first-appearance order, assigning one palette colour per group
+and drawing one legend entry when more than one group exists.
+
+#### Scenario: Two series
+- **WHEN** the `series` column carries two groups
+- **THEN** the chart draws two step lines with distinct colours
+
 ### Requirement: Representations are equivalent
 
 `SVStepPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream.
