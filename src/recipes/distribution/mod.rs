@@ -45,9 +45,15 @@ pub use sv_histogram_plot::{SVBarElement, SVHistogramPlot, SVHistogramPlotBuilde
 pub mod sv_rug_plot;
 pub use sv_rug_plot::{SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene};
 
+#[path = "strip_plot/mod.rs"]
+pub mod sv_strip_plot;
+pub use sv_strip_plot::{
+    SVStripMissingValuePolicy, SVStripPlot, SVStripPlotBuilder, SVStripRenderOutput, SVStripScene,
+};
+
 #[path = "violin_plot/mod.rs"]
 pub mod sv_violin_plot;
 pub use sv_violin_plot::{
     SVViolinMissingValuePolicy, SVViolinPlot, SVViolinPlotBuilder, SVViolinRenderOutput,
-    SVViolinScale, SVViolinSummary,
+    SVViolinScale,
 };
