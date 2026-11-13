@@ -5,6 +5,8 @@ use scienceview_core::sv_data::{
     SVSparseView, SVStreamingView,
 };
 use scienceview_core::sv_error::SVError;
+#[cfg(feature = "render-svg")]
+use scienceview_core::sv_window::{SVRollingWindow, SVWindowReadGuard};
 
 /// One test column, already in the representation to exercise.
 #[derive(Clone, Copy, Debug)]
@@ -109,4 +111,69 @@ impl SVDataSource for SVCountingSource<'_> {
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.inner.column(name)
     }
+}
+
+/// A live source whose two columns share a bounded rolling window each.
+#[cfg(feature = "render-svg")]
+#[derive(Debug)]
+pub(super) struct SVLiveSource {
+    horizontal: std::sync::Mutex<SVRollingWindow>,
+    vertical: std::sync::Mutex<SVRollingWindow>,
+}
+
+#[cfg(feature = "render-svg")]
+impl SVLiveSource {
+    pub(super) fn new(horizontal: &[f64], vertical: &[f64]) -> Self {
+        Self {
+            horizontal: std::sync::Mutex::new(sv_window(horizontal)),
+            vertical: std::sync::Mutex::new(sv_window(vertical)),
+        }
+    }
+
+    /// Appends one sample to both live columns.
+    pub(super) fn append(&self, horizontal: f64, vertical: f64) {
+        sv_lock(&self.horizontal).push(horizontal);
+        sv_lock(&self.vertical).push(vertical);
+    }
+}
+
+#[cfg(feature = "render-svg")]
+fn sv_window(values: &[f64]) -> SVRollingWindow {
+    let mut window = SVRollingWindow::with_capacity(64).expect("the capacity is positive");
+    window.extend(values.iter().copied());
+    window
+}
+
+#[cfg(feature = "render-svg")]
+fn sv_lock(
+    window: &std::sync::Mutex<SVRollingWindow>,
+) -> std::sync::MutexGuard<'_, SVRollingWindow> {
+    window
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+#[cfg(feature = "render-svg")]
+impl SVDataSource for SVLiveSource {
+    fn schema(&self) -> SVSourceSchema<'_> {
+        SVSourceSchema::owned(vec![
+            SVColumnDescriptor::new("x", SVColumnRole::X),
+            SVColumnDescriptor::new("y", SVColumnRole::Y),
+        ])
+    }
+
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
+        match name {
+            "x" => Ok(SVColumnSnapshot::Window(sv_read(&self.horizontal))),
+            "y" => Ok(SVColumnSnapshot::Window(sv_read(&self.vertical))),
+            other => Err(SVError::ColumnNotFound {
+                name: other.to_string(),
+            }),
+        }
+    }
+}
+
+#[cfg(feature = "render-svg")]
+fn sv_read(window: &std::sync::Mutex<SVRollingWindow>) -> SVWindowReadGuard<'_> {
+    SVWindowReadGuard::new(sv_lock(window))
 }
