@@ -62,7 +62,6 @@ pub(crate) fn sv_series_source() -> SVTestRugSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_sparse_source() -> SVTestRugSource<'static> {
     const INDICES: [usize; 6] = [0, 1, 2, 3, 4, 5];
     let values = SVSparseView::new(&INDICES, &VALUES, 6).expect("the sparse view is well formed");
@@ -72,7 +71,6 @@ pub(crate) fn sv_sparse_source() -> SVTestRugSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_streaming_source() -> SVTestRugSource<'static> {
     SVTestRugSource {
         values: SVColumnView::Streaming(SVStreamingView::new(&VALUES, 6, 0)),
