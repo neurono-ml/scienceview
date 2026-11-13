@@ -46,17 +46,17 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: Transition wiring is deferred
 
-`SVHistogramPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVHistogramPlot` SHALL NOT claim an animation path in this change. The
+temporal behaviour recorded in its FDR — bar-height interpolation and bin
+enter/exit — remains a target of the transition/streaming capability. Until
+that integration lands, `update` recomposes the current window and returns a
+fresh artifact.
 
-#### Scenario: Transition: bar height
-- **WHEN** the state changes and bar height is affected
-- **THEN** interpolates
-
-#### Scenario: Transition: new bin
-- **WHEN** the state changes and new bin is affected
-- **THEN** enters with the enter rule and grows to its height
+#### Scenario: Update recomposes the window
+- **WHEN** `update` is called after new samples arrive
+- **THEN** the current window is resolved again and rendered, without an incremental enter/update/exit animation
 
 ### Requirement: The chart renders on every declared backend
 

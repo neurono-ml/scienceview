@@ -43,7 +43,7 @@
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/distribution-histogram-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/recipes/distribution-histogram-plot.md` status to `shipped`, linking the
   example and the chapter.
 - [x] Add the `CHANGELOG.md` entry.
 
@@ -54,5 +54,15 @@
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
-  `docs/FDRs/distribution-histogram-plot.md` before opening the code PR
+  `docs/FDRs/recipes/distribution-histogram-plot.md` before opening the code PR
   (GitHub Copilot review requested on PR #109).
+
+## 8. Deferred (recorded, not ticked)
+
+- [ ] Weighted binning. The shipped `SVStat::Bin` kernel does not consume
+  observation weights; a configured `weight` is rejected with an error naming
+  the kernel gap. Follow-up: the `statistical-transforms` capability.
+- [ ] In-place streaming update. `update` recomposes the current window; growing
+  the bars without a redraw belongs to the transition/streaming integration.
+- [ ] Transition wiring. The FDR temporal behaviour is a target, not a claim of
+  this change; the spec records the deferral.
