@@ -46,6 +46,7 @@ examples.
 | 27 | `ch27-box-plot.md` | Box plots: the percentile-owned five-number summary, the whisker rules, outliers as dots, notches, series dodging, dense/sparse/streaming parity and the SVG/native dispatch |
 | 28 | `ch28-violin-plot.md` | Violin plots: the kernel-density silhouette, bandwidth and adjustment, the Area/Count/Width scales, inner box and jittered sample points, split series, dense/sparse/streaming parity and the SVG/native dispatch |
 | 30 | `ch30-strip-plot.md` | Strip plots: the one-dimensional dot per observation, the keyed `SVMove::Jitter` displacement, orientation, series colours, marker size and alpha, the missing-value policy, sparse stored-entry semantics, SVG/native dispatch and the parity, concurrency and observability tests |
+| 31 | `ch31-swarm-plot.md` | Swarm plots: the collision-free `SVMove::Swarm` layout, the data-space marker extent that makes the kernel's test a pixel test, both orientations, series colours, the missing-value policy, sparse stored-entry semantics, parity, concurrency, the span and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
