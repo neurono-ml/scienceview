@@ -34,6 +34,26 @@ line to `src/recipes/distribution/mod.rs`. No central registry exists, because a
 central registry would serialise every recipe change against every other one
 (patterns.md P4).
 
+### D5 — Transition wiring
+
+The tick geometry is transition-ready: every tick owns an owned path primitive
+and carries no borrowed data, so a transition can interpolate its two endpoints
+by the FDR's match key (`Index`). Actually wiring the transition kernel into the
+recipe operations is deferred to the later integration change that adds
+transition support to every recipe, exactly as the other wave-6 recipes do;
+this change claims transition-ready geometry only and does not tick the
+transition scenario in the spec.
+
+### D6 — Orientation and the margin
+
+`orientation` is the FDR's `orient` option, spelled out per patterns P11.
+`Vertical` places the values on the horizontal axis and draws vertical ticks in
+the bottom margin; `Horizontal` places them on the vertical axis and draws
+horizontal ticks in the left margin. The ticks sit in the outer part of the
+margin, so they never cover the plot area's data region nor the axis tick
+labels. A non-finite value draws no tick; a non-finite series value marks the
+whole observation as missing.
+
 ## Open Questions
 
 - Should the rug be composable *into* another recipe — that is, should `SVHistogramPlot` accept a `rug` option that adds rug ticks under the axis? *Open, and probably yes: it is the most common use of the rug.*
