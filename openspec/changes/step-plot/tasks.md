@@ -43,7 +43,7 @@
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/relational-step-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/recipes/relational-step-plot.md` status to `shipped`, linking the
   example and the chapter.
 - [x] Add the `CHANGELOG.md` entry.
 
@@ -54,7 +54,7 @@
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
-  `docs/FDRs/relational-step-plot.md` before opening the code PR.
+  `docs/FDRs/recipes/relational-step-plot.md` before opening the code PR.
 
 ## 8. Review fixes
 
