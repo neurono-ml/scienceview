@@ -32,6 +32,9 @@ data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge]
      -> [SVScale] -> SVMark::Bar
 ```
 
+The default `SVCountMultiple::Layer` draws every series full width in draw
+order without applying a move; `Stack` and `Dodge` add the `SVMove` step.
+
 ## Data contract
 
 | Column | Role | Type | Required |
