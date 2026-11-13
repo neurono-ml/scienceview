@@ -17,5 +17,5 @@ classifiers = [
 [tool.maturin]
 # The interpreter layer and the loadable-module shape are both opt-in features;
 # a plain `cargo build` never pulls `pyo3`.
-features = ["python", "extension-module"]
+features = ["python"]
 module-name = "scienceview"

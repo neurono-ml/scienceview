@@ -40,9 +40,10 @@
 //! [`SVError`](scienceview::sv_error::SVError) variants onto typed Python
 //! exception classes. `pyo3` is never part of the default build.
 //!
-//! Build the loadable module with `cargo build --features python,extension-module`
-//! (a Python development environment is required); see the crate README for the
-//! wheel instructions.
+//! Build the loadable module with `cargo build -p scienceview_python --features
+//! python` (a Python development environment is required); the wheel build goes
+//! through maturin, which enables PyO3's `extension-module` behaviour itself. See
+//! the crate README for the wheel instructions.
 
 #![warn(missing_docs)]
 

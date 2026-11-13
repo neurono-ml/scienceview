@@ -5,8 +5,8 @@
 //! pure conversion layer does the work, and errors travel back as typed
 //! exceptions. No rendering, validation or dispatch logic lives here.
 //!
-//! Build the loadable module with
-//! `cargo build -p scienceview_python --features python,extension-module`.
+//! Build the loadable module with `cargo build -p scienceview_python --features
+//! python`; maturin enables PyO3's `extension-module` behaviour for a wheel.
 
 mod control;
 mod data;
