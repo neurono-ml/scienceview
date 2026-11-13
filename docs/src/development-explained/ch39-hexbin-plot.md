@@ -137,8 +137,11 @@ later integration (mark-transitions), not to this recipe.
 ## The tests that make it concrete
 
 The companion `hexbin_plot_tests.rs` walks the options one at a time: grid size,
-extent, minimum count, orientation, colour map, mean aggregation, series
-grouping, missing values and an empty source. `parity_tests.rs` owns the data
+extent, minimum count, orientation, colour map and colour-scale transform,
+count normalisation, mean aggregation, series grouping, missing values and an
+empty source. `composition::lattice_tests` proves that every cell centre rounds
+back to its own cell, that every point lies inside the hexagon of its cell, and
+that adjacent centres keep the hexagonal spacing. `parity_tests.rs` owns the data
 boundary; `concurrency_tests.rs` renders the same figure from eight threads and
 compares the documents byte for byte; `render_tests.rs` covers both serializers,
 the typed refusal of other kinds and the checked-in figure.
