@@ -174,9 +174,14 @@ identity cannot be labelled or coloured.
 The implementation detail that matters is *where* the drop happens. For a
 dense or streaming column the recipe scans the values once and, only when it
 finds a non-finite value, builds a filtered dense buffer. When every value is
-finite the original borrowed view is passed to the kernel untouched. Sparse
-storage is filtered at its stored entries and keeps its logical length, so an
-implicit zero remains an observation.
+finite the original borrowed view is passed to the kernel untouched. A sparse
+column is filtered at its stored entries without ever being densified: every
+finite entry keeps its value, and a stored non-finite entry is removed together
+with its logical position, so the column is one observation shorter and the
+dropped value never reappears as an implicit zero. The companion tests
+`a_sparse_non_finite_value_is_omitted_like_its_dense_equivalent` and
+`a_sparse_series_non_finite_value_is_omitted_like_its_dense_equivalent` compare
+the serialized SVG of the dense and sparse forms.
 
 ## Representation parity
 
@@ -272,8 +277,8 @@ The companion modules are the executable specification:
   build-time failures.
 - `parity_tests.rs` compares dense, sparse and streaming input (with and
   without series), proves the sparse path is never densified, checks the
-  implicit-zero equivalence, asserts the streaming path is prompt, and bins a
-  ten-thousand-observation column.
+  implicit-zero equivalence and the sparse non-finite drop, asserts the
+  streaming path is prompt, and bins a ten-thousand-observation column.
 - `concurrency_tests.rs` renders the same figure from eight threads and
   compares every SVG byte for byte.
 - `observability_tests.rs` reads the operation span fields.

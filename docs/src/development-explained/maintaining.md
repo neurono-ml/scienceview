@@ -46,12 +46,10 @@ covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend, chapter 13 covers the transition kernel, chapter 14
-covers the animation timeline, chapter 15 covers the native backend and
-chapter 21 covers the regression recipe and chapter 22 covers the histogram recipe, each written by its own change. Later chapters are planned, one per capability of the
-chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
-covers the animation timeline, chapter 15 covers the native backend and chapter
-19 covers the first relational recipe, each written by its own change. Later
-chapters are planned, one per capability of the
+covers the animation timeline, chapter 15 covers the native backend, and
+chapters 16 to 22 cover the shipped recipes (scatter, line, area, step, band,
+regression and histogram), each written by its own change. Later chapters are
+planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
