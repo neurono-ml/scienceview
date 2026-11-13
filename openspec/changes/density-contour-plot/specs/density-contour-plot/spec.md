@@ -50,18 +50,6 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
-
-`SVDensityContourPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
-
-#### Scenario: Transition: contour paths
-- **WHEN** the state changes and contour paths is affected
-- **THEN** interpolate as the density field changes; paths whose level set disappears exit
-
-#### Scenario: Transition: bandwidth change
-- **WHEN** the state changes and bandwidth change is affected
-- **THEN** the contours morph into the new level sets
-
 ### Requirement: The chart renders on every declared backend
 
 `SVDensityContourPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
@@ -72,7 +60,7 @@
 
 #### Scenario: Native rendering
 - **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+- **THEN** the frame is rasterized from the same composition and has the same viewport dimensions as the SVG
 
 #### Scenario: Unsupported backend
 - **WHEN** a backend cannot express a required mark

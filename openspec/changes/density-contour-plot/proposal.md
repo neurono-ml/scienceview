@@ -17,6 +17,7 @@ implementation exists for `SVDensityContourPlot`.
 - Ship the eight tasks of P10: module and builder, parity and concurrency
   tests, example program, generated figure, book chapter, FDR status,
   CHANGELOG entry and independent acceptance review.
+- Defer transition wiring: the change claims no contour morphing.
 
 ## Capabilities
 

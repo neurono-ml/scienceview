@@ -33,7 +33,10 @@ rejected at build otherwise (patterns.md P6).
 
 ### D3 — Temporal behaviour
 
-contour paths: interpolate as the density field changes; paths whose level set disappears exit. colour: interpolates with the level. bandwidth change: the contours morph into the new level sets.
+This change deliberately ships no transition wiring. The geometry is
+transition-ready, but contour morphing is the hardest temporal problem in the
+library: when one loop splits into two, the topology changes. The FDR records
+the intended behaviour and the open question, and the change claims none of it.
 
 ### D4 — Registration
 
