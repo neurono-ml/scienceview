@@ -27,3 +27,7 @@ pub use sv_ecdf_plot::{SVECdfPlot, SVECdfPlotBuilder, SVEcdfPlotComposition};
 #[path = "histogram_plot/mod.rs"]
 pub mod sv_histogram_plot;
 pub use sv_histogram_plot::{SVBarElement, SVHistogramPlot, SVHistogramPlotBuilder};
+
+#[path = "rug_plot/mod.rs"]
+pub mod sv_rug_plot;
+pub use sv_rug_plot::{SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene};

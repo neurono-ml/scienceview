@@ -5,11 +5,11 @@
 | Id | FDR-115 |
 | Name | `SVRugPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch26-rug-plot.md` |
+| Example program | `examples/rug_plot.rs` |
 
 ## Purpose
 
@@ -58,10 +58,17 @@ position in the sample.
 |---|---|---|---|
 | `value` | `SVColumnRef` | — | seaborn |
 | `series` | `Option<SVColumnRef>` | `None` | seaborn |
-| `orient` | `SVBarOrientation` | `Vertical` | seaborn |
+| `orientation` (FDR `orient`) | `SVBarOrientation` | `Vertical` | seaborn |
 | `height` | `f32` | `0.05` | seaborn `height` |
 | `alpha` | `f32` | `1.0` | seaborn |
 | `line_width` | `SVLength` | token `mark.line_width` | — |
+
+`height` is a fraction of the plot's perpendicular extent, capped at the depth
+of the axis margin: a tick never enters the plot rectangle, even at
+`height = 1.0`. A non-finite observation draws no tick; a column with no
+drawable observation at all renders an empty scene rather than failing on a
+domain it never needed. A sparse column contributes only its stored entries,
+so implicit zeros neither produce a tick nor widen the value axis.
 
 ## Theme
 
@@ -88,12 +95,19 @@ Consumes `mark.palette`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] One tick per observation, at the observation's value.
-- [ ] The ticks are drawn in the margin of the axis and never overlap the
-      plot area's data region.
-- [ ] Dense, sparse and streaming inputs give the same ticks.
-- [ ] A large sample does not degrade the document size beyond the
-      documented bound.
+- [x] One tick per observation, at the observation's value
+      (`the_default_configuration_draws_one_tick_per_observation`).
+- [x] The ticks are drawn in the margin of the axis and never overlap the
+      plot area's data region
+      (`vertical_ticks_sit_in_the_bottom_margin_and_never_enter_the_plot`,
+      `horizontal_orientation_places_the_ticks_in_the_left_margin`).
+- [x] Dense, sparse and streaming inputs give the same ticks
+      (`dense_sparse_and_streaming_inputs_draw_the_same_scene`); a sparse
+      column marks only its stored entries
+      (`a_sparse_input_marks_only_its_stored_entries`).
+- [x] A large sample does not degrade the document size beyond the
+      documented bound
+      (`a_large_sample_draws_every_tick_in_one_compound_path`).
 
 ## Open questions
 
