@@ -20,4 +20,5 @@
 - [Chapter 13 — Transitions: making a figure move without losing track of its marks](development-explained/ch13-mark-transitions.md)
 - [Chapter 14 — Animation: one clock, two keyframe sources](development-explained/ch14-animation-timeline.md)
 - [Chapter 15 — Native: drawing pixels yourself, without a GPU](development-explained/ch15-native-backend.md)
+- [Chapter 20 — Band plots: filling the space between two lines](development-explained/ch20-band-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
