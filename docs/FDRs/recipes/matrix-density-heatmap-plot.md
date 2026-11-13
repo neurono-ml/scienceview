@@ -68,6 +68,7 @@ Accepted representations: dense, sparse, streaming (windowed).
 | `colour_map` | `SVColourMapRef` | theme default | — |
 | `colour_bar` | `bool` | `true` | — |
 | `opacity` | `f32` | `1.0` | — |
+| `empty_bin_policy` | `SVEmptyBinPolicy` | `LowestValue` | — |
 
 ## Theme
 
