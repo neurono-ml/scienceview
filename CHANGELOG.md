@@ -12,7 +12,7 @@ released.
 
 ### Added
 
-- The first relational recipe, `SVScatterPlot` (`scienceview::recipes::relational::scatter_plot`):
+- The first relational recipe, `SVScatterPlot` (`scienceview::sv_recipes::sv_relational::sv_scatter_plot`):
   the joint distribution of two continuous columns with optional `series`,
   `colour` and `size` channels, a constant `alpha` for overplotting, a marker
   shape, edge colour and width, the jitter move, and axes, grid, title and
