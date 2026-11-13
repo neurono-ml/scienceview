@@ -14,7 +14,7 @@ CSS and the small runtime are inlined. A self-contained page is a capability, no
 
 ### D2 — The Rust model stays the authority
 
-The embedded runtime forwards gestures to the model and applies the resulting deltas. It does not own state, consistent with the foundation's Rust-is-the-brain posture.
+The embedded runtime forwards gestures to the host as actions and applies the view transform they imply. It never re-derives geometry or owns figure data: any change to the figure itself arrives as a fresh payload from the Rust model, consistent with the foundation's Rust-is-the-brain posture.
 
 ### D3 — The stylesheet is emitted and overridable
 
