@@ -176,6 +176,68 @@ fn the_colour_map_option_changes_the_fill_palette() {
 }
 
 #[test]
+fn the_normalisation_option_changes_the_cell_values() {
+    use crate::sv_stat::SVNormalisation;
+
+    let source = sv_dense_source();
+    let counts = sv_build_default(&source)
+        .compose()
+        .expect("the count lattice composes");
+    let source = sv_dense_source();
+    let probability = SVHexbinPlot::builder()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .normalise(SVNormalisation::Probability)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the probability configuration is complete")
+        .compose()
+        .expect("the probability lattice composes");
+
+    let total = counts.number_of_observations() as f64;
+    assert!(
+        probability
+            .cells()
+            .iter()
+            .all(|cell| cell.value() <= 1.0 && cell.value() >= 0.0)
+    );
+    for (count_cell, probability_cell) in counts.cells().iter().zip(probability.cells()) {
+        assert_eq!(count_cell.observations(), probability_cell.observations());
+        assert_eq!(
+            probability_cell.value(),
+            count_cell.observations() as f64 / total
+        );
+    }
+}
+
+#[test]
+fn the_colour_scale_transform_changes_the_fill() {
+    use crate::sv_scale::SVScaleTransform;
+
+    let source = sv_dense_source();
+    let linear = sv_build_default(&source)
+        .compose()
+        .expect("the linear palette composes");
+    let source = sv_dense_source();
+    let transformed = SVHexbinPlot::builder()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .colour_scale(SVScaleTransform::SquareRoot)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the transformed configuration is complete")
+        .compose()
+        .expect("the transformed palette composes");
+
+    assert_ne!(
+        super::test_support::sv_render_svg(&linear),
+        super::test_support::sv_render_svg(&transformed)
+    );
+}
+
+#[test]
 fn mean_aggregation_averages_the_value_column_through_the_aggregate_kernel() {
     let source = sv_full_source();
     let counts = SVHexbinPlot::builder()
