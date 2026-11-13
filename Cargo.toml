@@ -69,7 +69,7 @@ name = "box_plot"
 required-features = ["render-svg"]
 
 [[example]]
-name = "strip_plot"
+name = "boxen_plot"
 required-features = ["render-svg"]
 
 [[example]]
@@ -85,6 +85,10 @@ required-features = ["render-svg"]
 [[example]]
 name = "violin_plot"
 path = "examples/violin_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
+name = "strip_plot"
 required-features = ["render-svg"]
 
 # The root package is a facade: it re-exports the core crate and every backend
