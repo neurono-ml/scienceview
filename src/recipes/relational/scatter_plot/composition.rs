@@ -23,6 +23,7 @@ use crate::sv_decoration::SVDecorationStyle;
 use crate::sv_error::SVError;
 use crate::sv_layout::{SVLength, SVResolvedRectangle, SVViewport};
 use crate::sv_mark::{SVDotShape, SVMark, SVMarkGeometry, SVMarkRequest, SVMarkTheme};
+use crate::sv_scale::{SVScale, SVScaleBuilder, SVScaleKind};
 
 pub(super) fn sv_compose_scene(
     configuration: &SVScatterConfiguration<'_>,
@@ -71,6 +72,10 @@ pub(super) fn sv_compose_scene(
 
     let horizontal_scale = sv_position_scale(horizontal_values, plot.x, plot.right())?;
     let vertical_scale = sv_position_scale(vertical, plot.bottom(), plot.y)?;
+    // Axis placement adds the plot origin back, so the decoration scales answer
+    // in plot-relative coordinates while the marks read the absolute scales.
+    let horizontal_axis_scale = sv_relative_scale(&horizontal_scale, 0.0, plot.width)?;
+    let vertical_axis_scale = sv_relative_scale(&vertical_scale, plot.height, 0.0)?;
 
     let colour_scale = match colour {
         Some(colour) if number_of_points > 0 => Some(sv_colour_scale(colour)?),
@@ -148,8 +153,8 @@ pub(super) fn sv_compose_scene(
         Vec::new()
     };
     let (before_marks, after_marks) = sv_scatter_decorations(
-        &horizontal_scale,
-        &vertical_scale,
+        &horizontal_axis_scale,
+        &vertical_axis_scale,
         configuration,
         plot,
         viewport,
@@ -171,4 +176,16 @@ pub(super) fn sv_compose_scene(
         number_of_series: groups.len(),
         number_of_marks: number_of_points,
     })
+}
+
+fn sv_relative_scale(
+    scale: &SVScale<'_>,
+    start: f64,
+    end: f64,
+) -> Result<SVScale<'static>, SVError> {
+    let domain = scale.domain();
+    SVScaleBuilder::new(SVScaleKind::Continuous)
+        .domain(domain.lower(), domain.upper())
+        .range(start, end)
+        .build()
 }
