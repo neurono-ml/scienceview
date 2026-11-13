@@ -38,6 +38,43 @@ fn horizontal_orientation_places_the_ticks_in_the_left_margin() {
 }
 
 #[test]
+fn an_extreme_height_is_capped_at_the_margin() {
+    let source = sv_dense_source();
+    for orientation in [SVBarOrientation::Vertical, SVBarOrientation::Horizontal] {
+        let scene = SVRugPlot::builder()
+            .data_source(&source)
+            .value("value")
+            .orientation(orientation)
+            .height(1.0)
+            .backend(SVBackendKind::Svg)
+            .build()
+            .expect("the configuration is complete")
+            .compose()
+            .expect("the capped rug composes");
+        let plot = scene.plot_area();
+
+        for (start, end) in sv_tick_segments(&scene) {
+            match orientation {
+                SVBarOrientation::Vertical => {
+                    assert!(start.y() > plot.bottom());
+                    assert!(
+                        end.y() >= plot.bottom() - 1e-9,
+                        "a capped vertical tick stops at the plot edge"
+                    );
+                }
+                SVBarOrientation::Horizontal => {
+                    assert!(start.x() < plot.x);
+                    assert!(
+                        end.x() <= plot.x + 1e-9,
+                        "a capped horizontal tick stops at the plot edge"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn the_height_option_changes_the_tick_length() {
     let source = sv_dense_source();
     let short = sv_build_default(&source)

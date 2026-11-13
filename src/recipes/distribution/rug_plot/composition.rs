@@ -1,6 +1,6 @@
 //! One render: resolve the columns, derive the scales and compose the scene.
 
-use super::channels::sv_group_observations;
+use super::channels::{SVRugObservation, sv_group_observations};
 use super::configuration::{
     SV_RUG_MARGIN, SV_RUG_PLOT_HEIGHT, SV_RUG_PLOT_LEFT, SV_RUG_PLOT_TOP, SV_RUG_PLOT_WIDTH,
     SV_RUG_VIEWPORT_HEIGHT, SV_RUG_VIEWPORT_WIDTH, SVRugConfiguration,
@@ -8,12 +8,14 @@ use super::configuration::{
 use super::decorations::sv_rug_decorations;
 use super::geometry::{SVRugGeometryInput, sv_tick_geometries};
 use super::scene::SVRugScene;
-use crate::sv_data::{SVColumnSnapshot, SVColumnView};
+use crate::sv_data::SVColumnSnapshot;
 use crate::sv_decoration::SVDecorationStyle;
 use crate::sv_error::SVError;
 use crate::sv_layout::{SVResolvedRectangle, SVViewport};
 use crate::sv_mark::SVBarOrientation;
-use crate::sv_scale::{SVScale, SVScaleBuilder, SVScaleKind};
+use crate::sv_scale::{
+    SVDomain, SVScale, SVScaleBuilder, SVScaleKind, SVScaleTransform, sv_nice_domain,
+};
 
 pub(super) fn sv_compose_scene(
     configuration: &SVRugConfiguration<'_>,
@@ -45,14 +47,10 @@ pub(super) fn sv_compose_scene(
 
     let (observations, groups) =
         sv_group_observations(value, series, &configuration.series_labels)?;
-    let value_scale = sv_value_scale(value, configuration.orientation, plot)?;
+    let value_scale = sv_value_scale(&observations, configuration.orientation, plot)?;
     let axis_scale = sv_relative_axis_scale(&value_scale, configuration.orientation, plot)?;
 
-    let tick_length = f64::from(configuration.height)
-        * match configuration.orientation {
-            SVBarOrientation::Vertical => plot.height,
-            SVBarOrientation::Horizontal => plot.width,
-        };
+    let tick_length = sv_tick_length(configuration, plot, viewport);
     let (depth_start, depth_end) = match configuration.orientation {
         SVBarOrientation::Vertical => (
             viewport.height() - SV_RUG_MARGIN,
@@ -112,24 +110,66 @@ fn sv_optional_snapshot<'source>(
     }
 }
 
+/// Derives the value scale from the observations the rug actually draws.
+///
+/// A sparse column contributes only its stored entries, so an implicit zero
+/// never widens the axis of a rug that draws no tick there; an observation
+/// dropped for a missing series value does not widen it either. When the
+/// sample holds no drawable observation at all — an empty column, or a column
+/// whose values are all non-finite — the rug falls back to the unit interval
+/// and draws an empty scene instead of failing on a domain it never needed.
 fn sv_value_scale(
-    view: SVColumnView<'_>,
+    observations: &[SVRugObservation],
     orientation: SVBarOrientation,
     plot: SVResolvedRectangle,
-) -> Result<SVScale<'_>, SVError> {
-    if view.length() == 0 {
-        let (start, end) = sv_value_range(orientation, plot);
-        return SVScaleBuilder::new(SVScaleKind::Continuous)
-            .domain(0.0, 1.0)
-            .range(start, end)
-            .build();
-    }
-
+) -> Result<SVScale<'static>, SVError> {
     let (start, end) = sv_value_range(orientation, plot);
+    let domain = match sv_observation_extent(observations) {
+        Some((lower, upper)) => {
+            sv_nice_domain(SVDomain::new(lower, upper)?, SVScaleTransform::Linear)
+        }
+        None => SVDomain::new(0.0, 1.0)?,
+    };
     SVScaleBuilder::new(SVScaleKind::Continuous)
-        .data_view(view)
+        .domain(domain.lower(), domain.upper())
         .range(start, end)
         .build()
+}
+
+/// Returns the extent of the drawn observation values.
+fn sv_observation_extent(observations: &[SVRugObservation]) -> Option<(f64, f64)> {
+    let mut lower = f64::INFINITY;
+    let mut upper = f64::NEG_INFINITY;
+    let mut found = false;
+    for value in observations.iter().map(|observation| observation.value) {
+        lower = lower.min(value);
+        upper = upper.max(value);
+        found = true;
+    }
+    found.then_some((lower, upper))
+}
+
+/// Returns the tick length, capped at the margin depth.
+///
+/// `height` is a fraction of the plot's perpendicular extent, but the tick is
+/// a margin mark: a fraction large enough to reach the plot rectangle is
+/// clamped to the margin, so the acceptance rule that a tick never enters the
+/// data region holds for every accepted `height` (including `1.0`).
+fn sv_tick_length(
+    configuration: &SVRugConfiguration<'_>,
+    plot: SVResolvedRectangle,
+    viewport: SVViewport,
+) -> f64 {
+    let requested = f64::from(configuration.height)
+        * match configuration.orientation {
+            SVBarOrientation::Vertical => plot.height,
+            SVBarOrientation::Horizontal => plot.width,
+        };
+    let available = match configuration.orientation {
+        SVBarOrientation::Vertical => (viewport.height() - SV_RUG_MARGIN - plot.bottom()).max(0.0),
+        SVBarOrientation::Horizontal => (plot.x - SV_RUG_MARGIN).max(0.0),
+    };
+    requested.min(available)
 }
 
 fn sv_value_range(orientation: SVBarOrientation, plot: SVResolvedRectangle) -> (f64, f64) {

@@ -88,6 +88,9 @@ impl<'data> SVRugPlotBuilder<'data> {
     }
 
     /// Sets the tick length as a fraction of the plot's perpendicular extent.
+    ///
+    /// The length is capped at the depth of the axis margin, so a tick never
+    /// enters the plot rectangle even at `height = 1.0`.
     #[must_use]
     pub fn height(mut self, height: f32) -> Self {
         self.height = height;

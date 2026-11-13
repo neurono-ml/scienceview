@@ -63,6 +63,13 @@ position in the sample.
 | `alpha` | `f32` | `1.0` | seaborn |
 | `line_width` | `SVLength` | token `mark.line_width` | — |
 
+`height` is a fraction of the plot's perpendicular extent, capped at the depth
+of the axis margin: a tick never enters the plot rectangle, even at
+`height = 1.0`. A non-finite observation draws no tick; a column with no
+drawable observation at all renders an empty scene rather than failing on a
+domain it never needed. A sparse column contributes only its stored entries,
+so implicit zeros neither produce a tick nor widen the value axis.
+
 ## Theme
 
 Consumes `mark.palette`, `text.*`, axis tokens.

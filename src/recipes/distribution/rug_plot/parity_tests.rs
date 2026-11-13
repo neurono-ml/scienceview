@@ -60,6 +60,40 @@ fn a_sparse_input_marks_only_its_stored_entries() {
     let scene = sv_build_default(&source)
         .compose()
         .expect("only the stored entries are marked");
+    let sparse_positions: Vec<f64> = sv_tick_segments(&scene)
+        .iter()
+        .map(|segment| segment.0.x())
+        .collect();
+
+    assert_eq!(scene.number_of_marks(), 2);
+    assert_eq!(sparse_positions.len(), 2);
+
+    let stored_source = SVTestRugSource::dense(&STORED);
+    let stored_scene = sv_build_default(&stored_source)
+        .compose()
+        .expect("the stored entries compose on their own");
+    let stored_positions: Vec<f64> = sv_tick_segments(&stored_scene)
+        .iter()
+        .map(|segment| segment.0.x())
+        .collect();
+    assert_eq!(
+        sparse_positions, stored_positions,
+        "implicit zeros never widen the axis of a rug that draws no tick there"
+    );
+}
+
+#[test]
+fn a_huge_sparse_column_marks_only_its_stored_entries() {
+    const INDICES: [usize; 2] = [3, 999_999];
+    const STORED: [f64; 2] = [1.0, 2.0];
+    let sparse = SVSparseView::new(&INDICES, &STORED, 1_000_000).expect("the sparse view is valid");
+    let source = SVTestRugSource {
+        values: SVColumnView::Sparse(sparse),
+        series: None,
+    };
+    let scene = sv_build_default(&source)
+        .compose()
+        .expect("a million logical positions with two stored entries compose");
 
     assert_eq!(scene.number_of_marks(), 2);
     assert_eq!(sv_tick_segments(&scene).len(), 2);

@@ -99,6 +99,36 @@ fn an_empty_source_renders_an_empty_scene() {
 }
 
 #[test]
+fn an_all_missing_source_renders_an_empty_scene() {
+    let values = [f64::NAN, f64::INFINITY, f64::NEG_INFINITY];
+    let source = SVTestRugSource::dense(&values);
+    let scene = sv_build_default(&source)
+        .compose()
+        .expect("a column with no drawable observation composes");
+
+    assert_eq!(scene.number_of_marks(), 0);
+    assert_eq!(sv_tick_segments(&scene).len(), 0);
+}
+
+#[test]
+fn a_single_observation_sits_at_the_centre_of_the_value_axis() {
+    let values = [42.0];
+    let source = SVTestRugSource::dense(&values);
+    let scene = sv_build_default(&source)
+        .compose()
+        .expect("a single observation composes");
+    let plot = scene.plot_area();
+    let segments = sv_tick_segments(&scene);
+
+    assert_eq!(segments.len(), 1);
+    let centre = plot.x + plot.width / 2.0;
+    assert!(
+        (segments[0].0.x() - centre).abs() < 1e-9,
+        "a degenerate domain places the only tick at the centre"
+    );
+}
+
+#[test]
 fn the_title_and_value_label_become_decorations() {
     let source = sv_dense_source();
     let scene = SVRugPlot::builder()
