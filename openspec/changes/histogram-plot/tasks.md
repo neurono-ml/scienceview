@@ -22,9 +22,9 @@
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
+- [x] Assert the operation span carries the backend kind, the representation
   and the point count.
 
 ## 4. Example and generated figure
