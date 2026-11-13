@@ -2,6 +2,7 @@
 
 mod cursor;
 mod grouping;
+mod sparse_indices;
 mod steps;
 
 pub(crate) use cursor::{sv_collect_samples, sv_combined_representation};

@@ -144,7 +144,17 @@ fn a_temporal_x_scale_is_accepted() {
         .build()
         .expect("a temporal x axis is documented");
     assert_eq!(plot.x_scale_kind(), SVScaleKind::Temporal);
-    assert!(plot.compose().is_ok());
+    let composition = plot.compose().expect("the temporal plot composes");
+    assert_eq!(composition.horizontal_scale_kind(), SVScaleKind::Continuous);
+    assert_eq!(composition.vertical_scale_kind(), SVScaleKind::Continuous);
+    assert!(
+        !composition
+            .mark_geometries()
+            .expect("the temporal projection draws")
+            .is_empty()
+    );
+    #[cfg(feature = "render-svg")]
+    assert!(plot.render().is_ok());
 }
 
 #[test]

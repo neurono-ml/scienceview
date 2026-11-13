@@ -7,7 +7,7 @@ use scienceview_core::sv_layout::{SVLength, SVResolvedRectangle, SVViewport};
 use scienceview_core::sv_mark::{
     SVDashPattern, SVMark, SVMarkGeometry, SVMarkRequest, SVMarkTheme,
 };
-use scienceview_core::sv_scale::{SVColour, SVScale};
+use scienceview_core::sv_scale::{SVColour, SVScale, SVScaleKind};
 
 /// One step line: its identity, colour, sample positions and expanded vertices.
 #[derive(Clone, Debug, PartialEq)]
@@ -101,6 +101,20 @@ impl SVStepPlotComposition {
     /// Returns the number of observations the step lines draw.
     pub fn point_count(&self) -> usize {
         self.point_count
+    }
+
+    /// Returns the kind of the projection the marks use.
+    ///
+    /// A temporal `x` is still projected through the continuous underlying
+    /// scale, because mark positions are numeric; the axis decoration keeps
+    /// the temporal kind for its tick labels.
+    pub fn horizontal_scale_kind(&self) -> SVScaleKind {
+        self.horizontal_scale.kind()
+    }
+
+    /// Returns the kind of the vertical projection (always continuous).
+    pub fn vertical_scale_kind(&self) -> SVScaleKind {
+        self.vertical_scale.kind()
     }
 
     /// Returns the logical canvas size.

@@ -1,20 +1,20 @@
 //! Reading the source columns through one representation dispatch.
 
 use super::super::core_implementation::SVStepPlot;
-use super::super::options::SVStepDuplicatePolicy;
 use super::grouping::SVStepSample;
+use super::sparse_indices::sv_sample_indices;
 use scienceview_core::sv_data::{SVColumnView, SVRepresentation, SVSparseView};
 use scienceview_core::sv_error::SVError;
 
 /// A column read through one representation dispatch.
-enum SVStepCursor<'a> {
+pub(super) enum SVStepCursor<'a> {
     Dense(&'a [f64]),
     Sparse(SVSparseView<'a>),
     Streaming(&'a [f64]),
 }
 
 impl<'a> SVStepCursor<'a> {
-    fn value_at(&self, index: usize) -> Option<f64> {
+    pub(super) fn value_at(&self, index: usize) -> Option<f64> {
         match self {
             SVStepCursor::Dense(values) | SVStepCursor::Streaming(values) => {
                 values.get(index).copied()
@@ -23,7 +23,7 @@ impl<'a> SVStepCursor<'a> {
         }
     }
 
-    fn sparse(&self) -> Option<&SVSparseView<'a>> {
+    pub(super) fn sparse(&self) -> Option<&SVSparseView<'a>> {
         match self {
             SVStepCursor::Sparse(sparse) => Some(sparse),
             SVStepCursor::Dense(_) | SVStepCursor::Streaming(_) => None,
@@ -82,9 +82,11 @@ pub(crate) fn sv_collect_samples(
 
     let indices = sv_sample_indices(
         &x_cursor,
+        &y_cursor,
         length,
         plot.duplicate_policy,
         plot.aggregate.is_some(),
+        plot.series.is_some(),
     );
 
     let mut samples = Vec::with_capacity(indices.len());
@@ -106,76 +108,6 @@ pub(crate) fn sv_collect_samples(
     }
 
     Ok((samples, representation))
-}
-
-/// Chooses the logical positions to read.
-///
-/// A sparse ordering column stores its non-zero `x` values explicitly; every
-/// other position is an implicit zero. Because all those positions share
-/// `x = 0`, the duplicate-`x` policy collapses them to exactly one observation,
-/// so the reader visits the stored entries plus that one representative
-/// position instead of expanding the column. Aggregation needs every
-/// observation of the group, so it falls back to the full logical length.
-fn sv_sample_indices(
-    x_cursor: &SVStepCursor<'_>,
-    length: usize,
-    policy: SVStepDuplicatePolicy,
-    aggregate: bool,
-) -> Vec<usize> {
-    let Some(sparse) = x_cursor.sparse() else {
-        return (0..length).collect();
-    };
-    if aggregate {
-        return (0..length).collect();
-    }
-
-    let mut indices: Vec<usize> = sparse.stored_entries().map(|(index, _)| index).collect();
-    if let Some(representative) = sv_sparse_zero_representative(sparse, policy) {
-        if !indices.contains(&representative) {
-            indices.push(representative);
-        }
-    }
-    indices
-}
-
-/// Returns the implicit-zero position that wins the duplicate-`x` policy.
-fn sv_sparse_zero_representative(
-    sparse: &SVSparseView<'_>,
-    policy: SVStepDuplicatePolicy,
-) -> Option<usize> {
-    match policy {
-        SVStepDuplicatePolicy::FirstWins => {
-            let mut position = 0;
-            for (index, value) in sparse.stored_entries() {
-                if index > position || value == 0.0 {
-                    return Some(position);
-                }
-                position = index + 1;
-            }
-            if position < sparse.length() {
-                Some(position)
-            } else {
-                None
-            }
-        }
-        SVStepDuplicatePolicy::LastWins => {
-            let mut last_zero = None;
-            let mut position = 0;
-            for (index, value) in sparse.stored_entries() {
-                if index > position {
-                    last_zero = Some(index - 1);
-                }
-                if value == 0.0 {
-                    last_zero = Some(index);
-                }
-                position = index + 1;
-            }
-            if position < sparse.length() {
-                last_zero = Some(sparse.length() - 1);
-            }
-            last_zero
-        }
-    }
 }
 
 pub(crate) fn sv_combined_representation(
