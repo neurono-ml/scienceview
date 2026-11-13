@@ -25,3 +25,6 @@
 - [x] Add the example, generated figure and book chapter (book branch).
 - [x] Run the four gates and open the ADR issue.
 
+## Review fixes
+
+- [x] Validate registered axis bounds against the scale transform's space.
