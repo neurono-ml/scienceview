@@ -1,14 +1,16 @@
 //! `SVContourPlot`: contour lines and filled bands over a supplied field.
 //!
 //! The chart is the composition of FDR-132:
-//! `data -> [SVStat::Aggregate (grid interpolation)] -> scalar field ->
-//! [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area`.
+//! `data -> [SVStat::Bin + SVStat::Aggregate (grid and cell mean)] -> scalar
+//! field -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line |
+//! SVMark::Area`.
 //!
 //! A matrix column is read directly onto a lattice; an `x`, `y`, `value` cloud
 //! is binned through [`SVStat::Bin`](crate::sv_stat::SVStat::Bin) and averaged
-//! per cell. The level extraction lives in the `geometry` submodule, because
-//! the core stat vocabulary has no contour variant yet (patterns P5); a future
-//! core change may promote it to a shared kernel.
+//! per cell by [`SVStat::Aggregate`](crate::sv_stat::SVStat::Aggregate). The
+//! level extraction lives in the `geometry` submodule, because the core stat
+//! vocabulary has no contour variant yet (patterns P5); a future core change
+//! may promote it to a shared kernel.
 //!
 //! ```
 //! use scienceview::sv_backend::SVBackendKind;

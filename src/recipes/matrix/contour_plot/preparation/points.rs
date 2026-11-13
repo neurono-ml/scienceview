@@ -6,7 +6,9 @@ use super::super::options::SVContourMissingPolicy;
 use super::missing::sv_fill_missing;
 use crate::sv_data::SVColumnView;
 use crate::sv_error::SVError;
-use crate::sv_stat::{SVBinOptions, SVStat, SVStatInput, SVStatResult};
+use crate::sv_stat::{
+    SVAggregateMethod, SVAggregateOptions, SVBinOptions, SVStat, SVStatInput, SVStatResult,
+};
 
 /// One finite `(x, y, value)` observation.
 struct SVPointObservation {
@@ -19,7 +21,8 @@ struct SVPointObservation {
 ///
 /// The two axes are binned through [`SVStat::Bin`], so the recipe owns no
 /// binning rule of its own. Every cell holds the mean of the values that fall
-/// in it; an empty cell is a missing sample and follows the configured policy.
+/// in it, computed by [`SVStat::Aggregate`]; an empty cell is a missing sample
+/// and follows the configured policy.
 pub(super) fn sv_points_field(
     configuration: &SVContourConfiguration<'_>,
     x: SVColumnView<'_>,
@@ -44,26 +47,15 @@ pub(super) fn sv_points_field(
     let y_edges = sv_bin_edges(&vertical, configuration.grid_count)?;
     let columns = x_edges.len() - 1;
     let rows = y_edges.len() - 1;
-    let mut sums = vec![0.0; columns * rows];
-    let mut counts = vec![0usize; columns * rows];
-    for observation in observations {
+    let mut cell_codes = Vec::with_capacity(observations.len());
+    let mut observed_values = Vec::with_capacity(observations.len());
+    for observation in &observations {
         let column = sv_bin_index(&x_edges, observation.x);
         let row = sv_bin_index(&y_edges, observation.y);
-        let position = row * columns + column;
-        sums[position] += observation.value;
-        counts[position] += 1;
+        cell_codes.push((row * columns + column) as f64);
+        observed_values.push(observation.value);
     }
-    let samples: Vec<f64> = sums
-        .iter()
-        .zip(counts.iter())
-        .map(|(sum, count)| {
-            if *count == 0 {
-                f64::NAN
-            } else {
-                sum / *count as f64
-            }
-        })
-        .collect();
+    let samples = sv_cell_means(&observed_values, &cell_codes, columns * rows)?;
     let values = sv_fill_missing(
         &samples,
         columns,
@@ -123,6 +115,39 @@ fn sv_bin_edges(values: &[f64], grid_count: usize) -> Result<Vec<f64>, SVError> 
             message: "the contour composition expects the bin kernel".to_string(),
         }),
     }
+}
+
+/// Computes the mean of the observations that fall in every cell.
+///
+/// The cell index is the group code handed to [`SVStat::Aggregate`], so the
+/// recipe composes the kernel instead of owning a mean of its own. A cell with
+/// no observation stays `NaN` and follows the missing-value policy.
+fn sv_cell_means(
+    values: &[f64],
+    cell_codes: &[f64],
+    number_of_cells: usize,
+) -> Result<Vec<f64>, SVError> {
+    let stat = SVStat::aggregate(SVAggregateOptions::new().method(SVAggregateMethod::Mean));
+    let input =
+        SVStatInput::new(SVColumnView::Dense(values)).with_groups(SVColumnView::Dense(cell_codes));
+    let SVStatResult::Groups(groups) = stat.apply(input)? else {
+        return Err(SVError::InvalidConfiguration {
+            message: "the contour composition expects the aggregate kernel".to_string(),
+        });
+    };
+    let mut samples = vec![f64::NAN; number_of_cells];
+    for group in groups.groups() {
+        let Some(code) = group.group() else {
+            continue;
+        };
+        let Ok(position) = usize::try_from(code.round() as i64) else {
+            continue;
+        };
+        if let Some(sample) = samples.get_mut(position) {
+            *sample = group.value();
+        }
+    }
+    Ok(samples)
 }
 
 fn sv_bin_index(edges: &[f64], value: f64) -> usize {
