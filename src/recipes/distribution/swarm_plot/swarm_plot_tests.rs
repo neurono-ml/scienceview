@@ -268,3 +268,19 @@ fn the_figure_title_and_axis_labels_reach_the_scene() {
     assert!(text.contains("species"));
     assert!(text.contains("body mass"));
 }
+
+#[test]
+fn an_all_missing_source_renders_an_empty_scene() {
+    const MISSING: [f64; 3] = [f64::NAN; 3];
+    const ONE_CATEGORY: [f64; 3] = [0.0; 3];
+    let table = SVDataTableBuilder::new()
+        .with_column("value", SVColumnRole::Y, &MISSING)
+        .with_column("category", SVColumnRole::Grouping, &ONE_CATEGORY)
+        .build()
+        .expect("the table is well formed");
+
+    let scene = scene(&table);
+    assert_eq!(scene.number_of_marks(), 0);
+    assert_eq!(scene.number_of_mark_primitives(), 0);
+    assert_eq!(scene.category_labels().len(), 1);
+}
