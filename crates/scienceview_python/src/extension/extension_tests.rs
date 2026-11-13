@@ -78,6 +78,19 @@ fn a_missing_backend_raises_the_typed_exception() {
 }
 
 #[test]
+fn a_dashboard_without_a_backend_is_rejected_at_construction() {
+    if !sv_python_tests_enabled() {
+        return;
+    }
+    Python::attach(|py| {
+        let panels = pyo3::types::PyList::empty(py);
+        let error = super::figure::dashboard(panels.as_any(), 1, 1, None, None)
+            .expect_err("the dashboard has no backend");
+        assert!(error.is_instance_of::<SVBackendSelectionError>(py));
+    });
+}
+
+#[test]
 fn the_streaming_class_pushes_and_re_renders() {
     if !sv_python_tests_enabled() {
         return;

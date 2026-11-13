@@ -266,8 +266,7 @@ impl SVPythonPlotOptions {
                 message: "`bin_count` must be at least one".to_string(),
             });
         }
-        let unused = sort_of_unused(kind, self);
-        if let Some(name) = unused {
+        if let Some(name) = sv_first_unbound_option(kind, self) {
             return Err(SVError::InvalidConfiguration {
                 message: format!(
                     "`{name}` is not an option of the `{}` plot; call `options_for` to see the bound options",
@@ -280,7 +279,10 @@ impl SVPythonPlotOptions {
 }
 
 /// Reports the first option that the kind does not bind.
-fn sort_of_unused(kind: SVPythonPlotKind, options: &SVPythonPlotOptions) -> Option<&'static str> {
+fn sv_first_unbound_option(
+    kind: SVPythonPlotKind,
+    options: &SVPythonPlotOptions,
+) -> Option<&'static str> {
     let bound: &[&str] = match kind {
         SVPythonPlotKind::Figure => &["title"],
         SVPythonPlotKind::ScatterPlot => &["x", "y", "series", "title", "x_label", "y_label"],

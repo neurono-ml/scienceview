@@ -1,9 +1,10 @@
 //! The streaming representation at the Python boundary: an owned bounded
 //! rolling window fed by `push`.
 //!
-//! A producer pushes samples from Python; a read borrows the current window and
-//! never waits. The window drops its oldest sample once it is full, so a stalled
-//! consumer cannot grow memory without bound.
+//! A producer pushes samples from Python; a read takes the current window under
+//! the window lock and never waits for a producer. The window drops its oldest
+//! sample once it is full, so a stalled consumer cannot grow memory without
+//! bound.
 
 use scienceview::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVDataSource, SVReactivity, SVSourceSchema,

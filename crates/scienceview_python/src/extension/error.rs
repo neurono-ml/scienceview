@@ -44,7 +44,7 @@ create_exception!(
     scienceview,
     SVScriptError,
     SVBindingError,
-    "Raised for a scripting, control or dashboard failure."
+    "Raised for a scripting failure."
 );
 
 /// Translates one `SVError` into the typed exception a caller can catch.

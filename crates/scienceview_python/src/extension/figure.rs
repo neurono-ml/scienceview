@@ -9,7 +9,8 @@ use crate::sv_spec::{
     SVPythonDashboardPanel, SVPythonDashboardSpec, SVPythonFigureSpec, SVPythonPlotKind,
     SVPythonPlotOptions, sv_backend_kind_names, sv_option_descriptors, sv_parse_backend_kind,
     sv_python_point_count, sv_render_python_dashboard, sv_render_python_figure,
-    sv_render_python_figure_svg, sv_save_python_figure, sv_update_python_figure,
+    sv_render_python_figure_svg, sv_require_backend_kind, sv_save_python_figure,
+    sv_update_python_figure,
 };
 
 use super::data::sv_build_bound_spec;
@@ -381,6 +382,9 @@ pub(crate) fn dashboard(
     if let Some(backend) = backend {
         specification.backend = Some(sv_parse_backend_kind(backend).map_err(sv_python_error)?);
     }
+    // Like a figure, a dashboard cannot even be held without the explicit
+    // selection: the caller's construction is the Rust builder's `build`.
+    sv_require_backend_kind(specification.backend).map_err(sv_python_error)?;
     for panel in panels.try_iter().map_err(|_| {
         sv_python_error(SVError::InvalidConfiguration {
             message: "`panels` must be a list of panel dictionaries".to_string(),
