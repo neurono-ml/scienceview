@@ -23,6 +23,7 @@ cargo run --example histogram_plot --features render-svg
 cargo run --example line_plot
 cargo run --example density_plot --features render-svg
 cargo run --example hexbin_plot --features render-svg
+cargo run --example parallel_coordinates_plot
 cargo run --example density_heatmap_plot --features render-svg
 ```
 
@@ -494,6 +495,39 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](assets/hexbin_plot.svg)
+## Parallel categories plot
+
+`examples/parallel_categories_plot.rs` builds an `SVParallelCategoriesPlot`.
+Every axis is counted through `SVStat::Count`, observations are aggregated into
+ribbons between adjacent axes, and the ribbon slices encode the count:
+
+```rust,ignore
+let scene = SVParallelCategoriesPlot::builder()
+    .data_source(&table)
+    .variables(&["delivery", "region", "outcome"])
+    .category_labels("delivery", &["online", "campus", "hybrid"])
+    .band_gap(0.24)
+
+## Parallel coordinates plot
+
+`examples/parallel_coordinates_plot.rs` builds an `SVParallelCoordinatesPlot`.
+Every continuous variable gets its own vertical axis, every observation is a
+polyline through the visible axes, and an optional grouping column colours the
+lines:
+
+```rust,ignore
+let output = SVParallelCoordinatesPlot::builder()
+    .data_source(&table)
+    .variables(&["sepal length", "sepal width", "petal length", "petal width"])
+    .colour("species")
+    .backend(SVBackendKind::Svg)
+    .build()?
+    .compose()?;
+```
+
+![Course outcomes across delivery, region and result](assets/parallel_categories_plot.svg)
+![Iris measurements across five parallel axes](assets/parallel_coordinates_plot.svg)
+
 ## Contour plot
 
 `examples/contour_plot.rs` builds an `SVContourPlot`. The recipe reads a
