@@ -1,4 +1,4 @@
-//! The matrix family: charts that draw a field defined over two axes.
+//! Matrix recipes: charts whose data is a two-dimensional field.
 //!
 //! Every chart in this family appends one `#[path] pub mod` and one
 //! `pub use` to this dispatcher; the family batch integrator resolves the
@@ -8,6 +8,10 @@
 
 #[path = "contour_plot/mod.rs"]
 pub mod sv_contour_plot;
-pub use sv_contour_plot::{
-    SVContourComposition, SVContourField, SVContourPlot, SVContourPlotBuilder,
+pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};
+
+#[path = "heatmap_plot/mod.rs"]
+pub mod sv_heatmap_plot;
+pub use sv_heatmap_plot::{
+    SVHeatmapFrame, SVHeatmapPlot, SVHeatmapPlotBuilder, SVHeatmapRenderOutput, SVHeatmapScene,
 };
