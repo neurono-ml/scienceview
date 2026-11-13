@@ -12,6 +12,17 @@ released.
 
 ### Added
 
+- The multivariate recipe `SVPairPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  a pair grid over a variable list, with one cell per pair, shared per-variable
+  domains, optional `hue` grouping, a configurable diagonal (density or
+  histogram) and a configurable off-diagonal shape (scatter, hexbin or
+  density contour). The chart follows FDR-144 and composes only the closed
+  kernels: dot, bar and line marks, `SVStat::Bin` and `SVStat::KernelDensity`,
+  the scale kernel and the layout engine's grid. Dense, sparse and streaming
+  input produce the same grid; the missing-value policy is explicit. The
+  example `examples/pair_plot.rs` writes `docs/figures/pair_plot.svg`.
+  Transition and animation wiring is deferred; the geometry is
+  transition-ready.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is

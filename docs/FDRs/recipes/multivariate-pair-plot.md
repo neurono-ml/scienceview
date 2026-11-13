@@ -5,11 +5,11 @@
 | Id | FDR-144 |
 | Name | `SVPairPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [ch43 — Pair plot](../../src/development-explained/ch43-pair-plot.md) |
+| Example program | [`examples/pair_plot.rs`](../../examples/pair_plot.rs) |
 
 ## Purpose
 
@@ -106,10 +106,18 @@ palette is a theme token, so the whole matrix is restyled by a theme change.
 
 ## Acceptance
 
-- [ ] The grid has one cell per pair of variables.
-- [ ] The diagonal shows a distribution appropriate to the variable type.
-- [ ] The `hue` grouping is consistent across cells and the diagonal.
-- [ ] Dense, sparse and streaming inputs give the same matrix.
+- [x] The grid has one cell per pair of variables.
+  Evidence: `pair_plot_tests::the_default_build_takes_every_continuous_column`
+  asserts nine cells for three variables.
+- [x] The diagonal shows a distribution appropriate to the variable type.
+  Evidence: `pair_plot_tests::the_diagonal_kind_changes_the_output` and the
+  density/histogram cells composed in `diagonal.rs`.
+- [x] The `hue` grouping is consistent across cells and the diagonal.
+  Evidence: `pair_plot_tests::hue_groups_the_marks_and_the_diagonal` asserts the
+  three hue groups and the shared legend.
+- [x] Dense, sparse and streaming inputs give the same matrix.
+  Evidence: `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_grid`
+  and `parity_tests::every_off_diagonal_kind_is_representation_parity`.
 
 ## Open questions
 
