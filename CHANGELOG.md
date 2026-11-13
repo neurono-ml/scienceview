@@ -12,25 +12,38 @@ released.
 
 ### Added
 
-<<<<<<< HEAD
+- The first relational recipe, `SVScatterPlot` (`scienceview::recipes::relational::scatter_plot`):
+  the joint distribution of two continuous columns with optional `series`,
+  `colour` and `size` channels, a constant `alpha` for overplotting, a marker
+  shape, edge colour and width, the jitter move, and axes, grid, title and
+  legend. It composes the existing data, scale, move, mark and decoration
+  kernels — no kernel variant is added — resolves dense, sparse and streaming
+  columns once per render without densifying or blocking, records the backend
+  kind, representation and point count in one operation span, and returns a
+  backend-agnostic `SVScatterScene` that the SVG backend serializes
+  deterministically. A large scatter groups its circles into one compound path
+  per paint. The example `examples/scatter_plot.rs` generates
+  `docs/figures/scatter_plot.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
   pure rasterizer (`SVRasterCanvas`) owns a straight-alpha RGBA buffer and
-  draws flattened paths with non-zero winding, stroked segments with caps,
-  joins, dashes and anti-aliasing, rectangles with corner radii, circles,
+  draws flattened paths with non-zero winding, stroked segments with butt,
+  round and square caps, round, miter and bevel joins (a miter past the limit
+  falls back to a bevel), dashes and anti-aliasing, rectangles with corner radii, circles,
   text laid out as boxes, and borrowed RGBA images with nearest or bilinear
   sampling, all scaled by the viewport's device pixel ratio. A present layer
   (`SVNativeWindow`, compiled only with the `window` feature, which the root
   `render-native` feature enables) blits the buffer through `softbuffer` in a
   `winit` window and re-solves the logical viewport on resize or scale change;
-  `winit` and `softbuffer` stay out of the default build. The frame loop takes
+  a streaming producer publishes frames into the open window, which presents
+  the newest one in place without reopening. `winit` and `softbuffer` stay out
+  of the default build. The frame loop takes
   its clock from the model through `SVFrameClock`, so a paused timeline
   performs no animation work. `render` and `update` return the comparable RGBA
   frame, `show` presents it, and `save` reports the missing export capability
   the native row declares. Dirty regions record what an in-place repaint
   touched, and the headless rasterizer is deterministic across threads.
-=======
 - The animation timeline in `scienceview_core::sv_animation`: `SVAnimation`
   owns the playback clock and the keyframe window, and `SVAnimationBuilder`
   requires an explicit `SVKeyframeSource` (`Fixed` or `Streaming`) with the
@@ -39,14 +52,30 @@ released.
   `SVKeyframeDelta::interpolate` is the seam the transition kernel consumes.
   Time is supplied by the caller through `advance(Duration)` — there is no wall
   clock, timer or async runtime — so playback is reproducible. A fixed source
-  validates strictly increasing timestamps at build time; a streaming source
+  validates non-decreasing timestamps at build time (an equal timestamp is a
+  zero-length segment that swaps instantly); a streaming source
   accepts arrivals into a bounded window that drops the oldest frame and counts
   accepted, duplicate, out-of-order and evicted keyframes. A keyframe arriving
   mid-transition re-targets from the interpolated position without a jump, and
   playback exposes idle, playing, paused and finished state with loop,
   direction, speed and the `SVAnimationAction` vocabulary. Every operation
   emits one `scienceview.animation` span.
->>>>>>> origin/docs/documentations
+- The transition kernel in `scienceview_core::sv_transition`: `SVTransition`
+  matches marks between two states by a stable key — `Category`, `Index`,
+  `Identity` or a seeded `Derived` hash, resolved into a typed
+  `SVMatchKeyValue` from a dense, sparse or streaming `SVColumnView` with one
+  dispatch and duplicate-key detection — and computes the enter, update and exit
+  sets. Interpolation follows the mark kernel's interpolable-property table:
+  position, size, colour, opacity and font size tween while shape, dash pattern
+  and font family hold their previous value and swap at the end. Enter and exit
+  rules (`None`, `FadeIn`/`ScaleIn`/`SlideIn`, `FadeOut`/`ScaleOut`/`SlideOut`)
+  govern appearances and disappearances. Durations and easings resolve from the
+  theme's motion tokens behind the `theme` feature, with documented built-in
+  defaults otherwise, and a reduced-motion theme collapses every frame to its
+  final state. The kernel owns no clock: evaluation is a pure function of a
+  caller-supplied progress in `0..=1`, so it is deterministic and safe to run
+  from several threads, and a backend without in-place update resolves the
+  transition to its final state.
 - The positional-move kernel in `scienceview_core::sv_move`: `SVMove` is the
   closed vocabulary of stack, dodge, jitter, shift, swarm and normalize, applied
   in data space between the statistic and the scale. `SVMoveSequence::new`

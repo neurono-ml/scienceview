@@ -1,0 +1,261 @@
+# Chapter 16 — A scatter plot from zero: how a recipe composes the kernels
+
+This chapter tells the story of the first **recipe** in `scienceview`:
+`SVScatterPlot`, the chart that draws two continuous columns as points. The
+recipe is small on purpose. It is the reference every later chart follows, so
+it shows how the pieces built in the previous chapters fit together without
+adding a single new primitive.
+
+By the end you will know what a recipe owns (channels, validation and a scene),
+what it deliberately does not own (geometry, scales, decoration layout) and
+where each of those lives in the code.
+
+## The picture a scatter draws
+
+A scatter plot answers a simple question: *where do two measurements sit
+together?* Each row of data becomes one dot. The horizontal position is one
+column, the vertical position another, and grouping, colour and size are
+optional channels layered on top.
+
+The chart is specified in `docs/FDRs/recipes/relational-scatter-plot.md`
+(FDR-101). The engineering contract in `docs/FDRs/patterns.md` fixes how a
+recipe is built: one capability, one chart, one change (P1), the builder
+surface (P2), the folder layout (P3), registration by family (P4), closed
+kernels (P5), the data boundary (P6), one error type (P7), observability (P8),
+tests (P9), the eight tasks (P10) and naming (P11).
+
+## The pipeline
+
+```mermaid
+flowchart LR
+    A["SVDataSource<br/>named columns"] --> B["resolve columns once<br/>dense · sparse · streaming"]
+    B --> C["x, y continuous scales"]
+    B --> D["series → stable palette<br/>size → diameter<br/>colour → continuous map"]
+    B --> E["optional SVMove::Jitter"]
+    E --> C
+    C --> F["SVMark::Dot<br/>one primitive per row"]
+    D --> G["paint and size channels"]
+    F --> G
+    G --> H["SVScatterScene<br/>marks + decorations"]
+    H --> I["SVG / native / component<br/>serializes the scene"]
+
+    style A fill:#f6e7a1,stroke:#8a6d00,color:#3d2f00
+    style B fill:#cfe8ff,stroke:#1c5d99,color:#0b2b4a
+    style F fill:#d8f5d0,stroke:#2f7d32,color:#123d14
+    style H fill:#ffd8e6,stroke:#a12b55,color:#4a1026
+    style I fill:#e6d8ff,stroke:#5a34a8,color:#2b1660
+```
+
+The important shape is the middle. `SVMark::Dot` owns geometry and paint;
+`SVScale` owns data-to-position; `SVMove` owns displacement; `SVDecoration`
+owns axes and legends. The recipe owns only the *mapping* from its named
+columns onto those kernels.
+
+## Channels are the recipe's real surface
+
+The builder names columns, not arrays:
+
+```rust,ignore
+let scene = SVScatterPlot::builder()
+    .data_source(&table)
+    .x("sepal_width")
+    .y("petal_length")
+    .series("species")
+    .size("body_mass")
+    .alpha(0.85)
+    .backend(SVBackendKind::Svg)
+    .build()?
+    .render()?;
+```
+
+`x` and `y` are required. `series` groups the rows and gives each group one
+palette colour and one legend entry. `size` maps a continuous column onto the
+marker diameter. `colour` is a continuous override that wins over the series
+palette point by point. `alpha` is constant and exists for overplotting: a
+translucent dot reveals density where opaque dots would hide it.
+
+The builder never guesses a backend. `backend(SVBackendKind::Svg)` is required;
+`execution_mode(...)` defaults to `Automatic`. `build()` validates and carries
+the kind into the built scatter, and `render()` records it in a span. This is
+the same rule the figure builder follows in Chapter 5.
+
+## Missing columns fail before pixels
+
+A recipe reads a named source, so it can fail at build time for a reason a user
+can fix:
+
+- no `x` or `y` name → an `InvalidConfiguration` naming the missing call;
+- a name the source does not expose → `ColumnNotFound`;
+- columns of different lengths → `MismatchedLengths`;
+- a non-jitter move → an explicit configuration error, because FDR-101 allows
+  only jitter;
+- an impossible alpha, size interval or marker → the dot kernel's own
+  validation error.
+
+The tests assert each of these paths, including
+`the_builder_requires_the_documented_columns`,
+`a_missing_optional_column_fails_with_an_explicit_error` and
+`columns_of_different_lengths_fail_at_build_time`.
+
+## The data boundary is crossed once
+
+The recipe calls `SVDataSource::column(name)` once per configured column. Each
+call resolves a `SVColumnSnapshot`, and `column_view()` exposes exactly one
+`SVColumnView`: dense, sparse or streaming. The scale, move and mark kernels
+then dispatch on that representation themselves.
+
+The tests prove the three representations agree:
+
+```rust,ignore
+let dense = sv_scene_to_svg(&sv_build_default(&dense_source).render()?);
+let sparse = sv_scene_to_svg(&sv_build_default(&sparse_source).render()?);
+let streaming = sv_scene_to_svg(&sv_build_default(&streaming_source).render()?);
+assert_eq!(dense, sparse);
+assert_eq!(dense, streaming);
+```
+
+`dense_sparse_and_streaming_inputs_draw_the_same_scene` is the parity claim.
+`a_sparse_input_is_never_densified` asserts that a sparse view renders through
+the sparse path — a call to `dense_values()` would have returned
+`UnsupportedRepresentation`, so success is evidence. `a_streaming_input_returns_promptly_and_shows_the_window`
+renders a streaming scene on another thread and reads the result with a
+two-second timeout, which is how the chapter states "never blocks the render
+thread" as an executable claim.
+
+## The jitter move, and nothing else
+
+Jitter is the one move FDR-101 accepts. It belongs to `sv_move`, not to the
+recipe: the move kernel derives a deterministic displacement from the mark key,
+so the same seeded jitter gives the same picture on every render. The recipe
+adds the displacement to the horizontal column before the scale is built:
+
+```rust,ignore
+let moved = SVMoveSequence::new(vec![SVMove::jitter().seed(7).into()])?
+    .apply(&SVMoveRequest::new(horizontal, &keys))?;
+```
+
+`jitter_displaces_points_deterministically` asserts that two renders of the
+seeded scatter are byte-identical and that the jittered figure differs from the
+plain one. The keys are the series codes, so points inside one group move
+within that group's band.
+
+## Size and colour meet the mark kernel
+
+The dot kernel produces geometry with one default size and one default colour.
+The recipe cannot ask `SVMark::Dot` for a per-point size, because the mark
+vocabulary is closed (P5) and adding a field would be a core change.
+
+Instead, the recipe applies the channels to the geometry the kernel returned:
+
+- each point's colour is placed on its primitive's paint;
+- each point's diameter becomes a scale factor applied around the primitive's
+  own centre, for circles, squares, paths and text alike;
+- the edge colour becomes the stroke and `edge_width` its width.
+
+No position is recomputed; the mark kernel remains the single owner of
+placement. The test `the_size_column_sizes_points_individually` reads the
+circle radii back from the scene and asserts they grow with the column;
+`the_colour_column_overrides_the_series_colour_per_point` asserts the
+continuous override wins.
+
+## Overplotting: transparency and one path
+
+Two policies keep a dense scatter readable and its document small:
+
+1. `alpha` is applied to every paint, so overlapping dots reveal density.
+2. Above `SV_LARGE_SCATTER_THRESHOLD` (512) circles, the recipe groups its
+   circles by paint and emits one compound `<path>` per group. Every circle is
+   still drawn, as two half arcs and a close command.
+
+`a_large_scatter_groups_its_circles_into_one_path` draws two thousand points and
+asserts that the scene holds a single mark primitive.
+
+## Decorations are measured, not guessed
+
+The recipe does not draw an axis. It asks `SVAxis` to measure itself against the
+plot extent, places the measurement against the solved rectangle, and asks
+`SVGrid` to reuse the placed tick coordinates. The title and the legend follow
+the same measure-then-place protocol from Chapter 9.
+
+The scene keeps the primitives in draw order: a `before_marks` list (title,
+grid, border) and an `after_marks` list (axes, legend). A backend serializes
+them in that order, so a legend sits above the marks and a grid below them
+without a z-index.
+
+## What the SVG backend receives
+
+`SVScatterScene` is backend-agnostic on purpose. It carries a viewport, a plot
+rectangle, a background, the two decoration lists and the mark geometries. The
+example turns it into a document:
+
+```rust,ignore
+let mut document = SVSvgDocument::new(scene.viewport())
+    .with_title(scene.title().unwrap_or("Scatter plot"))
+    .with_background(scene.background());
+document.push_decoration_primitives(scene.decoration_primitives_before_marks());
+for geometry in scene.mark_geometries() {
+    document.push_mark_geometry(geometry);
+}
+document.push_decoration_primitives(scene.decoration_primitives_after_marks());
+```
+
+`examples/scatter_plot.rs` writes the result to
+`docs/figures/scatter_plot.svg`; the SVG is mirrored into this book under
+`docs/src/assets/scatter_plot.svg`. The code pipeline regenerates the figure
+and fails on drift, so the picture above the chapter is always the tool's own
+output.
+
+## Concurrency and observability
+
+The built scatter holds a shared reference to its source and no mutable state
+of its own, so rendering it from several threads is safe. The test
+`several_threads_render_the_same_scatter_identically` renders the same scatter
+from eight threads, sixteen times each, and compares the serialized SVG byte
+for byte.
+
+Every `render()` runs inside one `scienceview.operation` span carrying
+`backend.kind`, `representation`, `points` and, when it finishes, `duration`
+and `outcome`. The test
+`a_render_records_the_backend_representation_and_point_count` installs a
+subscriber and asserts those fields, including a non-SVG configured kind, which
+proves the span records the choice instead of a hardcoded backend.
+
+## Roads not taken
+
+- **A recipe-specific renderer.** Rejected: it would duplicate placement and
+  paint logic and break P5.
+- **Extending `SVMark::Dot` with per-point size and colour.** Rejected for the
+  same reason. The channel mapping belongs to the recipe.
+- **A scatterplot matrix mode.** Rejected: a matrix of scatters is
+  `SVSplomPlot`, a different composition.
+- **A regression layer.** Rejected here: FDR-101 is the plain scatter; the
+  regression recipe composes `SVStat::Fit` separately.
+- **A keyed transition surface.** Deferred. The transition kernel already
+  exists, but FDR-101's animation acceptance is not satisfied yet; the recipe
+  exposes no match key and the acceptance list records that gap honestly.
+
+## The tests are the specification
+
+The recipe ships five companion modules:
+
+| Module | What it proves |
+| --- | --- |
+| `scatter_plot_tests.rs` | defaults, every option, the two required steps, large-data grouping |
+| `parity_tests.rs` | dense/sparse/streaming parity, non-densification, non-blocking streaming, missing and mismatched columns, seeded jitter |
+| `concurrency_tests.rs` | eight threads render byte-identical scenes |
+| `observability_tests.rs` | the render span carries the kind, representation and point count |
+| the module doctest | the public builder renders a three-point scene |
+
+Read them in that order: they are the executable version of this chapter.
+
+## Summary
+
+`SVScatterPlot` is a thin, deliberate layer:
+
+- it **owns** the column contract, the channel mapping and the scene;
+- it **borrows** the data boundary, the scales, the move, the mark and the
+  decorations from the kernels;
+- it **returns** a backend-agnostic scene so the SVG backend and every later
+  backend draw the same picture.
+
+That division is the template for the rest of the chart surface.
