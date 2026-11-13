@@ -1,29 +1,12 @@
-//! The embedded runtime: a small, dependency-free script that applies the
-//! model's payloads to the document without reloading it.
-//!
-//! The runtime never computes geometry. It reads the payload the Rust model
-//! serialized, swaps the rendered markup, and turns gestures into actions whose
-//! deltas only move the view transform. Requesting an animation frame is the
-//! clock the browser offers; the playback position always comes from the
-//! payload (design D4).
+//! The embedded runtime, its events and its inlined source.
 
-/// The event a host dispatches to deliver a new payload to a figure.
-pub const SV_HTML_UPDATE_EVENT: &str = "scienceview:update";
-/// The event the runtime dispatches when a gesture becomes an action.
-pub const SV_HTML_ACTION_EVENT: &str = "scienceview:action";
-/// The event the runtime dispatches after it applies a view delta.
-pub const SV_HTML_DELTA_EVENT: &str = "scienceview:delta";
+mod runtime_source;
 
-/// The inlined runtime source.
-pub const SV_HTML_RUNTIME: &str = include_str!("runtime.js");
-
-/// Why the runtime is small enough to inline in every document.
-///
-/// The constant function exists so the size is asserted in one place instead
-/// of in the middle of an unrelated test.
-pub fn sv_html_runtime_byte_length() -> usize {
-    SV_HTML_RUNTIME.len()
-}
+pub use runtime_source::SV_HTML_ACTION_EVENT;
+pub use runtime_source::SV_HTML_DELTA_EVENT;
+pub use runtime_source::SV_HTML_RUNTIME;
+pub use runtime_source::SV_HTML_UPDATE_EVENT;
+pub use runtime_source::sv_html_runtime_byte_length;
 
 #[cfg(test)]
 #[path = "embedded_runtime_tests.rs"]
