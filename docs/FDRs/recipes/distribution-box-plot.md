@@ -126,7 +126,7 @@ the temporal behaviour.
 
 | Backend | Notes |
 |---|---|
-| `Svg` | one `<path>` for the box, two for the whiskers, one line for the median, one element per outlier |
+| `Svg` | one `<path>` for the box body (three for a notch), four for the whisker stems and caps, one for the median, one element per outlier |
 | `Html` | same |
 | `Native` / `Wasm` | rectangle and line rasterization |
 | `Tui` | the box as a cell rectangle, the median as a character row |
