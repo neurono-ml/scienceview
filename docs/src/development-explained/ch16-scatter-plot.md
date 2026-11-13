@@ -137,7 +137,10 @@ let moved = SVMoveSequence::new(vec![SVMove::jitter().seed(7).into()])?
 `jitter_displaces_points_deterministically` asserts that two renders of the
 seeded scatter are byte-identical and that the jittered figure differs from the
 plain one. The keys are the series codes, so points inside one group move
-within that group's band.
+within that group's band. Jitter needs the displaced values as one column, so
+a sparse horizontal column is rejected with `UnsupportedRepresentation`
+rather than silently densified; the alternative the error names is to disable
+jitter or supply a dense column.
 
 ## Size and colour meet the mark kernel
 
