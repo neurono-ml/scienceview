@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVRegressionPlot` SHALL consume `x`, `y`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVRegressionPlot` SHALL consume `x`, `y` and the optional `series`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. The FDR's optional `weight` column is deferred to the `core-stat` capability because the closed fit kernel consumes no observation weights; the recipe SHALL NOT pretend to apply a weight it cannot pass to the kernel.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
@@ -32,43 +32,39 @@
 
 ### Requirement: Representations are equivalent
 
-`SVRegressionPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream.
+`SVRegressionPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream. A sparse column SHALL be accepted only when its stored support covers its whole logical length; a view with implicit zeros SHALL be rejected with `UnsupportedRepresentation` naming the dense and streaming alternatives, because fitting only the stored entries would not match the column's dense twin.
 
 #### Scenario: Dense sparse and streaming agree
 - **WHEN** the same data is presented as dense, sparse and streaming
 - **THEN** the output agrees within the documented tolerance
 
 #### Scenario: Sparse is not densified
-- **WHEN** a sparse input is supplied
+- **WHEN** a sparse input is supplied with every logical position stored
 - **THEN** the marks are computed without expanding the data
+
+#### Scenario: Sparse implicit zeros are rejected
+- **WHEN** a sparse column leaves any logical position unstored
+- **THEN** the operation fails with `UnsupportedRepresentation`, naming dense and streaming columns as the alternative
+
+#### Scenario: Dense and sparse twins agree
+- **WHEN** a sparse column stores every logical position, including explicit zero values, and its dense twin carries the same values
+- **THEN** both fits produce the same coefficients and predictions
 
 #### Scenario: Streaming does not block
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The chart renders through the backend it selects
 
-`SVRegressionPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
-
-#### Scenario: Transition: fit line
-- **WHEN** the state changes and fit line is affected
-- **THEN** morphs — the coefficients interpolate, and the curve is recomputed per frame
-
-#### Scenario: Transition: points
-- **WHEN** the state changes and points is affected
-- **THEN** redraw unless an identity key is available
-
-### Requirement: The chart renders on every declared backend
-
-`SVRegressionPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVRegressionPlot` SHALL render through the SVG backend in this change and SHALL build for every backend whose mark matrix declares support for `Dot`, `Line` and `Ribbon`. A backend whose composed render path is not implemented yet SHALL refuse the operation explicitly instead of drawing nothing.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
 - **THEN** the figure is self-contained and deterministic
 
-#### Scenario: Native rendering
-- **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+#### Scenario: Non-SVG backend
+- **WHEN** the chart is built for a backend that supports its marks but whose composed render path has not landed
+- **THEN** the render operation fails with an explicit missing-capability error
 
 #### Scenario: Unsupported backend
 - **WHEN** a backend cannot express a required mark

@@ -30,9 +30,10 @@ None.
 
 ## Impact
 
-- New module `src/recipes/relational/regression_plot/`.
+- New module `src/recipes/relational/regression_plot/`, registered as `sv_recipes::sv_relational::sv_regression_plot`.
 - New example `examples/regression_plot.rs` and generated figure
   `docs/figures/regression_plot.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the
-  family batch integrator.
+  family batch integrator; the public path is
+  `sv_recipes::sv_relational::sv_regression_plot`.
 - New specification `openspec/specs/regression-plot/spec.md`.
