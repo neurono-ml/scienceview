@@ -20,7 +20,10 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVImagePlot` SHALL consume `Raster`, `Colour raster`, `Encoded image`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVImagePlot` SHALL consume `Raster` and `Colour raster`, with the roles and
+types recorded in its FDR, and SHALL reject a configuration whose columns are
+missing or of the wrong kind. An encoded image stays a backend concern, as the
+FDR's Open questions record: the core never decodes PNG or JPEG bytes.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied

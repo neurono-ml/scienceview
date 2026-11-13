@@ -34,6 +34,27 @@ line to `src/recipes/matrix/mod.rs`. No central registry exists, because a
 central registry would serialise every recipe change against every other one
 (patterns.md P4).
 
+### D5 — Default bin counts
+
+`bin_count_x` and `bin_count_y` default to one bin per eight pixels of the
+plot area, so the documented defaults resolve to 60 horizontal and 38 vertical
+bins. An explicit count always wins; a count below one is rejected at build.
+
+### D6 — Cell normalisation and empty bins
+
+The accumulated cell weight is normalised with `SVNormalisation`: `Count`
+keeps the raw weight, `Probability` divides by the series total and `Density`
+divides by the series total and the cell area. A cell that received no weight
+is painted with the colour map's lowest value (`SVEmptyBinPolicy::LowestValue`,
+the default) or emits no primitive (`Transparent`), which satisfies the FDR's
+"lowest value, or transparent when configured" acceptance item.
+
+### D7 — Smoothing
+
+The FDR specifies no smoothing option, so none is exposed. Edges come from the
+bin kernel and the per-cell fold goes through the aggregate kernel; the recipe
+reimplements neither.
+
 ## Open Questions
 
 - Should this recipe be a specialisation of `SVHeatmapPlot` — that is, the heatmap recipe with a binning stat — rather than a separate type? *Open: a shared implementation with a different default stat is tempting, but the two have different axis semantics.*
