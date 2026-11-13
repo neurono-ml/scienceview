@@ -6,6 +6,7 @@ use crate::sv_stat::bin_result::SVBinResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::observations::SVObservationValues;
 use crate::sv_stat::stat_definition::SVStatResult;
+use crate::sv_stat::weights::{sv_for_each_weighted_observation, sv_validate_weights};
 
 /// The number of bins used when no boundary option is given.
 const SV_DEFAULT_BIN_COUNT: usize = 30;
@@ -16,17 +17,21 @@ pub(crate) fn sv_apply_bin(
     input: &SVStatInput<'_>,
 ) -> Result<SVStatResult, SVError> {
     let observations = SVObservationValues::from_view(input.values());
+    let weights = input.weights().map(SVObservationValues::from_view);
     if observations.length() == 0 {
         return Err(SVError::EmptyInput { operation: "bin" });
     }
     observations.validate_finite("bin")?;
+    if let Some(weights) = &weights {
+        sv_validate_weights(&observations, weights, "bin")?;
+    }
     let edges = sv_resolve_edges(options, &observations)?;
     let mut counts = vec![0.0; edges.len() - 1];
 
     let first_edge = edges[0];
     let last_edge = edges[edges.len() - 1];
     let mut add = |value: f64, weight: f64| {
-        if value < first_edge || value > last_edge {
+        if weight == 0.0 || value < first_edge || value > last_edge {
             return;
         }
         let position = if value == last_edge {
@@ -37,11 +42,7 @@ pub(crate) fn sv_apply_bin(
         counts[position] += weight;
     };
 
-    observations.for_each_stored(|value| add(value, 1.0));
-    let implicit_zeros = observations.implicit_zero_count() as f64;
-    if implicit_zeros > 0.0 {
-        add(0.0, implicit_zeros);
-    }
+    sv_for_each_weighted_observation(&observations, weights.as_ref(), &mut add);
 
     sv_normalise(&mut counts, &edges, options);
 

@@ -57,6 +57,7 @@ mod percentile_options;
 mod percentile_result;
 mod sorted_observations;
 mod stat_definition;
+mod weights;
 
 pub use aggregate_options::{SVAggregateErrorKind, SVAggregateMethod, SVAggregateOptions};
 pub use aggregate_result::{SVAggregateErrorInterval, SVAggregateGroup, SVAggregateResult};

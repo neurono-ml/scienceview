@@ -8,6 +8,9 @@ use crate::sv_stat::numeric::{SVCompensatedSum, SVWelford};
 use crate::sv_stat::observations::SVObservationValues;
 use crate::sv_stat::sorted_observations::SVSortedObservations;
 use crate::sv_stat::stat_definition::SVStatResult;
+use crate::sv_stat::weights::{
+    sv_for_each_weighted_observation, sv_total_weight, sv_validate_weights,
+};
 
 /// Applies the density configuration to the input column.
 pub(crate) fn sv_apply_kernel_density(
@@ -33,12 +36,16 @@ pub(crate) fn sv_apply_kernel_density(
     }
 
     let observations = SVObservationValues::from_view(input.values());
+    let weights = input.weights().map(SVObservationValues::from_view);
     if observations.length() == 0 {
         return Err(SVError::EmptyInput {
             operation: "kernel_density",
         });
     }
     observations.validate_finite("kernel_density")?;
+    if let Some(weights) = &weights {
+        sv_validate_weights(&observations, weights, "kernel_density")?;
+    }
 
     let bandwidth = options
         .explicit_bandwidth()
@@ -56,21 +63,22 @@ pub(crate) fn sv_apply_kernel_density(
         .map(|position| low + position as f64 * step)
         .collect();
 
-    let sample_count = observations.length() as f64;
-    let implicit_zeros = observations.implicit_zero_count() as f64;
+    let total_weight = sv_total_weight(&observations, weights.as_ref());
+    if !(total_weight > 0.0) {
+        return Err(SVError::InvalidConfiguration {
+            message: "a weighted density needs a positive total weight".to_string(),
+        });
+    }
     let kernel = options.kernel_shape();
 
     let density = grid
         .iter()
         .map(|point| {
             let mut sum = SVCompensatedSum::new();
-            observations.for_each_stored(|value| {
-                sum.add(kernel.evaluate((point - value) / bandwidth));
+            sv_for_each_weighted_observation(&observations, weights.as_ref(), |value, weight| {
+                sum.add(weight * kernel.evaluate((point - value) / bandwidth));
             });
-            if implicit_zeros > 0.0 {
-                sum.add(implicit_zeros * kernel.evaluate(point / bandwidth));
-            }
-            sum.value() / (sample_count * bandwidth)
+            sum.value() / (total_weight * bandwidth)
         })
         .collect();
 

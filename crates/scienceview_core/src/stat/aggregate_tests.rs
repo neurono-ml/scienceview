@@ -187,7 +187,13 @@ fn a_negative_weight_is_rejected() {
         .apply(input)
         .expect_err("weights cannot be negative");
 
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+    assert_eq!(
+        error,
+        SVError::NegativeWeight {
+            operation: "aggregate",
+            position: 1,
+        }
+    );
 }
 
 #[test]

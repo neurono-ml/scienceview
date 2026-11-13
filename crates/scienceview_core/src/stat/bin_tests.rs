@@ -246,3 +246,167 @@ fn the_default_bin_count_is_thirty() {
 
     assert_eq!(result.counts().len(), 30);
 }
+
+#[test]
+fn weighted_counts_accumulate_the_observation_weights() {
+    let values = [0.5, 1.5, 2.5];
+    let weights = [1.0, 3.0, 2.0];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let result = match SVStat::bin(SVBinOptions::new().bin_edges(vec![0.0, 1.0, 2.0, 3.0]))
+        .apply(input)
+        .expect("the weighted configuration is valid")
+    {
+        SVStatResult::Bins(result) => result,
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    };
+
+    assert_eq!(result.counts(), &[1.0, 3.0, 2.0]);
+}
+
+#[test]
+fn all_ones_weights_reproduce_the_unweighted_counts_exactly() {
+    let values = [0.1, 0.9, 1.0, 2.5, 2.9];
+    let weights = [1.0; 5];
+    let options = SVBinOptions::new().bin_edges(vec![0.0, 1.5, 3.0]);
+
+    let unweighted = apply_bin(options.clone(), &values);
+    let weighted = match SVStat::bin(options)
+        .apply(
+            SVStatInput::new(SVColumnView::Dense(&values))
+                .with_weights(SVColumnView::Dense(&weights)),
+        )
+        .expect("the weighted configuration is valid")
+    {
+        SVStatResult::Bins(result) => result,
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    };
+
+    assert_eq!(weighted.counts(), unweighted.counts());
+}
+
+#[test]
+fn weighted_probability_divides_by_the_total_weight() {
+    let values = [0.5, 1.5, 1.75];
+    let weights = [1.0, 1.0, 2.0];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let result = match SVStat::bin(
+        SVBinOptions::new()
+            .bin_edges(vec![0.0, 1.0, 2.0])
+            .normalise(SVNormalisation::Probability),
+    )
+    .apply(input)
+    .expect("the weighted configuration is valid")
+    {
+        SVStatResult::Bins(result) => result,
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    };
+
+    assert_eq!(result.counts(), &[0.25, 0.75]);
+}
+
+#[test]
+fn weighted_density_divides_by_the_total_weight_and_the_bin_width() {
+    let values = [0.5, 1.5, 1.75];
+    let weights = [1.0, 1.0, 2.0];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let result = match SVStat::bin(
+        SVBinOptions::new()
+            .bin_edges(vec![0.0, 1.0, 2.0])
+            .normalise(SVNormalisation::Density),
+    )
+    .apply(input)
+    .expect("the weighted configuration is valid")
+    {
+        SVStatResult::Bins(result) => result,
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    };
+
+    assert_eq!(result.counts(), &[0.25, 0.75]);
+}
+
+#[test]
+fn weighted_sparse_implicit_zeros_use_their_own_weights() {
+    let indices = [1usize];
+    let values = [1.0];
+    let sparse = SVSparseView::new(&indices, &values, 4).expect("valid sparse storage");
+    let weights = [2.0, 4.0, 6.0, 8.0];
+    let input =
+        SVStatInput::new(SVColumnView::Sparse(sparse)).with_weights(SVColumnView::Dense(&weights));
+
+    let result = match SVStat::bin(SVBinOptions::new().bin_edges(vec![0.0, 0.5, 2.0]))
+        .apply(input)
+        .expect("the weighted sparse column is binnable")
+    {
+        SVStatResult::Bins(result) => result,
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    };
+
+    assert_eq!(result.counts(), &[16.0, 4.0]);
+}
+
+#[test]
+fn a_negative_weight_is_rejected_with_its_position() {
+    let values = [1.0, 3.0];
+    let weights = [1.0, -3.0];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let error = SVStat::bin(SVBinOptions::new())
+        .apply(input)
+        .expect_err("weights cannot be negative");
+
+    assert_eq!(
+        error,
+        SVError::NegativeWeight {
+            operation: "bin",
+            position: 1,
+        }
+    );
+}
+
+#[test]
+fn a_non_finite_weight_is_rejected_with_its_position() {
+    let values = [1.0, 3.0];
+    let weights = [1.0, f64::NAN];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let error = SVStat::bin(SVBinOptions::new())
+        .apply(input)
+        .expect_err("a non-finite weight is not an observation weight");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "bin",
+            position: 1,
+        }
+    );
+}
+
+#[test]
+fn a_weight_column_of_a_different_length_is_rejected() {
+    let values = [1.0, 2.0, 3.0];
+    let weights = [1.0, 1.0];
+    let input =
+        SVStatInput::new(SVColumnView::Dense(&values)).with_weights(SVColumnView::Dense(&weights));
+
+    let error = SVStat::bin(SVBinOptions::new())
+        .apply(input)
+        .expect_err("columns must agree in length");
+
+    assert_eq!(
+        error,
+        SVError::MismatchedStatisticLengths {
+            operation: "bin",
+            first: 3,
+            second: 2,
+        }
+    );
+}

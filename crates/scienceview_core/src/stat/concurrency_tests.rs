@@ -100,3 +100,43 @@ fn a_fit_runs_concurrently_and_off_the_calling_thread() {
         assert!(!spawned.is_windowed());
     });
 }
+
+#[test]
+fn weighted_kernels_agree_across_threads() {
+    let values = dataset();
+    let weights: Vec<f64> = (0..values.len())
+        .map(|position| (position % 4) as f64)
+        .collect();
+    let stats = [
+        SVStat::bin(SVBinOptions::new().bin_count(8)),
+        SVStat::kernel_density(SVKernelDensityOptions::new().grid_count(32)),
+    ];
+
+    let expected: Vec<SVStatResult> = stats
+        .iter()
+        .map(|stat| {
+            stat.apply(
+                SVStatInput::new(SVColumnView::Dense(&values))
+                    .with_weights(SVColumnView::Dense(&weights)),
+            )
+            .expect("the calling thread applies the weighted stat")
+        })
+        .collect();
+
+    thread::scope(|scope| {
+        for _ in 0..4 {
+            let stats = &stats;
+            let expected = &expected;
+            let values = values.as_slice();
+            let weights = weights.as_slice();
+            scope.spawn(move || {
+                for (stat, expected) in stats.iter().zip(expected.iter()) {
+                    let input = SVStatInput::new(SVColumnView::Dense(values))
+                        .with_weights(SVColumnView::Dense(weights));
+                    let result = stat.apply(input).expect("each thread applies the stat");
+                    assert_eq!(&result, expected, "weights are thread-independent");
+                }
+            });
+        }
+    });
+}

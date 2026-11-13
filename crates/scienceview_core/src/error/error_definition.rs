@@ -206,6 +206,15 @@ pub enum SVError {
         position: usize,
     },
 
+    /// A statistical kernel received a negative observation weight.
+    #[error("`{operation}` received a negative observation weight at position {position}")]
+    NegativeWeight {
+        /// The stat operation that rejected the weight.
+        operation: &'static str,
+        /// The logical position of the offending weight.
+        position: usize,
+    },
+
     /// Two columns given to one statistical kernel have different lengths.
     #[error(
         "`{operation}` needs columns of equal length; the first has {first} values and the second has {second}"

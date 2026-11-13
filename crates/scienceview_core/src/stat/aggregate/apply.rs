@@ -14,6 +14,7 @@ use crate::sv_stat::aggregate_result::SVAggregateResult;
 use crate::sv_stat::input::SVStatInput;
 use crate::sv_stat::observations::SVObservationValues;
 use crate::sv_stat::stat_definition::SVStatResult;
+use crate::sv_stat::weights::sv_validate_weights;
 
 use super::buckets::SVBuckets;
 use super::zeros::sv_fold_implicit_zeros;
@@ -81,8 +82,7 @@ pub(crate) fn sv_apply_aggregate(
         groups.validate_finite("aggregate")?;
     }
     if let Some(weights) = &weights {
-        weights.validate_finite("aggregate")?;
-        sv_validate_non_negative(weights)?;
+        sv_validate_weights(&values, weights, "aggregate")?;
     }
 
     let needs_sorted_values = options.requested_method() == SVAggregateMethod::Median
@@ -106,21 +106,4 @@ pub(crate) fn sv_apply_aggregate(
     Ok(SVStatResult::Groups(SVAggregateResult::new(
         buckets.finish(options)?,
     )))
-}
-
-/// Rejects a negative weight wherever it is stored.
-fn sv_validate_non_negative(weights: &SVObservationValues<'_>) -> Result<(), SVError> {
-    let mut failure = None;
-    weights.for_each_stored_entry(|position, weight| {
-        if weight < 0.0 && failure.is_none() {
-            failure = Some(SVError::InvalidConfiguration {
-                message: format!("the observation weight at position {position} is negative"),
-            });
-        }
-    });
-
-    match failure {
-        Some(error) => Err(error),
-        None => Ok(()),
-    }
 }
