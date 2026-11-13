@@ -6,6 +6,7 @@ use super::super::extraction::{
     sv_collect_samples, sv_expand_step, sv_group_samples, sv_order_points,
 };
 use super::definition::SVStepPlot;
+use scienceview_core::sv_data::SVColumnView;
 use scienceview_core::sv_decoration::SVDecorationStyle;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::{SVResolvedRectangle, SVViewport};
@@ -31,7 +32,18 @@ impl SVStepPlot<'_> {
     /// the kernel's configuration error when an aggregate or a scale cannot be
     /// honoured.
     pub fn compose(&self) -> Result<SVStepPlotComposition, SVError> {
-        let (samples, representation) = sv_collect_samples(self)?;
+        self.sv_resolve(|x_view, y_view, series_view| {
+            self.sv_compose_views(x_view, y_view, series_view)
+        })
+    }
+
+    pub(crate) fn sv_compose_views(
+        &self,
+        x_view: SVColumnView<'_>,
+        y_view: SVColumnView<'_>,
+        series_view: Option<SVColumnView<'_>>,
+    ) -> Result<SVStepPlotComposition, SVError> {
+        let (samples, representation) = sv_collect_samples(self, x_view, y_view, series_view)?;
         if samples.is_empty() {
             return Err(SVError::EmptyInput {
                 operation: "step_plot",

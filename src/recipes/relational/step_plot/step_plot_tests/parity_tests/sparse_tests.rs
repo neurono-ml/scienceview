@@ -68,6 +68,31 @@ fn a_sparse_last_wins_zero_skips_a_missing_value() {
 }
 
 #[test]
+fn a_sparse_zero_survives_a_non_zero_sample_between_zero_runs() {
+    let indices = [1];
+    let values = [5.0];
+    let first_vertical = [f64::NAN, 10.0, 20.0];
+    let first_x = SVSparseView::new(&indices, &values, 3).expect("the view is valid");
+    let first_table = source(
+        SVTestColumn::Sparse(first_x),
+        SVTestColumn::Dense(&first_vertical),
+    );
+    let first = build(&first_table).compose().expect("the plot composes");
+    assert_eq!(first.series()[0].sample_horizontal(), &[0.0, 5.0]);
+    assert_eq!(first.series()[0].sample_vertical(), &[20.0, 10.0]);
+
+    let last_vertical = [20.0, 10.0, f64::NAN];
+    let last_x = SVSparseView::new(&indices, &values, 3).expect("the view is valid");
+    let last_table = source(
+        SVTestColumn::Sparse(last_x),
+        SVTestColumn::Dense(&last_vertical),
+    );
+    let last = build(&last_table).compose().expect("the plot composes");
+    assert_eq!(last.series()[0].sample_horizontal(), &[0.0, 5.0]);
+    assert_eq!(last.series()[0].sample_vertical(), &[20.0, 10.0]);
+}
+
+#[test]
 fn a_sparse_x_with_series_matches_the_dense_series() {
     let indices = [1];
     let values = [0.0];

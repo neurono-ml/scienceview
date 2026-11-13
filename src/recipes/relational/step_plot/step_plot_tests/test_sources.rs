@@ -78,3 +78,35 @@ impl SVDataSource for SVTestSource<'_> {
         Ok(SVColumnSnapshot::Borrowed(column.view()))
     }
 }
+
+/// A source wrapper that counts every column resolution.
+#[derive(Clone, Debug)]
+pub(super) struct SVCountingSource<'a> {
+    inner: SVTestSource<'a>,
+    calls: std::sync::Arc<std::sync::atomic::AtomicUsize>,
+}
+
+impl<'a> SVCountingSource<'a> {
+    pub(super) fn new(inner: SVTestSource<'a>) -> Self {
+        Self {
+            inner,
+            calls: std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+        }
+    }
+
+    pub(super) fn number_of_calls(&self) -> usize {
+        self.calls.load(std::sync::atomic::Ordering::Relaxed)
+    }
+}
+
+impl SVDataSource for SVCountingSource<'_> {
+    fn schema(&self) -> SVSourceSchema<'_> {
+        self.inner.schema()
+    }
+
+    fn column(&self, name: &str) -> Result<SVColumnSnapshot<'_>, SVError> {
+        self.calls
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.inner.column(name)
+    }
+}

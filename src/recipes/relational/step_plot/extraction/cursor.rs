@@ -39,24 +39,13 @@ fn sv_cursor(view: SVColumnView<'_>) -> SVStepCursor<'_> {
     )
 }
 
-/// Reads `x`, `y` and the optional `series` column once and resolves the
-/// representation the operation reports.
+/// Reads the already-resolved columns once and turns them into samples.
 pub(crate) fn sv_collect_samples(
     plot: &SVStepPlot<'_>,
+    x_view: SVColumnView<'_>,
+    y_view: SVColumnView<'_>,
+    series_view: Option<SVColumnView<'_>>,
 ) -> Result<(Vec<SVStepSample>, SVRepresentation), SVError> {
-    let mut x_snapshot = plot.data_source.column(&plot.x)?;
-    let mut y_snapshot = plot.data_source.column(&plot.y)?;
-    let mut series_snapshot = match plot.series.as_deref() {
-        Some(name) => Some(plot.data_source.column(name)?),
-        None => None,
-    };
-
-    let x_view = x_snapshot.column_view();
-    let y_view = y_snapshot.column_view();
-    let series_view = series_snapshot
-        .as_mut()
-        .map(|snapshot| snapshot.column_view());
-
     let length = x_view.length();
     if y_view.length() != length {
         return Err(SVError::MismatchedLengths {

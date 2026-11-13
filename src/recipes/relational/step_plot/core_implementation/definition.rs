@@ -3,7 +3,8 @@
 use super::super::builder::SVStepPlotBuilder;
 use super::super::options::{SVStepDuplicatePolicy, SVStepPosition};
 use scienceview_core::sv_backend::SVBackendKind;
-use scienceview_core::sv_data::SVDataSource;
+use scienceview_core::sv_data::{SVColumnView, SVDataSource};
+use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::{SVLength, SVViewport};
 use scienceview_core::sv_mark::SVDashPattern;
@@ -93,5 +94,28 @@ impl SVStepPlot<'_> {
     /// The figure title, when one was configured.
     pub fn title(&self) -> Option<&str> {
         self.title.as_deref()
+    }
+
+    /// Resolves the three source columns once and runs `operation` on them.
+    pub(crate) fn sv_resolve<Output>(
+        &self,
+        operation: impl FnOnce(
+            SVColumnView<'_>,
+            SVColumnView<'_>,
+            Option<SVColumnView<'_>>,
+        ) -> Result<Output, SVError>,
+    ) -> Result<Output, SVError> {
+        let mut x_snapshot = self.data_source.column(&self.x)?;
+        let mut y_snapshot = self.data_source.column(&self.y)?;
+        let mut series_snapshot = match self.series.as_deref() {
+            Some(name) => Some(self.data_source.column(name)?),
+            None => None,
+        };
+        let x_view = x_snapshot.column_view();
+        let y_view = y_snapshot.column_view();
+        let series_view = series_snapshot
+            .as_mut()
+            .map(|snapshot| snapshot.column_view());
+        operation(x_view, y_view, series_view)
     }
 }
