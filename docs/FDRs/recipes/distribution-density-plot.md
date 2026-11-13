@@ -128,9 +128,13 @@ be a core change with its own spec delta rather than a recipe reimplementation
 `normalise` option selects how the kernel's probability density reaches the
 vertical scale: `Density` keeps the kernel output, `Probability` multiplies by
 the grid spacing so each sample is a probability mass, and `Count` additionally
-multiplies by the observation count. Transition and animation wiring is
-deferred to the later integration; the recipe claims transition-ready geometry
-only.
+multiplies by the observation count. Grouping is the one sparse combination
+the recipe rejects: attributing implicit zeros to a series would require
+walking the whole logical lattice, so a sparse value column with a `series`
+column returns `UnsupportedRepresentation` and names the dense, streaming or
+ungrouped alternative (design A2); an ungrouped sparse column still reaches
+the kernel without densification. Transition and animation wiring is deferred
+to the later integration; the recipe claims transition-ready geometry only.
 
 ## Open questions
 
