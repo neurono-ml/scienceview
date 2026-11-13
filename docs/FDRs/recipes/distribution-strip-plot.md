@@ -5,11 +5,11 @@
 | Id | FDR-119 |
 | Name | `SVStripPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 30 — Strip plots](../../src/development-explained/ch30-strip-plot.md) |
+| Example program | [`examples/strip_plot.rs`](../../../examples/strip_plot.rs) |
 
 ## Purpose
 
@@ -72,6 +72,7 @@ given.
 | `alpha` | `f32` | `1.0` | seaborn |
 | `size` | `SVLength` | token `mark.size` | bokeh, plotly |
 | `orient` | `SVBarOrientation` | `Vertical` | seaborn |
+| `missing_value_policy` | `SVStripMissingValuePolicy` | `Omit` | — |
 
 ## Theme
 
@@ -102,11 +103,10 @@ jitter offset is a function of the mark's identity, not of the frame index.
 
 ## Acceptance
 
-- [ ] Every observation is drawn exactly once.
-- [ ] The jitter is reproducible when a seed is given.
-- [ ] Dense, sparse and streaming inputs give the same points.
-- [ ] In an animation, the points do not drift: the jitter offset depends on
-      the match key only.
+- [x] Every observation is drawn exactly once — `strip_plot_tests::the_default_configuration_draws_one_dot_per_observation`, `large_strip_tests::a_large_sample_composes_one_dot_per_observation`.
+- [x] The jitter is reproducible when a seed is given — `strip_plot_tests::a_seeded_jitter_is_reproducible_across_compositions`.
+- [x] Dense, sparse and streaming inputs give the same points — `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_scene`, `parity_tests::a_sparse_and_dense_representation_of_the_same_observations_agree_on_the_jitter`.
+- [x] In an animation, the points do not drift: the jitter offset depends on the match key only — `strip_plot_tests::the_jitter_offset_follows_the_match_key_and_not_the_value` (the offset follows the row and category keys, never the value; the transition wiring is deferred to the transition integration, the geometry is transition-ready).
 
 ## Open questions
 

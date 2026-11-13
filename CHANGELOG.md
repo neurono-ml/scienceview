@@ -12,6 +12,70 @@ released.
 
 ### Added
 
+- The distributional recipe `SVSwarmPlot` (`scienceview::sv_recipes::sv_distribution`):
+  one dot per observation of a continuous variable grouped by category, displaced
+  along the categorical axis so that no two dots of a category overlap; the width
+  of the swarm reads the density of the sample. The configuration surface follows
+  FDR-120 — `value`, `category`, `series`, `marker`, `size`, `orient`,
+  `swarm_width`, `alpha` and `missing_value_policy` — and the builder requires an
+  explicit backend selection. The layout is never reimplemented: the recipe
+  converts the solved marker diameter and the category slot into the data-space
+  `marker_extent` and `width` that `SVMove::Swarm` takes, so the kernel's
+  deterministic, collision-free, width-bounded layout and its typed errors — a
+  width below two marker extents, or a cluster that cannot be placed inside the
+  slot — reach the caller unchanged. Both orientations share one layout pass and
+  only reassign the axes; the series column colours the dots and adds a legend.
+  Dense, sparse and streaming columns resolve once per operation; a sparse input
+  contributes exactly its stored entries (a million-logical column with three
+  entries draws three dots) and a streaming window renders without blocking.
+  Non-finite observations are dropped or rejected by the missing-value policy.
+  The composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred to
+  the transition integration; the geometry is transition-ready. The example
+  `examples/swarm_plot.rs` writes `docs/figures/swarm_plot.svg`.
+- The distributional recipe `SVStripPlot` (`scienceview::sv_recipes::sv_distribution`):
+  every observation of a variable drawn as one dot over its category, displaced
+  along the categorical axis so overlapping points stay visible. The
+  configuration surface follows FDR-119 — `value`, `category`, `series`,
+  `jitter`, `jitter_mode`, `seed`, `marker`, `alpha`, `size`, `orient` and
+  `missing_value_policy` — and the builder requires an explicit backend
+  selection. The displacement is `SVMove::Jitter`, keyed by the observation's
+  row and category, so a seeded jitter is reproducible and a point keeps its
+  offset while its value changes. Dense, sparse and streaming columns resolve
+  once per operation; a sparse column contributes only its stored entries and
+  is never densified, and a streaming window renders without blocking. The dots
+  are the closed `SVMark::Dot` shape vocabulary, coloured by the optional
+  `series` column. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/strip_plot.rs` writes `docs/figures/strip_plot.svg`.
+- The distributional recipe `SVBoxenPlot` (`scienceview::sv_recipes::sv_distribution`):
+  letter-value plots, a nest of nested quantile boxes that summarises a large
+  distribution with far fewer observations than a violin needs. The
+  configuration surface follows FDR-118 — `value`, `category`, `series`,
+  `depth`, `tail_rule`, `show_median`, `show_outliers`, `outlier_marker`,
+  `width` and `orient` — and the builder requires an explicit backend
+  selection. Every letter value comes from `SVStat::Percentile`; the recipe
+  never reimplements the estimator. `SVBoxenTailRule` selects the
+  tail-stopping rule (`Tukey`, Henderson's `floor(log2(n)) - 3`, is the
+  default; `Proportion` and `Full` are also available) and `depth` overrides
+  the derived nesting depth, which produces `2 * depth - 1` boxes. The central
+  box spans the interquartile range and every outer box narrows by half, so the
+  nest reads as a sequence of letter values. The boxes are `SVMark::Ribbon`
+  primitives, the median is `SVMark::Line`, the optional outliers are
+  `SVMark::Dot`, and `SVMove::Dodge` lays one nest per series inside a
+  category. Both orientations are supported. Dense, sparse and streaming
+  columns resolve once per operation; a sparse input contributes only its
+  stored entries and a streaming window renders without blocking and reports
+  `is_approximate`. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error instead of being ignored. Transition and animation
+  wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/boxen_plot.rs` writes
+  `docs/figures/boxen_plot.svg`.
+
 - The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
   the five-number summary of every category, drawn as a box with whiskers,
   median line and — optionally — the observations outside the whiskers. The
@@ -442,6 +506,29 @@ released.
   are read through the `SVColumnView` boundary — sparse storage is never
   densified and a live window never blocks the render thread — and the
   interpolable-property table is exported for the transition kernel.
+
+- The distributional recipe `SVViolinPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the symmetric density silhouette of every category, revealing multimodality,
+  skew and bimodality that a box plot hides. The configuration surface follows
+  FDR-117 — `value`, `category`, `series`, `bandwidth`, `bandwidth_adjustment`,
+  `width`, `scale` (`Area`, `Count`, `Width`), `show_box`, `show_points`,
+  `split` and `orient` — and the builder requires an explicit backend
+  selection. The estimate comes from `SVStat::KernelDensity` with the derived
+  bandwidth and its adjustment; `SVStat::Percentile` supplies the optional
+  inner box. `SVMove::Dodge` lays one violin per series inside a category, or
+  `split(true)` gives two series the two halves of one slot; `SVMove::Jitter`
+  places the optional sample points deterministically. The silhouette is
+  composed from `SVMark::Area` (one closed path per mirrored half), the inner
+  box and median from `SVMark::Line`, and the sample points from `SVMark::Dot`;
+  no mark, stat, move or scale variant is added by the recipe. Both
+  orientations are supported. Dense, sparse and streaming columns resolve once
+  per operation; a sparse input contributes only its stored entries and a
+  streaming window renders without blocking and reports `is_approximate`. The
+  composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred
+  to the transition integration; the geometry is transition-ready. The example
+  `examples/violin_plot.rs` writes `docs/figures/violin_plot.svg`.
 
 ### Changed
 
