@@ -34,10 +34,11 @@ unticked.
 
 ### D4 — Registration
 
-The chart is registered by appending one
-line to `src/recipes/relational/mod.rs`. No central registry exists, because a
-central registry would serialise every recipe change against every other one
-(patterns.md P4).
+The chart is registered by appending one `#[path] pub mod` and one `pub use` line to
+`src/recipes/relational/mod.rs`, exposing the module as
+`sv_recipes::sv_relational::sv_regression_plot`. No central registry exists,
+because a central registry would serialise every recipe change against every
+other one (patterns.md P4).
 
 ### D5 — Sparse pairing
 

@@ -85,7 +85,7 @@
   unavailable backend kind.
 - [ ] Strengthen the tests: model-specific coefficients and a band compared to
   the kernel's interval values.
-- [ ] Rename the module path to `sv_recipes::sv_relational::sv_regression_plot`
+- [x] Rename the module path to `sv_recipes::sv_relational::sv_regression_plot`
   and update every path in code, examples, README and the book.
 - [ ] Update the book imports and claims; keep the composition diagram valid;
   `mdbook build docs` green.
