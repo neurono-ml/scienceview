@@ -38,7 +38,7 @@ flowchart LR
     A["SVDataSource<br/>value + matrix/points"] --> B["resolve once<br/>dense · sparse · streaming"]
     B --> C{"layout"}
     C -->|matrix| D["row-major lattice<br/>x_range / y_range"]
-    C -->|points| E["SVStat::Bin on x<br/>SVStat::Bin on y<br/>cell mean"]
+    C -->|points| E["SVStat::Bin on x<br/>SVStat::Bin on y<br/>SVStat::Aggregate<br/>cell mean"]
     D --> F["SVContourField"]
     E --> F
     F --> G["level selection<br/>count · range · size"]
@@ -52,8 +52,9 @@ The first surprise is the two layouts. A chart that has the matrix already does
 not need to bin anything: `matrix(rows, columns)` reads the `value` column
 row-major and places the samples on a lattice. A chart that only has a point
 cloud composes the existing `SVStat::Bin` kernel twice — once per axis — and
-folds every `(x, y, value)` triple into a cell mean. The recipe never owns a
-binning rule; it composes the kernel that already exists (patterns P5).
+then hands the observations of each cell to `SVStat::Aggregate`, which reports
+the mean. The recipe never owns a binning or averaging rule; it composes the
+kernels that already exist (patterns P5).
 
 Sparse input is never densified. In the matrix layout, a sparse value column
 answers an implicit position with zero and keeps its stored entries; the parity
@@ -88,7 +89,7 @@ let scene = plot.compose()?;
 | `matrix(rows, columns)` | read the value column as a matrix | point cloud |
 | `x`, `y` | the two point-cloud columns | required for points |
 | `x_range`, `y_range` | matrix coordinates | sample index |
-| `grid_count` | interpolation cells per axis | `64` |
+| `grid_count` | bin cells per axis | `64` |
 | `levels` | number of contour levels | `10` |
 | `level_range` | explicit height interval | observed range |
 | `level_size` | fixed spacing instead of a count | `None` |
@@ -138,8 +139,11 @@ cover a lower label. This is a notation feature, not a statistics feature.
 ## The tests are the specification
 
 `contour_plot_tests.rs` walks the public surface: the documented defaults, one
-test per option, the level count/range/spacing arithmetic, the nested filled
-bands, closed subpaths, labels, the missing policy and the explicit build errors.
+test per output-changing option (levels, level range and spacing, style, labels,
+colour map, colour-scale transform, line width, matrix ranges, grid count and
+the titles), the point-cloud cell mean, the nested filled bands, closed
+subpaths, the missing policy and the explicit build errors. An option with no
+effect on its own output is not faked into the list.
 `parity_tests.rs` asserts that dense and sparse point clouds agree, that dense and
 streaming clouds produce the same primitives, and that a structurally sparse
 matrix is never densified. `concurrency_tests.rs` serializes the same chart from
