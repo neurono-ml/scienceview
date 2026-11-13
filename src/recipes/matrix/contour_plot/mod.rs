@@ -58,8 +58,14 @@ pub use builder::SVContourPlotBuilder;
 pub use core_implementation::SVContourPlot;
 
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
 #[path = "contour_plot_tests.rs"]
 mod contour_plot_tests;
+#[cfg(test)]
+#[path = "observability_tests.rs"]
+mod observability_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
