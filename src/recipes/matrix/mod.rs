@@ -6,6 +6,14 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "clustered_heatmap_plot/mod.rs"]
+pub mod sv_clustered_heatmap_plot;
+pub use sv_clustered_heatmap_plot::{
+    SVClusterAxis, SVClusterMerge, SVClusterTree, SVClusteredHeatmapCell, SVClusteredHeatmapFrame,
+    SVClusteredHeatmapPlot, SVClusteredHeatmapPlotBuilder, SVClusteredHeatmapRenderOutput,
+    SVClusteredHeatmapScene, SVDendrogram, SVDendrogramMerge,
+};
+
 #[path = "contour_plot/mod.rs"]
 pub mod sv_contour_plot;
 pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};

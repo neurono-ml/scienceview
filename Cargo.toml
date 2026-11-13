@@ -115,6 +115,11 @@ path = "examples/heatmap_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
+name = "clustered_heatmap_plot"
+path = "examples/clustered_heatmap_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
 name = "contour_plot"
 path = "examples/contour_plot.rs"
 required-features = ["render-svg"]

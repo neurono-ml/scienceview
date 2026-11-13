@@ -12,6 +12,19 @@ released.
 
 ### Added
 
+- Clustered heatmap recipe (`SVClusteredHeatmapPlot`): draws a heatmap whose
+  rows and columns follow a **supplied** hierarchical clustering, plus the two
+  supplied dendrograms. The caller provides the matrix (dense, or a long table
+  pivoted through `SVStat::Aggregate`), `row_order`, `column_order` and the
+  optional `row_linkage` / `column_linkage` merge trees; the recipe validates
+  them and renders them, never computing a clustering. A duplicate leaf, an
+  out-of-range child, a decreasing merge distance, a wrong leaf count or a
+  non-permutation order is a typed `InvalidClusterTree` error naming the axis
+  and merge position. Sparse input is read in place; streaming is a static-only
+  exception rejected with `UnsupportedRepresentation` and the documented
+  snapshot alternative. SVG and native dispatch, concurrency and determinism
+  tests, and the operation span records the backend kind, representation and
+  drawn cells. See FDR-136 and chapter 54 of the book.
 - Weighted statistics: `SVStat::Bin` and `SVStat::KernelDensity` accept an
   observation weight column through `SVStatInput::with_weights`, alongside the
   `Aggregate` mean and sum that already did. The weight column follows the data

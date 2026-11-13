@@ -87,6 +87,17 @@ pub enum SVError {
         message: String,
     },
 
+    /// A supplied clustering tree is not a valid binary merge tree.
+    #[error("the {axis} clustering tree is inconsistent at position {position}: {message}")]
+    InvalidClusterTree {
+        /// The axis the inconsistent tree describes (`row` or `column`).
+        axis: &'static str,
+        /// The merge position the violation was found at.
+        position: usize,
+        /// What is wrong and how to fix it.
+        message: String,
+    },
+
     /// Two moves claim the same stage of the fixed composition order.
     #[error("two moves claim the `{stage}` stage of the move order; a stage runs at most once")]
     ConflictingMoveStage {
