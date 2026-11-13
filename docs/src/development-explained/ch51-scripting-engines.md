@@ -12,7 +12,7 @@ small, deterministic interpreters over a documented statement subset.
 
 That choice is a limitation, and this chapter states it plainly: the built-in
 interpreter does not run arbitrary Lua or JavaScript. It reads the statement
-shapes a figure script needs — `dispatch`, `increment`, `log`, and four
+shapes a figure script needs — `dispatch`, `increment`, `log`, and five
 capability calls — in each language's surface syntax. Everything the
 specification actually asks of scripting is exercised by that subset: loading,
 invoking, reloading, sandboxing, bounded execution and contained failure. A real
