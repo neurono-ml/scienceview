@@ -53,11 +53,17 @@ pub use render_output::{SVRugFrame, SVRugRenderOutput};
 pub use scene::SVRugScene;
 
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
 #[path = "large_rug_tests.rs"]
 mod large_rug_tests;
 #[cfg(test)]
 #[path = "option_tests.rs"]
 mod option_tests;
+#[cfg(test)]
+#[path = "observability_tests.rs"]
+mod observability_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
