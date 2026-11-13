@@ -6,6 +6,13 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "bar_plot/mod.rs"]
+pub mod sv_bar_plot;
+pub use sv_bar_plot::{
+    SVBarArrangement, SVBarBin, SVBarMissingValuePolicy, SVBarOrdering, SVBarPlot,
+    SVBarPlotBuilder, SVBarRenderOutput, SVBarSummary,
+};
+
 #[path = "box_plot/mod.rs"]
 pub mod sv_box_plot;
 pub use sv_box_plot::{
