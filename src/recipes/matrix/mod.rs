@@ -1,15 +1,33 @@
-//! The matrix family: charts that draw a relationship between two continuous
-//! variables as a lattice of cells.
+//! Matrix recipes: charts whose data is a two-dimensional field.
 //!
 //! Every chart in this family appends one `#[path] pub mod` and one
 //! `pub use` to this dispatcher; the family batch integrator resolves the
-//! ordering, so recipe changes never edit a central registry (patterns.md P4).
-//! Recipe module names carry the `sv_` prefix so the family scope never
-//! collides.
+//! ordering, so recipe changes never edit a central registry (patterns.md
+//! P4). Recipe module names carry the `sv_` prefix so the family scope
+//! never collides.
+
+#[path = "contour_plot/mod.rs"]
+pub mod sv_contour_plot;
+pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};
+
+#[path = "density_heatmap_plot/mod.rs"]
+pub mod sv_density_heatmap_plot;
+pub use sv_density_heatmap_plot::{
+    SVDensityHeatmapComposition, SVDensityHeatmapPlot, SVDensityHeatmapPlotBuilder,
+};
+
+#[path = "heatmap_plot/mod.rs"]
+pub mod sv_heatmap_plot;
+pub use sv_heatmap_plot::{
+    SVHeatmapFrame, SVHeatmapPlot, SVHeatmapPlotBuilder, SVHeatmapRenderOutput, SVHeatmapScene,
+};
 
 #[path = "hexbin_plot/mod.rs"]
 pub mod sv_hexbin_plot;
-pub use sv_hexbin_plot::{
-    SVHexbinAggregation, SVHexbinCell, SVHexbinComposition, SVHexbinMissingValuePolicy,
-    SVHexbinPlot, SVHexbinPlotBuilder,
+pub use sv_hexbin_plot::{SVHexbinComposition, SVHexbinPlot, SVHexbinPlotBuilder};
+
+#[path = "image_plot/mod.rs"]
+pub mod sv_image_plot;
+pub use sv_image_plot::{
+    SVImageFrame, SVImagePlot, SVImagePlotBuilder, SVImageRenderOutput, SVImageScene,
 };
