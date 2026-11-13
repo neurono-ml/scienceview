@@ -64,6 +64,28 @@ A stat consumes one or more `SVColumnView`s and produces a **derived view**:
 | `Percentile` | 1 continuous column | requested quantiles |
 | `Fit` | 1 continuous column + 1 value column | model coefficients + predicted curve |
 
+### Observation weights
+
+`SVStatInput::with_weights` attaches an optional weight column to any kernel
+that accepts one. The weight column follows the same data contract as the
+value column: it may be dense, sparse or streaming, it is resolved exactly
+once per operation, a sparse weight column is never densified, and a
+streaming one is read from its bounded window. A sparse implicit zero is a
+zero-weight observation, so it never changes a weighted result.
+
+| Kernel | Weighted | Semantics |
+|---|---|---|
+| `Bin` | yes | each observation contributes its weight to the bin it falls in; `Count`, `Probability` and `Density` normalise by the total weight |
+| `KernelDensity` | yes | the estimate is normalised by the total weight times the bandwidth; Silverman's bandwidth derivation stays unweighted and is documented as such |
+| `Aggregate` | yes | `Mean` and `Sum` weight their observations; the remaining methods reject weights explicitly |
+| `Count`, `EmpiricalCdf`, `Percentile`, `Fit` | no | the kernel rejects a configured weight column instead of ignoring it |
+
+A negative weight is an error naming the operation and the observation
+position (`SVError::NegativeWeight`); a non-finite weight is
+`SVError::NonFiniteValue`; a weight column whose length differs from the value
+column is `SVError::MismatchedLengths`. All-ones weights reproduce the
+unweighted result exactly.
+
 ### Representation parity
 
 | Stat | Dense | Sparse | Streaming | Note |
@@ -160,6 +182,13 @@ kernel never starts a runtime of its own.
       `x ≈ 1e6` and `x ≈ 1.7e9`, including a degree-2 case.
 - [x] Every `SVStat::apply` records one span with `stat.kind`, the value
       column's `representation`, `points`, `duration` and `outcome`.
+- [x] `Bin` and `KernelDensity` accept an observation weight column of any
+      representation, resolve it once, never densify it, and reproduce the
+      unweighted result exactly when every weight is one.
+- [x] A negative, non-finite or wrong-length weight column is a typed error
+      naming the operation and, where it applies, the observation position.
+- [x] Weighted binning and weighted kernel density are covered by
+      representation-parity and concurrency tests.
 - [x] Every kernel has companion tests in a `*_tests.rs` module beside its
       implementation.
 
@@ -171,7 +200,9 @@ kernel never starts a runtime of its own.
   stays dependency-light and the closed stat set is unchanged.*
 - Should `Aggregate` support a weighted mean over a weight column in the first
   version? *Answered: yes — `Mean` and `Sum` accept weights through
-  `SVStatInput::with_weights`; the other methods reject them explicitly.*
+  `SVStatInput::with_weights`; the other methods reject them explicitly.
+  `Bin` and `KernelDensity` accept the same weight column; the remaining
+  kernels reject a configured weight rather than ignoring it.*
 - What tolerance defines "the same pixels" for a sparse input in the
   `data-view-boundary` sense? *Answered: dense against sparse is exact and
   dense against streaming uses `SVRepresentationTolerance::DEFAULT`.*

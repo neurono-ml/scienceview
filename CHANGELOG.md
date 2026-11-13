@@ -12,6 +12,19 @@ released.
 
 ### Added
 
+- Weighted statistics: `SVStat::Bin` and `SVStat::KernelDensity` accept an
+  observation weight column through `SVStatInput::with_weights`, alongside the
+  `Aggregate` mean and sum that already did. The weight column follows the data
+  contract of `data-view-boundary` — dense, sparse or streaming, resolved once
+  per operation, never densified and never blocking on a stream — and a sparse
+  implicit zero is a zero-weight observation. Weighted counts, probabilities and
+  densities normalise by the total weight, and a weighted density integrates to
+  one while Silverman's bandwidth derivation stays unweighted (documented in
+  FDR-002). All-ones weights reproduce the unweighted result exactly; a
+  negative, non-finite or wrong-length weight column is a typed error naming the
+  operation and position. The `SVHistogramPlot` and `SVDensityPlot` recipes gain
+  a `weight(...)` column that flows into those kernels, replacing the former
+  build-time rejection and the documented weight gap.
 - Python bindings (`scienceview_python`, feature `python`): a PyO3 extension
   module exposing the validated builder surface with keyword arguments and an
   explicit `backend=` selection (`MissingBackendSelection` instead of an

@@ -121,10 +121,14 @@ Consumes `mark.palette`, `mark.area_opacity`, `text.*`, axis tokens.
 
 ## Amendment
 
-The configuration surface ships without the `weight` column. The
-kernel-density kernel applies an unweighted estimate only, so weighting would
-be a core change with its own spec delta rather than a recipe reimplementation
-(patterns.md P5). Series grouping covers the documented multi-curve case. The
+The configuration surface ships the `weight` column: `SVDensityPlot::weight`
+resolves the weight column once per series and hands it to
+`SVStat::KernelDensity`, which now owns the weighted estimate (FDR-002). A
+sparse weight column is never densified and a dropped sparse stored entry
+carries a zero weight. The estimate normalises by the total weight times the
+bandwidth, all-ones weights reproduce the unweighted curve exactly, and
+negative, non-finite or wrong-length weights are typed errors. Series grouping
+covers the documented multi-curve case. The
 `normalise` option selects how the kernel's probability density reaches the
 vertical scale: `Density` keeps the kernel output, `Probability` multiplies by
 the grid spacing so each sample is a probability mass, and `Count` additionally
@@ -141,5 +145,6 @@ to the later integration; the recipe claims transition-ready geometry only.
 - Should the bandwidth be chosen automatically by a better rule (for example,
       a plug-in selector), and if so is that a different kernel? *Open.*
 - Should the density kernel support a weighted variant natively, or through
-      the `weight` column? *Open.* The shipped kernel applies an unweighted
-      estimate only, so weighting awaits a core kernel variant.
+      the `weight` column? *Answered: through the `weight` column on
+      `SVStatInput`, implemented by the `statistical-weights` change; the
+      closed stat vocabulary is unchanged.*
