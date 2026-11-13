@@ -70,8 +70,10 @@ The rectangle at the end is deliberate. A recipe does not know how to write an
 SVG file, and it must not: it places values through the scale kernel and asks
 the mark kernel for paths. `SVBandRenderOutput` is that backend-agnostic
 answer — viewport, plot rectangle, mark geometries, decoration primitives. The
-example serializes it with `SVSvgDocument`; a native or terminal backend can
-walk the very same primitives later.
+`render-svg` feature adds `to_svg()` and the `render-native` feature adds
+`to_native_frame()`; both serialize the same primitives, and each rejects a
+figure configured for another kind with a typed error instead of ignoring the
+selection.
 
 ## The public surface
 
@@ -83,6 +85,8 @@ quietly fall back to a default backend.
 | Method | Meaning | Default |
 |---|---|---|
 | `data_source(...)` | the multi-column source | required |
+| `backend(...)` | the rendering backend | required |
+| `execution_mode(...)` | how the figure executes | `Automatic` |
 | `x(...)` | the ordering column | required |
 | `lower(...)`, `upper(...)` | explicit boundaries | explicit mode only |
 | `derive()` | select the derived mode | off |
@@ -95,15 +99,24 @@ quietly fall back to a default backend.
 | `border(...)` | draw the two boundary lines | `false` |
 | `dashed_borders(...)` | dash the boundary lines | `true` |
 | `centre_line(...)` | compose a line through the middle | `false` |
-| `missing_value_policy(...)` | omit-and-split or fail | omit |
+| `missing_value_policy(...)` | omit-and-split or reject | omit |
 | `x_scale_kind(...)`, `temporal_unit(...)` | continuous or temporal x | continuous, days |
+| `title(...)`, `x_title(...)`, `y_title(...)` | figure and axis titles | none |
 | `viewport(...)` | logical figure size | 640 × 400 |
 
 The two modes are mutually exclusive by construction: `build` rejects an
 explicit configuration without both boundaries, a derived configuration
 without a value column, and any attempt to mix them. A missing or mistyped
 column is an `SVError::ColumnNotFound` or an `SVError::InvalidConfiguration`
-with the role that was expected — before a pixel is drawn (P7).
+with the role that was expected — declared in `build`, before any data is read
+(P7). The same build step rejects a `Nominal` or `Boolean` `x_scale_kind`: a
+band has no ordered between-ness to fill, and discovering that at `render`
+would turn a configuration mistake into a data error.
+
+A `Temporal` x axis is placed through a continuous scale over the same domain
+and range while a temporal scale supplies the axis ticks; the mark kernel
+offers only numeric values to the horizontal scale, so both scales map a
+timestamp to the same pixel.
 
 ### Why `derive()` is a mode, not a stat value
 
@@ -120,7 +133,10 @@ new kernel capability.
 
 The explicit path keeps the source columns in their original representation.
 It asks each column for a snapshot once, derives the domains, and passes the
-views to `SVMarkRequest`:
+views to `SVMarkRequest`. The positions it walks are representation-aware: a
+dense column contributes every row, a sparse column contributes only its stored
+indices and a streaming column contributes its current window, so a sparse
+column is never expanded into a dense twin:
 
 ```rust,ignore
 let request = SVMarkRequest::new(x, lower, horizontal, vertical, plot)
@@ -165,17 +181,26 @@ approximation of the full data, and the output says so through
 `is_approximate()`. The recipe never waits for the next sample: the window it
 was handed is all it reads.
 
+The derived path reads values at the same representation-aware positions. It
+applies the missing-value policy before the aggregate kernel, because
+`SVStat::Aggregate` rejects a non-finite observation on its own terms; dropping
+the sample (or failing with the policy's message) is the recipe's decision, not
+the statistic's.
+
 ## Missing values
 
 A missing boundary is a non-finite `f64`. Leaving that to the first kernel
 that reads it produces a scale error deep inside the composition, so the
 policy is explicit:
 
-- `SVMissingValuePolicy::Omit` (default) drops the sample and splits the band:
-  the polygon closes before the gap and a new one opens after it, so the fill
-  never bridges over data that is not there.
-- `SVMissingValuePolicy::Error` rejects the whole render with an
+- `SVBandMissingValuePolicy::Omit` (default) drops the sample and splits the
+  band: the polygon closes before the gap and a new one opens after it, so the
+  fill never bridges over data that is not there.
+- `SVBandMissingValuePolicy::Error` rejects the whole render with an
   `InvalidConfiguration` naming the column and the position.
+
+The policy applies to both modes. The render span counts only finite drawn
+samples, so an omitted boundary never inflates the reported point count.
 
 The splitting itself is still composition: every finite run becomes its own
 `Ribbon` request. No invisible repair, no interpolation, no invented value.
@@ -192,12 +217,33 @@ private copy.
 ## One example, one figure
 
 `examples/band_plot.rs` derives a load interval per scenario from a small
-table, enables the dashed borders and the centre line, and writes the figure:
+table, enables the dashed borders and the centre line, and writes the figure
+through the public `to_svg()` serializer:
+
+```rust,ignore
+let output = SVBandPlotBuilder::new()
+    // …configuration…
+    .backend(SVBackendKind::Svg)
+    .build()?
+    .render()?;
+std::fs::write("docs/figures/band_plot.svg", output.to_svg()?)?;
+```
 
 ![Two confidence bands with dashed borders and centre lines](assets/band_plot.svg)
 
-The same geometry is available to any backend: `render()` returns mark
-primitives already in logical pixels.
+`render()` returns mark primitives already in logical pixels, so the native
+serializer can draw the very same primitives into a frame with `to_native_frame`.
+A figure configured for `Native` cannot write an SVG and one configured for
+`Svg` cannot produce a native frame; both mistakes are typed errors.
+
+## Transitions are deferred
+
+The FDR records that a band boundary interpolates, that the fill colour and
+opacity interpolate and that a band enters and widens from its centre. This
+change composes interpolable `Ribbon` and `Line` paths but ships no transition
+or animation API, and no test claims one. The temporal behaviour belongs to the
+transition and animation integration, and the FDR acceptance item stays
+unticked until that change lands.
 
 ## The tests are the specification
 
@@ -205,21 +251,29 @@ The companion tests are split the way the unit is split:
 
 - `band_plot_tests.rs` — the default composition, exact explicit bounds,
   opacity, fill, border dashes and the centre line. The exactness test reads
-  the path commands and compares both edges against the scaled data.
+  the path commands and asserts **both** boundaries at every scaled x. The
+  same file covers the build-time errors (scale kind, missing column, wrong
+  role), the execution-mode default, the viewport and the temporal unit.
 - `band_plot_derived_tests.rs` — the derived mean and standard deviation,
-  compared with a hand-computed interval, plus the percentile mode.
+  compared with a hand-computed interval, the exact centred 90% percentile
+  interval, and a huge-logical/few-stored sparse aggregate.
 - `band_plot_missing_tests.rs` — a `NaN` boundary becomes two polygons under
-  `Omit` and an error under `Error`.
+  `Omit` and an error under `Error`, in the explicit and the derived mode.
 - `band_plot_parity_tests.rs` — dense, sparse and streaming sources agree on
-  every path vertex within `1e-9`; a counting source proves each column is
-  resolved exactly once.
+  every path vertex within `1e-9`; implicit sparse zeros match the dense
+  equivalent; a huge logical length with few stored entries draws few points;
+  a counting source proves each column is resolved exactly once.
 - `band_plot_concurrency_tests.rs` — ten thousand points render, and four
   threads rendering the same built plot produce identical geometry.
 - `band_plot_series_tests.rs` — one band per series, in both modes.
 - `band_plot_observability_tests.rs` — the render span carries the configured
-  backend, the representation and the point count.
-- `band_plot_svg_tests.rs` — the SVG is self-contained and byte-identical
-  between two renders.
+  backend, the representation and the drawn point count; an omitted sample is
+  not counted.
+- `band_plot_svg_tests.rs` — the SVG is self-contained, byte-identical between
+  two renders and carries the figure and axis titles.
+- `band_plot_native_tests.rs` (`render-native`) — the native frame rasterizes
+  the first composed vertex, a non-native figure rejects `to_native_frame`, and
+  `save` on native reports the missing export capability.
 
 ## Roads not taken
 
@@ -228,9 +282,11 @@ The companion tests are split the way the unit is split:
   of them changed.
 - **A new mark variant.** `Ribbon` already means "region between two
   boundaries"; adding `Band` would split the vocabulary for no new geometry.
-- **Densifying a sparse column.** The explicit single-series path hands the
-  sparse view to the mark kernel unchanged. The mark reads stored entries and
-  implicit zeros without allocating a dense twin.
+- **Densifying a sparse column.** Both modes read representation-aware
+  positions: a sparse column contributes only its stored indices, so a
+  ten-million-position column with three stored values draws three points. An
+  implicit zero is read at its position when another column supplies it, but
+  it is never materialised into a dense twin.
 - **Blocking on a stream.** A derived band always renders the current window.
   It marks the result approximate instead of waiting for a "complete" stream
   that a live source never provides.
