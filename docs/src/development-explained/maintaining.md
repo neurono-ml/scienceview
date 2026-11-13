@@ -32,6 +32,7 @@ examples.
 | 13 | `ch13-mark-transitions.md` | Transitions: typed match keys and duplicate detection, the enter/update/exit sets, interpolation driven by the mark kernel's property table, theme motion tokens and reduced motion, the clock-free progress model, the backend capability contract, parity and concurrency |
 | 14 | `ch14-animation-timeline.md` | Animation: the model-owned clock, keyframe deltas and the transition seam, fixed and streaming sources over one bounded window, sampling and easing, playback state, looping and direction, interruptible re-targeting, the action vocabulary and the reproducibility, parity and concurrency tests |
 | 15 | `ch15-native-backend.md` | The native backend: two layers, straight-alpha blending, distance and sampled anti-aliasing, the device pixel ratio, dirty regions, the model-clock frame loop, resize and scale change, and the capability refusal of export |
+| 17 | `ch17-line-plot.md` | The first recipe: long-format columns, three representations, stable ordering, gaps and bridging, aggregation with an interval, step and spline vertices, multi-series colour, markers, observability and SVG rendering |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
