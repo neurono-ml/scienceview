@@ -65,6 +65,6 @@
   change: `SVDensityPlot::weight(...)` passes the column to the weighted
   `SVStat::KernelDensity`, and the kernel keeps Silverman's bandwidth
   unweighted (recorded in FDR-002).
-- [ ] Wire transition animation once the transition integration reaches the
-  distribution recipes. The scene already emits transition-ready geometry (one
-  curve per series over a fixed grid).
+- Deferred (decision 2026-11-13): transition animation. The scene already emits
+  transition-ready geometry (one curve per series over a fixed grid); wiring
+  the interpolation belongs to a future recipe-animation integration change.

@@ -62,7 +62,10 @@
 - [x] Weighted binning. Delivered by the `statistical-weights` change: the
   `SVStat::Bin` kernel now consumes an observation weight column and the
   recipe's `weight(...)` carries it, replacing the former build-time rejection.
-- [ ] In-place streaming update. `update` recomposes the current window; growing
-  the bars without a redraw belongs to the transition/streaming integration.
-- [ ] Transition wiring. The FDR temporal behaviour is a target, not a claim of
-  this change; the spec records the deferral.
+- Deferred (decision 2026-11-13): an in-place streaming update that grows the
+  bars without a redraw belongs to the transition/streaming integration. The
+  shipped `update` recomposes the current window and returns the new artifact;
+  no acceptance claim is made for incremental growth.
+- Deferred (decision 2026-11-13): transition wiring. The FDR temporal behaviour
+  is a design target; the recipe ships transition-ready geometry and the
+  interpolation belongs to a future recipe-animation integration change.
