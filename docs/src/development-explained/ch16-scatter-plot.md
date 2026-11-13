@@ -199,6 +199,12 @@ for geometry in scene.mark_geometries() {
 document.push_decoration_primitives(scene.decoration_primitives_after_marks());
 ```
 
+The scene also carries two optional backend surfaces: `to_svg()` behind the
+`render-svg` feature returns the same document, and `to_native_frame()` behind
+`render-native` rasterizes the same decorations and geometries with the
+from-scratch native canvas. The two are the first cross-backend check that a
+recipe produces one scene instead of one renderer per target.
+
 `examples/scatter_plot.rs` writes the result to
 `docs/figures/scatter_plot.svg`; the SVG is mirrored into this book under
 `docs/src/assets/scatter_plot.svg`. The code pipeline regenerates the figure
