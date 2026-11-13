@@ -81,8 +81,13 @@ impl<'source> SVRegressionPlot<'source> {
 
     /// Renders the chart to a self-contained SVG document.
     ///
-    /// Only the SVG backend is implemented by this change. The plot still
-    /// builds for every backend that can draw its marks, so a later backend
+    /// The recipe composes the scene — paired observations, one fit per
+    /// series, scales, decorations and the ribbon, line and dot marks — and the
+    /// backend serializes that scene. Only the SVG backend implements the
+    /// composed render path in this change, so a different configured kind is
+    /// refused with [`SVError::UnsupportedBackendCapability`] rather than
+    /// silently returning an empty or mislabelled document. The plot still
+    /// builds for every backend that can draw its marks, and a later backend
     /// only adds its own rendering path.
     ///
     /// # Errors

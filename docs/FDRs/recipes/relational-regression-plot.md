@@ -179,10 +179,18 @@ curve would pass through nonsense for a polynomial.
   registration or per-frame callback; the temporal table records the intended
   behaviour for the transition integration. The acceptance bullet is unticked
   accordingly.
-- **Backends.** SVG is the implemented render path in this change. The plot
-  builds for every backend whose mark matrix includes Dot, Line and Ribbon;
-  `render` reports the missing export capability for the others until a later
-  backend change adds its path.
+- **Backends and the recipe-level scene contract.** The recipe composes the
+  whole scene — paired observations, one fit per series, the two scales, the
+  ribbon, line and dot marks and their decorations — and hands it to the
+  backend serializer. The backend owns notation only; it never re-derives the
+  fit, the domains or the pairing. `render()` is the public path and always
+  records the configured kind in its span. SVG is the implemented composed
+  render path in this change; a different configured kind that passed the
+  build-time mark matrix is refused with
+  `SVError::UnsupportedBackendCapability` carrying that kind, never by drawing
+  nothing or mislabelling the output. The plot builds for every backend whose
+  mark matrix includes Dot, Line and Ribbon; each later backend change adds
+  only its own scene serialization.
 
 
 ## Open questions

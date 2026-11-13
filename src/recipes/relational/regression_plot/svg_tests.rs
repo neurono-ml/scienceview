@@ -58,10 +58,20 @@ fn a_non_svg_backend_is_rejected_by_the_render_operation() {
         .build()
         .expect("the marks are supported");
     let error = chart.render().expect_err("the backend is not implemented");
-    assert!(matches!(
-        error,
-        scienceview_core::sv_error::SVError::UnsupportedBackendCapability { .. }
-    ));
+    match error {
+        scienceview_core::sv_error::SVError::UnsupportedBackendCapability {
+            backend_kind,
+            capability,
+        } => {
+            assert_eq!(backend_kind, SVBackendKind::Native);
+            assert_eq!(
+                capability,
+                scienceview_core::sv_backend::SVBackendCapability::Export
+            );
+        }
+        other => panic!("the render must refuse the unavailable backend: {other:?}"),
+    }
+    assert_eq!(chart.backend_kind(), SVBackendKind::Native);
 }
 
 #[test]
