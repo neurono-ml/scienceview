@@ -12,6 +12,26 @@ released.
 
 ### Added
 
+- The empirical cumulative distribution recipe `SVECdfPlot` in
+  `scienceview::sv_recipes::sv_distribution::sv_ecdf_plot`: the proportion of
+  observations at or below each value, composed exactly as
+  `data -> [SVStat::EmpiricalCdf] -> (values, cumulative probability) ->
+  [SVScale] -> SVMark::Line (step geometry)`. The curve is never reimplemented:
+  the stat kernel derives the breakpoints and probabilities, and the recipe
+  expands them into explicit horizontal-then-vertical vertices reaching the
+  total at the maximum. The builder requires an explicit backend, defaults
+  `execution_mode` to `Automatic`, and exposes `value`, optional `series`,
+  `normalise`, `orient` (`SVBarOrientation`), `complementary`, `line_width`,
+  `viewport` and `title`. `normalise(false)` reaches the observation count;
+  `complementary(true)` draws the survival curve from the same kernel result;
+  horizontal orientation swaps the two channels. Dense, sparse and streaming
+  input resolve once per operation: an ungrouped sparse column reaches the
+  kernel unchanged (never densified) and a streaming window renders without
+  blocking. Non-finite observations and series codes are omitted. The
+  composition serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error.
+  Transition and animation wiring is deferred. The example
+  `examples/ecdf_plot.rs` writes `docs/figures/ecdf_plot.svg`.
 - The distributional recipe `SVDensityContourPlot`
   (`scienceview::sv_recipes::sv_distribution`): the joint distribution of two
   continuous variables drawn as filled contour bands or contour lines. The

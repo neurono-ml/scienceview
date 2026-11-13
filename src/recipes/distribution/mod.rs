@@ -20,6 +20,10 @@ pub use sv_density_plot::{
     SVDensityRendering,
 };
 
+#[path = "ecdf_plot/mod.rs"]
+pub mod sv_ecdf_plot;
+pub use sv_ecdf_plot::{SVECdfPlot, SVECdfPlotBuilder, SVEcdfPlotComposition};
+
 #[path = "histogram_plot/mod.rs"]
 pub mod sv_histogram_plot;
 pub use sv_histogram_plot::{SVBarElement, SVHistogramPlot, SVHistogramPlotBuilder};
