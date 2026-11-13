@@ -17,9 +17,14 @@ type SVSpanFields = BTreeMap<String, String>;
 static SV_SPAN_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 fn sv_span_test_guard() -> std::sync::MutexGuard<'static, ()> {
-    SV_SPAN_TEST_LOCK
+    let guard = SV_SPAN_TEST_LOCK
         .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    // The span callsite is shared across the suite; make sure a subscriber
+    // installed earlier in another thread did not leave its interest cached
+    // as disabled, which made this test flaky in a full parallel run.
+    tracing::callsite::rebuild_interest_cache();
+    guard
 }
 
 #[derive(Clone, Default)]
