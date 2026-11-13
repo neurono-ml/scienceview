@@ -6,6 +6,13 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "parallel_categories_plot/mod.rs"]
+pub mod sv_parallel_categories_plot;
+pub use sv_parallel_categories_plot::{
+    SVParallelCategoriesFrame, SVParallelCategoriesPlot, SVParallelCategoriesPlotBuilder,
+    SVParallelCategoriesRenderOutput, SVParallelCategoriesScene,
+};
+
 #[path = "parallel_coordinates_plot/mod.rs"]
 pub mod sv_parallel_coordinates_plot;
 pub use sv_parallel_coordinates_plot::{
