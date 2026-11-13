@@ -45,6 +45,13 @@ pub use sv_histogram_plot::{
     SVHistogramScene,
 };
 
+#[path = "point_plot/mod.rs"]
+pub mod sv_point_plot;
+pub use sv_point_plot::{
+    SVPointEstimate, SVPointMissingValuePolicy, SVPointOrdering, SVPointPlot, SVPointPlotBuilder,
+    SVPointRenderOutput,
+};
+
 #[path = "rug_plot/mod.rs"]
 pub mod sv_rug_plot;
 pub use sv_rug_plot::{SVRugFrame, SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene};
