@@ -8,7 +8,7 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVContourPlot` SHALL be produced by exactly the composition `data -> [SVStat::Aggregate (grid interpolation)] -> scalar field -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` and SHALL expose the configuration surface recorded in its FDR.
+`SVContourPlot` SHALL be produced by exactly the composition `data -> [SVStat::Bin (grid) + SVStat::Aggregate (cell mean)] -> scalar field -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` and SHALL expose the configuration surface recorded in its FDR. Bilinear interpolation of a point cloud is deferred: the current composition bins on both axes and averages each cell.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
@@ -46,17 +46,16 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: Transitions are deferred, not claimed
 
-`SVContourPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVContourPlot` SHALL NOT claim transition or animation support in this change.
+The composition recomputes the whole level set on every call and the geometry is
+deterministic, so a later transition change can match contour paths by vertex
+order; that wiring is out of scope here.
 
-#### Scenario: Transition: contour path
-- **WHEN** the state changes and contour path is affected
-- **THEN** recomputed per frame and morphed by vertex order
-
-#### Scenario: Transition: level set appearing or disappearing
-- **WHEN** the state changes and level set appearing or disappearing is affected
-- **THEN** enters or exits
+#### Scenario: Recomputed on every call
+- **WHEN** the same chart is composed twice from the same field
+- **THEN** the same primitives are produced and no animation state is created
 
 ### Requirement: The chart renders on every declared backend
 
