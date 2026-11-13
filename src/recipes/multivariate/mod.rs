@@ -18,3 +18,9 @@ pub mod sv_parallel_coordinates_plot;
 pub use sv_parallel_coordinates_plot::{
     SVParallelCoordinatesPlot, SVParallelCoordinatesPlotBuilder, SVParallelCoordinatesRenderOutput,
 };
+
+#[path = "splom_plot/mod.rs"]
+pub mod sv_splom_plot;
+pub use sv_splom_plot::{
+    SVSplomFrame, SVSplomPlot, SVSplomPlotBuilder, SVSplomRenderOutput, SVSplomScene,
+};
