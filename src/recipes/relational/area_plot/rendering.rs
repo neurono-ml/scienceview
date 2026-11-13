@@ -131,11 +131,22 @@ pub(crate) fn sv_compose_area(
     let style = SVDecorationStyle::built_in();
     let plot = sv_plot_area(viewport);
     let (x_lower, x_upper) = sv_horizontal_domain(&prepared);
-    let horizontal = SVScaleBuilder::new(configuration.x_scale_kind)
+    let horizontal_axis = SVScaleBuilder::new(configuration.x_scale_kind)
         .domain(x_lower, x_upper)
         .range(plot.x, plot.right())
         .temporal_unit(configuration.temporal_unit)
         .build()?;
+    // A temporal scale answers timestamp values, while the mark kernel places
+    // numeric positions. Both scales share domain and range, so the temporal
+    // axis and the numeric placement cannot disagree.
+    let horizontal = if configuration.x_scale_kind == SVScaleKind::Temporal {
+        SVScaleBuilder::new(SVScaleKind::Continuous)
+            .domain(x_lower, x_upper)
+            .range(plot.x, plot.right())
+            .build()?
+    } else {
+        horizontal_axis.clone()
+    };
     let (y_lower, y_upper) = sv_vertical_domain(configuration, &prepared);
     let vertical = SVScaleBuilder::new(SVScaleKind::Continuous)
         .domain(y_lower, y_upper)
@@ -145,7 +156,7 @@ pub(crate) fn sv_compose_area(
     let bottom = sv_build_axis(SVAxisSide::Bottom, configuration.x_title);
     let left = sv_build_axis(SVAxisSide::Left, configuration.y_title);
     let bottom_placement = bottom.place(
-        &bottom.measure(&horizontal, SVAxisSpace::new(plot.width)?, &style)?,
+        &bottom.measure(&horizontal_axis, SVAxisSpace::new(plot.width)?, &style)?,
         plot,
         &style,
     );

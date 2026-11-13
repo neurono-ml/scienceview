@@ -574,6 +574,65 @@ fn large_data_draws_every_point() {
     assert_eq!(rendering.point_count(), count);
 }
 
+#[test]
+fn an_unsupported_backend_fails_at_build_time() {
+    let source = SVTestSource::dense();
+    let error = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Native)
+        .build()
+        .err()
+        .expect("the recipe has no native rendering path yet");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
+
+#[test]
+fn a_temporal_axis_places_the_samples() {
+    let source = SVTestSource::dense();
+    let rendering = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .series("series")
+        .x_scale_kind(scienceview_core::sv_scale::SVScaleKind::Temporal)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("a temporal axis is a valid configuration")
+        .rendering()
+        .expect("the chart draws");
+
+    assert!(!path_points(rendering.primitives()).is_empty());
+}
+
+#[cfg(feature = "render-svg")]
+#[test]
+fn update_recomputes_the_current_window() {
+    let source = SVTestSource::streaming();
+    let plot = build_plot(&source);
+    let rendered = plot.render().expect("the chart renders");
+    let updated = plot.update(1).expect("the chart updates");
+
+    assert_eq!(rendered.bytes, updated.bytes);
+}
+
+#[cfg(feature = "render-svg")]
+#[test]
+fn save_writes_the_document() {
+    let directory = std::env::temp_dir().join("scienceview-area-plot-test");
+    std::fs::create_dir_all(&directory).expect("the temporary directory is writable");
+    let destination = directory.join("area_plot.svg");
+    let source = SVTestSource::dense();
+    let plot = build_plot(&source);
+    plot.save(&destination).expect("the chart saves");
+
+    let document = std::fs::read_to_string(&destination).expect("the document is readable");
+    assert!(document.starts_with("<svg"));
+    let _ = std::fs::remove_file(destination);
+}
+
 #[cfg(feature = "render-svg")]
 #[test]
 fn svg_output_contains_closed_paths() {
