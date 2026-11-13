@@ -35,11 +35,11 @@
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/scatter_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/scatter_plot.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
