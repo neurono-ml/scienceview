@@ -34,6 +34,21 @@ line to `src/recipes/relational/mod.rs`. No central registry exists, because a
 central registry would serialise every recipe change against every other one
 (patterns.md P4).
 
+### D5 — Derived mode is a pair, not an arbitrary stat
+
+Only `SVStat::Aggregate` reports both an estimate and an uncertainty interval,
+which are the two boundaries a band consumes. The builder therefore selects the
+derived mode explicitly (`derive()` plus `values(...)`) and constructs the
+aggregate from `error` and `confidence`; a caller-supplied arbitrary `SVStat`
+would have to be inspected at render time and could silently produce no band.
+
+### D6 — Missing values are explicit
+
+A non-finite boundary is a missing sample. `SVMissingValuePolicy::Omit`
+(default) splits the band at the gap so the fill never bridges absent data;
+`SVMissingValuePolicy::Error` rejects the render with an explicit configuration
+error naming the column and position.
+
 ## Open Questions
 
 - Should the band expose a `confidence` level that changes the interval interactively, and should that be a control in the UI kit? *Open — it would be a natural companion to the range slider.*
