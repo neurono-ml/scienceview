@@ -88,16 +88,17 @@ let composition = plot.compose()?;
 | `weight` | observation weight column | `None` |
 | `levels` | number of contour levels | `10` |
 | `level_range` | explicit height interval | observed range |
-| `bandwidth`, `bw_adjust` | optional Gaussian smoothing in data units | no smoothing |
+| `bandwidth`, `bandwidth_adjustment` | optional Gaussian smoothing in data units | no smoothing |
 | `grid_count` | cells per axis | `256` |
 | `style` | `Filled` or `Lines` | `Filled` |
 | `colour_map`, `colour_scale` | colour encoding of a level | theme map, linear |
 | `backend`, `execution_mode` | rendering form and run mode | backend required, `Automatic` |
 
 `bandwidth` deserves a note. It is not a hidden kernel-density implementation:
-it requests one Gaussian pass over the already binned field. The FDR describes
-the chart through the conceptual `KernelDensity (2D)` label; the implementation
-uses the bin kernel and writes that difference down.
+it requests one Gaussian pass over the already binned field, and the kernel
+radius is capped at the axis length so an extreme bandwidth stays bounded. The
+FDR records the binned composition explicitly instead of claiming a
+kernel-density variant the closed stat vocabulary does not have.
 
 ## Turning a field into closed regions
 
@@ -144,8 +145,10 @@ The recipe accepts dense, sparse and streaming input on the same operation.
   render thread, and the build checks that the chosen backend declares the
   streaming capability.
 
-Non-finite pairs are skipped rather than poisoning the grid; an input with no
-finite pair is rejected with `EmptyInput`. A sparse weight column still works,
+A pair whose `x` or `y` is not finite is skipped rather than poisoning the grid;
+an input with no finite pair is rejected with `EmptyInput`. A non-finite or
+negative `weight` is rejected explicitly, because silently dropping an
+observation would change the joint mass. A sparse weight column still works,
 because the weighted path walks logical positions through a cursor instead of
 materialising a value buffer.
 
@@ -153,8 +156,10 @@ materialising a value buffer.
 
 The companion test modules are the executable version of this chapter.
 `density_contour_plot_tests.rs` walks the configuration surface: defaults,
-every documented option, build-time errors, the weight and series columns,
-non-finite handling, the integral of the density and the two contour styles.
+every documented option, build-time errors, the weight and series columns, the
+missing-value policy, all-equal and constant fields, explicit level ranges
+outside the field, the integral of the density, the two contour styles, the
+closed filled subpaths and the bounded smoothing radius.
 `parity_tests.rs` asserts that dense, sparse and streaming input produce the
 same grid and the same contours, and that a structurally sparse column never
 becomes a dense array. `concurrency_tests.rs` serializes the same composition
