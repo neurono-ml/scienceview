@@ -38,3 +38,58 @@ central registry would serialise every recipe change against every other one
 
 - Should the contour extraction (marching squares and relatives) live in `core-stat` as a distinct stat, since both contour recipes need it? *Open — leaning yes, as `SVStat::Contour`.*
 
+
+### D5 — Two data layouts, one field abstraction
+
+The recipe folds its input into `SVContourField`, a public regular lattice. Two
+layouts reach it:
+
+- **Matrix** — `matrix(rows, columns)` reads the `value` column as a row-major
+  matrix. The coordinates span `x_range`/`y_range` when configured and the
+  sample index otherwise. A sparse value column answers implicit positions with
+  zero and is never materialised.
+- **Points** — `x`, `y` and `value` columns of equal length are binned on both
+  axes through `SVStat::Bin` (`grid_count` cells per axis, default 64), and each
+  cell holds the mean of the values that fall in it.
+
+`SVContourMissingPolicy` decides what a non-finite matrix sample means: `Omit`
+fills it from its finite orthogonal neighbours (then the finite mean, then
+zero), so marching squares always sees a complete lattice; `Error` rejects the
+render with `SVError::NonFiniteValue` naming the position. A non-finite point
+observation is dropped under `Omit` and rejected under `Error`.
+
+### D6 — Contour extraction is a geometry submodule, not a core stat
+
+`SVStat` has no contour variant (patterns P5), so the marching-squares table,
+the directed boundary walk and the region stitcher live in
+`src/recipes/matrix/contour_plot/geometry/`, documented as extraction geometry
+rather than statistics. The sibling `density_contour_plot` keeps its own copy;
+this change does not touch it. A future core change may promote the shared
+extraction to a `SVStat::Contour`-style kernel, at which point both recipes can
+compose it. Level interpolation itself is geometry: the thresholds are selected
+from the field range, the requested count, range or spacing, never from a
+statistical model.
+
+### D7 — Levels, bands and labels
+
+Thresholds are interior to the range: a count `n` places `n` levels at
+`k/(n+1)`, a `level_size` places them at the fixed step, and `level_range` fixes
+the interval. `Lines` strokes one compound path per threshold; `Filled` paints a
+background band plus one nested closed region per threshold, stitched with the
+non-zero fill rule. `labels(true)` appends one text run per drawn level, placed
+on the level curve and drawn after every band so a higher band cannot cover it.
+
+### D8 — Transition readiness
+
+The geometry is deterministic and recomputed from the field, so a later
+transition change can match contours by vertex order. No transition or
+animation wiring ships in this change.
+
+### Review
+
+Acceptance against `docs/FDRs/matrix-contour-plot.md` was performed by the
+implementing agent; the independent review is left to the batch integrator.
+Test evidence: `contour_plot_tests` (defaults, every option, the explicit error
+surface), `parity_tests` (dense/sparse/streaming, sparse implicit zeros,
+streaming window), `concurrency_tests`, `observability_tests` and `render_tests`
+(SVG and native typed dispatch).
