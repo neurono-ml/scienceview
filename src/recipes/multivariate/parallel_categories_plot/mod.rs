@@ -58,6 +58,9 @@ pub use render_output::{SVParallelCategoriesFrame, SVParallelCategoriesRenderOut
 pub use scene::{SVParallelCategoriesAxis, SVParallelCategoriesRibbon, SVParallelCategoriesScene};
 
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "parallel_categories_plot_tests.rs"]
 mod parallel_categories_plot_tests;
 #[cfg(test)]
