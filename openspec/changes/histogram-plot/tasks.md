@@ -59,9 +59,9 @@
 
 ## 8. Deferred (recorded, not ticked)
 
-- [ ] Weighted binning. The shipped `SVStat::Bin` kernel does not consume
-  observation weights; a configured `weight` is rejected with an error naming
-  the kernel gap. Follow-up: the `statistical-transforms` capability.
+- [x] Weighted binning. Delivered by the `statistical-weights` change: the
+  `SVStat::Bin` kernel now consumes an observation weight column and the
+  recipe's `weight(...)` carries it, replacing the former build-time rejection.
 - [ ] In-place streaming update. `update` recomposes the current window; growing
   the bars without a redraw belongs to the transition/streaming integration.
 - [ ] Transition wiring. The FDR temporal behaviour is a target, not a claim of

@@ -60,10 +60,11 @@
 
 ## Follow-ups (not this change)
 
-- [ ] Add the `weight` column once a weighted kernel-density variant exists in
-  the statistical-transform capability. The shipped kernel applies an
-  unweighted estimate, so the recipe deliberately omits the column instead of
-  reimplementing the kernel (patterns.md P5); the FDR amendment records it.
+- [x] Add the `weight` column once a weighted kernel-density variant exists in
+  the statistical-transform capability. Delivered by the `statistical-weights`
+  change: `SVDensityPlot::weight(...)` passes the column to the weighted
+  `SVStat::KernelDensity`, and the kernel keeps Silverman's bandwidth
+  unweighted (recorded in FDR-002).
 - [ ] Wire transition animation once the transition integration reaches the
   distribution recipes. The scene already emits transition-ready geometry (one
   curve per series over a fixed grid).
