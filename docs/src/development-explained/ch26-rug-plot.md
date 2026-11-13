@@ -100,6 +100,13 @@ the left margin. The ticks sit in the *outer* part of the margin so they never
 cover the plot area's data region — a tick can touch the canvas edge, but it
 never enters the rectangle a companion chart would paint.
 
+`height` is a fraction of the plot's perpendicular extent, but the recipe also
+caps the result at the depth of the margin. Without that cap, `height = 1.0`
+would ask for a tick as long as the whole plot and the far end would land
+inside the data region. The cap keeps the acceptance rule true for every
+accepted `height`; `an_extreme_height_is_capped_at_the_margin` checks both
+orientations at `height = 1.0`.
+
 ## Dense, sparse and streaming
 
 The data boundary is enforced once, in `channels.rs`. The value column
@@ -120,7 +127,11 @@ this shape:
 - **Sparse storage is never expanded.** A sparse view with two stored entries
   and a logical length of six draws two ticks, not six. This is the documented
   rug semantics: a rug marks observations, and an unstored sparse position is
-  not an observation. `a_sparse_input_marks_only_its_stored_entries` asserts it.
+  not an observation. `a_sparse_input_marks_only_its_stored_entries` asserts it,
+  and also checks that the implicit zeros do not widen the value axis: the two
+  stored entries land at the same positions they would in a dense column that
+  held only those two observations. `a_huge_sparse_column_marks_only_its_stored_entries`
+  repeats the check with a logical length of one million.
 - **Streaming never blocks.** The collector reads the bounded snapshot the
   streaming view already carries. `a_streaming_input_shows_its_current_window_without_blocking`
   hands it a window that dropped two of its six samples and checks that four
@@ -135,10 +146,18 @@ dispatch. A full sparse series therefore agrees with its dense twin
 
 A non-finite value (`NaN`, `+∞`, `−∞`) has no place on an axis, so it draws no
 tick. The collector skips it before any scale runs, and the rest of the sample
-is drawn normally — `non_finite_observations_are_skipped` feeds six values, two
-of them invalid, and gets three ticks. A non-finite *series* value marks the
-whole observation as missing: a tick whose colour group is unknown cannot be
-assigned honestly, so it is dropped rather than painted with an invented group.
+is drawn normally — `non_finite_observations_are_skipped` feeds six values,
+three of them invalid, and gets three ticks. A non-finite *series* value marks
+the whole observation as missing: a tick whose colour group is unknown cannot
+be assigned honestly, so it is dropped rather than painted with an invented
+group.
+
+A column with no drawable observation at all — the empty column, or one whose
+values are every one non-finite — renders an empty scene instead of failing on
+a domain it never needed. `an_all_missing_source_renders_an_empty_scene`
+asserts it. A single observation has a degenerate domain, so the scale places
+its only tick at the centre of the axis
+(`a_single_observation_sits_at_the_centre_of_the_value_axis`).
 
 ## The document stays small
 
@@ -193,8 +212,12 @@ of ticks actually drawn — the streaming test proves the correction.
 | `the_line_width_option_changes_the_stroke_width` | the stroke width reaches the paint |
 | `the_series_colours_form_stable_groups` | repeated series values share one palette colour |
 | `non_finite_observations_are_skipped` | missing values draw no tick |
+| `an_all_missing_source_renders_an_empty_scene` | a sample with no drawable value renders empty |
+| `a_single_observation_sits_at_the_centre_of_the_value_axis` | a degenerate domain centres its tick |
+| `an_extreme_height_is_capped_at_the_margin` | `height = 1.0` still never enters the plot |
 | `dense_sparse_and_streaming_inputs_draw_the_same_scene` | representation parity |
-| `a_sparse_input_marks_only_its_stored_entries` | sparse is not densified |
+| `a_sparse_input_marks_only_its_stored_entries` | sparse is not densified and implicit zeros do not widen the axis |
+| `a_huge_sparse_column_marks_only_its_stored_entries` | a million logical positions with two stored entries stay bounded |
 | `a_streaming_input_shows_its_current_window_without_blocking` | the bounded window is drawn |
 | `several_threads_render_the_same_rug_identically` | concurrency |
 | `a_compose_records_the_backend_representation_and_tick_count` | the operation span |
