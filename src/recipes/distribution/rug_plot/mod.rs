@@ -56,6 +56,9 @@ pub use scene::SVRugScene;
 #[path = "concurrency_tests.rs"]
 mod concurrency_tests;
 #[cfg(test)]
+#[path = "error_tests.rs"]
+mod error_tests;
+#[cfg(test)]
 #[path = "large_rug_tests.rs"]
 mod large_rug_tests;
 #[cfg(test)]
@@ -64,6 +67,9 @@ mod observability_tests;
 #[cfg(test)]
 #[path = "option_tests.rs"]
 mod option_tests;
+#[cfg(test)]
+#[path = "orientation_tests.rs"]
+mod orientation_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
