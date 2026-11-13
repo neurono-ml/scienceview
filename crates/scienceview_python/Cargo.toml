@@ -1,0 +1,41 @@
+[package]
+name = "scienceview_python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Python bindings for scienceview: the validated figure surface exposed through a pure-Rust conversion layer."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_python"
+
+[lib]
+name = "scienceview_python"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+scienceview = { path = "../..", version = "0.1.0", default-features = false }
+scienceview_dashboard = { path = "../scienceview_dashboard", version = "0.1.0" }
+pyo3 = { version = "0.30", optional = true }
+
+[features]
+# The binding is only useful with at least one backend compiled in, so SVG (the
+# dependency-free exporter) is available by default. `pyo3` still is not: the
+# interpreter layer stays behind `python`.
+default = ["render-svg"]
+# Optional CPython extension module. `pyo3` is never part of the default build.
+python = ["dep:pyo3"]
+# Produces the loadable extension module (used by the wheel build).
+extension-module = ["python", "pyo3/extension-module"]
+# Interpreter-backed tests; requires a Python development environment.
+python-tests = ["python", "pyo3/auto-initialize"]
+# Backend features are forwarded one to one; enabling one only makes the
+# backend available, it never selects it (spec `backend-selection`).
+render-svg = ["scienceview/render-svg"]
+render-html = ["scienceview/render-html"]
+
+[dev-dependencies]
+scienceview = { path = "../..", features = ["render-svg"] }
+
+[lints]
+workspace = true
