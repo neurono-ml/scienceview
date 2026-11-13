@@ -77,15 +77,15 @@
   defer them in the FDR.
 - [x] Replace the claimed-but-hardcoded theme consumption with `theme(...)`
   wiring or an explicit deferral in the FDR.
-- [ ] Split `regression_plot_tests.rs` into a `regression_plot_tests/` folder
+- [x] Split `regression_plot_tests.rs` into a `regression_plot_tests/` folder
   module.
 - [x] Route the example through the public `render()`/`save()`, gate it on
   `render-svg`, regenerate the figure and compare it to the checked-in copy.
 - [x] Document the recipe-level scene contract and test the typed error for an
   unavailable backend kind.
-- [ ] Strengthen the tests: model-specific coefficients and a band compared to
+- [x] Strengthen the tests: model-specific coefficients and a band compared to
   the kernel's interval values.
 - [x] Rename the module path to `sv_recipes::sv_relational::sv_regression_plot`
   and update every path in code, examples, README and the book.
-- [ ] Update the book imports and claims; keep the composition diagram valid;
+- [x] Update the book imports and claims; keep the composition diagram valid;
   `mdbook build docs` green.
