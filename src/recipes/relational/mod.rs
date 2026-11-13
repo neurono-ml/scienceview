@@ -6,5 +6,6 @@
 //! (patterns P4).
 
 // ## Relational recipe registrations (append one pair of lines per chart)
-pub mod line_plot;
-pub use line_plot::{SVLineInterpolation, SVLinePlot, SVLinePlotBuilder};
+#[path = "line_plot/mod.rs"]
+pub mod sv_line_plot;
+pub use sv_line_plot::{SVLegendPlacement, SVLineInterpolation, SVLinePlot, SVLinePlotBuilder};

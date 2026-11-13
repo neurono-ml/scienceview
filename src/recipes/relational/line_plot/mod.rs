@@ -11,15 +11,18 @@ mod core_implementation;
 mod decorations;
 mod geometry;
 mod interpolation;
+mod options;
 mod series;
-#[cfg(feature = "render-svg")]
-mod svg_output;
 
 pub use builder::{SVLineInterpolation, SVLinePlotBuilder};
 pub use composition::SVLinePlotComposition;
 pub use core_implementation::SVLinePlot;
+pub use options::SVLegendPlacement;
 pub use series::{SVLinePlotInterval, SVLinePlotSegment, SVLinePlotSeries};
 
+#[cfg(test)]
+#[path = "line_plot_test_support.rs"]
+mod line_plot_test_support;
 #[cfg(test)]
 #[path = "line_plot_tests.rs"]
 mod line_plot_tests;

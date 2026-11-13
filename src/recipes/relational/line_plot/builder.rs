@@ -1,20 +1,22 @@
 //! The builder and its configuration surface.
 //!
-//! The builder is the only public constructor of [`SVLinePlot`]. It collects
-//! the two required position channels, the optional grouping channels and the
-//! options recorded in `docs/FDRs/recipes/relational-line-plot.md`, validates
-//! them at `build` and transfers the configured backend kind into the chart
+//! The builder is the only public constructor of [`SVLinePlot`]. It binds a
+//! data source and the names of the columns it reads, collects the options
+//! recorded in `docs/FDRs/recipes/relational-line-plot.md`, validates them at
+//! `build` and transfers the configured backend kind into the chart
 //! (patterns P2).
 
 use scienceview_core::sv_backend::{SVBackendKind, sv_verify_backend_requirements};
-use scienceview_core::sv_data::{SVColumnView, SVRepresentation};
+use scienceview_core::sv_data::{SVDataSource, SVRepresentation};
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::SVLength;
 use scienceview_core::sv_mark::{SVDashPattern, SVMark, SVMarkKind, SVMarkTheme};
+use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 use scienceview_core::sv_stat::{SVAggregateErrorKind, SVAggregateMethod, SVAggregateOptions};
 
 use super::core_implementation::SVLinePlot;
+use super::options::SVLegendPlacement;
 
 /// How a line joins its observations between two adjacent `x` values.
 ///
@@ -56,28 +58,32 @@ impl SVLineInterpolation {
 
 /// Builds an [`SVLinePlot`].
 ///
-/// `x` and `y` are required; every other setting refines the line. The backend
-/// is required and has no automatic variant, and the execution mode defaults to
+/// The data source is required together with the names of the `x` and `y`
+/// columns; every other setting refines the line. The backend is required and
+/// has no automatic variant, and the execution mode defaults to
 /// [`SVExecutionMode::Automatic`].
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SVLinePlotBuilder<'values> {
-    pub(super) x: Option<SVColumnView<'values>>,
-    pub(super) y: Option<SVColumnView<'values>>,
-    pub(super) series: Option<SVColumnView<'values>>,
-    pub(super) group: Option<SVColumnView<'values>>,
+    pub(super) data_source: Option<&'values dyn SVDataSource>,
+    pub(super) x: Option<&'values str>,
+    pub(super) y: Option<&'values str>,
+    pub(super) series: Option<&'values str>,
+    pub(super) group: Option<&'values str>,
     pub(super) backend_kind: Option<SVBackendKind>,
     pub(super) execution_mode: SVExecutionMode,
     pub(super) title: Option<String>,
     pub(super) x_axis_title: Option<String>,
     pub(super) y_axis_title: Option<String>,
     pub(super) line_width: SVLength,
-    pub(super) dash: SVDashPattern,
+    pub(super) dash: Option<SVDashPattern>,
     pub(super) markers: bool,
     pub(super) interpolation: SVLineInterpolation,
     pub(super) sort_by_x: bool,
     pub(super) bridge_missing: bool,
     pub(super) aggregate: Option<SVAggregateOptions>,
-    pub(super) legend: bool,
+    pub(super) legend: SVLegendPlacement,
+    pub(super) x_scale_kind: SVScaleKind,
+    pub(super) temporal_unit: SVTemporalUnit,
 }
 
 impl<'values> SVLinePlotBuilder<'values> {
@@ -85,6 +91,7 @@ impl<'values> SVLinePlotBuilder<'values> {
     pub fn new() -> Self {
         let theme = SVMarkTheme::default();
         Self {
+            data_source: None,
             x: None,
             y: None,
             series: None,
@@ -95,41 +102,53 @@ impl<'values> SVLinePlotBuilder<'values> {
             x_axis_title: None,
             y_axis_title: None,
             line_width: SVLength::absolute(theme.line_width()),
-            dash: SVDashPattern::Solid,
+            dash: None,
             markers: false,
             interpolation: SVLineInterpolation::Linear,
             sort_by_x: true,
             bridge_missing: false,
             aggregate: None,
-            legend: true,
+            legend: SVLegendPlacement::Auto,
+            x_scale_kind: SVScaleKind::Continuous,
+            temporal_unit: SVTemporalUnit::Auto,
         }
     }
 
-    /// Binds the ordering-axis column.
+    /// Attaches the named-column data source the chart reads.
     #[must_use]
-    pub fn x(mut self, values: SVColumnView<'values>) -> Self {
-        self.x = Some(values);
+    pub fn data_source(mut self, data_source: &'values dyn SVDataSource) -> Self {
+        self.data_source = Some(data_source);
         self
     }
 
-    /// Binds the value column.
+    /// Binds the ordering-axis column by name.
     #[must_use]
-    pub fn y(mut self, values: SVColumnView<'values>) -> Self {
-        self.y = Some(values);
+    pub fn x(mut self, column: &'values str) -> Self {
+        self.x = Some(column);
+        self
+    }
+
+    /// Binds the value column by name.
+    #[must_use]
+    pub fn y(mut self, column: &'values str) -> Self {
+        self.y = Some(column);
         self
     }
 
     /// Binds the optional series column; one line is drawn per distinct code.
     #[must_use]
-    pub fn series(mut self, values: SVColumnView<'values>) -> Self {
-        self.series = Some(values);
+    pub fn series(mut self, column: &'values str) -> Self {
+        self.series = Some(column);
         self
     }
 
     /// Binds the optional aggregation-group column.
+    ///
+    /// A group splits an already drawn series into one line per group, so two
+    /// groups at the same `x` never become two vertices of one line.
     #[must_use]
-    pub fn group(mut self, values: SVColumnView<'values>) -> Self {
-        self.group = Some(values);
+    pub fn group(mut self, column: &'values str) -> Self {
+        self.group = Some(column);
         self
     }
 
@@ -175,10 +194,13 @@ impl<'values> SVLinePlotBuilder<'values> {
         self
     }
 
-    /// Sets the dash pattern.
+    /// Sets one dash pattern for every line.
+    ///
+    /// When no pattern is set, a multi-series chart encodes the series in the
+    /// dash, cycling through the documented patterns.
     #[must_use]
     pub fn dash(mut self, dash: SVDashPattern) -> Self {
-        self.dash = dash;
+        self.dash = Some(dash);
         self
     }
 
@@ -249,10 +271,24 @@ impl<'values> SVLinePlotBuilder<'values> {
         self
     }
 
-    /// Draws the series legend (default `true`).
+    /// Selects where the legend sits; `legend(false)` hides it.
     #[must_use]
-    pub fn legend(mut self, legend: bool) -> Self {
-        self.legend = legend;
+    pub fn legend(mut self, legend: impl Into<SVLegendPlacement>) -> Self {
+        self.legend = legend.into();
+        self
+    }
+
+    /// Selects the kind of the horizontal scale (default `Continuous`).
+    #[must_use]
+    pub fn x_scale_kind(mut self, kind: SVScaleKind) -> Self {
+        self.x_scale_kind = kind;
+        self
+    }
+
+    /// Selects the tick unit of a temporal horizontal scale.
+    #[must_use]
+    pub fn temporal_unit(mut self, unit: SVTemporalUnit) -> Self {
+        self.temporal_unit = unit;
         self
     }
 
@@ -260,39 +296,28 @@ impl<'values> SVLinePlotBuilder<'values> {
     ///
     /// # Errors
     ///
-    /// Returns [`SVError::InvalidConfiguration`] for a missing or mismatched
-    /// channel, an invalid option, a probability outside `(0, 1)` or a backend
-    /// that cannot host the streaming representation. Returns
-    /// [`SVError::MissingBackendSelection`] before any other failure when no
-    /// backend was selected.
+    /// Returns [`SVError::MissingDataSource`] when no source was attached,
+    /// [`SVError::MissingBackendSelection`] when no backend was selected,
+    /// [`SVError::ColumnNotFound`] for a mistyped column name,
+    /// [`SVError::MismatchedLengths`] for columns that do not share one length,
+    /// [`SVError::InvalidConfiguration`] for an invalid option, and the backend
+    /// errors of the streaming and mark capability checks.
     pub fn build(self) -> Result<SVLinePlot<'values>, SVError> {
+        let data_source = self.data_source.ok_or(SVError::MissingDataSource)?;
         let backend_kind = self.backend_kind.ok_or(SVError::MissingBackendSelection)?;
         let x = self.x.ok_or_else(|| SVError::InvalidConfiguration {
-            message: "a line plot needs an `x` column through `x`".to_string(),
+            message: "a line plot needs the `x` column".to_string(),
         })?;
         let y = self.y.ok_or_else(|| SVError::InvalidConfiguration {
-            message: "a line plot needs a `y` column through `y`".to_string(),
+            message: "a line plot needs the `y` column".to_string(),
         })?;
 
-        for (name, column) in [("x", x), ("y", y)] {
-            if column.length() != x.length() {
-                return Err(SVError::MismatchedLengths {
-                    name: name.to_string(),
-                    expected: x.length(),
-                    actual: column.length(),
-                });
-            }
-        }
-        for (name, column) in [("series", self.series), ("group", self.group)] {
-            if let Some(column) = column {
-                if column.length() != x.length() {
-                    return Err(SVError::MismatchedLengths {
-                        name: name.to_string(),
-                        expected: x.length(),
-                        actual: column.length(),
-                    });
-                }
-            }
+        validate_scale_kind(self.x_scale_kind)?;
+        if self.temporal_unit != SVTemporalUnit::Auto && self.x_scale_kind != SVScaleKind::Temporal
+        {
+            return Err(SVError::InvalidConfiguration {
+                message: "a temporal unit needs a temporal `x` scale".to_string(),
+            });
         }
 
         if let Some(SVAggregateErrorKind::Percentile(probability)) =
@@ -307,7 +332,7 @@ impl<'values> SVLinePlotBuilder<'values> {
 
         let line: SVMark = SVMark::line()
             .width(self.line_width)
-            .dash(self.dash.clone())
+            .dash(self.dash.clone().unwrap_or_default())
             .into();
         line.validate()?;
         if self.markers {
@@ -315,8 +340,10 @@ impl<'values> SVLinePlotBuilder<'values> {
             dot.validate()?;
         }
 
-        let representation =
-            sv_dominant_representation([x, y, self.series.unwrap_or(x), self.group.unwrap_or(x)]);
+        let mut names = vec![x, y];
+        names.extend(self.series);
+        names.extend(self.group);
+        let (_, representation) = sv_probe_columns(data_source, &names)?;
         if representation == SVRepresentation::Streaming {
             sv_verify_backend_requirements(
                 backend_kind,
@@ -343,6 +370,7 @@ impl<'values> SVLinePlotBuilder<'values> {
 
         Ok(SVLinePlot::from_builder(
             self,
+            data_source,
             backend_kind,
             x,
             y,
@@ -357,18 +385,48 @@ impl Default for SVLinePlotBuilder<'_> {
     }
 }
 
-fn sv_dominant_representation(columns: [SVColumnView<'_>; 4]) -> SVRepresentation {
-    if columns
-        .iter()
-        .any(|column| column.representation() == SVRepresentation::Streaming)
-    {
-        SVRepresentation::Streaming
-    } else if columns
-        .iter()
-        .any(|column| column.representation() == SVRepresentation::Sparse)
-    {
-        SVRepresentation::Sparse
-    } else {
-        SVRepresentation::Dense
+fn validate_scale_kind(kind: SVScaleKind) -> Result<(), SVError> {
+    if matches!(kind, SVScaleKind::Continuous | SVScaleKind::Temporal) {
+        return Ok(());
+    }
+    Err(SVError::InvalidConfiguration {
+        message: format!("a line-plot `x` scale is continuous or temporal, not {kind}"),
+    })
+}
+
+/// Resolves every named column once, checking existence and equal length.
+pub(super) fn sv_probe_columns(
+    data_source: &dyn SVDataSource,
+    names: &[&str],
+) -> Result<(usize, SVRepresentation), SVError> {
+    let mut expected: Option<(usize, SVRepresentation)> = None;
+    for name in names {
+        let mut snapshot = data_source.column(name)?;
+        let view = snapshot.column_view();
+        let length = view.length();
+        let representation = view.representation();
+        match expected {
+            None => expected = Some((length, representation)),
+            Some((expected_length, _)) if length != expected_length => {
+                return Err(SVError::MismatchedLengths {
+                    name: (*name).to_string(),
+                    expected: expected_length,
+                    actual: length,
+                });
+            }
+            Some((_, seen)) => {
+                expected = Some((length, sv_dominant(seen, representation)));
+            }
+        }
+    }
+    Ok(expected.unwrap_or((0, SVRepresentation::Dense)))
+}
+
+fn sv_dominant(left: SVRepresentation, right: SVRepresentation) -> SVRepresentation {
+    use SVRepresentation::{Dense, Sparse, Streaming};
+    match (left, right) {
+        (Streaming, _) | (_, Streaming) => Streaming,
+        (Sparse, _) | (_, Sparse) => Sparse,
+        (Dense, Dense) => Dense,
     }
 }

@@ -2,14 +2,15 @@
 
 use scienceview_core::sv_decoration::{
     SVAxis, SVAxisSide, SVAxisSpace, SVDecorationPrimitive, SVDecorationStyle, SVGrid, SVLegend,
-    SVLegendPosition, SVRectanglePrimitive, SVStroke, SVTitle, SVTitleRole,
+    SVRectanglePrimitive, SVStroke, SVTitle, SVTitleRole,
 };
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::SVResolvedRectangle;
 use scienceview_core::sv_scale::SVScale;
 
 use super::SVLinePlot;
-use super::composition::SV_LINE_PLOT_VIEWPORT_WIDTH;
+use super::composition::{SV_LINE_PLOT_VIEWPORT_HEIGHT, SV_LINE_PLOT_VIEWPORT_WIDTH};
+use super::options::SVLegendPlacement;
 use super::series::SVLinePlotSeries;
 
 pub(super) fn sv_build_decorations(
@@ -85,23 +86,43 @@ fn sv_legend_primitives(
     plot_area: SVResolvedRectangle,
     style: &SVDecorationStyle,
 ) -> Vec<SVDecorationPrimitive> {
-    if !plot.legend || series.len() < 2 {
+    if !plot.legend.is_visible() || series.len() < 2 {
         return Vec::new();
     }
 
-    let mut legend = SVLegend::new().with_position(SVLegendPosition::Inside);
+    let mut legend = SVLegend::new();
     for entry in series {
         legend.add_series(entry.key.clone(), entry.label.clone(), entry.colour);
     }
     let measurement = legend.measure(style);
-    let rectangle = SVResolvedRectangle::new(
-        (plot_area.right() - measurement.width() - style.gap()).max(plot_area.x),
-        plot_area.y + style.gap(),
+    let rectangle = sv_legend_rectangle(
+        plot.legend,
         measurement.width(),
         measurement.height(),
+        plot_area,
     );
     legend
         .place(&measurement, rectangle, style)
         .primitives()
         .to_vec()
+}
+
+fn sv_legend_rectangle(
+    placement: SVLegendPlacement,
+    width: f64,
+    height: f64,
+    plot: SVResolvedRectangle,
+) -> SVResolvedRectangle {
+    let margin = 8.0;
+    let (x, y) = match placement {
+        SVLegendPlacement::Auto | SVLegendPlacement::Right => (plot.right() + 12.0, plot.y),
+        SVLegendPlacement::Left => (margin, plot.y),
+        SVLegendPlacement::Top => (plot.x, (plot.y - height - margin).max(margin)),
+        SVLegendPlacement::Bottom => (plot.x, plot.bottom() + 12.0),
+        SVLegendPlacement::Inside => (plot.right() - width - margin, plot.y + margin),
+        SVLegendPlacement::Hidden => (margin, plot.y),
+    };
+    let maximum_x = (SV_LINE_PLOT_VIEWPORT_WIDTH - width - margin).max(margin);
+    let maximum_y = (SV_LINE_PLOT_VIEWPORT_HEIGHT - height - margin).max(margin);
+    SVResolvedRectangle::new(x.min(maximum_x), y.min(maximum_y), width, height)
 }

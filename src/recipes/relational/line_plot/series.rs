@@ -48,46 +48,83 @@ struct SVObservation {
     series: Option<f64>,
 }
 
-/// Extracts every observation once, then splits it into series and segments.
+/// Extracts every observation once, then splits it into one line per
+/// `(series, group)` and into contiguous segments.
 pub(super) fn sv_build_series(plot: &SVLinePlot<'_>) -> Result<Vec<SVLinePlotSeries>, SVError> {
-    let observations = sv_extract_observations(plot);
-    let groups = sv_group_observations(&observations);
+    let observations = sv_extract_observations(plot)?;
+    let series_groups = sv_group_by_series(&observations);
     let palette: SVScalePalette = sv_default_scale_palette();
+    let mut drawn = Vec::new();
 
-    groups
-        .into_iter()
-        .enumerate()
-        .map(|(index, (series_code, observations))| {
-            let colour = palette.colour_at_index(index);
+    for (series_index, (series_code, observations)) in series_groups.into_iter().enumerate() {
+        let colour = palette.colour_at_index(series_index);
+        let dash = plot
+            .dash
+            .clone()
+            .unwrap_or_else(|| sv_series_dash(series_index));
+        for (group_code, observations) in sv_group_by_group(&observations) {
             let segments = match plot.aggregate {
                 Some(options) => sv_aggregate_series(&observations, options, plot.sort_by_x)?,
                 None => sv_raw_segments(&observations, plot),
             };
             let segments = sv_apply_interpolation(segments, plot.interpolation);
-            Ok(SVLinePlotSeries {
-                key: sv_series_key(series_code),
-                label: sv_series_label(series_code),
+            drawn.push(SVLinePlotSeries {
+                key: sv_series_key(series_code, group_code),
+                label: sv_series_label(series_code, group_code),
                 colour,
                 segments,
                 line_width: plot.line_width,
-                dash: plot.dash.clone(),
+                dash: dash.clone(),
                 markers: plot.markers,
-            })
-        })
-        .collect()
+            });
+        }
+    }
+    Ok(drawn)
 }
 
-fn sv_extract_observations(plot: &SVLinePlot<'_>) -> Vec<SVObservation> {
-    let positions = sv_logical_positions(plot.x);
-    positions
+/// Counts the vertices the line mark actually draws.
+///
+/// This is deliberately not the logical input length: aggregation reduces the
+/// drawn marks, and the operation span must report what reaches the backend.
+pub(super) fn sv_number_of_drawn_marks(series: &[SVLinePlotSeries]) -> usize {
+    series
+        .iter()
+        .flat_map(|series| series.segments.iter())
+        .map(|segment| segment.line.len())
+        .sum()
+}
+
+fn sv_extract_observations(plot: &SVLinePlot<'_>) -> Result<Vec<SVObservation>, SVError> {
+    let mut x_snapshot = plot.data_source.column(plot.x_name)?;
+    let mut y_snapshot = plot.data_source.column(plot.y_name)?;
+    let mut series_snapshot = plot
+        .series_name
+        .map(|name| plot.data_source.column(name))
+        .transpose()?;
+    let mut group_snapshot = plot
+        .group_name
+        .map(|name| plot.data_source.column(name))
+        .transpose()?;
+
+    let x = x_snapshot.column_view();
+    let y = y_snapshot.column_view();
+    let series = series_snapshot
+        .as_mut()
+        .map(|snapshot| snapshot.column_view());
+    let group = group_snapshot
+        .as_mut()
+        .map(|snapshot| snapshot.column_view());
+
+    let observations = sv_logical_positions(x)
         .into_iter()
         .map(|position| SVObservation {
-            x: plot.x.value_at(position).unwrap_or(f64::NAN),
-            y: plot.y.value_at(position).unwrap_or(f64::NAN),
-            group: plot.group.and_then(|column| column.value_at(position)),
-            series: plot.series.and_then(|column| column.value_at(position)),
+            x: x.value_at(position).unwrap_or(f64::NAN),
+            y: y.value_at(position).unwrap_or(f64::NAN),
+            group: group.and_then(|column| column.value_at(position)),
+            series: series.and_then(|column| column.value_at(position)),
         })
-        .collect()
+        .collect();
+    Ok(observations)
 }
 
 /// Reads only stored sparse positions, so a sparse column is never expanded.
@@ -99,18 +136,33 @@ fn sv_logical_positions(column: SVColumnView<'_>) -> Vec<usize> {
     }
 }
 
-fn sv_group_observations(observations: &[SVObservation]) -> Vec<(Option<f64>, Vec<SVObservation>)> {
+fn sv_group_by_series(observations: &[SVObservation]) -> Vec<(Option<f64>, Vec<SVObservation>)> {
     let mut groups: Vec<(Option<f64>, Vec<SVObservation>)> = Vec::new();
     for observation in observations {
-        let position = groups
-            .iter()
-            .position(|(key, _)| sv_same_code(*key, observation.series));
-        match position {
+        match sv_find_code(&groups, |code| sv_same_code(code, observation.series)) {
             Some(index) => groups[index].1.push(*observation),
             None => groups.push((observation.series, vec![*observation])),
         }
     }
     groups
+}
+
+fn sv_group_by_group(observations: &[SVObservation]) -> Vec<(Option<f64>, Vec<SVObservation>)> {
+    let mut groups: Vec<(Option<f64>, Vec<SVObservation>)> = Vec::new();
+    for observation in observations {
+        match sv_find_code(&groups, |code| sv_same_code(code, observation.group)) {
+            Some(index) => groups[index].1.push(*observation),
+            None => groups.push((observation.group, vec![*observation])),
+        }
+    }
+    groups
+}
+
+fn sv_find_code(
+    groups: &[(Option<f64>, Vec<SVObservation>)],
+    matches: impl Fn(Option<f64>) -> bool,
+) -> Option<usize> {
+    groups.iter().position(|(code, _)| matches(*code))
 }
 
 fn sv_same_code(left: Option<f64>, right: Option<f64>) -> bool {
@@ -121,17 +173,32 @@ fn sv_same_code(left: Option<f64>, right: Option<f64>) -> bool {
     }
 }
 
-fn sv_series_key(code: Option<f64>) -> String {
-    match code {
-        Some(code) => format!("series:{code}"),
-        None => "series:all".to_string(),
+fn sv_series_key(series: Option<f64>, group: Option<f64>) -> String {
+    match (series, group) {
+        (Some(series), Some(group)) => format!("series:{series}|group:{group}"),
+        (Some(series), None) => format!("series:{series}"),
+        (None, Some(group)) => format!("group:{group}"),
+        (None, None) => "series:all".to_string(),
     }
 }
 
-fn sv_series_label(code: Option<f64>) -> String {
-    match code {
-        Some(code) => format!("{code}"),
-        None => "series".to_string(),
+fn sv_series_label(series: Option<f64>, group: Option<f64>) -> String {
+    match (series, group) {
+        (Some(series), Some(group)) => format!("{series} / {group}"),
+        (Some(series), None) => format!("{series}"),
+        (None, Some(group)) => format!("group {group}"),
+        (None, None) => "series".to_string(),
+    }
+}
+
+/// Cycles the documented dash patterns across series when no explicit pattern
+/// is configured, so two series stay distinguishable without colour alone.
+fn sv_series_dash(index: usize) -> SVDashPattern {
+    match index % 4 {
+        0 => SVDashPattern::Solid,
+        1 => SVDashPattern::Dashed,
+        2 => SVDashPattern::Dotted,
+        _ => SVDashPattern::DashDot,
     }
 }
 
@@ -190,12 +257,16 @@ fn sv_aggregate_series(
         return Ok(Vec::new());
     }
 
-    let mut key_index: HashMap<u128, usize> = HashMap::new();
+    // The observations are already one `(series, group)` line, so the
+    // aggregation key is the `x` value alone. Including the group here would
+    // emit two vertices at one `x` inside a single line, which draws a
+    // vertical spike instead of two independent lines.
+    let mut key_index: HashMap<u64, usize> = HashMap::new();
     let mut keys: Vec<f64> = Vec::with_capacity(finite.len());
     let mut positions_x: Vec<f64> = Vec::new();
     let values: Vec<f64> = finite.iter().map(|observation| observation.y).collect();
     for observation in &finite {
-        let key = sv_observation_key(observation);
+        let key = observation.x.to_bits();
         let index = *key_index.entry(key).or_insert_with(|| {
             positions_x.push(observation.x);
             positions_x.len() - 1
@@ -256,12 +327,6 @@ fn sv_aggregate_series(
         markers,
         interval,
     }])
-}
-
-fn sv_observation_key(observation: &SVObservation) -> u128 {
-    let x = u128::from(observation.x.to_bits());
-    let group = u128::from(observation.group.unwrap_or(0.0).to_bits());
-    (x << 64) | group
 }
 
 fn sv_apply_interpolation(
