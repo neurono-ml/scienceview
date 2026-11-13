@@ -54,6 +54,14 @@ path = "src/lib.rs"
 # compiles them as a required feature.
 # Charts that call the public serializers declare the backend feature that
 # compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
 [[example]]
 name = "scatter_plot"
 required-features = ["render-svg"]
