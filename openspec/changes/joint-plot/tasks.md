@@ -29,23 +29,23 @@
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/joint_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/joint_plot.svg` with `cargo run --example joint_plot` and
+- [x] Add `examples/joint_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/joint_plot.svg` with `cargo run --example joint_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/joint_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/joint_plot.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/multivariate-joint-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/multivariate-joint-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
