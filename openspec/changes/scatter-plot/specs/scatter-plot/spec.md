@@ -46,21 +46,26 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The chart is transition-ready
 
-`SVScatterPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVScatterPlot` SHALL compose marks whose geometry is ready for the transition
+kernel — a mark carries a stable key and a solved position, size and colour per
+point — but this change SHALL NOT wire a keyed transition or animation surface.
+Keyed transition wiring is deferred to the transition/animation integration,
+and the FDR records that acceptance item as deferred rather than satisfied.
 
-#### Scenario: Transition: marker position
-- **WHEN** the state changes and marker position is affected
-- **THEN** interpolates
+#### Scenario: Geometry is transition-ready
+- **WHEN** a scene is composed
+- **THEN** every mark carries the key and the geometry a transition would interpolate
 
-#### Scenario: Transition: marker shape
-- **WHEN** the state changes and marker shape is affected
-- **THEN** swaps
+#### Scenario: Keyed transitions are not exposed
+- **WHEN** the recipe's public builder is inspected
+- **THEN** it exposes no transition or animation configuration, because that wiring belongs to the later integration
 
-### Requirement: The chart renders on every declared backend
+### Requirement: The chart dispatches its configured backend
 
-`SVScatterPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVScatterPlot` SHALL render on the SVG and native backends, SHALL resolve the
+configured kind on every render and SHALL never succeed while ignoring it.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
@@ -70,7 +75,19 @@
 - **WHEN** the chart is rendered natively
 - **THEN** the frame matches the SVG within rasterization differences
 
-#### Scenario: Unsupported backend
+#### Scenario: Backend without a recipe serializer
+- **WHEN** the configured kind has no recipe-level serializer yet
+- **THEN** the render fails explicitly with a typed capability error
+
+#### Scenario: Compiled-out backend
+- **WHEN** the configured backend's crate feature is disabled
+- **THEN** the render reports the backend as unavailable instead of degrading silently
+
+#### Scenario: Serializer mismatch
+- **WHEN** an SVG serializer is applied to a scene composed for another kind, or the reverse
+- **THEN** the serializer rejects the scene with a typed error
+
+#### Scenario: Unsupported mark
 - **WHEN** a backend cannot express a required mark
 - **THEN** the build fails explicitly
 

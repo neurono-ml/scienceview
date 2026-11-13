@@ -1,0 +1,67 @@
+//! Scatter example: builds `SVScatterPlot` and writes
+//! `docs/figures/scatter_plot.svg`.
+//!
+//! Run with `cargo run --example scatter_plot --features render-svg` from the
+//! repository root. The figure is produced by the tool itself: the recipe
+//! composes the real scales, dot marks and decorations, and the public
+//! `to_svg()` method serializes the scene it returns — this program contains no
+//! serializer of its own.
+
+use scienceview::sv_backend::SVBackendKind;
+use scienceview::sv_data::{SVColumnRole, SVDataTableBuilder};
+use scienceview::sv_recipes::sv_relational::sv_scatter_plot::SVScatterPlot;
+use std::error::Error;
+use std::fs;
+use std::path::PathBuf;
+
+const SEPAL_WIDTH: [f64; 18] = [
+    1.4, 1.7, 1.9, 1.5, 2.0, 1.6, 2.6, 3.0, 2.8, 3.2, 2.7, 3.4, 3.1, 3.5, 3.3, 3.7, 3.9, 4.4,
+];
+const PETAL_LENGTH: [f64; 18] = [
+    2.6, 3.1, 3.4, 2.9, 3.8, 3.0, 4.3, 5.1, 4.7, 5.6, 4.5, 6.0, 5.4, 6.3, 5.8, 6.7, 7.1, 7.6,
+];
+const SPECIES: [f64; 18] = [
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+];
+const BODY_MASS: [f64; 18] = [
+    1.0, 1.4, 1.2, 0.9, 1.6, 1.1, 2.2, 2.8, 2.4, 3.0, 2.1, 3.2, 2.9, 3.4, 3.1, 3.7, 3.9, 4.2,
+];
+
+fn manifest_directory() -> Result<PathBuf, Box<dyn Error>> {
+    let directory = std::env::var("CARGO_MANIFEST_DIR")?;
+    Ok(PathBuf::from(directory))
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let table = SVDataTableBuilder::new()
+        .with_column("sepal_width", SVColumnRole::X, &SEPAL_WIDTH)
+        .with_column("petal_length", SVColumnRole::Y, &PETAL_LENGTH)
+        .with_column("species", SVColumnRole::Grouping, &SPECIES)
+        .with_column("body_mass", SVColumnRole::Weight, &BODY_MASS)
+        .build()?;
+
+    let scene = SVScatterPlot::builder()
+        .data_source(&table)
+        .x("sepal_width")
+        .y("petal_length")
+        .series("species")
+        .series_labels(&["setosa", "versicolor", "virginica"])
+        .size("body_mass")
+        .alpha(0.85)
+        .title("Sepal width against petal length")
+        .x_label("sepal width")
+        .y_label("petal length")
+        .backend(SVBackendKind::Svg)
+        .build()?
+        .compose()?;
+
+    let document = scene.to_svg()?;
+
+    let root = manifest_directory()?;
+    let figures = root.join("docs").join("figures");
+    fs::create_dir_all(&figures)?;
+    let destination = figures.join("scatter_plot.svg");
+    fs::write(&destination, document)?;
+    println!("Wrote {}", destination.display());
+    Ok(())
+}

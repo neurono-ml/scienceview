@@ -46,6 +46,12 @@ categories = ["visualization", "science"]
 name = "scienceview"
 path = "src/lib.rs"
 
+# The scatter example calls the public `to_svg()` serializer, so it needs the
+# backend feature that compiles it.
+[[example]]
+name = "scatter_plot"
+required-features = ["render-svg"]
+
 # The root package is a facade: it re-exports the core crate and every backend
 # crate whose feature is enabled. Every rendering backend is a Cargo feature and
 # maps 1:1 to a workspace crate under crates/scienceview_* (see PRD §3.1).
@@ -88,6 +94,7 @@ ndarray = { version = "0.17", optional = true }
 serde = { version = "1", optional = true, features = ["derive"] }
 serde_json = { version = "1", optional = true }
 tokio = { version = "1", optional = true, default-features = false, features = ["sync"] }
+tracing = "0.1"
 
 scienceview_svg = { path = "crates/scienceview_svg", version = "0.1.0", optional = true }
 scienceview_html = { path = "crates/scienceview_html", version = "0.1.0", optional = true }
