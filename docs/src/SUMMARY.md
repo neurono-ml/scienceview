@@ -49,4 +49,5 @@
 - [Chapter 42 — Scatterplot matrices: reading every pair at once](development-explained/ch42-splom-plot.md)
 - [Chapter 43 — Pair plots: every variable against every other](development-explained/ch43-pair-plot.md)
 - [Chapter 44 — Joint plots: two variables and their marginals, together](development-explained/ch44-joint-plot.md)
+- [Chapter 48 — Framework components: a figure inside React, Vue and Angular](development-explained/ch48-framework-components.md)
 - [Maintaining this book](development-explained/maintaining.md)
