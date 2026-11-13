@@ -38,9 +38,11 @@ data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge]
 |---|---|---|---|
 | `category` | the counted variable | nominal | yes |
 | `series` | grouping within a category | nominal | no |
-| `weight` | observation weight | continuous | no |
+| `weight` | observation weight | continuous | no — deferred: the shipped `SVStat::Count` kernel does not consume weights, so the builder rejects the option with a typed configuration error naming the kernel gap; weighted counting is a follow-up change to `statistical-transforms` |
 
-Accepted representations: dense, sparse, streaming.
+Accepted representations: dense, sparse, streaming. A sparse category column
+contributes its stored entries and every implicit zero as a category-zero
+observation, without being densified.
 
 ### Match key
 
@@ -62,9 +64,13 @@ Accepted representations: dense, sparse, streaming.
 | `series` | `Option<SVColumnRef>` | `None` | seaborn, plotly |
 | `orient` | `SVBarOrientation` | `Vertical` | seaborn |
 | `width` | `f32` | `0.8` | seaborn |
-| `normalise` | `SVNormalisation` | `None` | seaborn `normalize` |
+| `normalise` | `SVNormalisation` | `Count` | seaborn `normalize` |
 | `order` | `SVCountOrder` | `DataOrder` | seaborn, plotly |
 | `colour` | `Option<SVColour>` | theme palette | bokeh, plotly |
+| `multiple` | `SVCountMultiple` | `Layer` | seaborn, plotly |
+| `missing_value_policy` | `SVCountMissingValuePolicy` | `Omit` | — |
+| `category_labels`, `series_labels` | `&[&str]` | empty (numeric codes) | — |
+| `title`, `x_label`, `y_label` | `Option<&str>` | `None` | — |
 
 ## Theme
 
@@ -81,6 +87,11 @@ Consumes `mark.palette`, `text.*`, axis tokens.
 
 Category reordering is a nice, small animation: the bars keep their identity
 and slide, because the category is the match key.
+
+**Not shipped by this change:** the transition and animation driver belongs to
+the transition integration change. The scene is transition-ready — the category
+is the match key, so a state change can interpolate the bar height and slide
+the bars — but this change runs no animation and claims no animated reordering.
 
 ## Backend notes
 
@@ -105,7 +116,13 @@ and slide, because the category is the match key.
       `count_plot_tests::the_descending_order_reverses_the_categories`.
 - [x] Dense, sparse and streaming inputs give the same counts.
       `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_scene`,
+      `parity_tests::mixed_representations_agree_after_validating_lengths`,
       `parity_tests::a_sparse_input_with_implicit_zeros_counts_them_as_category_zero`.
+- [x] A configured weight is rejected with the typed kernel-gap error.
+      `count_plot_tests::a_configured_weight_is_rejected_with_the_kernel_gap`.
+- [ ] Animated reordering and entry. **Not shipped by this change:** the
+      geometry is transition-ready but the animation driver belongs to the
+      transition integration change.
 
 ## Open questions
 
