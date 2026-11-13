@@ -33,6 +33,27 @@ released.
   the geometry is transition-ready. The example
   `examples/parallel_categories_plot.rs` writes
   `docs/figures/parallel_categories_plot.svg`.
+- The multivariate recipe `SVParallelCoordinatesPlot`
+  (`scienceview::sv_recipes::sv_multivariate`): many observations drawn as
+  polylines through one vertical axis per continuous variable. The chart is the
+  composition of FDR-141 —
+  `data -> [no stat] -> values -> [one line per observation] -> [SVScale per axis] -> SVMark::Line` —
+  and its configuration surface is `variables`, `colour`, `line_width`,
+  `opacity`, `dimensions` (`SVDimension` range, visibility and axis tint),
+  `range`, `label_angle`, `axis_label`, `normalization`, `missing`, the title
+  and `backend(...)`, with `execution_mode` defaulting to `Automatic`. Every
+  visible variable receives its own continuous `SVScale` and axis order comes
+  from `variables` or `dimensions`. Each observation is an `SVMark::Line`
+  polyline; the optional colour column is a nominal grouping, and missing values
+  follow a gap, bridge, drop-observation or error policy. Dense, sparse and
+  streaming inputs produce the same polylines; a sparse column is read through
+  `value_at` and never densified, and a streaming window never blocks. The
+  composed scene serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error. Transition and animation wiring is deferred to the transition
+  integration; the geometry is transition-ready. The example
+  `examples/parallel_coordinates_plot.rs` writes
+  `docs/figures/parallel_coordinates_plot.svg`.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is

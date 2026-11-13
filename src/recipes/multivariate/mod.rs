@@ -1,4 +1,4 @@
-//! Multivariate recipes: charts that read several variables at once.
+//! Multivariate recipes: charts that show several variables at once.
 //!
 //! Every chart in this family appends one `#[path] pub mod` and one
 //! `pub use` to this dispatcher; the family batch integrator resolves the
@@ -9,8 +9,12 @@
 #[path = "parallel_categories_plot/mod.rs"]
 pub mod sv_parallel_categories_plot;
 pub use sv_parallel_categories_plot::{
-    SVCategoryOrder, SVParallelCategoriesAxis, SVParallelCategoriesColourMode,
-    SVParallelCategoriesFrame, SVParallelCategoriesMissingValuePolicy, SVParallelCategoriesPlot,
-    SVParallelCategoriesPlotBuilder, SVParallelCategoriesRenderOutput, SVParallelCategoriesRibbon,
-    SVParallelCategoriesScene,
+    SVParallelCategoriesFrame, SVParallelCategoriesPlot, SVParallelCategoriesPlotBuilder,
+    SVParallelCategoriesRenderOutput, SVParallelCategoriesScene,
+};
+
+#[path = "parallel_coordinates_plot/mod.rs"]
+pub mod sv_parallel_coordinates_plot;
+pub use sv_parallel_coordinates_plot::{
+    SVParallelCoordinatesPlot, SVParallelCoordinatesPlotBuilder, SVParallelCoordinatesRenderOutput,
 };

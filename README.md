@@ -77,6 +77,7 @@ cargo run --example area_plot
 cargo run --example density_contour_plot
 cargo run --example density_plot --features render-svg
 cargo run --example hexbin_plot --features render-svg
+cargo run --example parallel_coordinates_plot
 cargo run --example image_plot --features render-svg
 cargo run --example heatmap_plot --features render-svg
 cargo run --example parallel_categories_plot --features render-svg
@@ -340,6 +341,24 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](docs/figures/hexbin_plot.svg)
+Parallel coordinates (`examples/parallel_coordinates_plot.rs`) composes the
+`SVParallelCoordinatesPlot` recipe: every continuous variable gets its own
+vertical axis, every observation is a polyline through those axes, and an
+optional grouping column colours the lines:
+
+```rust
+use scienceview::sv_recipes::sv_multivariate::sv_parallel_coordinates_plot::SVParallelCoordinatesPlot;
+
+let output = SVParallelCoordinatesPlot::builder()
+    .data_source(&table)
+    .variables(&["sepal length", "sepal width", "petal length", "petal width", "body mass"])
+    .colour("species")
+    .backend(SVBackendKind::Svg)
+    .build()?
+    .compose()?;
+```
+
+![Iris measurements across five parallel axes](docs/figures/parallel_coordinates_plot.svg)
 Box plot (`examples/box_plot.rs`) composes the `SVBoxPlot` recipe: the
 percentile kernel supplies the quartiles and the median, the whisker rule
 chooses the ends and the outliers, and the dodge places one box per series
