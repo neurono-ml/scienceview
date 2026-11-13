@@ -85,20 +85,26 @@ fn the_backend_selection_is_required() {
 }
 
 #[test]
-fn a_backend_without_a_recipe_renderer_is_rejected_at_build() {
+fn a_backend_without_a_serializer_fails_with_a_typed_error() {
     let table = SVTestSource::new()
         .with_dense("x", SVColumnRole::X, &[1.0])
         .with_dense("y", SVColumnRole::Y, &[1.0]);
-    let error = expect_build_error(
-        SVStepPlot::builder()
-            .data_source(&table)
-            .x("x")
-            .y("y")
-            .backend(SVBackendKind::Native)
-            .build(),
-    );
+    let chart = SVStepPlot::builder()
+        .data_source(&table)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Native)
+        .build()
+        .expect("the explicit kind builds; the scene is backend-neutral");
+
+    let error = chart.render().expect_err("no native serializer exists yet");
     assert!(
-        matches!(error, SVError::InvalidConfiguration { .. }),
+        matches!(
+            error,
+            SVError::BackendUnavailable {
+                backend_kind: SVBackendKind::Native
+            }
+        ),
         "{error:?}"
     );
 }

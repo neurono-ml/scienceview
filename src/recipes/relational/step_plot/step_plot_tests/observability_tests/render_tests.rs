@@ -4,7 +4,7 @@ use super::super::super::SVStepPlot;
 use super::super::test_sources::{SVTestColumn, SVTestSource};
 use super::span_recorder::{SVSpanRecorder, sv_span_test_guard};
 use scienceview_core::sv_backend::SVBackendKind;
-use scienceview_core::sv_data::SVColumnRole;
+use scienceview_core::sv_data::{SVColumnRole, SVSparseView};
 use tracing_subscriber::{Registry, layer::SubscriberExt};
 
 fn render_operation_spans(
@@ -85,4 +85,38 @@ fn a_streaming_render_records_the_streaming_representation() {
     assert_eq!(operations.len(), 1, "{operations:?}");
     assert_eq!(operations[0]["representation"], "Streaming");
     assert_eq!(operations[0]["points"], "3");
+}
+
+#[test]
+fn a_sparse_render_records_the_drawn_points_not_the_logical_length() {
+    let _guard = sv_span_test_guard();
+    tracing::callsite::rebuild_interest_cache();
+
+    let indices = [0, 99_999];
+    let horizontal_values = [0.0, 1.0];
+    let vertical_values = [10.0, 20.0];
+    let sparse_horizontal =
+        SVSparseView::new(&indices, &horizontal_values, 100_000).expect("the view is valid");
+    let sparse_vertical =
+        SVSparseView::new(&indices, &vertical_values, 100_000).expect("the view is valid");
+    let table = SVTestSource::new()
+        .with_column(
+            "x",
+            SVColumnRole::X,
+            SVTestColumn::Sparse(sparse_horizontal),
+        )
+        .with_column("y", SVColumnRole::Y, SVTestColumn::Sparse(sparse_vertical));
+    let plot = SVStepPlot::builder()
+        .data_source(&table)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the sparse configuration builds");
+
+    let recorder = SVSpanRecorder::default();
+    let operations = render_operation_spans(&plot, &recorder);
+    assert_eq!(operations.len(), 1, "{operations:?}");
+    assert_eq!(operations[0]["representation"], "Sparse");
+    assert_eq!(operations[0]["points"], "2");
 }

@@ -1,7 +1,6 @@
 //! Configuration validation and the shared line options.
 
 use super::definition::SVStepPlot;
-use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataSource};
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_mark::{SVLineOptions, SVMark};
@@ -10,14 +9,6 @@ use scienceview_core::sv_stat::SVStat;
 
 impl SVStepPlot<'_> {
     pub(crate) fn validate(&self) -> Result<(), SVError> {
-        if self.backend_kind != SVBackendKind::Svg {
-            return Err(SVError::InvalidConfiguration {
-                message: format!(
-                    "SVStepPlot renders on the Svg backend; `{}` needs the recipe-aware backend that a later change ships",
-                    self.backend_kind
-                ),
-            });
-        }
         if !matches!(
             self.x_scale_kind,
             SVScaleKind::Continuous | SVScaleKind::Temporal

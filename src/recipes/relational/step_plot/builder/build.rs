@@ -13,8 +13,10 @@ impl<'source> SVStepPlotBuilder<'source> {
     /// [`SVError::MissingBackendSelection`] when a required builder step is
     /// missing, [`SVError::ColumnNotFound`] for an unknown column,
     /// [`SVError::MismatchedLengths`] for columns of different lengths, and
-    /// [`SVError::InvalidConfiguration`] for a backend this change cannot
-    /// serialize, a non-aggregate stat, or a mistyped column.
+    /// [`SVError::InvalidConfiguration`] for a non-aggregate stat or a
+    /// mistyped column. The configured backend kind is not rejected here: the
+    /// composition is backend-neutral, and an operation whose kind has no
+    /// serializer returns [`SVError::BackendUnavailable`].
     pub fn build(self) -> Result<SVStepPlot<'source>, SVError> {
         let data_source = self.data_source.ok_or(SVError::MissingDataSource)?;
         let backend_kind = self.backend_kind.ok_or(SVError::MissingBackendSelection)?;
