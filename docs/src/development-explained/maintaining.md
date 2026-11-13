@@ -38,21 +38,16 @@ examples.
 | 19 | `ch19-step-plot.md` | The relational step recipe: `SVStepPosition` pre/post/mid geometry, ordered and deduplicated samples, missing values, aggregation, multi-series colouring, backend-neutral composition and the real SVG document |
 | 20 | `ch20-band-plot.md` | The band plot recipe: the filled region between two boundaries, explicit and derived modes over `SVStat::Aggregate`, series, missing-value policy, dashed borders and the centre line, parity and concurrency |
 | 21 | `ch21-regression-plot.md` | Regression: the multi-mark recipe, the kernel-owned fit and confidence band, pairing across dense, sparse and streaming input, series grouping, extrapolation policy and the acceptance tests |
-| 23 | `ch23-density-plot.md` | Density plots: `SVStat::KernelDensity` with three kernel shapes, Silverman's bandwidth and `bw_adjust`, the fixed evaluation grid and `cut`, the `normalise` modes, series grouping, missing-value policy, sparse and streaming parity, SVG/native dispatch and the generated figure |
+| 23 | `ch23-density-plot.md` | Density plots: `SVStat::KernelDensity` with three kernel shapes, Silverman's bandwidth and `bandwidth_adjustment`, the fixed evaluation grid and `cut`, the `normalise` modes, series grouping, missing-value policy, sparse and streaming parity, SVG/native dispatch and the generated figure |
 
-Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
-covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
-covers the layout solver, chapter 8 covers the mark kernel, chapter 9
-covers the decoration surface, chapter 10 covers the statistical transform
-kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
-first rendering backend, chapter 13 covers the transition kernel, chapter 14
-covers the animation timeline, chapter 15 covers the native backend and
-chapter 21 covers the regression recipe, chapter 23 covers the density plot
-recipe, each written by its own change. Later chapters are planned, one per capability of the
-chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
-covers the animation timeline, chapter 15 covers the native backend and chapter
-19 covers the first relational recipe, each written by its own change. Later
-chapters are planned, one per capability of the
+Chapter 3 covers theming, chapter 4 the data boundary, chapter 5 the figure
+substrate, chapter 6 the scale kernel, chapter 7 the layout solver, chapter 8
+the mark kernel, chapter 9 the decoration surface, chapter 10 the statistical
+transform kernel, chapter 11 the positional-move kernel, chapter 12 the first
+rendering backend, chapter 13 the transition kernel, chapter 14 the animation
+timeline, chapter 15 the native backend, and chapters 16–21 and 23 the recipes:
+scatter, line, area, step, band, regression and density. Each is written by its
+own change. Later chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and

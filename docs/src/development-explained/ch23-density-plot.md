@@ -49,8 +49,9 @@ mark and not a recipe concept: it belongs to the statistical kernel
 bandwidth = 0.9 · s · n^(-1/5)
 ```
 
-`bw_adjust` multiplies that result. `2.0` doubles the smoothing; `0.5` halves
-it. An explicit `bandwidth(...)` replaces the derived value, and is still
+`bandwidth_adjustment(...)` multiplies that result (seaborn calls the same
+option `bw_adjust`). `2.0` doubles the smoothing; `0.5` halves it. An explicit
+`bandwidth(...)` replaces the derived value, and is still
 scaled by the adjustment so the two options compose predictably.
 
 **Evaluation grid.** A density is a function; to draw it we evaluate it at a
@@ -157,7 +158,7 @@ The companion tests read as the acceptance record of the FDR:
 | Test | What it proves |
 |---|---|
 | `the_density_integrates_to_one` | the trapezoid integral of the emitted curve is one within `1e-3` |
-| `the_bandwidth_follows_the_rule_of_thumb_and_scales_with_the_adjustment` | the derived bandwidth is positive and `bw_adjust = 2` doubles it exactly |
+| `the_bandwidth_follows_the_rule_of_thumb_and_scales_with_the_adjustment` | the derived bandwidth is positive and `bandwidth_adjustment(2.0)` doubles it exactly |
 | `an_explicit_bandwidth_is_used_verbatim` | an explicit bandwidth is not quietly re-derived |
 | `every_option_that_changes_output_is_reflected` | kernel, grid count, cut, normalisation, line width and bandwidth all reach the output |
 | `filling_adds_the_area_under_the_curve` | `fill(true)` adds exactly one area primitive per curve on top of its line |
@@ -168,7 +169,7 @@ The companion tests read as the acceptance record of the FDR:
 | `a_streaming_window_is_estimated_and_says_so` | the window is estimated and `is_windowed()` is true |
 | `a_missing_observation_is_dropped_or_rejected_by_policy` | `Omit` drops, `Error` rejects |
 | `each_column_is_resolved_exactly_once_per_operation` | one read for the value column, one for the series |
-| `concurrent_renders_agree` | eight threads produce byte-identical curves |
+| `concurrent_renders_agree` | eight threads produce identical curves |
 | `large_data_is_estimated_over_the_fixed_grid` | ten thousand observations still draw 256 samples and integrate to one |
 | `the_operation_span_carries_the_backend_representation_and_points` | the `render` span records the backend kind, the representation and 256 points |
 | `the_native_backend_rasterizes_the_same_scene` | the native frame is the composed scene, not a second implementation |
