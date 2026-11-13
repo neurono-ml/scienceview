@@ -5,11 +5,11 @@
 | Id | FDR-135 |
 | Name | `SVHexbinPlot` |
 | Family | Matrix and field |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 39 — Hexbin plots](../../src/development-explained/ch39-hexbin-plot.md) |
+| Example program | [`examples/hexbin_plot.rs`](../../../examples/hexbin_plot.rs) |
 
 ## Purpose
 
@@ -66,6 +66,8 @@ Accepted representations: dense, sparse, streaming (windowed).
 | `orientation` | `f64` radians | `0` | bokeh `angle` |
 | `colour_map` | `SVColourMapRef` | theme default | — |
 | `normalise` | `SVNormalisation` | `Count` | — |
+| `value` | `Option<SVColumnRef>` | `None` | — |
+| `aggregation` | `SVHexbinAggregation` | `Count` | — |
 | `min_count` | `usize` | `1` | — |
 
 ## Theme
@@ -93,11 +95,11 @@ Consumes the continuous colour-map token, axis tokens, text tokens.
 
 ## Acceptance
 
-- [ ] The hexagonal lattice covers the data domain with no gaps.
-- [ ] Each hexagon's colour is the colour map's colour for its count.
-- [ ] Cells below `min_count` are not drawn.
-- [ ] Dense, sparse and streaming inputs give the same lattice for the same
-      data.
+- [x] The hexagonal lattice covers the data domain with no gaps (`lattice` tests; the axial rounding is the exact inverse of the pointy-top tiling).
+- [x] Each hexagon's colour is the colour map's colour for its count (`the_default_configuration_composes_a_hexagonal_lattice`, `the_colour_map_option_changes_the_fill_palette`).
+- [x] Cells below `min_count` are not drawn (`min_count_drops_sparse_cells`).
+- [x] Dense, sparse and streaming inputs give the same lattice for the same
+      data (`dense_sparse_and_streaming_inputs_draw_the_same_hexagons`).
 
 ## Open questions
 

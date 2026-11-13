@@ -12,6 +12,24 @@ released.
 
 ### Added
 
+- The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
+  two continuous variables binned into a pointy-top hexagonal lattice and each
+  occupied cell drawn as one filled path, coloured by its count. The chart is
+  the composition of FDR-135 — `data -> [hexagonal lattice] -> (cells, counts)
+  -> [SVScale continuous over a colour map] -> one path per hexagon` — and its
+  configuration surface is `x`, `y`, `series`, `value`, `aggregation`,
+  `grid_size`, `extent`, `min_count`, `orientation`, `colour_map`,
+  `colour_scale`, `normalise`, `missing_value_policy`, the titles and the
+  viewport, with `backend(...)` required and `execution_mode` defaulting to
+  `Automatic`. Count aggregation accumulates the observations directly; mean
+  aggregation is delegated to `SVStat::Aggregate` and never reimplemented. A
+  sparse coordinate column is read through `value_at` and never densified; a
+  streaming window renders without blocking. The composed geometry carries a
+  colour bar and axes and serializes through `to_svg()` and, with
+  `render-native`, through `to_native_frame()`; any other configured kind fails
+  with a typed error instead of being ignored. Transition and animation wiring
+  is deferred to the transition integration; the geometry is transition-ready.
+  The example `examples/hexbin_plot.rs` writes `docs/figures/hexbin_plot.svg`.
 - The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
   the point estimate of every category with its uncertainty, optionally joined
   by a line. The chart is the composition of FDR-123 —
