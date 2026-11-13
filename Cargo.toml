@@ -46,6 +46,12 @@ categories = ["visualization", "science"]
 name = "scienceview"
 path = "src/lib.rs"
 
+# The scatter example calls the public `to_svg()` serializer, so it needs the
+# backend feature that compiles it.
+[[example]]
+name = "scatter_plot"
+required-features = ["render-svg"]
+
 # The root package is a facade: it re-exports the core crate and every backend
 # crate whose feature is enabled. Every rendering backend is a Cargo feature and
 # maps 1:1 to a workspace crate under crates/scienceview_* (see PRD §3.1).
@@ -83,6 +89,7 @@ streaming-tokio = ["dep:tokio", "scienceview_core/streaming-tokio"]
 
 [dependencies]
 scienceview_core = { path = "crates/scienceview_core", version = "0.1.0" }
+tracing = "0.1"
 scienceview_theme = { path = "crates/scienceview_theme", version = "0.1.0", optional = true }
 ndarray = { version = "0.17", optional = true }
 serde = { version = "1", optional = true, features = ["derive"] }
@@ -105,3 +112,7 @@ workspace = true
 
 [dev-dependencies]
 scienceview_svg = { path = "crates/scienceview_svg", version = "0.1.0" }
+
+tracing = "0.1"
+
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }

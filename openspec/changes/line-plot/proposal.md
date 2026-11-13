@@ -4,7 +4,7 @@
 
 Shows how a continuous value evolves along an ordered axis — usually time. It draws one line per series, and it aggregates within a series when several observations share the same `x`, which is what separates it from a plain polyline.
 
-The chart is specified in `docs/FDRs/relational-line-plot.md` (FDR-102) and is
+The chart is specified in `docs/FDRs/recipes/relational-line-plot.md` (FDR-102) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVLinePlot`.
 
@@ -30,9 +30,10 @@ None.
 
 ## Impact
 
-- New module `src/recipes/relational/line_plot/`.
+- New module `src/recipes/relational/line_plot/`, exposed as
+  `scienceview::sv_recipes::sv_relational::sv_line_plot`.
 - New example `examples/line_plot.rs` and generated figure
-  `docs/figures/line_plot.svg`.
+  `docs/figures/line_plot_recipe.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the
   family batch integrator.
 - New specification `openspec/specs/line-plot/spec.md`.

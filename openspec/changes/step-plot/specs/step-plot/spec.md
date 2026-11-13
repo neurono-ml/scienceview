@@ -30,6 +30,68 @@
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
 
+### Requirement: The step position is explicit
+
+`SVStepPlot` SHALL expand each ordered pair of samples into the pre, post or
+mid geometry selected by `SVStepPosition`, and `After` SHALL be the default.
+
+#### Scenario: Pre, post and mid geometry
+- **WHEN** the chart is built with `Before`, `After` or `Center`
+- **THEN** the expanded vertices place the riser at the current `x`, at the
+  next `x`, or halfway between the two `x` values respectively
+
+### Requirement: Ordering and duplicate positions are deterministic
+
+`SVStepPlot` SHALL order the samples by `x` within each series before expanding
+the step, and SHALL resolve equal `x` values with `SVStepDuplicatePolicy`:
+`LastWins` (the default) keeps the last observation in input order, and
+`FirstWins` keeps the first.
+
+#### Scenario: Unordered input
+- **WHEN** the rows arrive out of `x` order
+- **THEN** the step is expanded from the samples sorted by `x`
+
+#### Scenario: Duplicate positions
+- **WHEN** two rows share the same `x` in a series
+- **THEN** exactly one observation survives, chosen by the configured policy
+
+### Requirement: Missing values are omitted
+
+`SVStepPlot` SHALL omit every observation whose `x` or `y` is not finite, and
+SHALL fail with `SVError::EmptyInput` when no finite observation remains.
+
+#### Scenario: A missing sample
+- **WHEN** one sample has a non-finite value
+- **THEN** the step is drawn through the remaining samples without a gap mark
+
+#### Scenario: Every observation missing
+- **WHEN** no finite observation remains
+- **THEN** the operation fails explicitly instead of drawing an empty frame
+
+### Requirement: Aggregation collapses duplicate positions
+
+When an aggregate stat is configured, `SVStepPlot` SHALL collapse duplicate `x`
+values per series with that statistic before expanding the geometry, and SHALL
+reject any non-aggregate stat at build time.
+
+#### Scenario: Aggregate stat
+- **WHEN** two rows share an `x` and `SVStat::Aggregate` is configured
+- **THEN** their statistic becomes the single value at that position
+
+#### Scenario: Non-aggregate stat
+- **WHEN** a stat other than `SVStat::Aggregate` is configured
+- **THEN** the build fails with an explicit configuration error
+
+### Requirement: One step line per series
+
+The optional `series` column SHALL split the observations into one step line per
+group, preserving first-appearance order, assigning one palette colour per group
+and drawing one legend entry when more than one group exists.
+
+#### Scenario: Two series
+- **WHEN** the `series` column carries two groups
+- **THEN** the chart draws two step lines with distinct colours
+
 ### Requirement: Representations are equivalent
 
 `SVStepPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream.
@@ -46,31 +108,46 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The chart geometry is transition-ready
 
-`SVStepPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVStepPlot` SHALL expand the step into explicit vertices consumed by `SVMark::Line`, so the transition kernel interpolates corner positions and a new sample extends the line.
 
 #### Scenario: Transition: step vertices
-- **WHEN** the state changes and step vertices is affected
-- **THEN** interpolate — a step's corners move with the values
+- **WHEN** the state changes and a step corner moves
+- **THEN** the corner is an ordinary line vertex and interpolates with the values
 
 #### Scenario: Transition: new sample
-- **WHEN** the state changes and new sample is affected
-- **THEN** enters, and the step extends to it
+- **WHEN** a new sample arrives
+- **THEN** the operation re-resolves the source, the step extends to the new
+  sample and the prior samples are preserved; this change recomposes the
+  current window and does not ship an incremental append buffer
 
-### Requirement: The chart renders on every declared backend
+### Requirement: The chart renders through its declared backend
 
-`SVStepPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVStepPlot` SHALL compose a backend-neutral scene on every operation and
+SHALL dispatch the serializer from the configured `SVBackendKind`. This change
+ships the real SVG serializer; a kind whose serializer does not exist yet
+SHALL make the operation fail with `SVError::BackendUnavailable` naming the
+configured kind, never degrade silently to SVG.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
-- **THEN** the figure is self-contained and deterministic
-
-#### Scenario: Native rendering
-- **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+- **THEN** the figure is self-contained, contains a polyline path and is deterministic
 
 #### Scenario: Unsupported backend
-- **WHEN** a backend cannot express a required mark
-- **THEN** the build fails explicitly
+- **WHEN** a backend without a recipe-aware serializer is selected and an
+  operation runs
+- **THEN** the operation fails with `SVError::BackendUnavailable` naming the
+  configured backend, and the scene is never serialized as SVG
 
+### Requirement: The operation span counts drawn observations
+
+`SVStepPlot` SHALL record one operation span per `render`, `update` or `save`
+carrying the configured backend kind, the combined representation and the
+number of observations the composed scene actually draws, not the logical
+column length.
+
+#### Scenario: Sparse logical length
+- **WHEN** a sparse column has a large logical length and only two stored
+  samples survive the data contract
+- **THEN** the operation span reports two drawn points
