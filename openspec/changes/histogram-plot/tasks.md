@@ -43,9 +43,9 @@
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/distribution-histogram-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/distribution-histogram-plot.md` status to `shipped`, linking the
   example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
