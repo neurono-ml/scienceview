@@ -65,13 +65,16 @@ representations:
 
 `extraction/cursor.rs` dispatches on a column exactly once with
 `SVColumnView::dispatch`, then iterates the representation through a small
-cursor. Nothing is densified, and nothing waits for new data. A sparse ordering
-column needs one extra thought: every unlisted position has `x = 0`, and the
-duplicate-`x` policy collapses those positions to a single observation, so a
-single-series chart visits the stored entries plus that one representative
-position instead of expanding the column. A `series` column or an aggregate
-needs the observations grouped per series, so those paths fall back to the full
-logical length.
+cursor. An operation resolves `x`, `y` and `series` once and hands the views to
+the composition, so a live channel is drained once and the span's count matches
+the snapshot it drew. Nothing is densified, and nothing waits for new data. A
+sparse ordering column needs one extra thought: every unlisted position has
+`x = 0`, and the duplicate-`x` policy collapses those positions to a single
+observation, so a single-series chart visits the stored entries plus that one
+representative position instead of expanding the column (scanning for a
+representative with a finite `y` while skipping non-zero stored positions). A
+`series` column or an aggregate needs the observations grouped per series, so
+those paths fall back to the full logical length.
 
 Non-finite values are *missing*, not errors: the pair is skipped. If every row
 is missing, the operation reports `SVError::EmptyInput` instead of drawing a
