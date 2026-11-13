@@ -39,7 +39,7 @@ data -> [SVStat::Bin (grid) + SVStat::Aggregate (cell mean)] -> scalar field
 |---|---|---|
 | Grid | a dense 2D array | the field on a regular grid |
 | Points | `x`, `y`, `value` columns | interpolated onto a grid by the stat |
-| Sparse grid | indices and values | only the occupied points contribute |
+| Sparse grid | indices and values | a sparse value column keeps its stored entries and answers every implicit position with zero; it is never materialised |
 
 Accepted representations: dense, sparse, streaming (windowed).
 
