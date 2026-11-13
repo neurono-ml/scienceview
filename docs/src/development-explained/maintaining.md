@@ -32,6 +32,11 @@ examples.
 | 13 | `ch13-mark-transitions.md` | Transitions: typed match keys and duplicate detection, the enter/update/exit sets, interpolation driven by the mark kernel's property table, theme motion tokens and reduced motion, the clock-free progress model, the backend capability contract, parity and concurrency |
 | 14 | `ch14-animation-timeline.md` | Animation: the model-owned clock, keyframe deltas and the transition seam, fixed and streaming sources over one bounded window, sampling and easing, playback state, looping and direction, interruptible re-targeting, the action vocabulary and the reproducibility, parity and concurrency tests |
 | 15 | `ch15-native-backend.md` | The native backend: two layers, straight-alpha blending, distance and sampled anti-aliasing, the device pixel ratio, dirty regions, the model-clock frame loop, resize and scale change, and the capability refusal of export |
+| 16 | `ch16-scatter-plot.md` | The first relational recipe: the channel surface, dense/sparse/streaming parity, the jitter and dodge displacement moves, per-point size and colour on top of the dot kernel, the overplotting policy, the backend-agnostic scene and its SVG/native dispatch, concurrency and the operation span |
+| 17 | `ch17-line-plot.md` | The second relation recipe: long-format columns, three representations, stable ordering, gaps and bridging, aggregation with an interval, step and spline vertices, multi-series colour, markers, observability and SVG rendering |
+| 18 | `ch18-area-plot.md` | The first relational recipe: the area chart, the baseline modes, stacking through `SVMove::Stack`, the ribbon versus area decision, the missing-value policy, representation parity and the generated figure |
+| 19 | `ch19-step-plot.md` | The relational step recipe: `SVStepPosition` pre/post/mid geometry, ordered and deduplicated samples, missing values, aggregation, multi-series colouring, backend-neutral composition and the real SVG document |
+| 20 | `ch20-band-plot.md` | The band plot recipe: the filled region between two boundaries, explicit and derived modes over `SVStat::Aggregate`, series, missing-value policy, dashed borders and the centre line, parity and concurrency |
 | 21 | `ch21-regression-plot.md` | Regression: the multi-mark recipe, the kernel-owned fit and confidence band, pairing across dense, sparse and streaming input, series grouping, extrapolation policy and the acceptance tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
@@ -42,6 +47,10 @@ kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend, chapter 13 covers the transition kernel, chapter 14
 covers the animation timeline, chapter 15 covers the native backend and
 chapter 21 covers the regression recipe, each written by its own change. Later chapters are planned, one per capability of the
+chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
+covers the animation timeline, chapter 15 covers the native backend and chapter
+19 covers the first relational recipe, each written by its own change. Later
+chapters are planned, one per capability of the
 `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and

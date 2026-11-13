@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1080 520" role="img" aria-label="The SVAreaPlot recipe: three columns enter the data boundary, the missing-value policy orders and splits them, an optional stack supplies the cumulative baseline, the scales place the values and the area, ribbon and line marks feed the backend-agnostic scene">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d3557"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1080" height="520" fill="#ffffff"/>
+
+  <text x="540" y="40" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="bold" fill="#1d3557">
+    SVAreaPlot: one recipe, the existing kernels
+  </text>
+  <text x="540" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#4a5568">
+    data &#8594; [SVStat::Aggregate] &#8594; values &#8594; [SVMove::Stack] &#8594; [SVScale] &#8594; SVMark::Area
+  </text>
+
+  <rect x="40" y="110" width="220" height="150" rx="14" fill="#e8f1fb" stroke="#1d3557" stroke-width="2"/>
+  <text x="150" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#1d3557">Data source</text>
+  <text x="150" y="166" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">x: ordered axis</text>
+  <text x="150" y="188" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">y: value</text>
+  <text x="150" y="210" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">series: one area each</text>
+  <text x="150" y="238" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#6b7280">dense · sparse · streaming</text>
+
+  <line x1="260" y1="185" x2="330" y2="185" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="330" y="110" width="220" height="150" rx="14" fill="#fdf3e3" stroke="#e07a1f" stroke-width="2"/>
+  <text x="440" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#9a5b00">Prepare</text>
+  <text x="440" y="166" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">one read per column</text>
+  <text x="440" y="188" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">order on x per series</text>
+  <text x="440" y="210" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">missing value: omit or error</text>
+  <text x="440" y="238" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#6b7280">a gap closes and reopens the area</text>
+
+  <line x1="550" y1="185" x2="620" y2="185" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="82" width="200" height="94" rx="14" fill="#e9f7ef" stroke="#059669" stroke-width="2"/>
+  <text x="720" y="110" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#046c4e">SVMove::Stack</text>
+  <text x="720" y="134" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2d3748">optional stack=true</text>
+  <text x="720" y="154" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2d3748">returns top + baseline</text>
+
+  <rect x="620" y="196" width="200" height="94" rx="14" fill="#f0eafa" stroke="#8247e5" stroke-width="2"/>
+  <text x="720" y="224" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#6b3fa0">SVScale</text>
+  <text x="720" y="248" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2d3748">x: continuous / temporal</text>
+  <text x="720" y="268" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2d3748">y: continuous, domain padded</text>
+
+  <line x1="820" y1="185" x2="880" y2="185" stroke="#1d3557" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="880" y="110" width="160" height="150" rx="14" fill="#e8f1fb" stroke="#1d3557" stroke-width="2"/>
+  <text x="960" y="140" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#1d3557">Marks</text>
+  <text x="960" y="166" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">Area (baseline)</text>
+  <text x="960" y="188" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">Ribbon (stack)</text>
+  <text x="960" y="210" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">Line (boundary)</text>
+  <text x="960" y="238" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#6b7280">closed path per area</text>
+
+  <rect x="40" y="330" width="1000" height="150" rx="14" fill="#f7fafc" stroke="#cbd5e0" stroke-width="2"/>
+  <text x="540" y="362" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="bold" fill="#1d3557">What the recipe hands the backend</text>
+  <rect x="80" y="386" width="280" height="60" rx="10" fill="#e8f1fb" stroke="#1d3557"/>
+  <text x="220" y="412" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">grid and frame decorations</text>
+  <text x="220" y="432" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#6b7280">drawn first</text>
+  <rect x="400" y="386" width="280" height="60" rx="10" fill="#fdf3e3" stroke="#e07a1f"/>
+  <text x="540" y="412" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">area, ribbon and line primitives</text>
+  <text x="540" y="432" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#6b7280">backend-agnostic, owned</text>
+  <rect x="720" y="386" width="280" height="60" rx="10" fill="#e9f7ef" stroke="#059669"/>
+  <text x="860" y="412" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2d3748">axes and title decorations</text>
+  <text x="860" y="432" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#6b7280">drawn last</text>
+</svg>
