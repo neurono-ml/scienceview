@@ -12,6 +12,43 @@ released.
 
 ### Added
 
+- Python bindings (`scienceview_python`, feature `python`): a PyO3 extension
+  module exposing the validated builder surface with keyword arguments and an
+  explicit `backend=` selection (`MissingBackendSelection` instead of an
+  automatic default), `render()`/`render_svg()`/`save()` returning bytes and
+  paths, dashboards, and the `ControlState` action vocabulary. `pyo3` is
+  optional and never part of the default build. A pure-Rust conversion layer
+  (`sv_spec`) owns the data, the specification and the builder calls, so the
+  binding's semantics are tested without a Python interpreter; interpreter tests
+  are double-gated behind the `python-tests` feature and
+  `SCIENCEVIEW_PYTHON_TESTS`. Dense, sparse and streaming inputs are preserved,
+  `StreamingColumn` pushes into a bounded rolling window and `update()` renders
+  the advanced window, and every `SVError` family maps to a typed exception
+  under `SVBindingError`. `pyproject.toml` builds the wheel with maturin;
+  `examples/python_bindings.py` generates `docs/figures/python_bindings.svg`.
+- Runtime scripting (`scienceview_script`, feature `scripting`): `SVScriptEngine`
+  is the pluggable contract, with `SVLuaScriptEngine` and
+  `SVTypeScriptScriptEngine` as the two shipped front-ends and
+  `SVHostScriptExecutor`/`sv_host_executor_engine` as the adapter a real
+  interpreter plugs into. The shipped engines are dependency-light reference
+  front-ends over a documented, deterministic statement subset (`dispatch`,
+  `increment`, `log`, and the capability calls) in each language's surface
+  syntax; no Lua virtual machine or JavaScript engine is embedded by default.
+  `SVScriptRuntime` owns named scripts that are prepared once, invoked many
+  times and replaced atomically at runtime with a `Preserve` or `Reset` state
+  policy; a replacement that fails to prepare leaves the previous program
+  running. Scripts dispatch only the `sv_control` action vocabulary, through
+  `SVControlOrigin::Script`, and `sv_dispatch_outcome` applies the result to a
+  control session. Sandboxing is restricted by default (figure access only), and
+  `read_file`, `write_file`, `http_get`, `run_process` and `read_environment`
+  are refused unless the script widens its policy; the interpreter performs no
+  I/O itself and reports granted requests to the host. Every failure is a typed
+  `SVError` carrying the script name and a line/column/byte-span
+  `SVScriptLocation`, host execution is the default placement, `Embedded` is
+  opt-in behind `embedded-execution`, and each invocation runs inside a
+  `scienceview.script` span under a configurable statement budget. Tests cover
+  parsing and dispatch, reload policies, unknown actions, sandbox refusal,
+  bounded long scripts and concurrent shared runtimes.
 - The dashboard composition crate (`scienceview_dashboard`): a grid of rows,
   columns and spans whose cells are solved through `sv_layout`; shared
   `SVDataSource` registrations read by several panels without copying; linked
