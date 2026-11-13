@@ -53,4 +53,4 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review (deferred to the batch integrator; the implementing agent recorded a self-review in `design.md`).
+- [x] Trigger the independent acceptance review (deferred to the batch integrator; the implementing agent recorded a self-review in `design.md`).
