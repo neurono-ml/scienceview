@@ -17,6 +17,8 @@ use crate::sv_mark::{SVMarkKind, SVMarkProperty};
 use crate::sv_move::SVMoveStage;
 use thiserror::Error;
 
+use super::SVScriptLocation;
+
 /// Everything that can go wrong while configuring, operating or reading a
 /// figure.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
@@ -299,6 +301,99 @@ pub enum SVError {
     /// A playback action was dispatched without an animation timeline.
     #[error("a playback control needs an animation timeline attached to the session")]
     MissingAnimationTimeline,
+
+    /// A script was invoked by a name the runtime never registered.
+    #[error("no script is registered under the name `{name}`")]
+    ScriptNotFound {
+        /// The name that was requested.
+        name: String,
+    },
+
+    /// A script was registered under a name that is already taken.
+    #[error("a script is already registered under the name `{name}`")]
+    ScriptAlreadyRegistered {
+        /// The duplicated script identity.
+        name: String,
+    },
+
+    /// A script could not be prepared by its engine.
+    #[error("the script `{script}` failed to load at {location}: {message}")]
+    ScriptParseFailure {
+        /// The script identity.
+        script: String,
+        /// Where the failure happened.
+        location: SVScriptLocation,
+        /// The engine's own explanation.
+        message: String,
+    },
+
+    /// A script failed while executing one invocation.
+    #[error("the script `{script}` failed at {location}: {message}")]
+    ScriptRuntimeFailure {
+        /// The script identity.
+        script: String,
+        /// Where the failure happened.
+        location: SVScriptLocation,
+        /// The engine's own explanation.
+        message: String,
+    },
+
+    /// A script requested a capability its sandbox does not grant.
+    #[error(
+        "the script `{script}` requested the `{capability}` capability at {location}, which its sandbox does not grant"
+    )]
+    ScriptSandboxViolation {
+        /// The script identity.
+        script: String,
+        /// Where the refused statement is.
+        location: SVScriptLocation,
+        /// The capability that was refused.
+        capability: String,
+    },
+
+    /// A script dispatched an action name outside the control vocabulary.
+    #[error(
+        "the script `{script}` dispatched the unknown action `{action}` at {location}; the vocabulary is zoom, pan, reset, series, range, selection, playback and custom"
+    )]
+    ScriptUnknownAction {
+        /// The script identity.
+        script: String,
+        /// Where the unknown action was dispatched.
+        location: SVScriptLocation,
+        /// The name the script used.
+        action: String,
+    },
+
+    /// A script exceeded the number of statements one invocation may run.
+    #[error(
+        "the script `{script}` exceeded its statement budget of {budget} statements in one invocation"
+    )]
+    ScriptBudgetExceeded {
+        /// The script identity.
+        script: String,
+        /// The configured limit.
+        budget: usize,
+    },
+
+    /// The selected execution placement is not compiled into this build.
+    #[error(
+        "script execution placement `{placement}` is not available: enable the `embedded-execution` feature"
+    )]
+    UnsupportedScriptPlacement {
+        /// The placement the configuration requested.
+        placement: String,
+    },
+
+    /// An engine instance does not match the engine the runtime was built with.
+    #[error(
+        "the runtime is configured for the `{configured}` engine but the program was prepared for `{prepared}`"
+    )]
+    ScriptEngineMismatch {
+        /// The engine the runtime selected.
+        configured: String,
+        /// The engine that prepared the program.
+        prepared: String,
+    },
 
     /// A dashboard grid was declared with an unusable shape or spacing.
     #[error("invalid dashboard grid: {message}")]

@@ -9,6 +9,8 @@ pub enum SVControlOrigin {
     Control(String),
     /// A third-party widget, by its name.
     ExternalWidget(String),
+    /// A script, by its registered name.
+    Script(String),
     /// A programmatic dispatch with no widget attached.
     Programmatic,
 }
@@ -18,6 +20,7 @@ impl fmt::Display for SVControlOrigin {
         match self {
             Self::Control(name) => write!(formatter, "control={name}"),
             Self::ExternalWidget(name) => write!(formatter, "widget={name}"),
+            Self::Script(name) => write!(formatter, "script={name}"),
             Self::Programmatic => formatter.write_str("origin=programmatic"),
         }
     }

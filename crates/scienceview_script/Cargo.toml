@@ -1,0 +1,31 @@
+[package]
+name = "scienceview_script"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Pluggable, sandboxed and reloadable figure scripts for scienceview: Lua and TypeScript/JavaScript front-ends over the control action vocabulary."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_script"
+
+[features]
+default = ["engine-lua", "engine-typescript"]
+# The Lua front-end.
+engine-lua = []
+# The TypeScript/JavaScript front-end.
+engine-typescript = []
+# Accept scripts marked for embedding in the WebAssembly artifact. The bridge
+# itself ships with the WebAssembly backend; the flag only widens the placement
+# contract, so the default build stays free of any embedded runtime.
+embedded-execution = []
+
+[dependencies]
+scienceview_core = { path = "../scienceview_core", version = "0.1.0" }
+tracing = "0.1"
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }
