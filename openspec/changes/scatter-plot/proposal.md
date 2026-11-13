@@ -4,7 +4,7 @@
 
 Shows the joint distribution of two continuous variables, with optional grouping, sizing and colouring. It is the most basic chart in the library and the reference point for how a recipe is composed: a dot mark, a scale per axis, a move for grouping, and nothing else.
 
-The chart is specified in `docs/FDRs/relational-scatter-plot.md` (FDR-101) and is
+The chart is specified in `docs/FDRs/recipes/relational-scatter-plot.md` (FDR-101) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVScatterPlot`.
 
@@ -35,4 +35,10 @@ None.
   `docs/figures/scatter_plot.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the
   family batch integrator.
-- New specification `openspec/specs/scatter-plot/spec.md`.
+- The public module tree is
+  `scienceview::sv_recipes::sv_relational::sv_scatter_plot`; the folders keep
+  their names through `#[path]` attributes.
+- This change contributes the delta under
+  `openspec/changes/scatter-plot/specs/scatter-plot/spec.md`. The main
+  `openspec/specs/scatter-plot/spec.md` is produced by `opsx archive` after the
+  change merges, never published ahead of the implementation.

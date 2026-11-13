@@ -6,17 +6,13 @@
 //! Every figure selects its rendering backend explicitly through `backend(...)`
 //! with an `SVBackendKind` value: there is no automatic backend, the rendering
 //! form is always a deliberate choice.
-//!
 //! ## Trait-driven, feature-gated backends
-//!
 //! Rendering is commanded by the `SVRenderBackend` trait. Every backend is a
 //! Cargo feature and maps 1:1 to a workspace crate under `crates/scienceview_*`,
 //! so new backends — including third-party crates — plug in without touching
 //! the core. Enabling a feature only makes the backend available; the builder
 //! still requires an explicit `backend(...)` selection.
-//!
 //! Supported backends:
-//!
 //! - `render-svg`: self-contained SVG output, no extra dependencies.
 //! - `render-html`: self-contained HTML page embedding the figure.
 //! - `render-tui`: terminal rendering via `ratatui`.
@@ -28,14 +24,11 @@
 //! - `render-tauri`: Tauri native window output.
 //! - `render-dioxus`: Dioxus native component output.
 //! - `wasm`: WebAssembly canvas target for the from-scratch renderer.
-//!
 //! ## Dependency-light core
-//!
 //! The core data model is borrowed slices — no heavy algebra or GUI toolkit
 //! is required to describe a figure. Every capability beyond the core is an
 //! opt-in Cargo feature, so unused backends cost no binary size and no
 //! compile time:
-//!
 //! - `data-ndarray`: zero-copy views over `ndarray` arrays.
 //! - `data-sprs`: zero-copy views over `sprs` sparse vectors.
 //! - `spec-serde`: JSON serialization of the figure specification.
@@ -44,9 +37,17 @@
 
 pub use scienceview_core;
 pub use scienceview_core::{
-    sv_animation, sv_data, sv_decoration, sv_layout, sv_mark, sv_move, sv_scale, sv_stat,
-    sv_transition, sv_window,
+    sv_animation, sv_backend, sv_data, sv_decoration, sv_error, sv_figure, sv_layout, sv_mark,
+    sv_move, sv_observability, sv_scale, sv_stat, sv_transition, sv_window,
 };
+
+/// Charts built by composing the core kernels.
+///
+/// The public name is prefixed; the folder stays `recipes/` through the
+/// `#[path]` attribute. The tree is
+/// `sv_recipes -> sv_relational -> sv_<chart>_plot`.
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
