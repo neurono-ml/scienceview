@@ -90,3 +90,56 @@ fn a_streaming_window_renders_without_expanding_the_stream() {
     assert_eq!(output.bins().len(), 2);
     assert!(output.is_approximate());
 }
+
+#[test]
+fn mixed_representations_agree_after_validating_lengths() {
+    let values = [1.0, 2.0, 3.0, 4.0];
+    let categories = [0.0, 0.0, 1.0, 1.0];
+    let series = [0.0, 1.0, 0.0, 1.0];
+    let indices = [0usize, 1, 2, 3];
+    let category_view =
+        SVSparseView::new(&indices, &categories, categories.len()).expect("valid sparse storage");
+    let source = SVTestSource::new(vec![
+        ("value", SVColumnRole::Y, SVColumnView::Dense(&values)),
+        (
+            "category",
+            SVColumnRole::Grouping,
+            SVColumnView::Sparse(category_view),
+        ),
+        (
+            "series",
+            SVColumnRole::Grouping,
+            SVColumnView::Streaming(SVStreamingView::new(&series, 4, 0)),
+        ),
+    ]);
+
+    let mixed = SVBarPlotBuilder::new()
+        .data_source(&source)
+        .value("value")
+        .category("category")
+        .series("series")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("completes")
+        .render()
+        .expect("draws");
+
+    let dense_source = SVTestSource::new(vec![
+        ("value", SVColumnRole::Y, SVColumnView::Dense(&values)),
+        (
+            "category",
+            SVColumnRole::Grouping,
+            SVColumnView::Dense(&categories),
+        ),
+        (
+            "series",
+            SVColumnRole::Grouping,
+            SVColumnView::Dense(&series),
+        ),
+    ]);
+    let dense = render_series(&dense_source);
+    assert_eq!(mixed.bins().len(), 4);
+    assert_eq!(mixed.number_of_points(), 4);
+    assert!(mixed.is_approximate());
+    assert_close(&rectangles(&dense), &rectangles(&mixed));
+}
