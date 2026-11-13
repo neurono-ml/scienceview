@@ -17,3 +17,7 @@ pub use sv_scatter_plot::{SVScatterPlot, SVScatterPlotBuilder, SVScatterScene};
 #[path = "line_plot/mod.rs"]
 pub mod sv_line_plot;
 pub use sv_line_plot::{SVLinePlot, SVLinePlotBuilder};
+
+#[path = "area_plot/mod.rs"]
+pub mod sv_area_plot;
+pub use sv_area_plot::{SVAreaPlot, SVAreaPlotBuilder, SVAreaRendering};
