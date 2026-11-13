@@ -45,9 +45,7 @@ pub(super) fn sv_colour_scale(
         (0.0, 1.0)
     } else if configuration.robust && values.len() >= 5 {
         values.sort_by(f64::total_cmp);
-        let low_index = ((values.len() - 1) as f64 * 0.02).round() as usize;
-        let high_index = ((values.len() - 1) as f64 * 0.98).round() as usize;
-        (values[low_index], values[high_index])
+        (sv_percentile(&values, 0.02), sv_percentile(&values, 0.98))
     } else {
         let mut lower = f64::INFINITY;
         let mut upper = f64::NEG_INFINITY;
@@ -75,4 +73,17 @@ pub(super) fn sv_colour_scale(
         .domain(lower, upper)
         .colour_map(configuration.colour_map.clone())
         .build()
+}
+
+/// Returns the linearly interpolated percentile of an ascending slice.
+///
+/// The rank is interpolated between the two neighbouring order statistics, the
+/// definition numpy and seaborn use. Rounding the rank instead would include
+/// the outermost value at small sample counts, which defeats `robust`.
+fn sv_percentile(sorted: &[f64], fraction: f64) -> f64 {
+    let rank = fraction * (sorted.len() - 1) as f64;
+    let lower = rank.floor() as usize;
+    let upper = rank.ceil() as usize;
+    let weight = rank - lower as f64;
+    sorted[lower] * (1.0 - weight) + sorted[upper] * weight
 }

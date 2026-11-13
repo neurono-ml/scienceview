@@ -319,3 +319,70 @@ fn a_large_matrix_composes_every_cell_deterministically() {
     assert_eq!(first.number_of_marks(), 1_600);
     assert_eq!(first, second);
 }
+
+#[test]
+fn robust_derives_the_domain_from_the_central_percentiles() {
+    let values = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 100.0];
+    let matrix = SVHeatmapMatrix::new(&values, 2, 5).expect("the shape matches");
+    let build = |robust| {
+        SVHeatmapPlot::builder()
+            .matrix(matrix)
+            .robust(robust)
+            .colour_bar(false)
+            .backend(SVBackendKind::Svg)
+            .build()
+            .expect("the configuration is complete")
+            .compose()
+            .expect("the heatmap composes")
+    };
+
+    let plain = build(false);
+    let robust = build(true);
+
+    assert_eq!(
+        plain.colour_scale().domain().upper(),
+        100.0,
+        "the plain domain reaches the outlier"
+    );
+    assert!(
+        robust.colour_scale().domain().upper() < 100.0,
+        "the robust domain stops before the outlier"
+    );
+}
+
+#[test]
+fn a_positive_line_width_strokes_every_cell() {
+    let values = [1.0, 2.0, 3.0, 4.0];
+    let matrix = SVHeatmapMatrix::new(&values, 2, 2).expect("the shape matches");
+    let build = |line_width| {
+        SVHeatmapPlot::builder()
+            .matrix(matrix)
+            .line_width(line_width)
+            .colour_bar(false)
+            .backend(SVBackendKind::Svg)
+            .build()
+            .expect("the configuration is complete")
+            .compose()
+            .expect("the heatmap composes")
+    };
+
+    let plain = build(0.0);
+    let stroked = build(2.0);
+
+    assert!(
+        plain
+            .mark_geometries()
+            .iter()
+            .flat_map(|geometry| geometry.primitives())
+            .all(|primitive| primitive.paint().stroke().is_none()),
+        "the default cells have no border"
+    );
+    assert!(
+        stroked
+            .mark_geometries()
+            .iter()
+            .flat_map(|geometry| geometry.primitives())
+            .all(|primitive| primitive.paint().stroke().is_some()),
+        "every cell takes the requested border"
+    );
+}
