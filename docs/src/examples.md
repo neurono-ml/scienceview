@@ -14,6 +14,7 @@ cargo run --example bar_chart_svg
 cargo run --example band_plot
 cargo run --example area_plot
 cargo run --example scatter_plot --features render-svg
+cargo run --example histogram_plot --features render-svg
 cargo run --example line_plot
 cargo run --example density_plot --features render-svg
 ```
