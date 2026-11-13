@@ -12,6 +12,38 @@ released.
 
 ### Added
 
+<<<<<<< HEAD
+- The `SVLinePlot` recipe (`src/recipes/relational/line_plot/`, public path
+  `scienceview::sv_recipes::sv_relational::sv_line_plot`): one line per
+  `(series, group)` over an ordered `x` axis, composed from the existing data,
+  stat, scale, mark and decoration kernels. It reads named columns from any
+  `SVDataSource` (with typed `ColumnNotFound` errors), accepts dense, sparse
+  and streaming channels, sorts each series by `x` with a stable order, splits
+  the line at missing values unless `bridge_missing(true)` connects them, and
+  supports per-series colour and dash encoding, line width, markers, step or
+  Catmull-Rom interpolation, optional aggregation with an estimator and an
+  uncertainty interval, a configurable legend placement and continuous or
+  temporal `x` scales. The SVG and native backends serialize one composed
+  scene, and `examples/line_plot.rs` generates
+  `docs/figures/line_plot_recipe.svg`.
+=======
+- The first relational recipe, `SVScatterPlot` (`scienceview::sv_recipes::sv_relational::sv_scatter_plot`):
+  the joint distribution of two continuous columns with optional `series`,
+  `colour` and `size` channels, a constant `alpha` for overplotting, a marker
+  shape, edge colour and width, the jitter and dodge displacement moves, and
+  axes, grid, title and legend. It composes the existing data, scale, move,
+  mark and decoration kernels — no kernel variant is added — resolves dense,
+  sparse and streaming columns once per operation without densifying or
+  blocking, and records the backend kind, representation and the point count
+  the current operation actually resolved in one operation span. `compose()`
+  returns a backend-agnostic `SVScatterScene`; `render()` dispatches through the
+  configured kind — the SVG document for `Svg`, the native frame for `Native`,
+  a typed capability error for a kind with no recipe serializer and
+  `BackendUnavailable` for a compiled-out backend — and each scene serializer
+  rejects a mismatched kind. A large scatter groups its circles into one
+  compound path per paint. The example `examples/scatter_plot.rs` calls the
+  public `to_svg()` method and generates `docs/figures/scatter_plot.svg`.
+>>>>>>> origin/main
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
