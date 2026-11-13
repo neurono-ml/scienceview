@@ -67,10 +67,11 @@ representations:
 `SVColumnView::dispatch`, then iterates the representation through a small
 cursor. Nothing is densified, and nothing waits for new data. A sparse ordering
 column needs one extra thought: every unlisted position has `x = 0`, and the
-duplicate-`x` policy collapses those positions to a single observation, so the
-reader visits the stored entries plus that one representative position instead
-of expanding the column. Aggregation needs every observation of the group, so it
-falls back to the full logical length.
+duplicate-`x` policy collapses those positions to a single observation, so a
+single-series chart visits the stored entries plus that one representative
+position instead of expanding the column. A `series` column or an aggregate
+needs the observations grouped per series, so those paths fall back to the full
+logical length.
 
 Non-finite values are *missing*, not errors: the pair is skipped. If every row
 is missing, the operation reports `SVError::EmptyInput` instead of drawing a
