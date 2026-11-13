@@ -30,20 +30,20 @@
 ## 4. Example and generated figure
 
 - [x] Add `examples/line_plot.rs` demonstrating the documented configuration.
-- [x] Generate `docs/figures/line_plot.svg` with `cargo run --example line_plot` and
+- [x] Generate `docs/figures/line_plot_recipe.svg` with `cargo run --example line_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
 
 - [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [x] Mirror the figure into `docs/src/assets/line_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/line_plot_recipe.svg` and embed it in the
   chapter.
 - [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/relational-line-plot.md` status to `shipped`, linking the
+- [x] Change `docs/FDRs/recipes/relational-line-plot.md` status to `shipped`, linking the
   example and the chapter.
 - [x] Add the `CHANGELOG.md` entry.
 
@@ -54,4 +54,4 @@
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
-  `docs/FDRs/relational-line-plot.md` before opening the code PR.
+  `docs/FDRs/recipes/relational-line-plot.md` before opening the code PR.

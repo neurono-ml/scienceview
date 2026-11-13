@@ -3,7 +3,7 @@
 ## Context
 
 `SVLinePlot` is one of the scientific-core recipes specified in
-`docs/FDRs/relational-line-plot.md`. This change implements exactly that record on top of
+`docs/FDRs/recipes/relational-line-plot.md`. This change implements exactly that record on top of
 the core kernels already landed by the earlier waves, and touches nothing else.
 
 

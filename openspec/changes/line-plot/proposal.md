@@ -4,7 +4,7 @@
 
 Shows how a continuous value evolves along an ordered axis — usually time. It draws one line per series, and it aggregates within a series when several observations share the same `x`, which is what separates it from a plain polyline.
 
-The chart is specified in `docs/FDRs/relational-line-plot.md` (FDR-102) and is
+The chart is specified in `docs/FDRs/recipes/relational-line-plot.md` (FDR-102) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVLinePlot`.
 
