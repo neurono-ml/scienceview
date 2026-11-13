@@ -12,7 +12,7 @@ the core kernels already landed by the earlier waves, and touches nothing else.
 ### D1 — Composition
 
 The chart is exactly the composition
-`data -> [no stat] -> values -> [SVMove::Dodge (+ Jitter) within each cell] -> [SVScale per axis] -> SVMark::Dot, one cell per pair`. It introduces no new mark, stat, move or scale variant; if
+`data -> [no stat] -> values -> [SVMove::Jitter/Dodge within each cell] -> [SVScale per axis] -> SVMark::Dot (or a chart-owned hexbin/binned-contour cell), one cell per pair`. It introduces no new mark, stat, move or scale variant; if
 implementation reveals a missing variant, that is a change to the core
 capability first (patterns.md P5).
 
