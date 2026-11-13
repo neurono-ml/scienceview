@@ -12,7 +12,7 @@ use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 
 use super::configuration::{SVAreaInterpolation, SVAreaPlotConfiguration};
 use super::core_implementation::SVAreaPlot;
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVAreaMissingValuePolicy;
 
 /// Builds an [`SVAreaPlot`].
 ///
@@ -24,7 +24,7 @@ use super::missing_value_policy::SVMissingValuePolicy;
 /// ```
 /// use scienceview_core::sv_backend::SVBackendKind;
 /// use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
-/// use scienceview::recipes::relational::SVAreaPlot;
+/// use scienceview::sv_recipes::sv_relational::sv_area_plot::SVAreaPlot;
 ///
 /// let x = [0.0, 1.0, 2.0];
 /// let y = [1.0, 3.0, 2.0];
@@ -54,7 +54,7 @@ pub struct SVAreaPlotBuilder<'values, BackendState> {
     opacity: Option<f32>,
     line: bool,
     interpolation: SVAreaInterpolation,
-    missing_value_policy: SVMissingValuePolicy,
+    missing_value_policy: SVAreaMissingValuePolicy,
     theme: Option<SVMarkTheme>,
     title: Option<&'values str>,
     x_title: Option<&'values str>,
@@ -80,7 +80,7 @@ impl SVAreaPlotBuilder<'_, SVWithoutBackend> {
             opacity: None,
             line: true,
             interpolation: SVAreaInterpolation::default(),
-            missing_value_policy: SVMissingValuePolicy::default(),
+            missing_value_policy: SVAreaMissingValuePolicy::default(),
             theme: None,
             title: None,
             x_title: None,
@@ -168,7 +168,7 @@ impl<'values, BackendState> SVAreaPlotBuilder<'values, BackendState> {
 
     /// Chooses what happens to a non-finite sample.
     #[must_use]
-    pub fn missing_value_policy(mut self, missing_value_policy: SVMissingValuePolicy) -> Self {
+    pub fn missing_value_policy(mut self, missing_value_policy: SVAreaMissingValuePolicy) -> Self {
         self.missing_value_policy = missing_value_policy;
         self
     }

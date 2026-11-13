@@ -20,7 +20,7 @@ mod rendering;
 pub use builder::SVAreaPlotBuilder;
 pub use configuration::SVAreaInterpolation;
 pub use core_implementation::SVAreaPlot;
-pub use missing_value_policy::SVMissingValuePolicy;
+pub use missing_value_policy::SVAreaMissingValuePolicy;
 pub use rendering::SVAreaRendering;
 
 #[cfg(test)]

@@ -49,7 +49,8 @@ pub use scienceview_core::{
 };
 
 // Chart recipes: the named charts composed from the core kernels.
-pub mod recipes;
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;

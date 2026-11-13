@@ -5,7 +5,7 @@ use scienceview_core::sv_layout::SVViewport;
 use scienceview_core::sv_mark::{SVBaselineMode, SVMarkTheme};
 use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVAreaMissingValuePolicy;
 
 /// How an area's ordered boundary is joined between samples.
 ///
@@ -43,7 +43,7 @@ pub(crate) struct SVAreaPlotConfiguration<'values> {
     pub(crate) opacity: Option<f32>,
     pub(crate) line: bool,
     pub(crate) interpolation: SVAreaInterpolation,
-    pub(crate) missing_value_policy: SVMissingValuePolicy,
+    pub(crate) missing_value_policy: SVAreaMissingValuePolicy,
     pub(crate) theme: Option<SVMarkTheme>,
     pub(crate) title: Option<&'values str>,
     pub(crate) x_title: Option<&'values str>,

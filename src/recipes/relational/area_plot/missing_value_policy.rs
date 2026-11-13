@@ -8,7 +8,7 @@ use scienceview_core::sv_error::SVError;
 /// choice explicit instead of leaving it to whichever kernel reads the column
 /// first.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-pub enum SVMissingValuePolicy {
+pub enum SVAreaMissingValuePolicy {
     /// Drop the sample and split the area at the gap (default).
     ///
     /// Consecutive finite samples stay one region; a missing sample closes the
@@ -22,7 +22,7 @@ pub enum SVMissingValuePolicy {
     Error,
 }
 
-impl SVMissingValuePolicy {
+impl SVAreaMissingValuePolicy {
     /// The policy name as written in errors and spans.
     pub fn as_str(self) -> &'static str {
         match self {
@@ -35,7 +35,7 @@ impl SVMissingValuePolicy {
     ///
     /// # Errors
     ///
-    /// [`SVMissingValuePolicy::Error`] returns [`SVError::InvalidConfiguration`]
+    /// [`SVAreaMissingValuePolicy::Error`] returns [`SVError::InvalidConfiguration`]
     /// naming the column and the sample position.
     pub(crate) fn report(self, column: &str, index: usize) -> Result<(), SVError> {
         match self {

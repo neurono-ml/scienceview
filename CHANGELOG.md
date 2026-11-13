@@ -12,7 +12,7 @@ released.
 
 ### Added
 
-- The relational recipe `SVAreaPlot` in `scienceview::recipes::relational`: an
+- The relational recipe `SVAreaPlot` in `scienceview::sv_recipes::sv_relational`: an
   area chart that fills the region between an ordered boundary and a baseline.
   The builder requires an explicit backend and defaults to
   `SVExecutionMode::Automatic`; it exposes `x`, `y`, an optional `series`,

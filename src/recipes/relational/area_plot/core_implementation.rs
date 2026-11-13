@@ -14,7 +14,7 @@ use scienceview_core::sv_observability::sv_run_operation;
 
 use super::builder::SVAreaPlotBuilder;
 use super::configuration::{SVAreaInterpolation, SVAreaPlotConfiguration};
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVAreaMissingValuePolicy;
 use super::preparation::sv_prepare_area;
 use super::rendering::{SVAreaRendering, sv_compose_area};
 
@@ -102,7 +102,7 @@ impl<'values> SVAreaPlot<'values> {
     }
 
     /// Returns the missing-value policy in force.
-    pub fn missing_value_policy_value(&self) -> SVMissingValuePolicy {
+    pub fn missing_value_policy_value(&self) -> SVAreaMissingValuePolicy {
         self.configuration.missing_value_policy
     }
 

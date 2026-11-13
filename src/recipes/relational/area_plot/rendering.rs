@@ -19,7 +19,7 @@ use scienceview_core::sv_mark::{
 use scienceview_core::sv_scale::{SVColour, SVScale, SVScaleBuilder, SVScaleKind};
 
 use super::configuration::{SVAreaInterpolation, SVAreaPlotConfiguration};
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVAreaMissingValuePolicy;
 use super::preparation::{SVPreparedArea, SVPreparedSegment};
 
 /// The backend-agnostic composition of one area figure.
@@ -42,7 +42,7 @@ pub struct SVAreaRendering {
     opacity: Option<f32>,
     line: bool,
     interpolation: SVAreaInterpolation,
-    missing_value_policy: SVMissingValuePolicy,
+    missing_value_policy: SVAreaMissingValuePolicy,
 }
 
 impl SVAreaRendering {
@@ -112,7 +112,7 @@ impl SVAreaRendering {
     }
 
     /// Returns the missing-value policy in force.
-    pub fn missing_value_policy_value(&self) -> SVMissingValuePolicy {
+    pub fn missing_value_policy_value(&self) -> SVAreaMissingValuePolicy {
         self.missing_value_policy
     }
 }

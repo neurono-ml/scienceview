@@ -6,4 +6,5 @@
 //! central list (patterns P4), so recipe changes never serialise against each
 //! other.
 
-pub mod relational;
+#[path = "relational/mod.rs"]
+pub mod sv_relational;

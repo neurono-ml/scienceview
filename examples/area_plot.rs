@@ -6,7 +6,7 @@
 //! stack, the scales and the marks, and the SVG backend serializes the
 //! resulting primitives, exactly as a user program would do.
 
-use scienceview::recipes::relational::SVAreaPlot;
+use scienceview::sv_recipes::sv_relational::sv_area_plot::SVAreaPlot;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_svg::SVSvgDocument;

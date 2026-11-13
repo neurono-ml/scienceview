@@ -6,6 +6,9 @@
 //! change only ever adds its own lines and never reorders its siblings.
 
 // ## Relational recipe registrations (append one pair of lines per chart)
-pub mod area_plot;
+#[path = "area_plot/mod.rs"]
+pub mod sv_area_plot;
 
-pub use area_plot::{SVAreaInterpolation, SVAreaPlot, SVAreaPlotBuilder};
+pub use sv_area_plot::{
+    SVAreaInterpolation, SVAreaMissingValuePolicy, SVAreaPlot, SVAreaPlotBuilder, SVAreaRendering,
+};

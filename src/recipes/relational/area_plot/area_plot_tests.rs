@@ -4,7 +4,7 @@
 //! so the three representations are exercised without owning a copy of the
 //! columns.
 
-use super::{SVAreaInterpolation, SVAreaPlot, SVMissingValuePolicy};
+use super::{SVAreaInterpolation, SVAreaMissingValuePolicy, SVAreaPlot};
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{
     SVColumnDescriptor, SVColumnRole, SVColumnSnapshot, SVColumnView, SVDataSource,
@@ -196,7 +196,7 @@ fn builds_with_the_documented_defaults() {
     assert_eq!(plot.interpolation_value(), SVAreaInterpolation::Linear);
     assert_eq!(
         plot.missing_value_policy_value(),
-        SVMissingValuePolicy::Omit
+        SVAreaMissingValuePolicy::Omit
     );
 }
 
@@ -258,7 +258,7 @@ fn every_option_that_changes_output_is_reflected() {
         .baseline(SVBaselineMode::Value(0.5))
         .opacity(0.8)
         .line(false)
-        .missing_value_policy(SVMissingValuePolicy::Omit)
+        .missing_value_policy(SVAreaMissingValuePolicy::Omit)
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
@@ -388,7 +388,7 @@ fn a_strict_missing_value_policy_rejects_the_render() {
         .data_source(&source)
         .x("x")
         .y("y")
-        .missing_value_policy(SVMissingValuePolicy::Error)
+        .missing_value_policy(SVAreaMissingValuePolicy::Error)
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
@@ -415,7 +415,7 @@ fn a_strict_missing_value_policy_rejects_a_stacked_render() {
         .y("y")
         .series("series")
         .stack(true)
-        .missing_value_policy(SVMissingValuePolicy::Error)
+        .missing_value_policy(SVAreaMissingValuePolicy::Error)
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
