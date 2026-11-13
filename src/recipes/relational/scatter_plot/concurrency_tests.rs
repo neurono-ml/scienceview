@@ -6,7 +6,7 @@ use super::test_support::{sv_build_default, sv_dense_source, sv_scene_to_svg};
 fn several_threads_render_the_same_scatter_identically() {
     let source = sv_dense_source();
     let plot = sv_build_default(&source);
-    let expected = sv_scene_to_svg(&plot.render().expect("the first render succeeds"));
+    let expected = sv_scene_to_svg(&plot.compose().expect("the first render succeeds"));
 
     std::thread::scope(|scope| {
         let handles: Vec<_> = (0..8)
@@ -15,7 +15,7 @@ fn several_threads_render_the_same_scatter_identically() {
                 scope.spawn(move || {
                     (0..16)
                         .map(|_| {
-                            sv_scene_to_svg(&plot.render().expect("a concurrent render succeeds"))
+                            sv_scene_to_svg(&plot.compose().expect("a concurrent render succeeds"))
                         })
                         .collect::<Vec<_>>()
                 })
@@ -37,7 +37,7 @@ fn a_cloned_scatter_renders_the_same_scene() {
     let plot = sv_build_default(&source);
     let clone = plot.clone();
 
-    let first = sv_scene_to_svg(&plot.render().expect("the original renders"));
-    let second = sv_scene_to_svg(&clone.render().expect("the clone renders"));
+    let first = sv_scene_to_svg(&plot.compose().expect("the original renders"));
+    let second = sv_scene_to_svg(&clone.compose().expect("the clone renders"));
     assert_eq!(first, second);
 }

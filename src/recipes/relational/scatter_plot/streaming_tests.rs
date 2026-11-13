@@ -17,7 +17,7 @@ fn a_streaming_input_returns_promptly_and_shows_the_window() {
     let (sender, receiver) = mpsc::channel();
     std::thread::scope(|scope| {
         scope.spawn(|| {
-            let scene = plot.render().expect("the streaming window renders");
+            let scene = plot.compose().expect("the streaming window renders");
             let _ = sender.send(scene.number_of_marks());
         });
     });
@@ -38,7 +38,7 @@ fn a_streaming_scene_can_be_serialized_as_svg() {
         colours: None,
     };
     let scene = sv_build_default(&streaming_source)
-        .render()
+        .compose()
         .expect("the streaming scene renders");
     let svg = sv_scene_to_svg(&scene);
     assert!(svg.starts_with("<svg"));

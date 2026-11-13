@@ -3,6 +3,9 @@
 use super::builder::SVScatterPlotBuilder;
 use super::composition::sv_compose_scene;
 use super::configuration::SVScatterConfiguration;
+#[cfg(feature = "render-native")]
+use super::render_output::SVScatterFrame;
+use super::render_output::SVScatterRenderOutput;
 use super::scene::SVScatterScene;
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{SVDataSource, SVRepresentation};
@@ -57,27 +60,110 @@ impl<'data> SVScatterPlot<'data> {
         self.configuration.number_of_points
     }
 
-    /// Composes the scene with the configured backend.
+    /// Composes the backend-agnostic scene.
     ///
-    /// The scene is backend-agnostic: the configured kind is recorded in the
-    /// operation span and in the built figure, and a backend serializes the
-    /// geometry later. The call resolves each column once and never blocks on a
-    /// streaming window.
+    /// The scene carries the configured kind but no notation: an SVG, native
+    /// or component serializer turns the same viewport, decorations and mark
+    /// geometries into its own artifact. The call resolves each column once and
+    /// never blocks on a streaming window.
     ///
     /// # Errors
     ///
     /// Returns the column, scale or mark error of the composition, after
     /// recording the failure in the operation span.
-    pub fn render(&self) -> Result<SVScatterScene, SVError> {
+    pub fn compose(&self) -> Result<SVScatterScene, SVError> {
+        let configuration = &self.configuration;
+        sv_run_operation(
+            "compose",
+            configuration.backend_kind,
+            configuration.representation,
+            configuration.number_of_points,
+            || {
+                let scene = sv_compose_scene(configuration)?;
+                sv_record_resolved_points(&scene);
+                Ok(scene)
+            },
+        )
+    }
+
+    /// Renders through the path the configured kind actually has.
+    ///
+    /// The configured kind is never ignored: `Svg` serializes the SVG document,
+    /// `Native` rasterizes the native frame, and every other kind reports
+    /// [`SVError::UnsupportedBackendCapability`] because the recipe has no
+    /// serializer for it yet. A compiled-out backend reports
+    /// [`SVError::BackendUnavailable`] instead of degrading silently.
+    ///
+    /// # Errors
+    ///
+    /// Returns the composition error, [`SVError::BackendUnavailable`] when the
+    /// configured backend's feature is disabled, or
+    /// [`SVError::UnsupportedBackendCapability`] for a kind with no
+    /// recipe-level serializer.
+    pub fn render(&self) -> Result<SVScatterRenderOutput, SVError> {
         let configuration = &self.configuration;
         sv_run_operation(
             "render",
             configuration.backend_kind,
             configuration.representation,
             configuration.number_of_points,
-            || sv_compose_scene(configuration),
+            || {
+                let scene = sv_compose_scene(configuration)?;
+                sv_record_resolved_points(&scene);
+                sv_dispatch_render(&scene)
+            },
         )
     }
+}
+
+/// Records the mark count the current composition actually drew.
+///
+/// `build` probes the columns once to validate a figure that can render; a
+/// streaming source may have advanced since then. The span therefore starts
+/// with the build-time count and is corrected here, after the columns were
+/// resolved for this operation.
+fn sv_record_resolved_points(scene: &SVScatterScene) {
+    tracing::Span::current().record("points", scene.number_of_marks());
+}
+
+fn sv_dispatch_render(scene: &SVScatterScene) -> Result<SVScatterRenderOutput, SVError> {
+    match scene.backend_kind() {
+        SVBackendKind::Svg => sv_render_svg(scene),
+        SVBackendKind::Native => sv_render_native(scene),
+        backend_kind => Err(SVError::UnsupportedBackendCapability {
+            backend_kind,
+            capability: crate::sv_backend::SVBackendCapability::Export,
+        }),
+    }
+}
+
+#[cfg(feature = "render-svg")]
+fn sv_render_svg(scene: &SVScatterScene) -> Result<SVScatterRenderOutput, SVError> {
+    Ok(SVScatterRenderOutput::Svg(scene.to_svg()?.into_bytes()))
+}
+
+#[cfg(not(feature = "render-svg"))]
+fn sv_render_svg(scene: &SVScatterScene) -> Result<SVScatterRenderOutput, SVError> {
+    Err(SVError::BackendUnavailable {
+        backend_kind: scene.backend_kind(),
+    })
+}
+
+#[cfg(feature = "render-native")]
+fn sv_render_native(scene: &SVScatterScene) -> Result<SVScatterRenderOutput, SVError> {
+    let frame = scene.to_native_frame()?;
+    Ok(SVScatterRenderOutput::Native(SVScatterFrame::new(
+        frame.width(),
+        frame.height(),
+        frame.pixels().to_vec(),
+    )))
+}
+
+#[cfg(not(feature = "render-native"))]
+fn sv_render_native(scene: &SVScatterScene) -> Result<SVScatterRenderOutput, SVError> {
+    Err(SVError::BackendUnavailable {
+        backend_kind: scene.backend_kind(),
+    })
 }
 
 /// Probes the named columns once for existence and equal length.

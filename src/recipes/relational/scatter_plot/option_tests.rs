@@ -19,7 +19,7 @@ fn the_marker_option_changes_the_drawn_shape() {
         .build()
         .expect("the configuration is complete");
 
-    let scene = plot.render().expect("the scatter renders");
+    let scene = plot.compose().expect("the scatter renders");
     let first = &scene.mark_geometries()[0].primitives()[0];
     assert!(matches!(
         first.shape(),
@@ -31,7 +31,7 @@ fn the_marker_option_changes_the_drawn_shape() {
 fn the_alpha_option_is_applied_to_every_mark() {
     let source = sv_dense_source();
     let scene = sv_build_default(&source)
-        .render()
+        .compose()
         .expect("the default scatter renders");
     let opaque = scene.mark_geometries()[0].primitives()[0].paint().opacity();
 
@@ -43,7 +43,7 @@ fn the_alpha_option_is_applied_to_every_mark() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
-    let scene = plot.render().expect("the scatter renders");
+    let scene = plot.compose().expect("the scatter renders");
     let translucent = scene.mark_geometries()[0].primitives()[0].paint().opacity();
 
     assert!((opaque - 1.0).abs() < 1e-6);
@@ -62,7 +62,7 @@ fn the_size_column_sizes_points_individually() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
-    let scene = plot.render().expect("the scatter renders");
+    let scene = plot.compose().expect("the scatter renders");
     let radii: Vec<f64> = scene.mark_geometries()[0]
         .primitives()
         .iter()
@@ -88,7 +88,7 @@ fn the_series_column_assigns_one_stable_colour_and_legend_entry_per_value() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete");
-    let scene = plot.render().expect("the scatter renders");
+    let scene = plot.compose().expect("the scatter renders");
 
     assert_eq!(scene.number_of_series(), 3);
     let first = scene.mark_geometries()[0].primitives();
@@ -114,7 +114,7 @@ fn the_colour_column_overrides_the_series_colour_per_point() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("the scatter renders");
 
     let colours: Vec<crate::sv_scale::SVColour> = scene.mark_geometries()[0]
@@ -137,7 +137,7 @@ fn the_edge_options_paint_a_stroke() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("the scatter renders");
 
     let paint = scene.mark_geometries()[0].primitives()[0].paint();
@@ -160,7 +160,7 @@ fn the_legend_placement_option_is_carried_into_the_scene() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("the scatter renders");
 
     assert!(matches!(
@@ -182,7 +182,7 @@ fn the_title_and_axis_labels_become_decorations() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("the scatter renders");
 
     assert_eq!(scene.title(), Some("Measurements"));

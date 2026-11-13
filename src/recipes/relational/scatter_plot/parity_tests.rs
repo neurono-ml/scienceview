@@ -24,17 +24,17 @@ fn dense_sparse_and_streaming_inputs_draw_the_same_scene() {
 
     let dense = sv_scene_to_svg(
         &sv_build_default(&dense_source)
-            .render()
+            .compose()
             .expect("dense renders"),
     );
     let sparse = sv_scene_to_svg(
         &sv_build_default(&sparse_source)
-            .render()
+            .compose()
             .expect("sparse renders"),
     );
     let streaming = sv_scene_to_svg(
         &sv_build_default(&streaming_source)
-            .render()
+            .compose()
             .expect("streaming renders"),
     );
 
@@ -49,7 +49,7 @@ fn a_sparse_input_is_never_densified() {
 
     assert_eq!(plot.representation(), SVRepresentation::Sparse);
     let scene = plot
-        .render()
+        .compose()
         .expect("a sparse view renders without being expanded");
     assert_eq!(scene.number_of_marks(), HORIZONTAL.len());
 }
@@ -68,7 +68,7 @@ fn a_sparse_input_with_implicit_zeros_keeps_its_logical_points() {
         colours: None,
     };
     let scene = sv_build_default(&source)
-        .render()
+        .compose()
         .expect("implicit zeros stay logical points");
     assert_eq!(scene.number_of_marks(), DENSE_X.len());
 }
@@ -147,7 +147,7 @@ fn an_empty_source_renders_an_empty_scene() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("an empty scatter renders");
 
     assert_eq!(scene.number_of_marks(), 0);
@@ -167,14 +167,14 @@ fn jitter_displaces_points_deterministically() {
         .build()
         .expect("the jitter configuration is complete");
 
-    let first = sv_scene_to_svg(&plot.render().expect("the jittered scatter renders"));
-    let second = sv_scene_to_svg(&plot.render().expect("the jittered scatter renders again"));
+    let first = sv_scene_to_svg(&plot.compose().expect("the jittered scatter renders"));
+    let second = sv_scene_to_svg(&plot.compose().expect("the jittered scatter renders again"));
     assert_eq!(first, second, "the seeded jitter is deterministic");
 
     let plain_source = sv_dense_source();
     let plain = sv_scene_to_svg(
         &sv_build_default(&plain_source)
-            .render()
+            .compose()
             .expect("the plain scatter renders"),
     );
     assert_ne!(first, plain, "jitter moves the marks");
@@ -192,7 +192,7 @@ fn jitter_rejects_a_sparse_column_instead_of_densifying_it() {
         .build()
         .expect("the jitter configuration is complete");
     let error = plot
-        .render()
+        .compose()
         .expect_err("jitter cannot displace a sparse column without densifying it");
 
     assert!(matches!(
@@ -216,7 +216,7 @@ fn a_dodge_move_is_accepted_as_the_displacement() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("dodge is a documented displacement move")
-        .render()
+        .compose()
         .expect("the dodged scatter renders");
     assert_eq!(scene.number_of_marks(), HORIZONTAL.len());
 }

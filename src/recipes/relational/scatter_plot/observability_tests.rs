@@ -1,4 +1,4 @@
-//! The one operation span a scatter render emits (patterns P8).
+//! The one operation span a scatter composition emits (patterns P8).
 
 use super::SVScatterPlot;
 use super::test_support::{sv_dense_source, sv_streaming_source};
@@ -106,7 +106,7 @@ impl<S: Subscriber + for<'lookup> LookupSpan<'lookup>> Layer<S> for SVSpanRecord
 }
 
 #[test]
-fn a_render_records_the_backend_representation_and_point_count() {
+fn a_compose_records_the_backend_representation_and_point_count() {
     let _guard = sv_span_test_guard();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
@@ -120,24 +120,24 @@ fn a_render_records_the_backend_representation_and_point_count() {
         .expect("the configuration is complete");
 
     let scene = tracing::subscriber::with_default(subscriber, || {
-        plot.render().expect("the scatter renders")
+        plot.compose().expect("the scatter renders")
     });
 
     assert_eq!(scene.number_of_marks(), 5);
     let spans = recorder.captured();
-    let render_spans: Vec<_> = spans
+    let compose_spans: Vec<_> = spans
         .iter()
-        .filter(|span| span.get("operation").map(String::as_str) == Some("render"))
+        .filter(|span| span.get("operation").map(String::as_str) == Some("compose"))
         .collect();
-    assert_eq!(render_spans.len(), 1, "one render span per operation");
-    assert_eq!(render_spans[0]["backend.kind"], "native");
-    assert_eq!(render_spans[0]["representation"], "Streaming");
-    assert_eq!(render_spans[0]["points"], "5");
-    assert_eq!(render_spans[0]["outcome"], "success");
+    assert_eq!(compose_spans.len(), 1, "one compose span per operation");
+    assert_eq!(compose_spans[0]["backend.kind"], "native");
+    assert_eq!(compose_spans[0]["representation"], "Streaming");
+    assert_eq!(compose_spans[0]["points"], "5");
+    assert_eq!(compose_spans[0]["outcome"], "success");
 }
 
 #[test]
-fn the_span_reports_the_dense_representation_and_the_configured_kind() {
+fn the_compose_span_reports_the_dense_representation_and_the_configured_kind() {
     let _guard = sv_span_test_guard();
     let recorder = SVSpanRecorder::default();
     let subscriber = Registry::default().with(recorder.clone());
@@ -151,14 +151,14 @@ fn the_span_reports_the_dense_representation_and_the_configured_kind() {
         .expect("the configuration is complete");
 
     tracing::subscriber::with_default(subscriber, || {
-        plot.render().expect("the scatter renders");
+        plot.compose().expect("the scatter renders");
     });
 
     let spans = recorder.captured();
     let span = spans
         .iter()
-        .find(|span| span.get("operation").map(String::as_str) == Some("render"))
-        .expect("a render span was recorded");
+        .find(|span| span.get("operation").map(String::as_str) == Some("compose"))
+        .expect("a compose span was recorded");
     assert_eq!(span["backend.kind"], "svg");
     assert_eq!(span["representation"], SVRepresentation::Dense.to_string());
 }

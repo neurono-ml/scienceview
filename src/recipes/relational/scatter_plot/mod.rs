@@ -27,11 +27,16 @@
 //!     .backend(SVBackendKind::Svg)
 //!     .build()
 //!     .expect("the configuration is complete")
-//!     .render()
-//!     .expect("the scatter renders");
+//!     .compose()
+//!     .expect("the scatter composes");
 //!
 //! assert_eq!(scene.number_of_marks(), 3);
 //! ```
+//!
+//! `render()` goes one step further and serializes the scene through the path
+//! the configured kind actually has: an SVG document for
+//! `SVBackendKind::Svg`, a native frame for `SVBackendKind::Native`, and a
+//! typed error for a kind the recipe does not serialize yet.
 
 mod builder;
 mod builder_options;
@@ -44,9 +49,11 @@ mod decorations;
 mod geometry;
 mod jitter;
 mod options;
+mod render_output;
 mod scene;
 
 pub use options::{SVScatterLegendPlacement, SVScatterSizeScale};
+pub use render_output::{SVScatterFrame, SVScatterRenderOutput};
 pub use scene::SVScatterScene;
 
 pub use builder::SVScatterPlotBuilder;
@@ -67,7 +74,7 @@ mod option_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
-#[cfg(all(test, any(feature = "render-svg", feature = "render-native")))]
+#[cfg(test)]
 #[path = "render_tests.rs"]
 mod render_tests;
 #[cfg(test)]

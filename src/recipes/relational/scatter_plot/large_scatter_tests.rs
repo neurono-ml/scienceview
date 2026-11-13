@@ -23,7 +23,7 @@ fn a_large_scatter_groups_its_circles_into_one_path() {
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")
-        .render()
+        .compose()
         .expect("a large scatter renders");
 
     assert_eq!(scene.number_of_marks(), POINT_COUNT);

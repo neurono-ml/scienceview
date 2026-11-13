@@ -163,6 +163,7 @@ pub(super) fn sv_compose_scene(
     );
 
     Ok(SVScatterScene {
+        backend_kind: configuration.backend_kind,
         viewport,
         plot_area: plot,
         background: style.background(),

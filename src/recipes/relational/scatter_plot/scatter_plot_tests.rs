@@ -49,7 +49,7 @@ fn the_default_composition_draws_one_mark_per_point() {
     assert_eq!(plot.representation(), SVRepresentation::Dense);
     assert_eq!(plot.point_count(), HORIZONTAL.len());
 
-    let scene = plot.render().expect("the default scatter renders");
+    let scene = plot.compose().expect("the default scatter renders");
     assert_eq!(scene.number_of_marks(), HORIZONTAL.len());
     assert_eq!(scene.number_of_mark_primitives(), HORIZONTAL.len());
     assert_eq!(scene.number_of_series(), 1);

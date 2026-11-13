@@ -6,16 +6,23 @@
 //! scene without re-deriving a position.
 
 use super::SVScatterLegendPlacement;
+use crate::sv_backend::SVBackendKind;
 use crate::sv_decoration::SVDecorationPrimitive;
-#[cfg(feature = "render-native")]
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use crate::sv_error::SVError;
 use crate::sv_layout::{SVResolvedRectangle, SVViewport};
 use crate::sv_mark::SVMarkGeometry;
 use crate::sv_scale::SVColour;
 
-/// Everything one scatter render produced.
+/// Everything one scatter composition produced.
+///
+/// The scene is backend-agnostic, but it carries the kind it was composed for:
+/// the recipe-level serializers exposed on it (`to_svg`, `to_native_frame`)
+/// refuse a scene whose configured kind they do not serve, so a serializer can
+/// never be applied to the wrong backend by accident.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SVScatterScene {
+    pub(super) backend_kind: SVBackendKind,
     pub(super) viewport: SVViewport,
     pub(super) plot_area: SVResolvedRectangle,
     pub(super) background: SVColour,
@@ -31,6 +38,11 @@ pub struct SVScatterScene {
 }
 
 impl SVScatterScene {
+    /// Returns the backend kind the scene was composed for.
+    pub fn backend_kind(&self) -> SVBackendKind {
+        self.backend_kind
+    }
+
     /// Returns the viewport the scene was solved for.
     pub fn viewport(&self) -> SVViewport {
         self.viewport
@@ -104,8 +116,21 @@ impl SVScatterScene {
     ///
     /// Only available with the `render-svg` feature, which makes the SVG
     /// backend crate available; the scene itself is backend-agnostic.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::UnsupportedBackendCapability`] when the scene was
+    /// composed for a kind other than `Svg`, so an SVG serializer can never be
+    /// applied to a scene configured for another backend.
     #[cfg(feature = "render-svg")]
-    pub fn to_svg(&self) -> String {
+    pub fn to_svg(&self) -> Result<String, SVError> {
+        if self.backend_kind != SVBackendKind::Svg {
+            return Err(SVError::UnsupportedBackendCapability {
+                backend_kind: self.backend_kind,
+                capability: crate::sv_backend::SVBackendCapability::Export,
+            });
+        }
+
         let mut document = scienceview_svg::SVSvgDocument::new(self.viewport)
             .with_title(
                 self.title
@@ -123,7 +148,7 @@ impl SVScatterScene {
             document.push_mark_geometry(geometry);
         }
         document.push_decoration_primitives(&self.decoration_primitives_after_marks);
-        document.to_svg()
+        Ok(document.to_svg())
     }
 
     /// Rasterizes the scene with the from-scratch native renderer.
@@ -131,8 +156,21 @@ impl SVScatterScene {
     /// Only available with the `render-native` feature. The same scene the SVG
     /// backend serializes is drawn into an RGBA frame, which is what makes the
     /// two backends comparable within rasterization differences.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::UnsupportedBackendCapability`] when the scene was
+    /// composed for a kind other than `Native`, so the rasterizer can never be
+    /// applied to a scene configured for another backend.
     #[cfg(feature = "render-native")]
     pub fn to_native_frame(&self) -> Result<scienceview_native::SVNativeFrame, SVError> {
+        if self.backend_kind != SVBackendKind::Native {
+            return Err(SVError::UnsupportedBackendCapability {
+                backend_kind: self.backend_kind,
+                capability: crate::sv_backend::SVBackendCapability::Presentation,
+            });
+        }
+
         let mut canvas = scienceview_native::SVRasterCanvas::new(&self.viewport);
         canvas.fill(self.background);
         canvas.draw_decoration_primitives(&self.decoration_primitives_before_marks);
