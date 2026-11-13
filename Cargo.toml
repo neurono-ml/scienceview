@@ -8375,7 +8375,7 @@ render-vue = ["dep:scienceview_vue"]
 render-angular = ["dep:scienceview_angular"]
 render-tauri = ["dep:scienceview_tauri"]
 render-dioxus = ["dep:scienceview_dioxus"]
-wasm = ["dep:scienceview_wasm"]
+wasm = ["dep:scienceview_wasm", "scienceview_wasm/wasm"]
 # Live updates over standard-library channels; no async runtime in core.
 streaming = ["scienceview_core/streaming"]
 # Live updates over Tokio watch channels.

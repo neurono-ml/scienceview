@@ -9,5 +9,32 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_wasm"
 
+[features]
+default = []
+# The browser binding surface. It is never part of the default build: the
+# crate compiles and is testable on the host target without wasm-bindgen.
+wasm = ["dep:js-sys", "dep:wasm-bindgen", "dep:web-sys"]
+
+[dependencies]
+scienceview_core = { path = "../scienceview_core", version = "0.1.0" }
+# The rasterizer is reused, not reimplemented: the WebAssembly target compiles
+# the same from-scratch CPU renderer the native window presents. The window
+# layer stays out of this build (default features are off).
+scienceview_native = { path = "../scienceview_native", version = "0.1.0", default-features = false }
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3", optional = true, features = [
+    "CanvasRenderingContext2d",
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+    "ImageData",
+    "Window",
+] }
+
+[dev-dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }
+
 [lints]
 workspace = true
