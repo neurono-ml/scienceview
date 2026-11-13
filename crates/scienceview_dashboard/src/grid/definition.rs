@@ -18,6 +18,18 @@ pub struct SVDashboardGrid {
     vertical_gap: f64,
 }
 
+impl Default for SVDashboardGrid {
+    /// Declares the one-cell grid a dashboard starts from.
+    fn default() -> Self {
+        Self {
+            number_of_rows: 1,
+            number_of_columns: 1,
+            horizontal_gap: 0.0,
+            vertical_gap: 0.0,
+        }
+    }
+}
+
 impl SVDashboardGrid {
     /// Declares a grid with no spacing.
     ///

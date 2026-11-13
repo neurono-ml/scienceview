@@ -143,3 +143,13 @@ fn every_cell_rectangle_stays_inside_the_viewport() {
         }
     }
 }
+
+#[test]
+fn the_default_grid_is_one_cell_without_spacing() {
+    let grid = SVDashboardGrid::default();
+
+    assert_eq!(grid.number_of_rows(), 1);
+    assert_eq!(grid.number_of_columns(), 1);
+    assert_eq!(grid.horizontal_gap(), 0.0);
+    assert_eq!(grid.vertical_gap(), 0.0);
+}

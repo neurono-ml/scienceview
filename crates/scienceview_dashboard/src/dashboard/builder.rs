@@ -40,7 +40,7 @@ impl<'a> SVDashboardBuilder<'a> {
     /// Starts a one-cell dashboard with no panel and no source.
     pub fn new() -> Self {
         Self {
-            grid: SVDashboardGrid::new(1, 1).expect("a one-cell grid is valid"),
+            grid: SVDashboardGrid::default(),
             viewport: SVViewport::new(800.0, 600.0),
             title: "scienceview dashboard".to_string(),
             description: None,
