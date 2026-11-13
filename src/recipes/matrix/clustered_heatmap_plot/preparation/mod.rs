@@ -11,7 +11,7 @@ mod table;
 use self::table::sv_prepare_table;
 use super::SVClusterAxis;
 use super::configuration::{SVClusteredHeatmapConfiguration, SVClusteredHeatmapInput};
-use super::options::sv_validate_cluster_order;
+use super::options::{sv_require_dendrogram_trees, sv_validate_cluster_order};
 use crate::sv_data::SVRepresentation;
 use crate::sv_error::SVError;
 
@@ -140,12 +140,8 @@ pub(super) fn sv_validate_supplied_clustering(
             prepared.number_of_columns(),
         )?;
     }
-    if configuration.dendrogram
-        && (configuration.row_tree.is_none() || configuration.column_tree.is_none())
-    {
-        return Err(SVError::InvalidConfiguration {
-            message: "the dendrogram needs both `row_linkage(...)` and `column_linkage(...)`; supply the supplied clustering tree or call `dendrogram(false)`".to_string(),
-        });
+    if configuration.dendrogram {
+        sv_require_dendrogram_trees(configuration.row_tree, configuration.column_tree)?;
     }
     Ok(())
 }

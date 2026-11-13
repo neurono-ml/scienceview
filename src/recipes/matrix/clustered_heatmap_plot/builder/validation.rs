@@ -11,7 +11,7 @@ use crate::sv_recipes::sv_matrix::sv_clustered_heatmap_plot::configuration::{
 };
 use crate::sv_recipes::sv_matrix::sv_clustered_heatmap_plot::core_implementation::SVClusteredHeatmapPlot;
 use crate::sv_recipes::sv_matrix::sv_clustered_heatmap_plot::options::{
-    sv_validate_cluster_order, sv_validate_cluster_tree,
+    sv_require_dendrogram_trees, sv_validate_cluster_order, sv_validate_cluster_tree,
 };
 
 impl<'data> SVClusteredHeatmapPlotBuilder<'data> {
@@ -28,6 +28,9 @@ impl<'data> SVClusteredHeatmapPlotBuilder<'data> {
         let backend_kind = self.backend_kind.ok_or(SVError::MissingBackendSelection)?;
         sv_verify_mark_supported(SVMarkKind::Image, backend_kind)?;
         sv_validate_centre(self.centre)?;
+        if self.dendrogram {
+            sv_require_dendrogram_trees(self.row_tree, self.column_tree)?;
+        }
 
         let row_order = self.row_order.ok_or_else(|| SVError::InvalidConfiguration {
             message: "SVClusteredHeatmapPlot requires `row_order(...)`: the clustering is an input, not a computation".to_string(),
@@ -88,11 +91,6 @@ impl<'data> SVClusteredHeatmapPlotBuilder<'data> {
             }
             if let Some(tree) = self.column_tree {
                 sv_validate_cluster_tree(tree, SVClusterAxis::Column, columns)?;
-            }
-            if self.dendrogram && (self.row_tree.is_none() || self.column_tree.is_none()) {
-                return Err(SVError::InvalidConfiguration {
-                    message: "the dendrogram needs both `row_linkage(...)` and `column_linkage(...)`; supply the supplied clustering tree or call `dendrogram(false)`".to_string(),
-                });
             }
         }
 

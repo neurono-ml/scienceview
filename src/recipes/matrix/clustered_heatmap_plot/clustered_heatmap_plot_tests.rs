@@ -162,6 +162,31 @@ fn a_label_count_that_does_not_match_the_matrix_is_rejected() {
 }
 
 #[test]
+fn a_long_table_without_both_trees_is_rejected_at_build() {
+    let source = sv_dense_source();
+    let error = SVClusteredHeatmapPlot::builder()
+        .data_source(&source)
+        .row("row")
+        .column("column")
+        .value("value")
+        .row_order(&ROW_ORDER)
+        .column_order(&COLUMN_ORDER)
+        .row_linkage(sv_row_tree())
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect_err("the default dendrogram needs both supplied trees");
+    match error {
+        SVError::InvalidConfiguration { message } => {
+            assert!(
+                message.contains("column_linkage"),
+                "the error names the missing input: {message}"
+            );
+        }
+        other => panic!("expected an explicit configuration error, received {other:?}"),
+    }
+}
+
+#[test]
 fn an_unsupported_backend_is_a_typed_error() {
     let error = SVClusteredHeatmapPlot::builder()
         .matrix(super::test_support::sv_matrix())

@@ -247,6 +247,33 @@ fn sv_validate_merge_child(
     Ok(())
 }
 
+/// Rejects a requested dendrogram that is missing one of its two trees.
+///
+/// The check only depends on the configuration, not on the data dimensions, so
+/// it runs in `build` for every input surface — a direct matrix and a long
+/// table alike.
+///
+/// # Errors
+///
+/// Returns [`SVError::InvalidConfiguration`] naming the missing input when the
+/// dendrogram is requested without both supplied trees.
+pub(super) fn sv_require_dendrogram_trees(
+    row_tree: Option<SVClusterTree<'_>>,
+    column_tree: Option<SVClusterTree<'_>>,
+) -> Result<(), SVError> {
+    let missing = match (row_tree.is_some(), column_tree.is_some()) {
+        (true, true) => return Ok(()),
+        (false, false) => "both `row_linkage(...)` and `column_linkage(...)`",
+        (false, true) => "`row_linkage(...)`",
+        (true, false) => "`column_linkage(...)`",
+    };
+    Err(SVError::InvalidConfiguration {
+        message: format!(
+            "the dendrogram needs {missing}; supply the clustering tree or call `dendrogram(false)`"
+        ),
+    })
+}
+
 /// Validates that an order is a permutation of the axis dimension.
 ///
 /// # Errors
