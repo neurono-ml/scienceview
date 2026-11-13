@@ -43,7 +43,14 @@ data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge]
 | `weight` | observation weight | continuous | no |
 
 Accepted representations: dense, sparse, streaming. For a streaming source the
-bins are computed over the rolling window and the histogram updates in place.
+bins are computed over the rolling window. The in-place update of the drawn
+bars is deferred (see Temporal and Acceptance).
+
+Weighted binning is deferred: the shipped `SVStat::Bin` kernel does not consume
+observation weights, so a configured `weight` is rejected at build time with a
+configuration error that names the kernel gap. The recipe never reimplements
+weighted binning; it belongs to a change of the `statistical-transforms`
+capability.
 
 ### Match key
 
@@ -67,9 +74,9 @@ their edge value, so that a bin keeps its identity when the domain shifts.
 | `bin_count` | `Option<usize>` | derived from the axis width | seaborn, plotly |
 | `bin_width` | `Option<f64>` | `None` | seaborn, plotly |
 | `bin_edges` | `Option<Vec<f64>>` | `None` | seaborn |
-| `normalise` | `SVNormalisation` | `None` | seaborn, plotly `histfunc` |
+| `normalise` | `SVNormalisation` | `Count` | seaborn, plotly `histfunc` |
 | `cumulative` | `bool` | `false` | seaborn `cumulative` |
-| `common_norm` | `bool` | `false` | seaborn |
+| `common_normalisation` | `bool` | `false` | seaborn |
 | `common_bins` | `bool` | `true` | seaborn |
 | `shrink` | `f32` | `1.0` | seaborn `shrink` — the gap between bars |
 | `element` | `SVBarElement` | `Bar` | seaborn (`bars`, `step`, `poly`) |
@@ -97,6 +104,13 @@ palette.
 
 A streaming histogram is the archetypal live chart: bins grow in height as
 observations arrive, and the bin boundaries stay put.
+
+Transition wiring is deferred in this change. The recipe produces
+transition-ready geometry — bins keep their identity by index and the heights
+live in data space — and `update` recomposes the current window, but no
+enter/update/exit animation path runs yet. That integration belongs to the
+transition/streaming capability; the FDR records the target behaviour above and
+the acceptance checklist does not tick it.
 
 ## Backend notes
 
