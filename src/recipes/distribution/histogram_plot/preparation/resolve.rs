@@ -18,9 +18,16 @@ pub(crate) fn sv_prepare(
         Some(name) => Some(configuration.data_source.column(name)?),
         None => None,
     };
+    let mut weight_snapshot = match configuration.weight.as_deref() {
+        Some(name) => Some(configuration.data_source.column(name)?),
+        None => None,
+    };
 
     let value = value_snapshot.column_view();
     let series = series_snapshot
+        .as_mut()
+        .map(crate::sv_data::SVColumnSnapshot::column_view);
+    let weight = weight_snapshot
         .as_mut()
         .map(crate::sv_data::SVColumnSnapshot::column_view);
 
@@ -36,9 +43,22 @@ pub(crate) fn sv_prepare(
             });
         }
     }
+    if let Some(weight) = weight {
+        if weight.length() != value.length() {
+            return Err(SVError::MismatchedLengths {
+                name: configuration
+                    .weight
+                    .clone()
+                    .unwrap_or_else(|| "weight".to_string()),
+                expected: value.length(),
+                actual: weight.length(),
+            });
+        }
+    }
 
     let groups = observations::sv_observation_groups(
         value,
+        weight,
         series,
         configuration.missing_value_policy,
         &configuration.series_labels,

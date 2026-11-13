@@ -44,10 +44,10 @@ impl<'data> SVHistogramPlotBuilder<'data> {
 
     /// Names the optional observation weight column.
     ///
-    /// The shipped `SVStat::Bin` kernel does not consume weights, so a
-    /// configured weight is rejected at build time with a typed configuration
-    /// error naming the kernel gap; the recipe never reimplements weighted
-    /// binning.
+    /// The weights reach `SVStat::Bin` unchanged: they are resolved once per
+    /// series, aligned with the value column (a dropped missing value drops its
+    /// weight too), and normalised by their total. Negative or non-finite
+    /// weights are rejected with a typed error naming the position.
     #[must_use]
     pub fn weight(mut self, weight: impl Into<String>) -> Self {
         self.weight = Some(weight.into());

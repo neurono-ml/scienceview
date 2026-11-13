@@ -359,17 +359,54 @@ fn non_finite_values_are_omitted_by_default_and_reported_on_request() {
 }
 
 #[test]
-fn a_configured_weight_fails_with_the_kernel_gap_named() {
-    let source = sv_dense_source();
+fn a_weight_column_scales_the_bin_heights() {
+    use super::test_support::sv_weighted_source;
+    let source = sv_weighted_source();
+    let scene = sv_build(&source, |builder| builder.bin_count(2).weight("weight"))
+        .compose()
+        .expect("the weighted histogram composes");
+
+    assert_eq!(scene.bin_heights(), &[4.0, 7.0]);
+}
+
+#[test]
+fn a_weight_column_of_a_different_length_is_rejected() {
+    const SHORT: [f64; 2] = [1.0, 1.0];
+    let source = SVTestSource {
+        value: SVColumnView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVColumnView::Dense(&SHORT)),
+    };
     let error = SVHistogramPlot::builder()
         .data_source(&source)
         .value("value")
         .weight("weight")
         .backend(SVBackendKind::Svg)
         .build()
-        .expect_err("the shipped bin kernel does not consume weights");
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
-    assert!(format!("{error}").contains("weight"));
+        .expect_err("columns must agree in length");
+
+    assert!(matches!(error, SVError::MismatchedLengths { .. }));
+}
+
+#[test]
+fn a_negative_weight_is_rejected_with_its_position() {
+    const NEGATIVE: [f64; 8] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0];
+    let source = SVTestSource {
+        value: SVColumnView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVColumnView::Dense(&NEGATIVE)),
+    };
+    let error = sv_build(&source, |builder| builder.weight("weight").bin_count(2))
+        .compose()
+        .expect_err("weights cannot be negative");
+
+    assert_eq!(
+        error,
+        SVError::NegativeWeight {
+            operation: "bin",
+            position: 6,
+        }
+    );
 }
 
 #[test]
@@ -448,6 +485,7 @@ fn a_non_finite_series_code_is_rejected() {
     let source = SVTestSource {
         value: SVColumnView::Dense(&VALUES),
         series: Some(SVColumnView::Dense(&BAD_SERIES)),
+        weight: None,
     };
     let error = sv_build(&source, |builder| builder.series("series").bin_count(2))
         .compose()

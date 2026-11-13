@@ -19,8 +19,7 @@ impl<'data> SVHistogramPlotBuilder<'data> {
     /// Returns [`SVError::MissingDataSource`] or
     /// [`SVError::MissingBackendSelection`] for a required step, a
     /// configuration error for a missing value column, an impossible bin
-    /// boundary, a configured weight (the shipped bin kernel does not consume
-    /// weights), a dodge combined with a non-bar element or a stack combined
+    /// boundary, a dodge combined with a non-bar element or a stack combined
     /// with independent bins, [`SVError::ColumnNotFound`] for a column the
     /// source does not expose, [`SVError::MismatchedLengths`] when the columns
     /// disagree, and [`SVError::UnsupportedMark`] when the backend cannot draw
@@ -32,14 +31,6 @@ impl<'data> SVHistogramPlotBuilder<'data> {
             message: "SVHistogramPlot requires a `value` column; call `value(\"<column>\")`"
                 .to_string(),
         })?;
-
-        if let Some(weight) = self.weight.as_deref() {
-            return Err(SVError::InvalidConfiguration {
-                message: format!(
-                    "the `{weight}` weight column cannot be honoured: the shipped `SVStat::Bin` kernel does not consume observation weights; weighted binning is a follow-up change to `statistical-transforms`"
-                ),
-            });
-        }
 
         sv_validate_bin_options(self.bin_count, self.bin_width, self.bin_edges.as_deref())?;
         if !self.shrink.is_finite() || self.shrink <= 0.0 || self.shrink > 1.0 {
@@ -76,6 +67,7 @@ impl<'data> SVHistogramPlotBuilder<'data> {
 
         let mut names = vec![value.as_str()];
         names.extend(self.series.as_deref());
+        names.extend(self.weight.as_deref());
         let (number_of_observations, representation) = sv_probe_columns(data_source, &names)?;
 
         Ok(SVHistogramPlot {
@@ -83,6 +75,7 @@ impl<'data> SVHistogramPlotBuilder<'data> {
                 data_source,
                 value,
                 series: self.series,
+                weight: self.weight,
                 series_labels: self.series_labels,
                 bin_count: self.bin_count,
                 bin_width: self.bin_width,
