@@ -1,13 +1,13 @@
-//! Chart recipes.
+//! Chart recipes: one module per chart family.
 //!
-//! A recipe composes the closed kernels of `scienceview_core` into one chart.
-//! Recipes live in the root package because they are the public chart surface:
-//! the core stays a kernel library, and every family owns a module that
-//! registers its charts (`docs/FDRs/patterns.md`, P4).
+//! A recipe composes the core kernels — data, statistics, scales, marks,
+//! decorations — into one named chart. It adds no kernel variant of its own
+//! (patterns P5), and it is registered in its family module rather than in a
+//! central list (patterns P4), so recipe changes never serialise against each
+//! other.
 //!
-//! The public module is `sv_recipes`; the folder keeps the dated `recipes`
-//! name through `#[path]`, so the physical layout stays stable while the
-//! public surface follows the mandatory `sv_` prefix.
+//! The public name is prefixed like every public module; the folder stays
+//! `recipes/` because the `#[path]` attribute keeps the two apart.
 
 #[path = "relational/mod.rs"]
 pub mod sv_relational;
