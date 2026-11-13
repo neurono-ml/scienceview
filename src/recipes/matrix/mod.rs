@@ -21,3 +21,9 @@ pub mod sv_heatmap_plot;
 pub use sv_heatmap_plot::{
     SVHeatmapFrame, SVHeatmapPlot, SVHeatmapPlotBuilder, SVHeatmapRenderOutput, SVHeatmapScene,
 };
+
+#[path = "image_plot/mod.rs"]
+pub mod sv_image_plot;
+pub use sv_image_plot::{
+    SVImageFrame, SVImagePlot, SVImagePlotBuilder, SVImageRenderOutput, SVImageScene,
+};

@@ -12,6 +12,28 @@ released.
 
 ### Added
 
+- The matrix recipe `SVImagePlot` (`scienceview::sv_recipes::sv_matrix`):
+  a raster drawn on its data extent, either a numeric field mapped through a
+  continuous colour map (greyscale by default) or RGBA pixels drawn as stored.
+  The chart is the composition of FDR-134 —
+  `data -> [no stat] -> raster -> [SVScale::Continuous over a colour map] -> SVMark::Image` —
+  and its configuration surface is `raster` (`SVImageSource`),
+  `colour_map`, `interpolation` (nearest or bilinear), `minimum_intensity` and
+  `maximum_intensity` (the FDR's `z_min`/`z_max`), `opacity`, `origin`, the
+  raster dimensions, the data `extent`, `aspect_ratio` (equal or stretch), the
+  `missing_policy`, `colour_bar`, the titles and the viewport, with
+  `backend(...)` required and `execution_mode` defaulting to `Automatic`.
+  An intensity raster accepts dense, sparse and streaming columns: a sparse
+  raster is read from its stored entries and never densified, and a streaming
+  column renders its newest window without blocking. Missing pixels are
+  transparent or take the domain's lower colour. The composed scene serializes
+  through `to_svg()` (a PNG data URI) and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error, and
+  the terminal backend is rejected at build time because it cannot express a
+  raster. Transition and animation wiring — including the pixel cross-fade the
+  FDR names — is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/image_plot.rs` computes its field
+  analytically and writes the deterministic figure `docs/figures/image_plot.svg`.
 - The matrix recipe `SVDensityHeatmapPlot` (`scienceview::sv_recipes::sv_matrix`):
   the two-dimensional density of two continuous variables drawn as a raster of
   coloured cells. The chart is the composition of FDR-133 —

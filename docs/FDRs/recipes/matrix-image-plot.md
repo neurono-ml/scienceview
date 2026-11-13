@@ -5,11 +5,11 @@
 | Id | FDR-134 |
 | Name | `SVImagePlot` |
 | Family | Matrix and field |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [ch38 — the image recipe](../../src/development-explained/ch38-image-plot.md) |
+| Example program | [`examples/image_plot.rs`](../../../examples/image_plot.rs) |
 
 ## Purpose
 
@@ -37,7 +37,7 @@ data -> [no stat] -> raster -> [SVScale::Continuous over a colour map] -> SVMark
 |---|---|---|
 | Raster | a dense 2D array of intensities | rendered greyscale or through a colour map |
 | Colour raster | a dense 2D array of RGBA | rendered as is |
-| Encoded image | encoded bytes | rendered as an image resource |
+| Encoded image | encoded bytes | a backend concern, not decoded by the core (see Open questions) |
 
 Accepted representations: dense, sparse (a sparse raster is drawn with its
 missing pixels transparent), streaming (a window of frames).
@@ -95,11 +95,22 @@ pixels of two different images.
 
 ## Acceptance
 
-- [ ] The raster is displayed with the requested extent and origin.
-- [ ] A numeric raster is coloured through the requested colour map, or
+- [x] The raster is displayed with the requested extent and origin.
+      Evidence: `image_plot::image_plot_tests` (`the_default_scene_draws_one_image_mark_on_the_raster_grid`,
+      `the_origin_decides_which_edge_the_first_row_touches`,
+      `equal_aspect_letterboxes_and_stretch_fills_the_extent`).
+- [x] A numeric raster is coloured through the requested colour map, or
       greyscale when none is given.
-- [ ] The interpolation mode is honoured.
-- [ ] A streaming source replaces the frame in place.
+      Evidence: `image_plot::image_plot_tests` (`greyscale_is_the_default_colour_map`,
+      `a_colour_map_bypasses_greyscale`,
+      `explicit_intensity_bounds_override_the_derived_domain`).
+- [x] The interpolation mode is honoured.
+      Evidence: `image_plot::render_tests` (`bilinear_sampling_reaches_the_svg_document`).
+- [x] A streaming source replaces the frame in place.
+      Evidence: `image_plot::parity_tests`
+      (`a_streaming_window_renders_its_newest_frame`,
+      `a_short_streaming_window_fills_the_frame_it_has`,
+      `an_empty_streaming_window_composes_a_transparent_frame`).
 
 ## Open questions
 
