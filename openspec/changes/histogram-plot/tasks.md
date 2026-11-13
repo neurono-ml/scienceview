@@ -35,11 +35,11 @@
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/histogram_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/histogram_plot.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
@@ -49,9 +49,10 @@
 
 ## 7. Acceptance
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
+- [x] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
-  `docs/FDRs/distribution-histogram-plot.md` before opening the code PR.
+- [x] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [x] Trigger the independent acceptance review against
+  `docs/FDRs/distribution-histogram-plot.md` before opening the code PR
+  (GitHub Copilot review requested on PR #109).
