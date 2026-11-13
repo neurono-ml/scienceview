@@ -29,7 +29,7 @@ plotting a physical potential, a loss surface or a response surface.
 ## Recipe
 
 ```
-data -> [SVStat::Aggregate (grid interpolation)] -> scalar field
+data -> [SVStat::Bin (grid) + SVStat::Aggregate (cell mean)] -> scalar field
      -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area
 ```
 
@@ -62,14 +62,14 @@ Accepted representations: dense, sparse, streaming (windowed).
 |---|---|---|---|
 | `matrix` | `(usize, usize)` shape over the `value` column | `None` (point cloud) | — |
 | `x`, `y`, `value` | `Option<SVColumnRef>` | `value` required; `x`/`y` for a point cloud | plotly |
-| `levels` | `Option<usize>` | `10` | plotly |
+| `levels` | `usize` | `10` | plotly |
 | `level_range` | `Option<(f64, f64)>` | `None` | plotly `contours.start`/`end` |
 | `level_size` | `Option<f64>` | `None` | plotly `contours.size` |
 | `style` | `SVContourStyle` | `Lines` | plotly (`lines`, `fill`) |
 | `labels` | `bool` | `false` | — |
 | `missing_policy` | `SVContourMissingPolicy` | `Omit` | — |
-| `colour_map` | `SVColourMapRef` | theme default | plotly |
-| `line_width` | `SVLength` | token `mark.line_width` | — |
+| `colour_map` | `SVColourMap` | theme default | plotly |
+| `line_width` | `f64` | token `mark.line_width` | — |
 | `interpolation` | — | — | deferred: the point cloud is folded by cell mean for now |
 
 ## Theme
@@ -78,14 +78,22 @@ Consumes the continuous colour-map token, axis tokens, text tokens.
 
 ## Temporal
 
-| Property | Behaviour |
+This change wires no animation. Every temporal row below is a design target, not
+a shipped behaviour; the recipe recomputes the whole level set on each
+`compose`.
+
+| Property | Intended behaviour (not wired) |
 |---|---|
 | contour path | recomputed per frame and morphed by vertex order |
 | colour | interpolates with the level |
 | level set appearing or disappearing | enters or exits |
 
 The contour-path matching problem is shared with
-`SVDensityContourPlot` and is documented there.
+`SVDensityContourPlot` and is documented there. Interpolating contour *paths*
+directly is hard when the topology changes (a contour can split into two); the
+honest target is to recompute the level sets per frame and match their vertices
+in order, accepting that a topology change is a visible cut. This is explicitly
+out of scope for this change.
 
 ## Backend notes
 
@@ -101,7 +109,7 @@ The contour-path matching problem is shared with
 ## Acceptance
 
 - [x] The contour levels follow the requested count, range or spacing (`contour_plot_tests::the_levels_follow_the_requested_range_and_spacing`, `a_level_count_changes_the_number_of_thresholds`).
-- [x] The field is interpolated onto a grid when the input is a point cloud (`contour_plot_tests::a_point_cloud_is_interpolated_through_the_bin_kernel`, `parity_tests::dense_and_sparse_fields_agree`).
+- [x] The field is binned onto a regular grid when the input is a point cloud (`contour_plot_tests::a_point_cloud_is_binned_onto_a_grid_through_the_bin_kernel`, `a_point_cloud_cell_is_the_mean_aggregate_of_its_observations`).
 - [x] A filled contour renders as nested closed paths without gaps (`contour_plot_tests::a_filled_style_paints_nested_bands_instead_of_lines`, `every_filled_subpath_is_closed`).
 - [x] Dense, sparse and streaming inputs give the same contours for the same
       field (`parity_tests::dense_and_sparse_fields_agree`,
