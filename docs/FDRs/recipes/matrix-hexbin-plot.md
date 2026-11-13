@@ -5,11 +5,11 @@
 | Id | FDR-135 |
 | Name | `SVHexbinPlot` |
 | Family | Matrix and field |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 39 — Hexbin plots](../../src/development-explained/ch39-hexbin-plot.md) |
+| Example program | [`examples/hexbin_plot.rs`](../../../examples/hexbin_plot.rs) |
 
 ## Purpose
 
@@ -29,9 +29,16 @@ that the eye can read.
 ## Recipe
 
 ```
-data -> [SVStat::Bin (2D, hexagonal lattice)] -> (cells, counts)
-     -> [SVScale::Continuous over a colour map] -> SVMark::HexTile
+data -> [hexagonal lattice owned by the recipe] -> (cells, counts)
+     -> [SVScale::Continuous over a colour map] -> one filled SVMark::Area
+        (a closed path) per hexagon
 ```
+
+The closed stat vocabulary has no bivariate hexagonal variant (patterns P5), so
+the recipe owns the lattice geometry, exactly as `SVDensityContourPlot` owns its
+marching-squares pass. Positions come from the scale kernel; mean aggregation is
+delegated to `SVStat::Aggregate`.
+
 
 ## Data contract
 
@@ -66,6 +73,8 @@ Accepted representations: dense, sparse, streaming (windowed).
 | `orientation` | `f64` radians | `0` | bokeh `angle` |
 | `colour_map` | `SVColourMapRef` | theme default | — |
 | `normalise` | `SVNormalisation` | `Count` | — |
+| `value` | `Option<SVColumnRef>` | `None` | — |
+| `aggregation` | `SVHexbinAggregation` | `Count` | — |
 | `min_count` | `usize` | `1` | — |
 
 ## Theme
@@ -74,7 +83,10 @@ Consumes the continuous colour-map token, axis tokens, text tokens.
 
 ## Temporal
 
-| Property | Behaviour |
+This change wires no animation. Every temporal row below is a design target, not
+a shipped behaviour; the recipe recomputes the whole lattice on each `compose`.
+
+| Property | Intended behaviour (not wired) |
 |---|---|
 | cell colour | interpolates |
 | cell entering or leaving | enters or exits |
@@ -93,15 +105,18 @@ Consumes the continuous colour-map token, axis tokens, text tokens.
 
 ## Acceptance
 
-- [ ] The hexagonal lattice covers the data domain with no gaps.
-- [ ] Each hexagon's colour is the colour map's colour for its count.
-- [ ] Cells below `min_count` are not drawn.
-- [ ] Dense, sparse and streaming inputs give the same lattice for the same
-      data.
+- [x] The hexagonal lattice covers the data domain with no gaps (`composition::lattice_tests::every_point_lands_inside_the_hexagon_of_its_cell`, `every_cell_centre_rounds_back_to_its_own_cell`, `adjacent_cell_centres_keep_the_hexagonal_spacing`).
+- [x] Each hexagon's colour is the colour map's colour for its count (`the_default_configuration_composes_a_hexagonal_lattice`, `the_colour_map_option_changes_the_fill_palette`).
+- [x] Cells below `min_count` are not drawn (`min_count_drops_sparse_cells`).
+- [x] Dense, sparse and streaming inputs give the same lattice for the same
+      data (`dense_sparse_and_streaming_inputs_draw_the_same_hexagons`).
 
 ## Open questions
 
 - Should the hexagonal lattice be an option of the 2D bin stat, rather than a
-      separate stat? *Current answer: yes — the lattice geometry is an option
-      of `SVStat::Bin`, and this recipe configures it. Open whether the
-      recipe earns its own type at all.*
+      separate stat? *Current answer: no — `SVStat::Bin` bins one continuous
+      column and the closed vocabulary (patterns P5) has no bivariate hexagonal
+      variant, so this recipe owns the lattice geometry, exactly as the
+      density-contour recipe owns marching squares. Promoting it to a shared
+      kernel would be a core change; open whether the recipe then earns its own
+      type.*

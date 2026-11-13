@@ -22,6 +22,10 @@ pub use sv_heatmap_plot::{
     SVHeatmapFrame, SVHeatmapPlot, SVHeatmapPlotBuilder, SVHeatmapRenderOutput, SVHeatmapScene,
 };
 
+#[path = "hexbin_plot/mod.rs"]
+pub mod sv_hexbin_plot;
+pub use sv_hexbin_plot::{SVHexbinComposition, SVHexbinPlot, SVHexbinPlotBuilder};
+
 #[path = "image_plot/mod.rs"]
 pub mod sv_image_plot;
 pub use sv_image_plot::{
