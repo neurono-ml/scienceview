@@ -9,7 +9,7 @@
   dispatcher.
 - [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVJointPlot` carrying its configured kind.
-- [x] Wire the composition `data -> [no stat] -> values -> central cell: SVMark::Dot (or a density contour) -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout` through the core kernels.
+- [x] Wire the composition `data -> [no stat] -> values -> central cell: SVMark::Dot, SVHexbinPlot, SVDensityContourPlot or SVStat::Fit -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout` through the core kernels.
 
 ## 2. Data contract and parity
 
@@ -55,3 +55,19 @@
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [ ] Trigger the independent acceptance review against
   `docs/FDRs/multivariate-joint-plot.md` before opening the code PR.
+
+## Deviations recorded during the independent review
+
+- The FDR and the spec named the marginals "along the bottom and along the
+  left"; the implemented layout puts them on the top and the right, which is
+  seaborn's `jointplot` layout and the position its own companion tests assert.
+  The FDR, the proposal, the design and the spec delta were amended to the
+  implemented position rather than leaving the record stale.
+- The FDR's configuration surface was amended to the implemented names
+  (`regression_model`, `SVJointMarginal` with `Rug`, `missing_value_policy`,
+  titles and the required `backend`) and to record that seaborn's `box`
+  marginal is a follow-up.
+- Transition and animation wiring remains deferred to the transition
+  integration: the composed geometry is transition-ready, but this change claims
+  no transition test. The transition requirement in the spec delta is carried by
+  that integration, not by this recipe change.

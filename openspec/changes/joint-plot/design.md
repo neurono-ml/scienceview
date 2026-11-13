@@ -12,7 +12,7 @@ the core kernels already landed by the earlier waves, and touches nothing else.
 ### D1 — Composition
 
 The chart is exactly the composition
-`data -> [no stat] -> values -> central cell: SVMark::Dot (or a density contour) -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout`. It introduces no new mark, stat, move or scale variant; if
+`data -> [no stat] -> values -> central cell: SVMark::Dot, SVHexbinPlot, SVDensityContourPlot or SVStat::Fit -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout`. It introduces no new mark, stat, move or scale variant; if
 implementation reveals a missing variant, that is a change to the core
 capability first (patterns.md P5).
 
@@ -25,7 +25,7 @@ P6).
 
 ### D3 — Temporal behaviour
 
-point position: interpolates in the central panel. marginal distribution: re-computed per frame and morphed. kind change: the central panel swaps between the scatter, the contour and the fit.
+point position: interpolates in the central panel. marginal distribution: re-computed per frame and morphed. kind change: the central panel swaps between the scatter, the hexbin, the contour and the fit.
 
 ### D4 — Registration
 
