@@ -3,14 +3,13 @@
 //!
 //! Run with `cargo run --example band_plot` from the repository root. The
 //! figure is produced by the tool itself: the real `SVBandPlotBuilder`
-//! composes the bands, and the SVG document surface serializes the very
+//! composes the bands and the public `to_svg()` serializer writes the very
 //! geometry the recipe produced.
 
 use scienceview::sv_recipes::sv_relational::sv_band_plot::SVBandPlotBuilder;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_core::sv_layout::SVViewport;
-use scienceview_svg::SVSvgDocument;
 use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
@@ -42,7 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .with_column("scenario", SVColumnRole::Grouping, &series)
         .build()?;
 
-    let plot = SVBandPlotBuilder::new()
+    let output = SVBandPlotBuilder::new()
         .data_source(&table)
         .x("time")
         .derive()
@@ -55,27 +54,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         .y_title("load")
         .viewport(SVViewport::new(640.0, 400.0))
         .backend(SVBackendKind::Svg)
-        .build()?;
+        .build()?
+        .render()?;
 
-    let output = plot.render()?;
-    let mut document = SVSvgDocument::new(output.viewport()).with_background(
-        scienceview_core::sv_decoration::SVDecorationStyle::built_in().background(),
-    );
-    if let Some(title) = output.title() {
-        document = document.with_title(title.to_string());
-    }
-    for geometry in output.geometries() {
-        document.push_mark_geometry(geometry);
-    }
-    for primitive in output.decorations() {
-        document.push_decoration_primitives(std::slice::from_ref(primitive));
-    }
+    let document = output.to_svg()?;
 
     let root = manifest_directory()?;
     let figures = root.join("docs").join("figures");
     fs::create_dir_all(&figures)?;
     let destination = figures.join("band_plot.svg");
-    fs::write(&destination, document.to_svg())?;
+    fs::write(&destination, document)?;
     println!("Wrote {}", destination.display());
     Ok(())
 }

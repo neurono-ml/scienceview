@@ -75,9 +75,9 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
       - name: cargo build --examples
-        run: cargo build --workspace --examples
+        run: cargo build --workspace --examples --features render-svg
       - name: cargo test --examples
-        run: cargo test --workspace --examples
+        run: cargo test --workspace --examples --features render-svg
 
   figures:
     name: Figures (tool-generated, no drift)
@@ -100,7 +100,9 @@ jobs:
             exit 1
           fi
           for example in "${examples[@]}"; do
-            cargo run --example "$(basename "${example}" .rs)"
+            # An example whose target declares `required-features` (the band
+            # plot calls the public `to_svg`) needs the SVG backend feature.
+            cargo run --example "$(basename "${example}" .rs)" --features render-svg
           done
       - name: Checked-in figures must match tool output
         run: |

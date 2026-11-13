@@ -46,6 +46,12 @@ categories = ["visualization", "science"]
 name = "scienceview"
 path = "src/lib.rs"
 
+# The band example calls the public `to_svg()` serializer, so it needs the
+# backend feature that compiles it.
+[[example]]
+name = "band_plot"
+required-features = ["render-svg"]
+
 # The root package is a facade: it re-exports the core crate and every backend
 # crate whose feature is enabled. Every rendering backend is a Cargo feature and
 # maps 1:1 to a workspace crate under crates/scienceview_* (see PRD §3.1).
