@@ -17,6 +17,6 @@
 
 ## Acceptance
 
-- [ ] Add the example, generated figure and book chapter (book branch).
-- [ ] Run the four gates and open the ADR issue.
+- [x] Add the example, generated figure and book chapter (book branch).
+- [x] Run the four gates and open the ADR issue.
 
