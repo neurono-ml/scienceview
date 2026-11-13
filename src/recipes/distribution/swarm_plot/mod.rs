@@ -60,11 +60,17 @@ pub use render_output::{SVSwarmFrame, SVSwarmRenderOutput};
 pub use scene::SVSwarmScene;
 
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
 #[path = "error_tests.rs"]
 mod error_tests;
 #[cfg(test)]
 #[path = "large_swarm_tests.rs"]
 mod large_swarm_tests;
+#[cfg(test)]
+#[path = "observability_tests.rs"]
+mod observability_tests;
 #[cfg(test)]
 #[path = "option_tests.rs"]
 mod option_tests;
