@@ -2,21 +2,24 @@
 
 ## Document and stylesheet
 
-- [ ] Write the failing test: a saved document renders without external resources.
-- [ ] Implement the document emitter and stylesheet inlining.
+- [x] Write the failing test: a saved document renders without external resources.
+- [x] Implement the document emitter and stylesheet inlining.
+- [x] Update the `Html` capability row in the core matrix (export, streaming, events, in-place update; no scripting, no presentation) and its tests.
 
 ## Runtime and events
 
-- [ ] Write the failing test: a gesture produces an action and a delta is applied.
-- [ ] Implement the embedded runtime and the event bridge.
+- [x] Write the failing test: a gesture produces an action and a delta is applied.
+- [x] Implement the embedded runtime and the event bridge.
 
 ## In-place update
 
-- [ ] Write the failing test: an update preserves the host page's state.
-- [ ] Implement in-place update driven by the model clock.
+- [x] Write the failing test: an update preserves the host page's state.
+- [x] Implement in-place update driven by the model clock.
+- [x] Embed dense, sparse and streaming snapshots without densifying sparse data.
 
 ## Acceptance
 
-- [ ] Add the example, generated figure and book chapter (book branch).
-- [ ] Run the four gates and open the ADR issue.
-
+- [x] Add the page example and the book chapter (book branch). A self-contained
+  page is not a vector figure, so this change generates no SVG under
+  `docs/figures/`.
+- [x] Run the four gates and open the ADR issue.

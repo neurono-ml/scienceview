@@ -27,6 +27,18 @@ released.
   the typed missing-capability error; the frame's `to_text`/`to_ansi` values are
   the caller-side capture path. Golden-frame, colour-mapping, degenerate-size,
   wide-character, 10k-point, concurrency, capability and span tests cover it.
+- The HTML rendering backend `scienceview_html`, selected with
+  `SVBackendKind::Html` and the `render-html` feature: one self-contained
+  document with the compiled theme stylesheet, the SVG figure and a small
+  inline runtime, so the page renders and updates with no network access and
+  no new dependency. `render` and `save` write the page; `update` returns only
+  the payload element, which the runtime applies in place without reloading or
+  losing the host page's view state; `show` reports the missing presentation
+  capability. The `Html` capability row now declares export, streaming, gesture
+  events and in-place update (transition support follows), while scripting and
+  presentation stay unsupported. Dense, sparse and streaming snapshots are
+  embedded in the representation they arrive in. The example
+  `crates/scienceview_html/examples/offline_document.rs` prints an offline page.
 - The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
   two variables shown together with the marginal distribution of each — a
   central bivariate panel (scatter, hexbin, density contour or regression)
