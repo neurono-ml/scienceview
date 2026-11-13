@@ -128,8 +128,9 @@ curve would pass through nonsense for a polynomial.
       `a_polynomial_order_is_fitted_not_interpolated` recovers the quadratic
       coefficients and the 128-sample kernel grid.
 - [x] The confidence band matches the estimator's interval.
-      `the_confidence_band_brackets_the_curve` checks the kernel's lower and
-      upper samples around every prediction.
+      `the_confidence_band_is_the_kernel_interval` asserts that the recipe's
+      grid, predictions, lower and upper samples are the kernel's own values,
+      and that every prediction lies between its two bounds.
 - [x] Dense, sparse and streaming inputs give the same fit for the same data.
       `dense_sparse_and_streaming_agree_within_the_tolerance` and
       `a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows`
