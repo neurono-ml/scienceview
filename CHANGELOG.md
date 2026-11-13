@@ -12,6 +12,26 @@ released.
 
 ### Added
 
+- The distributional recipe `SVHistogramPlot` in
+  `scienceview::sv_recipes::sv_distribution::sv_histogram_plot`: a continuous
+  variable binned and drawn as bars, composed exactly as
+  `data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge] ->
+  [SVScale x, y, colour] -> SVMark::Bar`. The builder requires an explicit
+  backend, defaults `execution_mode` to `Automatic`, and exposes the FDR-111
+  surface: `value`, `series`, `bin_count`, `bin_width`, `bin_edges`,
+  `normalise`, `cumulative`, `common_normalisation`, `common_bins`, `shrink`,
+  `element`, `orientation`, `multiple` and a missing-value policy. Binning is
+  never reimplemented: `SVStat::Bin` supplies the edges and the count,
+  probability or density heights, and `SVMove` supplies stacking and dodging.
+  Dense, sparse and streaming input resolve once per operation; a sparse column
+  keeps its stored support and its implicit zeros, and a streaming window
+  renders without blocking. The composed geometry serializes through `to_svg()`
+  and, with `render-native`, through `to_native_frame()`; any other configured
+  kind fails with a typed error instead of being ignored. Weighted binning is
+  not implemented because the shipped bin kernel does not consume weights, and
+  a configured weight fails with a configuration error naming that gap. The
+  example `examples/histogram_plot.rs` calls the public `to_svg()` and writes
+  `docs/figures/histogram_plot.svg`.
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
