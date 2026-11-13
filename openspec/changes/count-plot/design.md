@@ -18,14 +18,20 @@ capability first (patterns.md P5).
 
 ### D2 — Data contract
 
-The chart consumes `category`, `series`, `weight`. Dense,
-sparse and streaming representations are accepted; the recipe dispatches on the
-representation once per operation and never densifies or blocks (patterns.md
-P6).
+The chart consumes `category` and `series`. Dense,
+sparse and streaming representations are accepted, including mixed
+representations across columns; the recipe dispatches on the representation
+once per operation and never densifies or blocks (patterns.md P6). The FDR also
+records a `weight` column, but the shipped `SVStat::Count` kernel does not
+consume weights: the builder rejects a configured weight with a typed error
+naming the kernel gap rather than reimplementing weighted counting.
 
 ### D3 — Temporal behaviour
 
-bar height: interpolates. category ordering change: the bars slide to their new positions. new category: enters.
+Bar height and colour are transition-ready geometry; the category is the match
+key, so a reordering state change can slide bars that keep their identity. The
+animation driver itself is deferred to the transition integration change, as
+recorded in the FDR; this change claims no animated reordering or entry.
 
 ### D4 — Registration
 
