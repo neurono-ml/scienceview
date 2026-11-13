@@ -64,11 +64,11 @@ mod concurrency_tests;
 #[path = "observability_tests.rs"]
 mod observability_tests;
 #[cfg(test)]
-#[path = "parity_tests.rs"]
-mod parity_tests;
-#[cfg(test)]
 #[path = "parallel_categories_plot_tests.rs"]
 mod parallel_categories_plot_tests;
+#[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
 #[cfg(test)]
 #[path = "render_tests.rs"]
 mod render_tests;
