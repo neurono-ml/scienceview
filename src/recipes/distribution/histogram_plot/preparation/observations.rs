@@ -247,16 +247,22 @@ fn sv_sparse_storage(
     }
     let mut indices = Vec::new();
     let mut values = Vec::new();
+    let mut dropped = 0usize;
     for (index, value) in sparse.stored_entries() {
         if value.is_finite() {
-            indices.push(index);
+            indices.push(index - dropped);
             values.push(value);
+        } else {
+            dropped += 1;
         }
     }
+    // Dropping an observation shortens the logical column by one, so the
+    // removed stored entry never turns into an implicit zero. The implicit
+    // zeros that remain keep their count.
     Ok(SVObservationStorage::Sparse {
         indices,
         values,
-        length: sparse.length(),
+        length: sparse.length().saturating_sub(dropped),
     })
 }
 
@@ -267,6 +273,7 @@ fn sv_group_sparse<'a>(
 ) -> Result<SVObservationStorage<'a>, SVError> {
     let mut stored_indices = Vec::new();
     let mut stored_values = Vec::new();
+    let mut dropped = 0usize;
     for (position, original) in indices.iter().copied().enumerate() {
         let stored = match sparse.indices().binary_search(&original) {
             Ok(stored_position) => sparse.values().get(stored_position).copied(),
@@ -278,15 +285,18 @@ fn sv_group_sparse<'a>(
         if !value.is_finite() {
             policy.report("histogram_values", original)?;
             if policy.omits() {
+                dropped += 1;
                 continue;
             }
         }
-        stored_indices.push(position);
+        stored_indices.push(position - dropped);
         stored_values.push(value);
     }
+    // A dropped observation leaves the logical column one position shorter;
+    // the group's implicit zeros keep their count instead of absorbing it.
     Ok(SVObservationStorage::Sparse {
         indices: stored_indices,
         values: stored_values,
-        length: indices.len(),
+        length: indices.len().saturating_sub(dropped),
     })
 }

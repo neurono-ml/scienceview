@@ -103,6 +103,66 @@ fn a_sparse_input_with_implicit_zeros_matches_its_dense_equivalent() {
 }
 
 #[test]
+fn a_sparse_non_finite_value_is_omitted_like_its_dense_equivalent() {
+    const DENSE: [f64; 4] = [0.0, f64::NAN, 2.0, 0.0];
+    const INDICES: [usize; 2] = [1, 2];
+    const STORED: [f64; 2] = [f64::NAN, 2.0];
+    let sparse = SVSparseView::new(&INDICES, &STORED, 4).expect("the sparse view is valid");
+    let sparse_source = SVTestSource {
+        value: SVColumnView::Sparse(sparse),
+        series: None,
+    };
+    let dense_source = SVTestSource::dense(&DENSE);
+
+    let dense = sv_scene_to_svg(
+        &sv_build_default(&dense_source)
+            .compose()
+            .expect("dense renders"),
+    );
+    let sparse = sv_scene_to_svg(
+        &sv_build_default(&sparse_source)
+            .compose()
+            .expect("sparse renders"),
+    );
+    assert_eq!(
+        dense, sparse,
+        "a dropped sparse observation is not an implicit zero"
+    );
+}
+
+#[test]
+fn a_sparse_series_non_finite_value_is_omitted_like_its_dense_equivalent() {
+    const DENSE: [f64; 4] = [0.0, 0.0, f64::NAN, 4.0];
+    const SERIES: [f64; 4] = [0.0, 1.0, 0.0, 1.0];
+    const INDICES: [usize; 2] = [2, 3];
+    const STORED: [f64; 2] = [f64::NAN, 4.0];
+    let sparse = SVSparseView::new(&INDICES, &STORED, 4).expect("the sparse view is valid");
+    let sparse_source = SVTestSource {
+        value: SVColumnView::Sparse(sparse),
+        series: Some(SVColumnView::Dense(&SERIES)),
+    };
+    let dense_source = SVTestSource {
+        value: SVColumnView::Dense(&DENSE),
+        series: Some(SVColumnView::Dense(&SERIES)),
+    };
+
+    let dense = sv_scene_to_svg(
+        &sv_build_series(&dense_source)
+            .compose()
+            .expect("the dense series renders"),
+    );
+    let sparse = sv_scene_to_svg(
+        &sv_build_series(&sparse_source)
+            .compose()
+            .expect("the sparse series renders"),
+    );
+    assert_eq!(
+        dense, sparse,
+        "a dropped sparse series observation is not an implicit zero"
+    );
+}
+
+#[test]
 fn a_streaming_input_returns_promptly_and_shows_the_window() {
     let source = sv_streaming_source();
     let plot = sv_build_default(&source);
