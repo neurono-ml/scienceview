@@ -30,7 +30,8 @@ None.
 
 ## Impact
 
-- New module `src/recipes/relational/line_plot/`.
+- New module `src/recipes/relational/line_plot/`, exposed as
+  `scienceview::sv_recipes::sv_relational::sv_line_plot`.
 - New example `examples/line_plot.rs` and generated figure
   `docs/figures/line_plot_recipe.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the

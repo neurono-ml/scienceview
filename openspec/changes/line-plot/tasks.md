@@ -55,3 +55,22 @@
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
   `docs/FDRs/recipes/relational-line-plot.md` before opening the code PR.
+
+## 8. Review fixes
+
+- [x] Split the aggregation into one line per `(series, group)` and add the
+  same-`x` and several-`x` regression tests.
+- [x] Bind an `SVDataSource` and named columns, with typed `ColumnNotFound`
+  errors and an in-memory adapter for borrowed views.
+- [x] Render the composed scene on the SVG and native backends and reject an
+  unwired backend explicitly.
+- [x] Record the transition-ready geometry in the spec/design and leave the
+  keyed-transition acceptance criterion unchecked with its deferral note.
+- [x] Expose `SVLegendPlacement` (default `Auto`, `legend(false)` hides it),
+  per-series dash encoding and temporal `x` scale support.
+- [x] Report drawn marks in the operation span, rename the public modules to
+  `sv_recipes::sv_relational::sv_line_plot`, and update the example, README and
+  chapter paths.
+- [x] Compare the SVG test with the checked-in figure through the public render
+  path and cover `group`, `legend(false)`, `execution_mode`, `save`, parity and
+  streaming growth.

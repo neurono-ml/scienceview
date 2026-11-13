@@ -20,15 +20,41 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVLinePlot` SHALL consume `x`, `y`, `series`, `group`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVLinePlot` SHALL read the named columns `x`, `y`, `series` and `group` from
+an `SVDataSource`, with the roles and types recorded in its FDR, and SHALL
+reject a configuration whose source is missing, whose column name is not
+declared, or whose columns do not share one logical length.
 
 #### Scenario: Documented columns
-- **WHEN** the documented columns are supplied
+- **WHEN** the documented columns are supplied through a data source
 - **THEN** the chart builds and renders
 
-#### Scenario: Missing column
-- **WHEN** a required column is missing
-- **THEN** the build fails with an explicit configuration error
+#### Scenario: Missing source
+- **WHEN** no data source is attached
+- **THEN** the build fails with `SVError::MissingDataSource`
+
+#### Scenario: Mistyped column
+- **WHEN** a named column is not declared by the source
+- **THEN** the build fails with the typed `SVError::ColumnNotFound`
+
+#### Scenario: Mismatched lengths
+- **WHEN** the named columns do not share one logical length
+- **THEN** the build fails with `SVError::MismatchedLengths`
+
+### Requirement: Grouping produces independent lines
+
+`SVLinePlot` SHALL draw one line per `(series, group)` pair. Observations that
+share an `x` but belong to different groups SHALL never become two vertices of
+one line, and an aggregated group with a single `x` SHALL collapse to one
+sample.
+
+#### Scenario: Two groups at one x
+- **WHEN** two groups are observed at the same `x`
+- **THEN** two independent lines are drawn, each with its own identity
+
+#### Scenario: Two groups across several x
+- **WHEN** two groups are observed at several `x` values
+- **THEN** each group keeps its own ordered vertices
 
 ### Requirement: Representations are equivalent
 
@@ -46,31 +72,44 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The geometry is transition-ready
 
-`SVLinePlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVLinePlot` SHALL keep a stable `(series, group)` identity and stable
+per-series colour and dash on every drawn segment, so a future transition layer
+can match points by `x` and swap the dash without re-deriving a position. A
+keyed transition surface is explicitly deferred and is not part of this change.
 
-#### Scenario: Transition: point position
-- **WHEN** the state changes and point position is affected
-- **THEN** interpolates
+#### Scenario: Stable identity
+- **WHEN** the chart composes a series
+- **THEN** every drawn line carries a stable `(series, group)` key
 
-#### Scenario: Transition: dash pattern
-- **WHEN** the state changes and dash pattern is affected
-- **THEN** swaps
+#### Scenario: Streaming growth
+- **WHEN** a streaming window grows
+- **THEN** the new observation is appended at its `x` position without moving
+  the existing points
 
-### Requirement: The chart renders on every declared backend
+#### Scenario: Keyed interpolation is deferred
+- **WHEN** the caller expects point-position interpolation or dash swapping
+- **THEN** the recipe reports that no keyed transition surface is wired yet,
+  rather than claiming the behaviour
 
-`SVLinePlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+### Requirement: The chart renders the composed scene
+
+`SVLinePlot` SHALL compose one backend-agnostic scene and SHALL render it on
+the SVG and native backends. Every other backend SHALL be rejected explicitly
+with `SVError::UnsupportedBackendCapability`; the recipe never degrades
+silently.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
-- **THEN** the figure is self-contained and deterministic
+- **THEN** the figure is self-contained and deterministic, and matches the
+  checked-in figure through the public render path
 
 #### Scenario: Native rendering
 - **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+- **THEN** the same composed scene is rasterised into a non-empty RGBA frame
 
-#### Scenario: Unsupported backend
-- **WHEN** a backend cannot express a required mark
-- **THEN** the build fails explicitly
+#### Scenario: Unwired backend
+- **WHEN** a backend other than SVG or native is requested
+- **THEN** the render fails explicitly with `SVError::UnsupportedBackendCapability`
 
