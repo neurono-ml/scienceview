@@ -39,8 +39,11 @@
 - **THEN** the output agrees within the documented tolerance
 
 #### Scenario: Sparse is not densified
-- **WHEN** a sparse input is supplied
-- **THEN** the marks are computed without expanding the data
+- **WHEN** a sparse input is supplied, including a column with a million
+  logical slots and only a few stored values
+- **THEN** the marks are computed from the stored entries and the implicit-zero
+  run boundaries, without expanding the column to a dense buffer or allocating
+  in proportion to its logical length
 
 #### Scenario: Streaming does not block
 - **WHEN** a streaming input is supplied
@@ -60,17 +63,37 @@
 
 ### Requirement: The chart renders on every declared backend
 
-`SVAreaPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVAreaPlot` SHALL render on the SVG and native backends, and on every later
+backend that gains a serializer for the recipe scene.
+
+Every operation SHALL compose one backend-agnostic `SVAreaRendering` carrying
+the viewport, the background, and the decoration and mark primitives in final
+draw order; a serializer SHALL replay those lists without re-deriving a
+position.
 
 #### Scenario: SVG rendering
-- **WHEN** the chart is rendered as SVG
-- **THEN** the figure is self-contained and deterministic
+- **WHEN** the chart is rendered with `SVBackendKind::Svg`
+- **THEN** the scene is replayed into a self-contained, deterministic SVG document
 
 #### Scenario: Native rendering
-- **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+- **WHEN** the chart is rendered with `SVBackendKind::Native`
+- **THEN** the same scene is replayed into an RGBA raster frame
 
-#### Scenario: Unsupported backend
+#### Scenario: Configured kind is never ignored
+- **WHEN** the chart is rendered with a kind the recipe has no serializer for
+- **THEN** the build fails explicitly with a capability error instead of emitting another backend's bytes
+
+#### Scenario: Unsupported mark
 - **WHEN** a backend cannot express a required mark
 - **THEN** the build fails explicitly
+
+### Requirement: In-place update is deferred
+
+`SVAreaPlot` SHALL NOT expose an update operation that ignores its append count.
+Until the streaming/transition change wires in-place updates, a streaming
+source SHALL be re-read through `render()` from its current bounded window.
+
+#### Scenario: Deferred update
+- **WHEN** a caller reads the recipe's public operation surface
+- **THEN** there is no `update(appended_points)` that silently discards the count, and the deferral is recorded in FDR-103
 

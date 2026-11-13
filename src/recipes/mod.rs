@@ -1,14 +1,13 @@
-//! Chart recipes: one module per chart, grouped by the family it belongs to.
+//! Chart recipes: one module per chart family.
 //!
-//! A recipe composes the core kernels — data boundary, stats, moves, scales,
-//! marks and decorations — into the chart a reader names. It never reimplements
-//! a kernel and never adds a variant to a closed enumeration (patterns.md P5).
-//! Registration happens in the family module, never in a central list (P4), so
-//! two recipes of different families never conflict.
+//! A recipe composes the core kernels — data, statistics, scales, marks,
+//! decorations — into one named chart. It adds no kernel variant of its own
+//! (patterns P5), and it is registered in its family module rather than in a
+//! central list (patterns P4), so recipe changes never serialise against each
+//! other.
 //!
-//! The public path is `sv_recipes::sv_relational::sv_regression_plot`; the
-//! directory names stay unprefixed and the module names are bound through
-//! `#[path]`, which keeps the family scope free of duplicate recipe names.
+//! The public name is prefixed like every public module; the folder stays
+//! `recipes/` because the `#[path]` attribute keeps the two apart.
 
 #[path = "relational/mod.rs"]
 pub mod sv_relational;
