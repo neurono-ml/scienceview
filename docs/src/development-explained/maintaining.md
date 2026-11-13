@@ -38,6 +38,7 @@ examples.
 | 19 | `ch19-step-plot.md` | The relational step recipe: `SVStepPosition` pre/post/mid geometry, ordered and deduplicated samples, missing values, aggregation, multi-series colouring, backend-neutral composition and the real SVG document |
 | 20 | `ch20-band-plot.md` | The band plot recipe: the filled region between two boundaries, explicit and derived modes over `SVStat::Aggregate`, series, missing-value policy, dashed borders and the centre line, parity and concurrency |
 | 21 | `ch21-regression-plot.md` | Regression: the multi-mark recipe, the kernel-owned fit and confidence band, pairing across dense, sparse and streaming input, series grouping, extrapolation policy and the acceptance tests |
+| 25 | `ch25-ecdf-plot.md` | The ECDF recipe: the empirical cumulative distribution through `SVStat::EmpiricalCdf`, exact horizontal-then-vertical step geometry, normalisation and the derived survival curve, orientation, series grouping, missing values, non-densifying sparse reads, streaming windows and SVG/native serialization |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
