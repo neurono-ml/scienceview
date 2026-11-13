@@ -70,7 +70,7 @@ impl<'data> SVHistogramPlotBuilder<'data> {
         let mark_kind = match self.element {
             SVBarElement::Bar => SVMarkKind::Bar,
             SVBarElement::Step => SVMarkKind::Line,
-            SVBarElement::Poly => SVMarkKind::Area,
+            SVBarElement::Polygon => SVMarkKind::Area,
         };
         sv_verify_mark_supported(mark_kind, backend_kind)?;
 

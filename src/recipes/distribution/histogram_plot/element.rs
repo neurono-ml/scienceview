@@ -14,7 +14,7 @@ pub enum SVBarElement {
     /// A stepped outline through the bin tops.
     Step,
     /// A filled polygon under the bin tops.
-    Poly,
+    Polygon,
 }
 
 impl SVBarElement {
@@ -23,7 +23,7 @@ impl SVBarElement {
         match self {
             SVBarElement::Bar => "Bar",
             SVBarElement::Step => "Step",
-            SVBarElement::Poly => "Poly",
+            SVBarElement::Polygon => "Polygon",
         }
     }
 }

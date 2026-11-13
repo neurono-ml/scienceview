@@ -103,7 +103,7 @@ pub(super) fn sv_series_primitives(
         SVBarElement::Step => {
             sv_push_step(prepared, plot, horizontal, vertical, theme, &mut primitives)?
         }
-        SVBarElement::Poly => {
+        SVBarElement::Polygon => {
             sv_push_polygon(prepared, plot, horizontal, vertical, &mut primitives)?
         }
     }

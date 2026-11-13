@@ -289,7 +289,7 @@ fn the_step_element_draws_a_path_instead_of_rectangles() {
 fn the_polygon_element_draws_a_filled_area() {
     let source = sv_dense_source();
     let scene = sv_build(&source, |builder| {
-        builder.bin_count(3).element(SVBarElement::Poly)
+        builder.bin_count(3).element(SVBarElement::Polygon)
     })
     .compose()
     .expect("the polygon histogram composes");
