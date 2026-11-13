@@ -11,3 +11,6 @@
 
 #[path = "relational/mod.rs"]
 pub mod sv_relational;
+
+#[path = "distribution/mod.rs"]
+pub mod sv_distribution;
