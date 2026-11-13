@@ -5,7 +5,7 @@ we move along an ordered axis?* The axis is usually time, but it can be any
 continuous measurement. The chart draws one line per series and, when several
 observations share the same position, it can summarise them before drawing.
 
-This chapter follows `SVLinePlot`, the first recipe of the relational family.
+This chapter follows `SVLinePlot`, one of the relational recipes.
 It is a *recipe*: it introduces no new statistical, geometric or rendering
 kernel. It arranges the kernels that already exist into one named chart, the
 same way a kitchen follows a recipe with ingredients it did not invent.
@@ -57,9 +57,11 @@ sine and cosine observations.
 
 ## Same chart on three representations
 
-The recipe reads a column through `SVColumnView`, which is dense, sparse or a
-bounded streaming window. It resolves a sparse column by visiting only its
-stored entries — never by expanding it into a dense buffer — and it reads a
+The recipe reads named columns from any `SVDataSource`. The in-memory
+`SVDataTable` adapter works for borrowed dense slices, and the core's sparse and
+streaming adapters present the same trait, so the recipe itself never knows
+which representation it received. It resolves a sparse column by visiting only
+its stored entries — never by expanding it into a dense buffer — and it reads a
 streaming column from the snapshot the source already published, so the render
 thread never waits for new data.
 
@@ -79,9 +81,11 @@ series by `x` by default, with a *stable* sort: equal `x` values keep their
 arrival order. Setting `sort_by_x(false)` preserves the incoming order for
 callers that already know it.
 
-Ordering is also what makes a live line cheap to grow. The transition kernel
-matches points by their `x` value, so an appended point does not move the
-points already drawn; the segment to it simply interpolates.
+Ordering is also what makes a live line cheap to grow. Each line keeps a stable
+`(series, group)` identity, so an appended observation is placed at its own `x`
+without moving the points already drawn. The geometry is transition-ready, but
+this recipe does not yet wire a keyed transition surface; point-position
+interpolation and dash swapping are deferred to the animation recipe change.
 
 ## Missing values: a gap or a bridge
 
@@ -104,11 +108,19 @@ Seaborn's `lineplot` estimates a value per `x`; plotly and bokeh draw the
 observations as given. Both behaviours are useful, so aggregation is an
 explicit option, not a hidden default.
 
-When `aggregate` is enabled, the recipe groups observations by `(series, x,
-group)` and calls the existing `SVStat::Aggregate`. The estimator (`Mean` by
-default, or median, sum, minimum, maximum, standard deviation, count) decides
-the drawn value. An optional `error` or `ci(probability)` asks for an interval;
-the recipe draws it with `SVMark::Ribbon` underneath the line.
+The recipe first splits the observations into one line per `(series, group)`
+pair, then groups that line's observations by `x` and calls the existing
+`SVStat::Aggregate`. The estimator (`Mean` by default, or median, sum, minimum,
+maximum, standard deviation, count) decides the drawn value. An optional `error`
+or `ci(probability)` asks for an interval; the recipe draws it with
+`SVMark::Ribbon` underneath the line.
+
+Keeping the group in the line identity is essential. If two groups observed at
+the same `x` stayed in one line, the aggregate would emit two vertices at that
+`x` and the polyline would draw a vertical spike. The regression test
+`a_group_splits_into_one_line_per_series_and_group` covers exactly that case,
+and `two_groups_over_several_x_values_keep_independent_lines` proves each group
+keeps its own ordered vertices.
 
 ```mermaid
 flowchart TB
@@ -160,10 +172,19 @@ appearance. The test
 `series_divides_the_lines_and_assigns_a_stable_colour_each` asserts two series,
 two different colours and a non-empty legend.
 
+Without an explicit `dash`, the recipe also cycles the documented dash patterns
+across the series, so two lines remain distinguishable without colour alone.
+`legend` takes an `SVLegendPlacement`: `Auto` is the default, and
+`legend(false)` is shorthand for `SVLegendPlacement::Hidden`. The test
+`legend_false_hides_the_legend` proves the legend contributes no decoration while
+the lines still draw.
+
 `markers(true)` adds `SVMark::Dot` on top of every line, one circle per
-observation. `line_width` and `dash` flow straight into `SVMark::Line`'s paint,
-which `line_width_and_dash_reach_the_stroke_paint` verifies on the produced
-primitives.
+observation. `line_width` and an explicit `dash` flow straight into
+`SVMark::Line`'s paint, which `line_width_and_dash_reach_the_stroke_paint`
+verifies on the produced primitives. Setting `x_scale_kind(Temporal)` (with an
+optional `temporal_unit`) builds a time axis; the test
+`a_temporal_x_scale_is_built_from_the_option` asserts the scale kind and unit.
 
 ## Composition, observability and rendering
 
@@ -171,38 +192,51 @@ primitives.
 returns an `SVLinePlotComposition`. A backend then visits the mark geometries in
 draw order: intervals first, lines next, markers last. This visitor shape keeps
 the recipe independent of any document type while still letting the real SVG
-backend serialize every geometry.
+backend serialize every geometry. The composition is the scene: `to_svg()`
+serializes it and `to_native_frame()` rasterizes the very same decorations and
+marks with the from-scratch CPU renderer, so the two backends cannot drift. A
+backend the recipe does not wire yet is rejected explicitly with
+`UnsupportedBackendCapability`.
 
 Every public operation runs inside the one operation span from the figure
-substrate. `composing_records_the_backend_representation_and_point_count`
+substrate. `composing_records_the_backend_representation_and_drawn_marks`
 captures that span and asserts `backend.kind = svg`, `representation = Dense`
-and `points = 3`. Rendering goes through `scienceview_svg::SVSvgDocument`;
-`concurrent_renders_produce_byte_identical_documents` renders one chart from
-eight threads and compares the bytes.
+and `points = 3`. The `points` field counts the marks actually drawn: with
+aggregation the test
+`aggregation_reports_drawn_marks_not_the_logical_length` shows four input rows
+collapsing to two drawn marks. `concurrent_renders_produce_byte_identical_documents`
+renders one chart from eight threads and compares the bytes, and
+`the_svg_backend_matches_the_checked_in_figure_through_the_public_path` proves
+the checked-in figure is exactly what `render()` produces.
 
 ## The example and its figure
 
 The runnable program is `examples/line_plot.rs`. It builds a damped sine and
-cosine, one series each, enables markers and serializes the composition with
-the real SVG document surface:
+cosine, one series each, through the named in-memory data source and renders
+with the configured backend:
 
 ```rust,ignore
+use scienceview::sv_recipes::sv_relational::sv_line_plot::SVLinePlotBuilder;
+use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
+
+let table = SVDataTable::builder()
+    .with_column("x", SVColumnRole::X, &x)
+    .with_column("y", SVColumnRole::Y, &y)
+    .with_column("series", SVColumnRole::Grouping, &series)
+    .build()?;
+
 let plot = SVLinePlotBuilder::new()
-    .x(SVColumnView::Dense(&x))
-    .y(SVColumnView::Dense(&y))
-    .series(SVColumnView::Dense(&series))
+    .data_source(&table)
+    .x("x")
+    .y("y")
+    .series("series")
     .markers(true)
     .line_width(SVLength::absolute(2.0))
     .title("Damped oscillation by series")
     .backend(SVBackendKind::Svg)
     .build()?;
 
-let composition = plot.compose()?;
-let mut document = SVSvgDocument::new(composition.viewport())
-    .with_title(composition.title().unwrap_or("A line plot"))
-    .with_background(SVDecorationStyle::built_in().background());
-document.push_decoration_primitives(composition.decorations());
-composition.visit_mark_geometries(|geometry| document.push_mark_geometry(geometry))?;
+let bytes = plot.render()?.bytes;
 ```
 
 ![Damped oscillation line plot generated by scienceview](assets/line_plot_recipe.svg)
