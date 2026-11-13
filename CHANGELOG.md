@@ -12,6 +12,29 @@ released.
 
 ### Added
 
+- The WebAssembly canvas backend `scienceview_wasm` (`SVBackendKind::Wasm`):
+  the browser target compiles the from-scratch CPU rasterizer of
+  `scienceview_native` instead of reimplementing rendering in JavaScript, so a
+  canvas frame is the frame the desktop target presents. A `SVCanvasSurface`
+  seam captures frames headlessly on the host and blits them through `web-sys`
+  on `wasm32`; a host presentation without a surface reports a typed
+  `BackendUnavailable`. `requestAnimationFrame` only schedules redraws: its
+  timestamp is handed to the model clock and a paused model performs no
+  animation work. The JavaScript bindings expose construction, update and
+  render only. The `wasm` feature is opt-in and never part of the default
+  build; `examples/wasm_backend.rs` writes `docs/figures/wasm_backend.svg`.
+- The terminal rendering backend `scienceview_tui` (`render-tui` feature): an
+  `SVRenderBackend` for `SVBackendKind::Tui` that rasterizes the
+  backend-agnostic mark and decoration primitives onto a character cell grid.
+  Paths and dots use braille sub-cell dots, filled rectangles use partial block
+  glyphs for fractional heights, text handles East Asian wide characters and
+  clipping, and colour is emitted as ANSI escape sequences at true-colour,
+  256-colour or 16-colour depth. `SVTickClock` advances animation by elapsed
+  time with a bounded tick rate, `SVTuiBackend::render_frame_for_terminal`
+  re-solves the layout on resize, and `SVTerminalSession` presents the frame
+  through ratatui and crossterm behind the optional `terminal` feature. The
+  backend declares events, streaming, in-place update and presentation, and
+  refuses `save`/export with the typed missing-capability error.
 - The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
   two variables shown together with the marginal distribution of each, on the
   top and the right, sharing the central scales. It composes the scatter mark,
