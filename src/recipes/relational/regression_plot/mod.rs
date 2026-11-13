@@ -68,7 +68,7 @@ mod observability_tests;
 #[path = "parity_tests.rs"]
 mod parity_tests;
 #[cfg(test)]
-#[path = "regression_plot_tests.rs"]
+#[path = "regression_plot_tests/mod.rs"]
 mod regression_plot_tests;
 #[cfg(all(test, feature = "render-svg"))]
 #[path = "svg_tests.rs"]
