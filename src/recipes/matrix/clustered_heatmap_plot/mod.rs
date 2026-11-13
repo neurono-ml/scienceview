@@ -18,7 +18,8 @@
 //!
 //! let values = [1.0, 2.0, 3.0, 4.0];
 //! let matrix = SVHeatmapMatrix::new(&values, 2, 2).expect("the shape matches");
-//! let tree = SVClusterTree::new(&[SVClusterMerge::new(0, 1, 1.0, 2)]);
+//! let merges = [SVClusterMerge::new(0, 1, 1.0, 2)];
+//! let tree = SVClusterTree::new(&merges);
 //! let row_order = [1, 0];
 //! let column_order = [0, 1];
 //! let scene = SVClusteredHeatmapPlot::builder()
