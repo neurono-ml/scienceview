@@ -159,3 +159,33 @@ fn the_compose_span_reports_the_dense_representation_and_the_configured_kind() {
     assert_eq!(span["backend.kind"], "svg");
     assert_eq!(span["representation"], SVRepresentation::Dense.to_string());
 }
+
+#[test]
+fn every_public_operation_emits_its_own_span() {
+    let _guard = sv_span_test_guard();
+    let recorder = SVSpanRecorder::default();
+    let subscriber = Registry::default().with(recorder.clone());
+    let source = sv_dense_source();
+    let plot = SVRugPlot::builder()
+        .data_source(&source)
+        .value("value")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    let destination = std::env::temp_dir().join("scienceview-rug-span-test.svg");
+
+    tracing::subscriber::with_default(subscriber, || {
+        let _ = plot.render();
+        let _ = plot.update(1);
+        let _ = plot.save(&destination);
+    });
+
+    let operations: Vec<String> = recorder
+        .captured()
+        .iter()
+        .filter_map(|span| span.get("operation").cloned())
+        .collect();
+    assert!(operations.contains(&"render".to_string()));
+    assert!(operations.contains(&"update".to_string()));
+    assert!(operations.contains(&"save".to_string()));
+}

@@ -69,12 +69,25 @@ impl SVRugPlot<'_> {
     /// Same as [`SVRugPlot::render`], plus [`SVError::BackendFailure`] when the
     /// destination cannot be written.
     pub fn save(&self, destination: &Path) -> Result<(), SVError> {
-        let output = self.render()?;
-        std::fs::write(destination, output.bytes()).map_err(|error| SVError::BackendFailure {
-            backend_kind: self.configuration.backend_kind,
-            operation: "save",
-            message: error.to_string(),
-        })
+        let configuration = &self.configuration;
+        sv_run_operation(
+            "save",
+            configuration.backend_kind,
+            configuration.representation,
+            configuration.number_of_observations,
+            || {
+                let scene = sv_compose_scene(configuration)?;
+                sv_record_resolved_ticks(&scene);
+                let output = sv_dispatch_render(&scene)?;
+                std::fs::write(destination, output.bytes()).map_err(|error| {
+                    SVError::BackendFailure {
+                        backend_kind: configuration.backend_kind,
+                        operation: "save",
+                        message: error.to_string(),
+                    }
+                })
+            },
+        )
     }
 }
 
