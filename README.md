@@ -76,6 +76,7 @@ cargo run --example line_plot
 cargo run --example area_plot
 cargo run --example density_contour_plot
 cargo run --example density_plot --features render-svg
+cargo run --example heatmap_plot --features render-svg
 ```
 
 Line plot (`examples/line_plot_svg.rs`) renders a built figure through the

@@ -79,8 +79,9 @@ the matrix grows.
 | `colour_bar` | `bool` | `true` | seaborn `cbar`, plotly `colorbar` |
 | `missing` | `SVMissingValue` | `Transparent` | — |
 
-`SVMissingValue` decides how a missing cell is drawn: transparent, a fixed
-colour, or the colour of the map's lowest value.
+`SVMissingValue` decides how a missing cell is drawn: `Omit` draws nothing,
+`Transparent` draws the cell fully transparent, and `Neutral` paints it with the
+theme surface colour.
 
 ## Theme
 
