@@ -10,6 +10,13 @@
 - [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVScatterPlot` carrying its configured kind.
 - [x] Wire the composition `data -> [no stat] -> values -> [SVMove::Dodge | Jitter] -> [SVScale x, y, colour] -> SVMark::Dot` through the core kernels.
+- [x] Name the public module tree
+  `sv_recipes -> sv_relational -> sv_scatter_plot` with `#[path]` attributes,
+  keeping the folders and re-exporting only the plot types from the family.
+- [x] Dispatch `render()` through the configured kind: the SVG document for
+  `Svg`, the native frame for `Native`, a typed `BackendUnavailable` when the
+  feature is compiled out and `UnsupportedBackendCapability` for a kind with no
+  recipe serializer; each scene serializer rejects a mismatched kind.
 
 ## 2. Data contract and parity
 
@@ -25,13 +32,19 @@
 - [x] Write the failing concurrency test for rendering the same figure from
   several threads.
 - [x] Assert the operation span carries the backend kind, the representation
-  and the point count.
+  and the point count the current operation resolved from the columns, not the
+  build-time probe.
 
 ## 4. Example and generated figure
 
 - [x] Add `examples/scatter_plot.rs` demonstrating the documented configuration.
-- [x] Generate `docs/figures/scatter_plot.svg` with `cargo run --example scatter_plot` and
-  verify the `figures` gate reports no drift.
+- [x] Generate `docs/figures/scatter_plot.svg` with
+  `cargo run --example scatter_plot --features render-svg` and verify the
+  `figures` gate reports no drift.
+- [x] Make the example call the public `to_svg()` method, declare
+  `required-features = ["render-svg"]` on its target, and add the
+  `the_public_svg_method_matches_the_checked_in_figure` drift test that compares
+  the public method's output with the checked-in figure.
 
 ## 5. Book chapter (book branch)
 
@@ -43,15 +56,21 @@
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/relational-scatter-plot.md` status to `shipped`, linking the
-  example and the chapter.
+- [x] Change `docs/FDRs/recipes/relational-scatter-plot.md` status to `shipped`,
+  linking the example and the chapter, and align its axis-label defaults and
+  `colour` contract with the code.
 - [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
-- [x] Run the four gates locally: `cargo fmt --all --check`,
-  `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
-  figures check.
+- [x] Run the gates locally: `cargo fmt --all --check`,
+  `cargo clippy --workspace --all-targets` (default and `--all-features`),
+  `cargo test --workspace --all-targets` (default and `--all-features`),
+  `cargo test --workspace --doc`, the examples, the figures check,
+  `mdbook build docs` and `openspec validate scatter-plot --strict`.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [x] Trigger the independent acceptance review against
-  `docs/FDRs/relational-scatter-plot.md` before opening the code PR.
+  `docs/FDRs/recipes/relational-scatter-plot.md` before opening the code PR.
+- [x] Address the review blockers: backend dispatch, resolved point count in
+  the span, prefixed public module tree, figure drift test, documentation
+  corrections and this spec/design correction.
