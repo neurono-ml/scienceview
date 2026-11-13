@@ -19,6 +19,13 @@ Python mirrors the Rust rule: no automatic backend.
 
 Dense, sparse and streaming inputs are all exposed.
 
+### D4 — The recipe set is bound one adapter at a time
+
+Each recipe needs an adapter that maps its Python keywords onto its Rust
+builder, so the bound set starts as a subset. `plot_kinds()` reports it, the
+option catalogue is the per-kind parity list, and a kind without an adapter is
+not constructible rather than approximated.
+
 ## Risks / Trade-offs
 
 - Two surfaces can drift; the parity tests run the same scenarios from Python.
