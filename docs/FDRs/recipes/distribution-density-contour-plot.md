@@ -108,16 +108,21 @@ contour plot and its colour bar consistently.
 
 ## Temporal
 
-| Property | Behaviour |
+This change wires no animation. Every temporal row below is a design target, not
+a shipped behaviour; the recipe recomputes the whole level set on each
+`compose`.
+
+| Property | Intended behaviour (not wired) |
 |---|---|
 | contour paths | interpolate as the density field changes; paths whose level set disappears exit |
 | colour | interpolates with the level |
 | bandwidth change | the contours morph into the new level sets |
 
 Interpolating contour *paths* directly is hard when the topology changes (a
-contour can split into two). The honest behaviour is to recompute the level
-sets per frame and morph them by matching their vertices in order, accepting
-that a topology change is a visible cut. This is an open question.
+contour can split into two). The honest target is to recompute the level sets
+per frame and morph them by matching their vertices in order, accepting that a
+topology change is a visible cut. This remains the open question below and is
+explicitly out of scope for this change.
 
 ## Backend notes
 
