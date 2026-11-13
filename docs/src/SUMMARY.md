@@ -43,4 +43,5 @@
 - [Chapter 36 — Contours: drawing a field that was handed to you](development-explained/ch36-contour-plot.md)
 - [Chapter 37 — Density heatmaps: the binned field, cell by cell](development-explained/ch37-density-heatmap-plot.md)
 - [Chapter 38 — Image plots: showing a raster honestly](development-explained/ch38-image-plot.md)
+- [Chapter 39 — Hexbin plots: a million points read as a few thousand hexagons](development-explained/ch39-hexbin-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)

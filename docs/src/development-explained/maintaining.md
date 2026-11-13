@@ -53,6 +53,7 @@ examples.
 | 35 | `ch35-heatmap-plot.md` | Heatmaps: a rectangular matrix drawn as coloured cells through `SVStat::Aggregate` pivot, the continuous colour scale and its `SVColourBar`, annotations, row/column labels, the missing-cell policy, square cells and axis orientation, dense/sparse/streaming parity and the SVG/native dispatch |
 | 36 | `ch36-contour-plot.md` | Contours: a supplied scalar field read from a matrix or interpolated from a point cloud through `SVStat::Bin`, level count/range/size selection, marching squares and stitched closed regions, the `Lines`/`Filled` styles, the missing-value policy, sparse implicit zeros, streaming windows, labels, and the SVG/native dispatch |
 | 38 | `ch38-image-plot.md` | Image plots: a raster on its data extent through `SVMark::Image`, numeric fields mapped by `SVContinuousColourScale` and RGBA pixels drawn as stored, nearest and bilinear sampling, the extent and origin, equal and stretched aspect ratios, transparent and domain-lower missing pixels, dense/sparse/streaming parity, the PNG data URI and the native frame |
+| 39 | `ch39-hexbin-plot.md` | Hexbin plots: the pointy-top hexagonal lattice and its exact axial inverse, count and mean aggregation, grid size and extent, the minimum-count filter, the continuous colour scale and colour bar, the missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
