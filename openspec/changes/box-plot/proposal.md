@@ -12,7 +12,10 @@ implementation exists for `SVBoxPlot`.
 
 - Implement `SVBoxPlot` as a recipe composed of the core kernels, following the
   contract in `docs/FDRs/patterns.md`:
-  `data -> [SVStat::Aggregate (quantiles) + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Box | SVMark::Dot (outliers)`
+  `data -> [SVStat::Percentile + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Ribbon | SVMark::Line | SVMark::Dot`
+  (the FDR's `SVMark::Box` shorthand is realised with the closed mark
+  vocabulary: a filled ribbon body, line segments for the median/whiskers/caps
+  and dots for the outliers and the mean)
 - Expose the configuration surface recorded in the FDR: `value` (—); `category` (—); `series` (None); `quartiles` ([0.25, 0.5, 0.75]); `whisker` (Tukey); `whisker_range` (None); `show_outliers` (true).
 - Ship the eight tasks of P10: module and builder, parity and concurrency
   tests, example program, generated figure, book chapter, FDR status,

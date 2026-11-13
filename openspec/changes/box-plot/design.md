@@ -12,9 +12,8 @@ the core kernels already landed by the earlier waves, and touches nothing else.
 ### D1 — Composition
 
 The chart is exactly the composition
-`data -> [SVStat::Aggregate (quantiles) + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Box | SVMark::Dot (outliers)`. It introduces no new mark, stat, move or scale variant; if
-implementation reveals a missing variant, that is a change to the core
-capability first (patterns.md P5).
+`data -> [SVStat::Percentile + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Ribbon | SVMark::Line | SVMark::Dot`. The mark vocabulary is closed and has no `Box` variant, so the FDR's `SVMark::Box` shorthand is realised with the existing marks: the ribbon draws the filled body,
+lines draw the median, whiskers and caps, and dots draw the outliers and the mean. It introduces no new mark, stat, move or scale variant; if implementation reveals a missing variant, that is a change to the core capability first (patterns.md P5).
 
 ### D2 — Data contract
 

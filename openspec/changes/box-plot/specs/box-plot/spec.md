@@ -8,7 +8,7 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVBoxPlot` SHALL be produced by exactly the composition `data -> [SVStat::Aggregate (quantiles) + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Box | SVMark::Dot (outliers)` and SHALL expose the configuration surface recorded in its FDR.
+`SVBoxPlot` SHALL be produced by exactly the composition `data -> [SVStat::Percentile + outlier extraction] -> [SVMove::Dodge] -> [SVScale] -> SVMark::Ribbon | SVMark::Line | SVMark::Dot` (the FDR's `SVMark::Box` shorthand realised with the closed mark vocabulary) and SHALL expose the configuration surface recorded in its FDR.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
