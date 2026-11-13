@@ -5,11 +5,11 @@
 | Id | FDR-113 |
 | Name | `SVDensityContourPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch24-density-contour-plot.md`](../../src/development-explained/ch24-density-contour-plot.md) |
+| Example program | [`examples/density_contour_plot.rs`](../../../examples/density_contour_plot.rs) |
 
 ## Purpose
 
@@ -106,11 +106,34 @@ that a topology change is a visible cut. This is an open question.
 
 ## Acceptance
 
-- [ ] The contour levels follow the requested count or explicit range.
-- [ ] The density integrates to one over the domain.
-- [ ] Dense, sparse and streaming inputs give the same contours for the same
-      data.
-- [ ] A filled contour renders as nested closed paths without gaps.
+- [x] The contour levels follow the requested count or explicit range.
+      Evidence: `the_level_count_is_the_requested_one` and
+      `an_explicit_level_range_bounds_every_threshold`.
+- [x] The density integrates to one over the domain.
+      Evidence: `the_density_integrates_to_one_over_the_domain` (and the
+      weighted and grouped variants).
+- [x] Dense, sparse and streaming inputs give the same contours for the same
+      data. Evidence: `dense_sparse_and_streaming_agree_within_the_documented_tolerance`
+      and `dense_sparse_and_streaming_produce_the_same_contours`.
+- [x] A filled contour renders as nested closed paths without gaps.
+      Evidence: `filled_contours_are_filled_paths_and_lines_are_stroked_paths`,
+      `the_contour_stitcher_closes_a_ring_of_cell_segments` and the generated
+      figure in `docs/figures/density_contour_plot.svg`.
+
+## Implementation notes
+
+The closed stat vocabulary has no bivariate density variant (patterns P5), so
+the recipe composes the existing `SVStat::Bin` kernel on each axis and folds
+every observation pair into the joint grid. The density is the joint count
+divided by the total observation weight and the cell area, which is why it
+integrates to one. `bandwidth` and `bw_adjust` request a Gaussian smoothing pass
+over the grid; there is no hidden kernel-density implementation.
+
+Contour isolation is a recipe-level marching-squares step: line style emits one
+stroked compound path per level, and filled style emits the threshold region
+`density >= level` as one closed compound path per level, painted from the
+lowest level up so the bands nest without gaps. Transition wiring is deferred:
+the geometry is transition-ready, but no contour morphing is claimed.
 
 ## Open questions
 

@@ -12,6 +12,22 @@ released.
 
 ### Added
 
+- The distributional recipe `SVDensityContourPlot`
+  (`scienceview::sv_recipes::sv_distribution`): the joint distribution of two
+  continuous variables drawn as filled contour bands or contour lines. The
+  configuration surface follows FDR-113 — `x`, `y`, `series`, `weight`,
+  `levels`, `level_range`, `bandwidth`, `bw_adjust`, `grid_count`, `style`,
+  `colour_map` and `colour_scale` — and the builder requires an explicit backend
+  selection. The density is never reimplemented: `SVStat::Bin` derives the two
+  edge vectors and the recipe folds the observation pairs into the joint grid,
+  normalised so it integrates to one; sparse views are walked through their
+  stored entries and streaming views through their current window. A
+  marching-squares step turns the scalar field into backend-agnostic paths, and
+  the filled style paints each threshold region as one closed compound path
+  from the lowest level up, so the bands nest without gaps. SVG and native
+  serialize the same composition; every other kind reports a typed
+  unsupported-capability error. The example is `examples/density_contour_plot.rs`
+  and the generated figure is `docs/figures/density_contour_plot.svg`.
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
