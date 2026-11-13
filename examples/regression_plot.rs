@@ -7,7 +7,7 @@
 //! data source → `SVStat::Fit` → scales → ribbon, line and dot marks →
 //! decorations → SVG serialization.
 
-use scienceview::recipes::relational::SVRegressionPlotBuilder;
+use scienceview::sv_recipes::sv_relational::SVRegressionPlotBuilder;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVColumnView, SVDataTable};
 use scienceview_core::sv_decoration::{

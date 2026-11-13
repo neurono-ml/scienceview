@@ -11,7 +11,7 @@
 //! use scienceview_core::sv_backend::SVBackendKind;
 //! use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 //! use scienceview_core::sv_stat::SVFitModel;
-//! use scienceview::recipes::relational::{SVRegressionPlot, SVRegressionPlotBuilder};
+//! use scienceview::sv_recipes::sv_relational::{SVRegressionPlot, SVRegressionPlotBuilder};
 //!
 //! let x = [0.0, 1.0, 2.0, 3.0, 4.0];
 //! let y = [1.0, 3.0, 5.0, 7.0, 9.0];

@@ -12,7 +12,7 @@ released.
 
 ### Added
 
-- The relational recipe `SVRegressionPlot` (`scienceview::recipes::relational`):
+- The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
   `order`, `confidence`, `show_points`, `show_fit`, `marker`, `line_width` —

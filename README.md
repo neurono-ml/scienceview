@@ -143,7 +143,7 @@ Regression plot (`examples/regression_plot.rs`) composes the real
 and the scatter, line and ribbon marks sharing one axes and one legend.
 
 ```rust
-use scienceview::recipes::relational::SVRegressionPlotBuilder;
+use scienceview::sv_recipes::sv_relational::SVRegressionPlotBuilder;
 
 let plot = SVRegressionPlotBuilder::new()
     .data_source(&table)

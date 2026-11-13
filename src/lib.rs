@@ -42,7 +42,9 @@
 //! - `streaming`: live updates over standard-library channels.
 //! - `streaming-tokio`: live updates over Tokio watch channels.
 
-pub mod recipes;
+// Chart recipes: the public chart surface composed from the closed kernels.
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
 
 pub use scienceview_core;
 pub use scienceview_core::{
