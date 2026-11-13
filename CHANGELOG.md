@@ -12,6 +12,29 @@ released.
 
 ### Added
 
+- The distributional recipe `SVSwarmPlot` (`scienceview::sv_recipes::sv_distribution`):
+  one dot per observation of a continuous variable grouped by category, displaced
+  along the categorical axis so that no two dots of a category overlap; the width
+  of the swarm reads the density of the sample. The configuration surface follows
+  FDR-120 — `value`, `category`, `series`, `marker`, `size`, `orient`,
+  `swarm_width`, `alpha` and `missing_value_policy` — and the builder requires an
+  explicit backend selection. The layout is never reimplemented: the recipe
+  converts the solved marker diameter and the category slot into the data-space
+  `marker_extent` and `width` that `SVMove::Swarm` takes, so the kernel's
+  deterministic, collision-free, width-bounded layout and its typed errors — a
+  width below two marker extents, or a cluster that cannot be placed inside the
+  slot — reach the caller unchanged. Both orientations share one layout pass and
+  only reassign the axes; the series column colours the dots and adds a legend.
+  Dense, sparse and streaming columns resolve once per operation; a sparse input
+  contributes exactly its stored entries (a million-logical column with three
+  entries draws three dots) and a streaming window renders without blocking.
+  Non-finite observations are dropped or rejected by the missing-value policy.
+  The composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred to
+  the transition integration; the geometry is transition-ready. The example
+  `examples/swarm_plot.rs` writes `docs/figures/swarm_plot.svg`.
+
 - The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
   the five-number summary of every category, drawn as a box with whiskers,
   median line and — optionally — the observations outside the whiskers. The
