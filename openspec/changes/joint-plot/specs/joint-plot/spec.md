@@ -2,13 +2,13 @@
 
 ## Purpose
 
-`SVJointPlot` — Shows the relationship between two variables together with the marginal distribution of each: a central bivariate plot, with a univariate distribution along the bottom and along the left. It is the composition that answers "what does the relationship look like, and what do the two marginals look like" in a single figure.
+`SVJointPlot` — Shows the relationship between two variables together with the marginal distribution of each: a central bivariate plot, with the distribution of `x` along the top and the distribution of `y` along the right. It is the composition that answers "what does the relationship look like, and what do the two marginals look like" in a single figure.
 
 ## ADDED Requirements
 
 ### Requirement: The chart is the specified composition
 
-`SVJointPlot` SHALL be produced by exactly the composition `data -> [no stat] -> values -> central cell: SVMark::Dot (or a density contour) -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout` and SHALL expose the configuration surface recorded in its FDR.
+`SVJointPlot` SHALL be produced by exactly the composition `data -> [no stat] -> values -> central cell: SVMark::Dot, SVHexbinPlot, SVDensityContourPlot or SVStat::Fit -> marginal cells: the distribution recipe for the variable type -> [SVScale per axis] -> three panels sharing a layout` and SHALL expose the configuration surface recorded in its FDR.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
@@ -56,7 +56,7 @@
 
 #### Scenario: Transition: kind change
 - **WHEN** the state changes and kind change is affected
-- **THEN** the central panel swaps between the scatter, the contour and the fit
+- **THEN** the central panel swaps between the scatter, the hexbin, the contour and the fit
 
 ### Requirement: The chart renders on every declared backend
 
