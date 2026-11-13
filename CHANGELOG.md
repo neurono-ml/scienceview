@@ -468,6 +468,29 @@ released.
   densified and a live window never blocks the render thread — and the
   interpolable-property table is exported for the transition kernel.
 
+- The distributional recipe `SVViolinPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the symmetric density silhouette of every category, revealing multimodality,
+  skew and bimodality that a box plot hides. The configuration surface follows
+  FDR-117 — `value`, `category`, `series`, `bandwidth`, `bandwidth_adjustment`,
+  `width`, `scale` (`Area`, `Count`, `Width`), `show_box`, `show_points`,
+  `split` and `orient` — and the builder requires an explicit backend
+  selection. The estimate comes from `SVStat::KernelDensity` with the derived
+  bandwidth and its adjustment; `SVStat::Percentile` supplies the optional
+  inner box. `SVMove::Dodge` lays one violin per series inside a category, or
+  `split(true)` gives two series the two halves of one slot; `SVMove::Jitter`
+  places the optional sample points deterministically. The silhouette is
+  composed from `SVMark::Area` (one closed path per mirrored half), the inner
+  box and median from `SVMark::Line`, and the sample points from `SVMark::Dot`;
+  no mark, stat, move or scale variant is added by the recipe. Both
+  orientations are supported. Dense, sparse and streaming columns resolve once
+  per operation; a sparse input contributes only its stored entries and a
+  streaming window renders without blocking and reports `is_approximate`. The
+  composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred
+  to the transition integration; the geometry is transition-ready. The example
+  `examples/violin_plot.rs` writes `docs/figures/violin_plot.svg`.
+
 ### Changed
 
 - The data boundary is exposed through the public modules `sv_data` and

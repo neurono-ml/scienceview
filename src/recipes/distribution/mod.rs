@@ -44,3 +44,10 @@ pub use sv_histogram_plot::{SVBarElement, SVHistogramPlot, SVHistogramPlotBuilde
 #[path = "rug_plot/mod.rs"]
 pub mod sv_rug_plot;
 pub use sv_rug_plot::{SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene};
+
+#[path = "violin_plot/mod.rs"]
+pub mod sv_violin_plot;
+pub use sv_violin_plot::{
+    SVViolinMissingValuePolicy, SVViolinPlot, SVViolinPlotBuilder, SVViolinRenderOutput,
+    SVViolinScale, SVViolinSummary,
+};
