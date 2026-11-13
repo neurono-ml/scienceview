@@ -12,5 +12,23 @@
 //! `pub use` would make them collide. Callers name the recipe module.
 
 // ## Relational recipe registrations (append one pair of lines per chart)
+
+#[path = "area_plot/mod.rs"]
+pub mod sv_area_plot;
+pub use sv_area_plot::{SVAreaPlot, SVAreaPlotBuilder, SVAreaRendering};
+
+#[path = "line_plot/mod.rs"]
+pub mod sv_line_plot;
+pub use sv_line_plot::{SVLinePlot, SVLinePlotBuilder};
+
+#[path = "scatter_plot/mod.rs"]
+pub mod sv_scatter_plot;
+pub use sv_scatter_plot::{SVScatterPlot, SVScatterPlotBuilder, SVScatterScene};
+
+#[path = "step_plot/mod.rs"]
+pub mod sv_step_plot;
+pub use sv_step_plot::{SVStepDuplicatePolicy, SVStepPlot, SVStepPlotBuilder, SVStepPosition};
+
 #[path = "band_plot/mod.rs"]
 pub mod sv_band_plot;
+pub use sv_band_plot::{SVBandPlot, SVBandPlotBuilder, SVBandRenderOutput};
