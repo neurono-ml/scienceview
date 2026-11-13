@@ -494,6 +494,25 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](assets/hexbin_plot.svg)
+## Parallel categories plot
+
+`examples/parallel_categories_plot.rs` builds an `SVParallelCategoriesPlot`.
+Every axis is counted through `SVStat::Count`, observations are aggregated into
+ribbons between adjacent axes, and the ribbon slices encode the count:
+
+```rust,ignore
+let scene = SVParallelCategoriesPlot::builder()
+    .data_source(&table)
+    .variables(&["delivery", "region", "outcome"])
+    .category_labels("delivery", &["online", "campus", "hybrid"])
+    .band_gap(0.24)
+    .backend(SVBackendKind::Svg)
+    .build()?
+    .compose()?;
+```
+
+![Course outcomes across delivery, region and result](assets/parallel_categories_plot.svg)
+
 ## Contour plot
 
 `examples/contour_plot.rs` builds an `SVContourPlot`. The recipe reads a
