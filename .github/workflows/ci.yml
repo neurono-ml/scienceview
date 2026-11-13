@@ -59,7 +59,7 @@ jobs:
           fi
           for example in "${examples[@]}"; do
             # An example whose target declares `required-features` (the charts
-            # that call the public `to_svg`) needs the SVG backend feature.
+            # that call the public serializers) needs the SVG backend feature.
             cargo run --example "$(basename "${example}" .rs)" --features render-svg
           done
       - name: The mirrored figures must match the code branch

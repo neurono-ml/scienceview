@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="The regression plot composition: data source, pairing, fit, scale, ribbon, line, dot and one SVG document">
+  <title>The regression plot composition</title>
+  <desc>Data is paired and cleaned, fitted once per series by SVStat::Fit, mapped by a continuous scale, and drawn as a ribbon, a line and dots into one SVG document.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" text-anchor="middle">
+    <g>
+      <rect x="12" y="108" width="132" height="76" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+      <text x="78" y="137" fill="#0f172a" font-weight="700">data source</text>
+      <text x="78" y="157" fill="#0f172a">x, y, series</text>
+    </g>
+    <g>
+      <rect x="178" y="108" width="138" height="76" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+      <text x="247" y="137" fill="#0f172a" font-weight="700">pair + drop</text>
+      <text x="247" y="157" fill="#0f172a">non-finite</text>
+    </g>
+    <g>
+      <rect x="350" y="100" width="152" height="92" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+      <text x="426" y="131" fill="#0f172a" font-weight="700">SVStat::Fit</text>
+      <text x="426" y="151" fill="#0f172a">one per series</text>
+      <text x="426" y="171" fill="#0f172a">coefficients + band</text>
+    </g>
+    <g>
+      <rect x="536" y="100" width="148" height="92" rx="10" fill="#e0e7ff" stroke="#4338ca" stroke-width="1.5"/>
+      <text x="610" y="131" fill="#0f172a" font-weight="700">SVScale</text>
+      <text x="610" y="151" fill="#0f172a">continuous</text>
+      <text x="610" y="171" fill="#0f172a">x / y</text>
+    </g>
+    <g>
+      <rect x="742" y="16" width="126" height="60" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+      <text x="805" y="42" fill="#0f172a" font-weight="700">SVMark::Ribbon</text>
+      <text x="805" y="60" fill="#0f172a">confidence band</text>
+    </g>
+    <g>
+      <rect x="742" y="120" width="126" height="60" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.5"/>
+      <text x="805" y="146" fill="#0f172a" font-weight="700">SVMark::Line</text>
+      <text x="805" y="164" fill="#0f172a">fitted curve</text>
+    </g>
+    <g>
+      <rect x="742" y="224" width="126" height="60" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.5"/>
+      <text x="805" y="250" fill="#0f172a" font-weight="700">SVMark::Dot</text>
+      <text x="805" y="268" fill="#0f172a">observations</text>
+    </g>
+    <g>
+      <rect x="894" y="120" width="96" height="60" rx="10" fill="#f3f4f6" stroke="#374151" stroke-width="1.5"/>
+      <text x="942" y="146" fill="#0f172a" font-weight="700">one SVG</text>
+      <text x="942" y="164" fill="#0f172a">document</text>
+    </g>
+
+    <g stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#arrow)">
+      <path d="M 144 146 L 172 146"/>
+      <path d="M 316 146 L 344 146"/>
+      <path d="M 502 146 L 530 146"/>
+      <path d="M 684 132 C 710 132 714 54 736 48"/>
+      <path d="M 684 146 L 736 150"/>
+      <path d="M 684 160 C 710 160 714 246 736 252"/>
+      <path d="M 868 46 C 884 46 884 142 888 146"/>
+      <path d="M 868 150 L 888 150"/>
+      <path d="M 868 254 C 884 254 884 158 888 154"/>
+    </g>
+  </g>
+</svg>
