@@ -22,11 +22,16 @@ use super::configuration::{SVAreaInterpolation, SVAreaPlotConfiguration};
 use super::missing_value_policy::SVAreaMissingValuePolicy;
 use super::preparation::{SVPreparedArea, SVPreparedSegment};
 
-/// The backend-agnostic composition of one area figure.
+/// The backend-agnostic scene of one area figure.
 ///
-/// It owns the primitives in their final draw order, so a backend only
-/// serializes them: `grid_and_frame` first, the mark `primitives` next and
-/// `axes_and_title` last.
+/// This is the recipe-level scene contract: the value carries the viewport, the
+/// background, and every primitive in final draw order — `grid_and_frame`
+/// first, the mark `primitives` next and `axes_and_title` last. A backend
+/// serializer replays exactly those lists; it never re-derives a position, and
+/// it can never substitute the output of another backend. `SVAreaPlot::render`
+/// selects the serializer from the configured kind: the SVG document for
+/// `Svg`, the raster frame for `Native`, and an explicit missing-capability
+/// error for every other kind.
 #[derive(Clone, Debug)]
 pub struct SVAreaRendering {
     viewport: SVViewport,

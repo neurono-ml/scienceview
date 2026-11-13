@@ -135,42 +135,28 @@ impl<'values> SVAreaPlot<'values> {
 
     /// Renders the figure with the configured backend.
     ///
+    /// The operation composes the scene once and hands it to the serializer
+    /// selected by the configured kind: the SVG document or the native raster
+    /// frame. The kind is never ignored, and a kind the recipe has no
+    /// serializer for reports the missing capability instead of receiving
+    /// bytes another backend produced.
+    ///
     /// # Errors
     ///
-    /// Returns [`SVError::InvalidConfiguration`] when the crate was built
-    /// without the `render-svg` feature, and the composition error otherwise.
-    #[cfg(feature = "render-svg")]
+    /// Returns the composition error, [`SVError::UnsupportedBackendCapability`]
+    /// for a kind without a recipe serializer, and
+    /// [`SVError::BackendUnavailable`] when the selected serializer's feature
+    /// is not compiled.
     pub fn render(&self) -> Result<SVRenderOutput, SVError> {
         let rendering = self.rendering()?;
-
-        Ok(SVRenderOutput {
-            backend_kind: self.backend_kind,
-            bytes: sv_svg_document(&rendering),
-        })
-    }
-
-    /// Renders the figure with the configured backend.
-    ///
-    /// # Errors
-    ///
-    /// Always returns [`SVError::InvalidConfiguration`] when the crate is built
-    /// without the `render-svg` feature: the recipe composes primitives, and a
-    /// serializer must be enabled to turn them into bytes.
-    #[cfg(not(feature = "render-svg"))]
-    pub fn render(&self) -> Result<SVRenderOutput, SVError> {
-        Err(sv_missing_serializer())
+        sv_serialize(self.backend_kind, &rendering)
     }
 
     /// Re-renders the current window after `appended_points` new samples.
     ///
-    /// An area over a live source is drawn from the bounded window the source
-    /// already carries, so the stack baseline is recomputed for that window and
-    /// the areas take their new stacked positions.
-    ///
     /// # Errors
     ///
-    /// Returns the composition error, or the missing-serializer error when the
-    /// `render-svg` feature is absent.
+    /// Returns the composition and serializer errors.
     pub fn update(&self, appended_points: usize) -> Result<SVRenderOutput, SVError> {
         let prepared = sv_prepare_area(&self.configuration)?;
         sv_run_operation(
@@ -181,18 +167,22 @@ impl<'values> SVAreaPlot<'values> {
             || {
                 let _ = appended_points;
                 let rendering = sv_compose_area(&self.configuration, prepared)?;
-                sv_output(self.backend_kind, &rendering)
+                sv_serialize(self.backend_kind, &rendering)
             },
         )
     }
 
     /// Writes the figure to `destination`.
     ///
+    /// Only the SVG backend exports a document. The native backend presents a
+    /// frame instead, so it reports the missing export capability rather than
+    /// writing raw pixels under a document extension.
+    ///
     /// # Errors
     ///
-    /// Returns the composition error and [`SVError::BackendFailure`] when the
-    /// file cannot be written.
-    #[cfg(feature = "render-svg")]
+    /// Returns the composition error, [`SVError::UnsupportedBackendCapability`]
+    /// for a backend without an export format, and [`SVError::BackendFailure`]
+    /// when the file cannot be written.
     pub fn save(&self, destination: &Path) -> Result<(), SVError> {
         let prepared = sv_prepare_area(&self.configuration)?;
         sv_run_operation(
@@ -202,29 +192,20 @@ impl<'values> SVAreaPlot<'values> {
             prepared.point_count,
             || {
                 let rendering = sv_compose_area(&self.configuration, prepared)?;
-                std::fs::write(destination, sv_svg_document(&rendering)).map_err(|error| {
-                    SVError::BackendFailure {
-                        backend_kind: self.backend_kind,
-                        operation: "save",
-                        message: format!("cannot write {}: {error}", destination.display()),
-                    }
+                let bytes = sv_export(self.backend_kind, &rendering)?;
+                std::fs::write(destination, bytes).map_err(|error| SVError::BackendFailure {
+                    backend_kind: self.backend_kind,
+                    operation: "save",
+                    message: format!("cannot write {}: {error}", destination.display()),
                 })
             },
         )
     }
 
-    /// Writes the figure to `destination`.
+    /// Reports that the recipe has no presentation surface.
     ///
-    /// # Errors
-    ///
-    /// Always returns [`SVError::InvalidConfiguration`] when the crate is built
-    /// without the `render-svg` feature.
-    #[cfg(not(feature = "render-svg"))]
-    pub fn save(&self, _destination: &Path) -> Result<(), SVError> {
-        Err(sv_missing_serializer())
-    }
-
-    /// Reports that an SVG document has no presentation surface.
+    /// A native window is opened by the native backend's own present loop; the
+    /// recipe exports documents and frames, it never owns a window.
     ///
     /// # Errors
     ///
@@ -237,23 +218,71 @@ impl<'values> SVAreaPlot<'values> {
     }
 }
 
-#[cfg(feature = "render-svg")]
-fn sv_output(
+/// Dispatches the composed scene to the serializer of the configured kind.
+///
+/// The scene contract is backend-agnostic on purpose: [`SVAreaRendering`]
+/// carries the viewport, the background, and the decoration and mark
+/// primitives in draw order. A serializer only replays those lists.
+fn sv_serialize(
     backend_kind: SVBackendKind,
     rendering: &SVAreaRendering,
 ) -> Result<SVRenderOutput, SVError> {
+    let bytes = match backend_kind {
+        SVBackendKind::Svg => sv_svg_bytes(rendering)?,
+        SVBackendKind::Native => sv_native_bytes(rendering)?,
+        other => {
+            return Err(SVError::UnsupportedBackendCapability {
+                backend_kind: other,
+                capability: SVBackendCapability::Export,
+            });
+        }
+    };
     Ok(SVRenderOutput {
         backend_kind,
-        bytes: sv_svg_document(rendering),
+        bytes,
     })
 }
 
+/// Returns the bytes an export writes for the configured kind.
+fn sv_export(backend_kind: SVBackendKind, rendering: &SVAreaRendering) -> Result<Vec<u8>, SVError> {
+    match backend_kind {
+        SVBackendKind::Svg => sv_svg_bytes(rendering),
+        other => Err(SVError::UnsupportedBackendCapability {
+            backend_kind: other,
+            capability: SVBackendCapability::Export,
+        }),
+    }
+}
+
+#[cfg(feature = "render-svg")]
+fn sv_svg_bytes(rendering: &SVAreaRendering) -> Result<Vec<u8>, SVError> {
+    Ok(sv_svg_document(rendering))
+}
+
 #[cfg(not(feature = "render-svg"))]
-fn sv_output(
-    _backend_kind: SVBackendKind,
-    _rendering: &SVAreaRendering,
-) -> Result<SVRenderOutput, SVError> {
-    Err(sv_missing_serializer())
+fn sv_svg_bytes(_rendering: &SVAreaRendering) -> Result<Vec<u8>, SVError> {
+    Err(SVError::BackendUnavailable {
+        backend_kind: SVBackendKind::Svg,
+    })
+}
+
+#[cfg(feature = "render-native")]
+fn sv_native_bytes(rendering: &SVAreaRendering) -> Result<Vec<u8>, SVError> {
+    let mut canvas = scienceview_native::SVRasterCanvas::new(&rendering.viewport());
+    canvas.fill(rendering.background());
+    canvas.draw_decoration_primitives(rendering.grid_and_frame());
+    for primitive in rendering.primitives() {
+        canvas.draw_mark_primitive(primitive);
+    }
+    canvas.draw_decoration_primitives(rendering.axes_and_title());
+    Ok(canvas.to_frame().into_pixels())
+}
+
+#[cfg(not(feature = "render-native"))]
+fn sv_native_bytes(_rendering: &SVAreaRendering) -> Result<Vec<u8>, SVError> {
+    Err(SVError::BackendUnavailable {
+        backend_kind: SVBackendKind::Native,
+    })
 }
 
 #[cfg(feature = "render-svg")]
@@ -269,13 +298,4 @@ fn sv_svg_document(rendering: &SVAreaRendering) -> Vec<u8> {
     }
     document.push_decoration_primitives(rendering.axes_and_title());
     document.to_bytes()
-}
-
-#[cfg(not(feature = "render-svg"))]
-fn sv_missing_serializer() -> SVError {
-    SVError::InvalidConfiguration {
-        message:
-            "the area recipe composes primitives; enable the `render-svg` feature to serialize them"
-                .to_string(),
-    }
 }

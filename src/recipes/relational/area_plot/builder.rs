@@ -2,7 +2,7 @@
 
 use std::marker::PhantomData;
 
-use scienceview_core::sv_backend::{SVBackendKind, sv_verify_mark_supported};
+use scienceview_core::sv_backend::{SVBackendCapability, SVBackendKind, sv_verify_mark_supported};
 use scienceview_core::sv_data::SVDataSource;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_figure::{SVExecutionMode, SVWithBackend, SVWithoutBackend};
@@ -273,8 +273,9 @@ impl<'values> SVAreaPlotBuilder<'values, SVWithBackend> {
     /// Returns [`SVError::MissingDataSource`] when no source was attached,
     /// [`SVError::ColumnNotFound`] for a column the source does not declare,
     /// [`SVError::InvalidConfiguration`] for an incomplete or out-of-range
-    /// option, and [`SVError::UnsupportedMark`] when the selected backend
-    /// cannot draw the composed area.
+    /// option, [`SVError::UnsupportedMark`] when the selected backend cannot
+    /// draw the composed area, and [`SVError::UnsupportedBackendCapability`]
+    /// when the recipe has no serializer for the selected kind.
     pub fn build(self) -> Result<SVAreaPlot<'values>, SVError> {
         let data_source = self.data_source.ok_or(SVError::MissingDataSource)?;
         let backend_kind = self.backend_kind.ok_or(SVError::MissingBackendSelection)?;
@@ -315,11 +316,7 @@ impl<'values> SVAreaPlotBuilder<'values, SVWithBackend> {
         if self.line {
             sv_verify_mark_supported(SVMarkKind::Line, backend_kind)?;
         }
-        if backend_kind != SVBackendKind::Svg {
-            return Err(sv_invalid(&format!(
-                "the area recipe serializes only the `svg` backend today; the selected backend is `{backend_kind}`"
-            )));
-        }
+        sv_validate_recipe_backend(backend_kind)?;
 
         let configuration = SVAreaPlotConfiguration {
             data_source,
@@ -346,6 +343,23 @@ impl<'values> SVAreaPlotBuilder<'values, SVWithBackend> {
             backend_kind,
             self.execution_mode,
         ))
+    }
+}
+
+/// Rejects a backend the recipe has no scene serializer for.
+///
+/// The recipe composes one backend-agnostic scene and hands it to a concrete
+/// serializer: the SVG document and the native raster frame exist today; every
+/// other kind reports the missing export capability instead of receiving bytes
+/// it did not produce.
+fn sv_validate_recipe_backend(backend_kind: SVBackendKind) -> Result<(), SVError> {
+    if matches!(backend_kind, SVBackendKind::Svg | SVBackendKind::Native) {
+        Ok(())
+    } else {
+        Err(SVError::UnsupportedBackendCapability {
+            backend_kind,
+            capability: SVBackendCapability::Export,
+        })
     }
 }
 

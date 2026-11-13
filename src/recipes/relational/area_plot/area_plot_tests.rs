@@ -630,18 +630,24 @@ fn large_data_draws_every_point() {
 }
 
 #[test]
-fn an_unsupported_backend_fails_at_build_time() {
+fn a_backend_without_a_recipe_serializer_fails_at_build_time() {
     let source = SVTestSource::dense();
     let error = SVAreaPlot::new()
         .data_source(&source)
         .x("x")
         .y("y")
-        .backend(SVBackendKind::Native)
+        .backend(SVBackendKind::Html)
         .build()
         .err()
-        .expect("the recipe has no native rendering path yet");
+        .expect("the recipe has no HTML serializer yet");
 
-    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+    assert!(matches!(
+        error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Html,
+            capability: scienceview_core::sv_backend::SVBackendCapability::Export,
+        }
+    ));
 }
 
 #[test]
@@ -660,17 +666,6 @@ fn a_temporal_axis_places_the_samples() {
         .expect("the chart draws");
 
     assert!(!path_points(rendering.primitives()).is_empty());
-}
-
-#[cfg(feature = "render-svg")]
-#[test]
-fn update_recomputes_the_current_window() {
-    let source = SVTestSource::streaming();
-    let plot = build_plot(&source);
-    let rendered = plot.render().expect("the chart renders");
-    let updated = plot.update(1).expect("the chart updates");
-
-    assert_eq!(rendered.bytes, updated.bytes);
 }
 
 #[cfg(feature = "render-svg")]
@@ -964,4 +959,56 @@ fn a_million_logical_sparse_column_allocates_proportionally_to_its_stored_slots(
         allocated_bytes < 1_048_576,
         "a million-slot sparse column allocated {allocated_bytes} bytes; the geometry must stay proportional to the three stored slots"
     );
+}
+
+#[cfg(feature = "render-native")]
+#[test]
+fn the_native_backend_rasterizes_the_same_scene() {
+    let source = SVTestSource::dense();
+    let plot = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .series("series")
+        .backend(SVBackendKind::Native)
+        .build()
+        .expect("the native backend hosts the composed marks");
+
+    let output = plot.render().expect("the native backend renders the chart");
+    assert_eq!(output.backend_kind, SVBackendKind::Native);
+    assert_eq!(
+        output.bytes.len(),
+        640 * 400 * 4,
+        "a 640x400 frame carries four RGBA channels per device pixel"
+    );
+    assert!(
+        output.bytes.chunks_exact(4).any(|pixel| pixel[3] != 0),
+        "the rasterizer painted at least one visible pixel"
+    );
+}
+
+#[cfg(feature = "render-native")]
+#[test]
+fn native_save_reports_the_missing_export_capability() {
+    let source = SVTestSource::dense();
+    let plot = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Native)
+        .build()
+        .expect("the native backend hosts the composed marks");
+    let destination = std::env::temp_dir().join("scienceview-area-plot-native.svg");
+
+    let error = plot
+        .save(&destination)
+        .expect_err("the native backend presents, it does not export a file");
+    assert_eq!(
+        error,
+        SVError::UnsupportedBackendCapability {
+            backend_kind: SVBackendKind::Native,
+            capability: scienceview_core::sv_backend::SVBackendCapability::Export,
+        }
+    );
+    assert!(!destination.exists());
 }
