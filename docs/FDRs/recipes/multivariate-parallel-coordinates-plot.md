@@ -5,11 +5,11 @@
 | Id | FDR-141 |
 | Name | `SVParallelCoordinatesPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 40 — Parallel coordinates](../../src/development-explained/ch40-parallel-coordinates-plot.md) |
+| Example program | [`examples/parallel_coordinates_plot.rs`](../../../examples/parallel_coordinates_plot.rs) |
 
 ## Purpose
 
@@ -100,10 +100,19 @@ plot one of the easiest to animate well.
 
 ## Acceptance
 
-- [ ] One axis is drawn per variable, in the requested order.
-- [ ] Each observation is drawn as a polyline through the axes.
-- [ ] A variable's range may be overridden independently.
-- [ ] Dense, sparse and streaming inputs give the same polylines.
+- [x] One axis is drawn per variable, in the requested order
+      (`the_default_configuration_draws_one_axis_per_variable_and_one_line_per_observation`,
+      `the_variable_order_sets_the_axis_order`,
+      `dimensions_reorder_hide_and_override_an_axis`).
+- [x] Each observation is drawn as a polyline through the axes
+      (`the_default_configuration_draws_one_axis_per_variable_and_one_line_per_observation`,
+      `a_polyline_is_a_line_mark_path`).
+- [x] A variable's range may be overridden independently
+      (`a_positional_range_override_replaces_the_derived_domain`,
+      `dimensions_reorder_hide_and_override_an_axis`).
+- [x] Dense, sparse and streaming inputs give the same polylines
+      (`dense_sparse_and_streaming_inputs_draw_the_same_polylines`,
+      `a_partially_sparse_column_is_read_through_its_stored_entries`).
 
 ## Open questions
 
