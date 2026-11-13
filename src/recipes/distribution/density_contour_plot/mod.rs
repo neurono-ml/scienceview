@@ -61,11 +61,11 @@ pub use builder::SVDensityContourPlotBuilder;
 pub use core_implementation::SVDensityContourPlot;
 
 #[cfg(test)]
-#[path = "density_contour_plot_tests.rs"]
-mod density_contour_plot_tests;
-#[cfg(test)]
 #[path = "concurrency_tests.rs"]
 mod concurrency_tests;
+#[cfg(test)]
+#[path = "density_contour_plot_tests.rs"]
+mod density_contour_plot_tests;
 #[cfg(test)]
 #[path = "observability_tests.rs"]
 mod observability_tests;
