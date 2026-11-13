@@ -14,8 +14,9 @@
 ## Purpose
 
 `SVJointPlot` shows the relationship between two variables together with the
-marginal distribution of each: a central bivariate plot, with a univariate
-distribution along the bottom and along the left.
+marginal distribution of each: a central bivariate plot, with the univariate
+distribution of `x` along the top and the univariate distribution of `y` along
+the right, matching seaborn's `jointplot` layout.
 
 It is the composition that answers "what does the relationship look like, and
 what do the two marginals look like" in a single figure.
@@ -33,7 +34,7 @@ what do the two marginals look like" in a single figure.
 
 ```
 data -> [no stat] -> values
-     -> central cell:  SVMark::Dot (or a density contour)
+     -> central cell:  SVMark::Dot, SVHexbinPlot, SVDensityContourPlot or SVStat::Fit
      -> marginal cells: the distribution recipe for the variable type
      -> [SVScale per axis] -> three panels sharing a layout
 ```
@@ -42,9 +43,9 @@ data -> [no stat] -> values
 
 | Column | Role | Type | Required |
 |---|---|---|---|
-| `x` | the horizontal variable | continuous or nominal | yes |
-| `y` | the vertical variable | continuous or nominal | yes |
-| `series` | grouping | nominal | no |
+| `x` | the horizontal variable | continuous | yes |
+| `y` | the vertical variable | continuous | yes |
+| `series` | grouping | nominal, encoded numerically | no |
 
 Accepted representations: dense, sparse, streaming.
 
@@ -58,9 +59,9 @@ marginals.
 | Channel | Encodes | Scale |
 |---|---|---|
 | x, y in the central panel | the two variables | `Continuous` |
-| x in the bottom margin | the distribution of `x` | `Continuous` |
-| y in the left margin | the distribution of `y` | `Continuous` |
-| colour | `series` | `Nominal` |
+| x in the top margin | the distribution of `x` | `Continuous` |
+| y in the right margin | the distribution of `y` | `Continuous` |
+| colour | `series` | group palette |
 
 ## Configuration
 
@@ -72,12 +73,24 @@ marginals.
 | `marginal_kind` | `SVJointMarginal` | `Auto` | seaborn (`hist`, `kde`, `box`) |
 | `marker` | `SVDotShape` | `Circle` | seaborn |
 | `alpha` | `f32` | `1.0` | seaborn |
-| `reg_model` | `SVFitModel` | `Linear` | seaborn `kind='reg'` |
+| `regression_model` | `SVJointRegressionModel` | `Linear` | seaborn `kind='reg'` |
+| `missing_value_policy` | `SVJointMissingValuePolicy` | `Omit` | seaborn `dropna` |
+| `title`, `x_label`, `y_label` | `Option<String>` | column names | — |
+| `backend` | `SVBackendKind` | required | — |
+
+`SVJointKind` is `Scatter`, `Hexbin`, `DensityContour` or `Regression`; the hexbin
+form is covered by the FDR's `kind` enumeration through the "bivariate density"
+role rather than a separate seaborn name. `SVJointMarginal` is `Auto`,
+`Histogram`, `Density` or `Rug`; seaborn's `box` marginal is not implemented and
+is a documented follow-up. `Auto` resolves to `Density` for a density contour and
+to `Histogram` for every other central form.
 
 ## Theme
 
-Consumes `mark.palette`, `mark.size`, `mark.area_opacity`, `text.*`, axis
-tokens.
+Consumes the built-in decoration style (`text.*` and axis tokens) and the
+`SVMarkTheme` defaults for marker size, line width and default mark colour. The
+`series` palette is the built-in scale palette; a theme-aware palette override is
+not part of this change.
 
 ## Temporal
 
@@ -85,7 +98,7 @@ tokens.
 |---|---|
 | point position | interpolates in the central panel |
 | marginal distribution | re-computed per frame and morphed |
-| kind change | the central panel swaps between the scatter, the contour and the fit |
+| kind change | the central panel swaps between the scatter, the hexbin, the contour and the fit |
 
 ## Backend notes
 
