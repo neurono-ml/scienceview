@@ -2,8 +2,8 @@
 
 ## Target and bindings
 
-- [ ] Write the failing test: a headless canvas frame matches the native frame.
-- [ ] Implement the WebAssembly target and the minimal bindings.
+- [x] Write the failing test: a headless canvas frame matches the native frame.
+- [x] Implement the WebAssembly target and the minimal bindings.
 
 ## Clock and update
 
