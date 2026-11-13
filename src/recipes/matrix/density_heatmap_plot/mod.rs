@@ -32,6 +32,9 @@ pub use grid::SVDensityHeatmapGrid;
 pub use options::SVEmptyBinPolicy;
 
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "density_heatmap_plot_tests.rs"]
 mod density_heatmap_plot_tests;
 #[cfg(test)]
