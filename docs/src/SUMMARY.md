@@ -51,4 +51,5 @@
 - [Chapter 44 — Joint plots: two variables and their marginals, together](development-explained/ch44-joint-plot.md)
 - [Chapter 45 — The HTML backend: a figure that lives in a page](development-explained/ch45-html-backend.md)
 - [Chapter 46 — Terminal: drawing a figure on a character grid](development-explained/ch46-tui-backend.md)
+- [Chapter 47 — WebAssembly: the same renderer, in a browser tab](development-explained/ch47-wasm-backend.md)
 - [Maintaining this book](development-explained/maintaining.md)
