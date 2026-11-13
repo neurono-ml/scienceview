@@ -107,6 +107,11 @@ name = "count_plot"
 path = "examples/count_plot.rs"
 required-features = ["render-svg"]
 
+[[example]]
+name = "point_plot"
+path = "examples/point_plot.rs"
+required-features = ["render-svg"]
+
 # The root package is a facade: it re-exports the core crate and every backend
 # crate whose feature is enabled. Every rendering backend is a Cargo feature and
 # maps 1:1 to a workspace crate under crates/scienceview_* (see PRD §3.1).
