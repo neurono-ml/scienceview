@@ -44,6 +44,7 @@ examples.
 | 25 | `ch25-ecdf-plot.md` | The ECDF recipe: the empirical cumulative distribution through `SVStat::EmpiricalCdf`, exact horizontal-then-vertical step geometry, normalisation and the derived survival curve, orientation, series grouping, missing values, non-densifying sparse reads, streaming windows and SVG/native serialization |
 | 26 | `ch26-rug-plot.md` | The distributional rug recipe: the one-dimensional marginal tick, the line-kernel segment composition, the value and depth scales, orientation and the axis margin, series colours, missing observations, sparse stored-entry semantics, the bounded compound path and the acceptance tests |
 | 27 | `ch27-box-plot.md` | Box plots: the percentile-owned five-number summary, the whisker rules, outliers as dots, notches, series dodging, dense/sparse/streaming parity and the SVG/native dispatch |
+| 30 | `ch30-strip-plot.md` | Strip plots: the one-dimensional dot per observation, the keyed `SVMove::Jitter` displacement, orientation, series colours, marker size and alpha, the missing-value policy, sparse stored-entry semantics, SVG/native dispatch and the parity, concurrency and observability tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
