@@ -4,7 +4,7 @@
 
 Fills the region between a line and a baseline. It shows magnitude over an ordered axis, and it is the base form of a stacked area chart.
 
-The chart is specified in `docs/FDRs/relational-area-plot.md` (FDR-103) and is
+The chart is specified in `docs/FDRs/recipes/relational-area-plot.md` (FDR-103) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVAreaPlot`.
 

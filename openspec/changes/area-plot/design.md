@@ -16,6 +16,13 @@ The chart is exactly the composition
 implementation reveals a missing variant, that is a change to the core
 capability first (patterns.md P5).
 
+Implementation correction: `SVMark::Area` closes against a scalar baseline, so
+it cannot draw the per-point cumulative baseline a stack produces. A
+non-stacked area composes `SVMark::Area`; a stacked area composes
+`SVMark::Ribbon` between the cumulative baseline and the cumulative top that
+`SVMove::Stack` returns. `SVMove::Stack` is still the only stacking
+implementation.
+
 ### D2 — Data contract
 
 The chart consumes `x`, `y`, `series`. Dense,
