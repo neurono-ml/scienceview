@@ -7,8 +7,8 @@
 
 ## Lua and TypeScript engines
 
-- [ ] Write the failing conformance tests shared by both engines.
-- [ ] Implement the Lua engine and the TypeScript front-end plus JavaScript engine.
+- [x] Write the failing conformance tests shared by both engines.
+- [x] Implement the Lua engine and the TypeScript front-end plus JavaScript engine.
 
 ## Sandboxing and failure containment
 
