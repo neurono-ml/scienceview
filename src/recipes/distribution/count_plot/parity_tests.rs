@@ -2,7 +2,7 @@
 
 use super::SVCountPlot;
 use super::test_support::{
-    SVTestSource, sv_build_default, sv_build_series, sv_dense_source, sv_scene_to_svg,
+    CATEGORIES, SVTestSource, sv_build_default, sv_build_series, sv_dense_source, sv_scene_to_svg,
     sv_series_source, sv_sparse_series_source, sv_sparse_source, sv_streaming_series_source,
     sv_streaming_source,
 };
@@ -54,6 +54,34 @@ fn dense_sparse_and_streaming_series_agree() {
 
     assert_eq!(dense, sparse, "dense and sparse series agree");
     assert_eq!(dense, streaming, "dense and streaming series agree");
+}
+
+#[test]
+fn mixed_representations_agree_after_validating_lengths() {
+    const INDICES: [usize; 3] = [2, 3, 5];
+    const STORED: [f64; 3] = [1.0, 1.0, 1.0];
+    let series =
+        SVSparseView::new(&INDICES, &STORED, CATEGORIES.len()).expect("the sparse view is valid");
+    let mixed_source = SVTestSource {
+        category: SVColumnView::Dense(&CATEGORIES),
+        series: Some(SVColumnView::Sparse(series)),
+    };
+
+    let dense = sv_scene_to_svg(
+        &sv_build_series(&sv_series_source())
+            .compose()
+            .expect("the dense series renders"),
+    );
+    let mixed = sv_scene_to_svg(
+        &sv_build_series(&mixed_source)
+            .compose()
+            .expect("the mixed representations render"),
+    );
+
+    assert_eq!(
+        dense, mixed,
+        "a sparse series column keeps its implicit zero-group observations"
+    );
 }
 
 #[test]
