@@ -1,15 +1,26 @@
-//! The multivariate family: charts that relate more than two dimensions —
-//! scatterplot matrix, pair plot, parallel coordinates, parallel categories and
-//! joint plot.
+//! Multivariate recipes: charts that show several variables at once.
 //!
-//! Every chart in this family appends one `#[path] pub mod` and one `pub use`
-//! to this dispatcher; the family batch integrator resolves the ordering, so
-//! recipe changes never edit a central registry (patterns.md P4). Recipe module
-//! names carry the `sv_` prefix so the family scope never collides.
+//! Every chart in this family appends one `#[path] pub mod` and one
+//! `pub use` to this dispatcher; the family batch integrator resolves the
+//! ordering, so recipe changes never edit a central registry (patterns.md
+//! P4). Recipe module names carry the `sv_` prefix so the family scope
+//! never collides.
+
+#[path = "parallel_categories_plot/mod.rs"]
+pub mod sv_parallel_categories_plot;
+pub use sv_parallel_categories_plot::{
+    SVParallelCategoriesFrame, SVParallelCategoriesPlot, SVParallelCategoriesPlotBuilder,
+    SVParallelCategoriesRenderOutput, SVParallelCategoriesScene,
+};
+
+#[path = "parallel_coordinates_plot/mod.rs"]
+pub mod sv_parallel_coordinates_plot;
+pub use sv_parallel_coordinates_plot::{
+    SVParallelCoordinatesPlot, SVParallelCoordinatesPlotBuilder, SVParallelCoordinatesRenderOutput,
+};
 
 #[path = "splom_plot/mod.rs"]
 pub mod sv_splom_plot;
 pub use sv_splom_plot::{
-    SVSplomCell, SVSplomCellKind, SVSplomDiagonal, SVSplomFrame, SVSplomMissingValuePolicy,
-    SVSplomPlot, SVSplomPlotBuilder, SVSplomRenderOutput, SVSplomScaleMode, SVSplomScene,
+    SVSplomFrame, SVSplomPlot, SVSplomPlotBuilder, SVSplomRenderOutput, SVSplomScene,
 };
