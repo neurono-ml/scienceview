@@ -12,6 +12,24 @@ released.
 
 ### Added
 
+- The multivariate recipe `SVSplomPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  a scatterplot matrix over two or more continuous variables — one scatter cell
+  per variable pair and a univariate distribution on the diagonal (histogram by
+  default, kernel density or empty on request), with the observations shared
+  across every cell. The chart is the composition of FDR-143 —
+  `data -> [SVStat for the diagonal only] -> values -> [SVScale per axis] ->
+  SVMark::Dot per cell` — and its configuration surface is `variables`,
+  `colour` (nominal grouping), `diagonal`, `marker`, `size`, `opacity`,
+  `scale_mode` (per-variable `Independent` or common `Shared`), `cell_aspect`,
+  `show_upper`, `show_lower`, `show_diagonal`, `missing_value_policy`, `title`
+  and the backend, with `backend(...)` required and `execution_mode` defaulting
+  to `Automatic`. The grid is solved through `sv_layout`; dense, sparse and
+  streaming variables render the same matrix, a sparse column is never
+  densified, and a streaming window never blocks. The scene serializes through
+  `to_svg()` and, with `render-native`, through `to_native_frame()`; any other
+  kind fails with a typed error. Transition and animation wiring is deferred to
+  the transition integration; the geometry is transition-ready. The example
+  `examples/splom_plot.rs` writes `docs/figures/splom_plot.svg`.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is
