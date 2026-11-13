@@ -39,4 +39,5 @@
 - [Chapter 32 — Bar plots: saying one number about each category](development-explained/ch32-bar-plot.md)
 - [Chapter 33 — Count plots: how many observations fall into each category](development-explained/ch33-count-plot.md)
 - [Chapter 34 — Point plots: one estimate and its uncertainty per category](development-explained/ch34-point-plot.md)
+- [Chapter 36 — Contours: drawing a field that was handed to you](development-explained/ch36-contour-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
