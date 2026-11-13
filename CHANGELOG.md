@@ -12,6 +12,24 @@ released.
 
 ### Added
 
+- The distributional recipe `SVStripPlot` (`scienceview::sv_recipes::sv_distribution`):
+  every observation of a variable drawn as one dot over its category, displaced
+  along the categorical axis so overlapping points stay visible. The
+  configuration surface follows FDR-119 — `value`, `category`, `series`,
+  `jitter`, `jitter_mode`, `seed`, `marker`, `alpha`, `size`, `orient` and
+  `missing_value_policy` — and the builder requires an explicit backend
+  selection. The displacement is `SVMove::Jitter`, keyed by the observation's
+  row and category, so a seeded jitter is reproducible and a point keeps its
+  offset while its value changes. Dense, sparse and streaming columns resolve
+  once per operation; a sparse column contributes only its stored entries and
+  is never densified, and a streaming window renders without blocking. The dots
+  are the closed `SVMark::Dot` shape vocabulary, coloured by the optional
+  `series` column. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/strip_plot.rs` writes `docs/figures/strip_plot.svg`.
+
 - The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
   the five-number summary of every category, drawn as a box with whiskers,
   median line and — optionally — the observations outside the whiskers. The
