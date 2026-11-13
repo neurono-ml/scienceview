@@ -7,7 +7,7 @@ use super::SVContourComposition;
 use super::{SVContourPlot, SVContourPlotBuilder};
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{
-    SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema,
+    SVColumnSnapshot, SVColumnView, SVDataSource, SVSourceSchema, SVSparseView, SVStreamingView,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVMarkPrimitive;
@@ -80,6 +80,27 @@ pub(crate) fn sv_matrix_source() -> SVTestSource<'static> {
 
 pub(crate) fn sv_points_source() -> SVTestSource<'static> {
     SVTestSource::points(&POINT_X, &POINT_Y, &POINT_VALUE)
+}
+
+pub(crate) fn sv_sparse_points_source() -> SVTestSource<'static> {
+    const INDICES: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    let x = SVSparseView::new(&INDICES, &POINT_X, 9).expect("the sparse view is well formed");
+    let y = SVSparseView::new(&INDICES, &POINT_Y, 9).expect("the sparse view is well formed");
+    let value =
+        SVSparseView::new(&INDICES, &POINT_VALUE, 9).expect("the sparse view is well formed");
+    SVTestSource {
+        value: SVColumnView::Sparse(value),
+        x: Some(SVColumnView::Sparse(x)),
+        y: Some(SVColumnView::Sparse(y)),
+    }
+}
+
+pub(crate) fn sv_streaming_points_source() -> SVTestSource<'static> {
+    SVTestSource {
+        value: SVColumnView::Streaming(SVStreamingView::new(&POINT_VALUE, 9, 0)),
+        x: Some(SVColumnView::Streaming(SVStreamingView::new(&POINT_X, 9, 0))),
+        y: Some(SVColumnView::Streaming(SVStreamingView::new(&POINT_Y, 9, 0))),
+    }
 }
 
 pub(crate) fn sv_builder(source: &dyn SVDataSource) -> SVContourPlotBuilder<'_> {

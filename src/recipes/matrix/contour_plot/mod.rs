@@ -61,6 +61,9 @@ pub use core_implementation::SVContourPlot;
 #[path = "contour_plot_tests.rs"]
 mod contour_plot_tests;
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "render_tests.rs"]
 mod render_tests;
 #[cfg(test)]
