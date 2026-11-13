@@ -53,8 +53,10 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
-  `docs/FDRs/distribution-density-plot.md` before opening the code PR.
+- [x] Trigger the independent acceptance review against
+  `docs/FDRs/distribution-density-plot.md` before opening the code PR. The
+  review verified the spec, conventions, gates and the cross-merge union, and
+  recorded the weight and transition deferrals in the spec delta.
 
 ## Follow-ups (not this change)
 

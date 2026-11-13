@@ -64,8 +64,19 @@ kernel as-is.
 the grid spacing so the samples sum to one, and `Count` additionally multiplies
 by the observation count so the samples sum to the group size.
 
-### A4 — `bw_adjust` composes with the derived bandwidth
+### A4 — `bandwidth_adjustment` composes with the derived bandwidth
 
 When the bandwidth is not fixed, the recipe runs the kernel once to obtain the
-Silverman bandwidth and re-applies it fixed and scaled when `bw_adjust != 1`.
-It never reimplements the rule; the second pass is a kernel call.
+Silverman bandwidth and re-applies it fixed and scaled when
+`bandwidth_adjustment != 1`. It never reimplements the rule; the second pass is
+a kernel call. The public setter uses the unabbreviated name; the FDR keeps
+seaborn's `bw_adjust` as the source reference.
+
+### A5 — Transition wiring is deferred
+
+The recipe emits transition-ready geometry: one curve per series over a fixed
+`grid_count` lattice, so a later transition integration can interpolate point
+by point and morph a curve when the bandwidth changes. Wiring the chart into
+the transition kernel is deferred to that integration, as recorded in the FDR
+amendment and the book chapter. Until then the chart renders static curves and
+the spec delta does not require state transitions.
