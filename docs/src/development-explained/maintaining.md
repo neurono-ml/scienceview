@@ -57,6 +57,7 @@ examples.
 | 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
 | 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
 | 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
+| 46 | `ch46-tui-backend.md` | The terminal backend: the cell-grid viewport, snapping only at the end, braille dots, partial blocks, wide characters, three ANSI colour depths, the elapsed-time tick clock, resize handling, registry dispatch and the honest export refusal |
 | 47 | `ch47-wasm-backend.md` | The WebAssembly canvas backend: reusing the native CPU rasterizer through `scienceview_native`, the `SVCanvasSurface` seam and its headless/browser implementations, the thread-local handle that keeps the backend `Send + Sync` without `unsafe`, the model-owned clock driven by `requestAnimationFrame`, the minimal binding surface, the capability row and the parity, refusal and observability tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
@@ -122,3 +123,11 @@ per variable pair and a univariate diagonal into a grid solved by the layout
 kernel: it explains the shared observations, the missing-value policy, the
 independent and common scale domains, the three diagonal modes, the colour
 grouping and the parity, concurrency and observability tests.
+
+Chapter 45 covers the HTML backend, the first document target with a clock: it
+explains why one self-contained page is the right unit for both a scientist and
+a dashboard, how the compiled theme becomes overridable custom properties, how
+the embedded payload keeps the Rust model the authority, how an update replaces
+only the payload element, how gestures become actions and view deltas, and how
+the golden, determinism, concurrency, 10k-point and observability tests make
+those claims executable.
