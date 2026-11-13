@@ -55,3 +55,14 @@
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [ ] Trigger the independent acceptance review against
   `docs/FDRs/recipes/relational-area-plot.md` before opening the code PR.
+
+## 8. Review follow-ups
+
+- [x] Compose `SVMark::Ribbon` for stack=true: the area mark closes against a
+  scalar baseline and cannot express the per-point cumulative baseline
+  `SVMove::Stack` returns.
+- [x] Place a temporal ordered axis through a numeric placement scale that
+  shares the temporal axis domain and range, because the mark kernel places
+  numeric positions while `SVScaleKind::Temporal` answers timestamps.
+- [x] Reject a backend with no recipe rendering path at build time; only the
+  SVG serializer is wired in this change.
