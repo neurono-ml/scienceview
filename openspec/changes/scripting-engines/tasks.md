@@ -12,8 +12,8 @@
 
 ## Sandboxing and failure containment
 
-- [ ] Write the failing test: a failing script does not terminate the host.
-- [ ] Implement the sandbox policy and error reporting.
+- [x] Write the failing test: a failing script does not terminate the host.
+- [x] Implement the sandbox policy and error reporting.
 
 ## Acceptance
 
