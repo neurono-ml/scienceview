@@ -65,6 +65,52 @@ fn a_non_svg_backend_is_rejected_by_the_render_operation() {
 }
 
 #[test]
+fn the_checked_in_figure_is_the_public_render_output() {
+    const FIRST_X: [f64; 12] = [1.2, 1.6, 1.9, 2.3, 2.7, 3.1, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4];
+    const SECOND_X: [f64; 12] = [1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6, 5.0, 5.4, 5.8];
+    const FIRST_Y: [f64; 12] = [2.1, 2.6, 2.9, 3.6, 4.0, 4.8, 5.1, 5.8, 6.3, 6.9, 7.4, 7.9];
+    const SECOND_Y: [f64; 12] = [1.4, 1.9, 2.5, 2.8, 3.5, 3.9, 4.6, 5.0, 5.4, 6.1, 6.5, 7.2];
+
+    let mut x = FIRST_X.to_vec();
+    x.extend_from_slice(&SECOND_X);
+    let mut y = FIRST_Y.to_vec();
+    y.extend_from_slice(&SECOND_Y);
+    let mut series = vec![0.0; FIRST_X.len()];
+    series.extend(std::iter::repeat_n(1.0, SECOND_X.len()));
+
+    let table = SVDataTable::builder()
+        .with_column("petal length", SVColumnRole::X, &x)
+        .with_column("sepal width", SVColumnRole::Y, &y)
+        .with_column("species", SVColumnRole::Grouping, &series)
+        .build()
+        .expect("the example table is well formed");
+    let chart = SVRegressionPlotBuilder::new()
+        .data_source(&table)
+        .x("petal length")
+        .y("sepal width")
+        .series("species")
+        .confidence(0.95)
+        .title("Sepal width against petal length")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the example configuration is valid");
+
+    let rendered = chart.render().expect("the chart renders").bytes;
+    let checked_in = std::fs::read(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("docs")
+            .join("figures")
+            .join("regression_plot.svg"),
+    )
+    .expect("the checked-in figure is readable");
+
+    assert_eq!(
+        rendered, checked_in,
+        "regenerate docs/figures/regression_plot.svg with `cargo run --example regression_plot --features render-svg`"
+    );
+}
+
+#[test]
 fn saving_writes_the_rendered_document() {
     let table = SVDataTable::builder()
         .with_column("x", SVColumnRole::X, &X)
