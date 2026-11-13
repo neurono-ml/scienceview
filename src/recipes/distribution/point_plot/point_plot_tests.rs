@@ -306,6 +306,36 @@ fn the_default_execution_mode_is_automatic() {
 }
 
 #[test]
+fn a_backend_without_a_point_plot_serializer_fails_with_a_typed_error() {
+    let values = [1.0, 2.0];
+    let categories = [0.0, 1.0];
+    let data = table(&values, &categories);
+    let plot = plot(&data)
+        .backend(SVBackendKind::Html)
+        .build()
+        .expect("the html backend hosts the dot and error-bar marks");
+
+    let error = plot
+        .save(std::path::Path::new("point.html"))
+        .expect_err("the html kind has no point-plot serializer");
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
+
+#[test]
+fn the_standard_error_is_narrower_than_the_standard_deviation() {
+    let values = [1.0, 2.0, 3.0, 4.0];
+    let categories = [0.0; 4];
+    let data = table(&values, &categories);
+
+    let deviation = draw(plot(&data).error(SVAggregateErrorKind::StandardDeviation));
+    let error = draw(plot(&data).error(SVAggregateErrorKind::StandardError));
+    let deviation = deviation.estimates()[0].error().expect("an interval");
+    let error = error.estimates()[0].error().expect("an interval");
+
+    assert!(error.upper() - error.lower() < deviation.upper() - deviation.lower());
+}
+
+#[test]
 fn the_builder_rejects_invalid_cap_width_and_confidence() {
     let values = [1.0, 2.0];
     let categories = [0.0, 1.0];
