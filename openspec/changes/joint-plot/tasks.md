@@ -13,18 +13,18 @@
 
 ## 2. Data contract and parity
 
-- [ ] Write the failing parity test: dense, sparse and streaming input of the
+- [x] Write the failing parity test: dense, sparse and streaming input of the
   same data produce the same marks within the documented tolerance.
-- [ ] Implement the column resolution and the explicit error for a missing or
+- [x] Implement the column resolution and the explicit error for a missing or
   mistyped column.
-- [ ] Verify a sparse input is never densified and a streaming input never
+- [x] Verify a sparse input is never densified and a streaming input never
   blocks; assert the window behaviour where the recipe depends on it.
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
+- [x] Assert the operation span carries the backend kind, the representation
   and the point count.
 
 ## 4. Example and generated figure
