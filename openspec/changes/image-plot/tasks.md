@@ -2,35 +2,35 @@
 
 ## 1. Module, builder and composition
 
-- [ ] Write the failing tests first: the chart builds with its documented
+- [x] Write the failing tests first: the chart builds with its documented
   defaults, and each option changes the output.
-- [ ] Create `src/recipes/matrix/image_plot/{mod.rs, builder.rs,
+- [x] Create `src/recipes/matrix/image_plot/{mod.rs, builder.rs,
   core_implementation.rs}` following patterns.md P3; `mod.rs` is a pure
   dispatcher.
-- [ ] Implement the builder state machine, the required `backend(...)` and the
+- [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVImagePlot` carrying its configured kind.
-- [ ] Wire the composition `data -> [no stat] -> raster -> [SVScale::Continuous over a colour map] -> SVMark::Image` through the core kernels.
+- [x] Wire the composition `data -> [no stat] -> raster -> [SVScale::Continuous over a colour map] -> SVMark::Image` through the core kernels.
 
 ## 2. Data contract and parity
 
-- [ ] Write the failing parity test: dense, sparse and streaming input of the
+- [x] Write the failing parity test: dense, sparse and streaming input of the
   same data produce the same marks within the documented tolerance.
-- [ ] Implement the column resolution and the explicit error for a missing or
+- [x] Implement the column resolution and the explicit error for a missing or
   mistyped column.
-- [ ] Verify a sparse input is never densified and a streaming input never
+- [x] Verify a sparse input is never densified and a streaming input never
   blocks; assert the window behaviour where the recipe depends on it.
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
+- [x] Assert the operation span carries the backend kind, the representation
   and the point count.
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/image_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/image_plot.svg` with `cargo run --example image_plot` and
+- [x] Add `examples/image_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/image_plot.svg` with `cargo run --example image_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
@@ -43,15 +43,28 @@
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/matrix-image-plot.md` status to `shipped`, linking the
-  example and the chapter.
-- [ ] Add the `CHANGELOG.md` entry.
+- [x] Change `docs/FDRs/recipes/matrix-image-plot.md` status to `shipped`,
+  linking the example and the chapter.
+- [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
+- [x] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [x] Open the ADR issue (#147) and reference it from both PRs with a closing
+  keyword.
 - [ ] Trigger the independent acceptance review against
   `docs/FDRs/matrix-image-plot.md` before opening the code PR.
+
+## Implementation notes
+
+- The FDR's `z_min`/`z_max` are exposed as `minimum_intensity(...)` and
+  `maximum_intensity(...)`, because patterns P11 forbids abbreviations in Rust
+  names; the FDR option names remain the reference in their documentation.
+- The recipe also exposes the raster `dimensions`, the data `extent`,
+  `aspect_ratio` and `missing_policy`, which the FDR discusses but does not yet
+  list as named options.
+- The scene owns the mapped RGBA buffer and rebuilds its single image primitive
+  per serialization, because the image mark borrows its pixels and a
+  self-referential scene would require unsafe code.
