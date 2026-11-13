@@ -42,4 +42,5 @@ pub use sv_rug_plot::{SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene
 pub mod sv_strip_plot;
 pub use sv_strip_plot::{
     SVStripMissingValuePolicy, SVStripPlot, SVStripPlotBuilder, SVStripRenderOutput, SVStripScene,
-};
+#[path = "violin_plot/mod.rs"]
+pub mod sv_violin_plot;
