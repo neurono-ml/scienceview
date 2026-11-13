@@ -36,19 +36,27 @@
 //! ```
 
 mod builder;
+mod builder_options;
 mod builder_state;
+mod builder_validation;
 mod composition;
 mod configuration;
 mod core_implementation;
+mod domains;
+mod extrapolation;
+mod fitting;
+mod grouping;
 mod pairing;
 #[cfg(feature = "render-svg")]
 mod render_svg;
+mod sparse_pairing;
 
 pub use builder::SVRegressionPlotBuilder;
 pub use builder_state::{SVWithBackend, SVWithDataSource, SVWithoutBackend, SVWithoutDataSource};
 pub use composition::{SVRegressionComposition, SVRegressionSeriesFit};
-pub use configuration::{SVExtrapolationPolicy, SVRegressionConfiguration};
+pub use configuration::SVRegressionConfiguration;
 pub use core_implementation::SVRegressionPlot;
+pub use extrapolation::SVExtrapolationPolicy;
 
 #[cfg(test)]
 #[path = "concurrency_tests.rs"]
