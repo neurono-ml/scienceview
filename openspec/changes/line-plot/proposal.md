@@ -32,7 +32,7 @@ None.
 
 - New module `src/recipes/relational/line_plot/`.
 - New example `examples/line_plot.rs` and generated figure
-  `docs/figures/line_plot.svg`.
+  `docs/figures/line_plot_recipe.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the
   family batch integrator.
 - New specification `openspec/specs/line-plot/spec.md`.

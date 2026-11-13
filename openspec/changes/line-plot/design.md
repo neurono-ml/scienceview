@@ -38,3 +38,16 @@ central registry would serialise every recipe change against every other one
 
 - Should the confidence interval be a separate mark (`Ribbon`) inside this recipe, or a sibling recipe (`SVBandPlot`) that the line recipe may include? *Current answer: a sibling, so a band can be used alone.*
 
+
+
+## Implementation outcome
+
+The recipe was implemented as `src/recipes/relational/line_plot/` with the
+builder, the composition, the series/ordering/aggregation logic, interpolation,
+decorations and SVG output in separate files; `mod.rs` is a pure dispatcher. It
+composes `SVStat::Aggregate`, `SVMark::Line`, `SVMark::Dot` and
+`SVMark::Ribbon` and adds no kernel variant. Dense, sparse and streaming
+channels share one extraction path, and the SVG figure is
+`docs/figures/line_plot_recipe.svg` (renamed from the planned `line_plot.svg`
+to avoid colliding with the existing `line_plot_svg` example). The book chapter
+is `docs/src/development-explained/ch17-line-plot.md`.
