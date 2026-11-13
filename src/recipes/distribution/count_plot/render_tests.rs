@@ -3,7 +3,9 @@
 use super::SVCountPlot;
 #[cfg(feature = "render-svg")]
 use super::SVCountRenderOutput;
-use super::test_support::{sv_build_default, sv_dense_source};
+#[cfg(feature = "render-svg")]
+use super::test_support::sv_build_default;
+use super::test_support::sv_dense_source;
 use crate::sv_backend::{SVBackendCapability, SVBackendKind};
 use crate::sv_error::SVError;
 
