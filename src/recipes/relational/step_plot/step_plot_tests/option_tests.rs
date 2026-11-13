@@ -47,13 +47,13 @@ fn the_documented_defaults_are_applied() {
 #[test]
 fn each_step_position_expands_different_vertices() {
     let table = source(&HORIZONTAL, &VERTICAL);
-    let expected = [
-        (SVStepPosition::After, vec![1.0, 2.0, 2.0, 3.0, 3.0]),
-        (SVStepPosition::Before, vec![1.0, 1.0, 2.0, 2.0, 3.0]),
-        (SVStepPosition::Center, vec![1.0, 1.5, 1.5, 2.5, 2.5, 3.0]),
-    ];
 
-    for (position, horizontal) in expected {
+    for position in SVStepPosition::ALL {
+        let horizontal = match position {
+            SVStepPosition::After => vec![1.0, 2.0, 2.0, 3.0, 3.0],
+            SVStepPosition::Before => vec![1.0, 1.0, 2.0, 2.0, 3.0],
+            SVStepPosition::Center => vec![1.0, 1.5, 1.5, 2.5, 2.5, 3.0],
+        };
         let plot = SVStepPlot::builder()
             .data_source(&table)
             .x("time")
