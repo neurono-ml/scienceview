@@ -38,6 +38,96 @@ released.
   to the transition integration; the geometry is transition-ready. The example
   `examples/box_plot.rs` writes `docs/figures/box_plot.svg`.
 
+- The distributional recipe `SVRugPlot` (`scienceview::sv_recipes::sv_distribution`):
+  one small tick per observation, drawn in the margin of the axis the values
+  occupy. The configuration surface follows FDR-115 — `value`, `series`,
+  `orientation`, `height`, `alpha`, `line_width`, `title` and `value_label` —
+  and the builder requires an explicit backend selection. Every tick is the
+  two-point `SVMark::Line` segment geometry of the closed mark vocabulary; the
+  recipe places each stored observation once through a continuous value scale
+  and a bounded depth scale that spans the margin, so the ticks never enter the
+  plot area — the tick length is capped at the margin depth even at
+  `height = 1.0`. Dense, sparse and streaming input of the same observations
+  agree byte for byte, a sparse column marks only its stored support without
+  being densified and without letting implicit zeros widen the axis, and a
+  large sample is grouped into one compound path per paint so the document
+  stays bounded. Non-finite observations draw no tick, and a column with no
+  drawable observation renders an empty scene. The new example
+  `examples/rug_plot.rs` generates `docs/figures/rug_plot.svg`.
+- The empirical cumulative distribution recipe `SVECdfPlot` in
+  `scienceview::sv_recipes::sv_distribution::sv_ecdf_plot`: the proportion of
+  observations at or below each value, composed exactly as
+  `data -> [SVStat::EmpiricalCdf] -> (values, cumulative probability) ->
+  [SVScale] -> SVMark::Line (step geometry)`. The curve is never reimplemented:
+  the stat kernel derives the breakpoints and probabilities, and the recipe
+  expands them into explicit horizontal-then-vertical vertices reaching the
+  total at the maximum. The builder requires an explicit backend, defaults
+  `execution_mode` to `Automatic`, and exposes `value`, optional `series`,
+  `normalise`, `orient` (`SVBarOrientation`), `complementary`, `line_width`,
+  `viewport` and `title`. `normalise(false)` reaches the observation count;
+  `complementary(true)` draws the survival curve from the same kernel result;
+  horizontal orientation swaps the two channels. Dense, sparse and streaming
+  input resolve once per operation: an ungrouped sparse column reaches the
+  kernel unchanged (never densified) and a streaming window renders without
+  blocking. Non-finite observations and series codes are omitted. The
+  composition serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error.
+  Transition and animation wiring is deferred. The example
+  `examples/ecdf_plot.rs` writes `docs/figures/ecdf_plot.svg`.
+- The distributional recipe `SVDensityContourPlot`
+  (`scienceview::sv_recipes::sv_distribution`): the joint distribution of two
+  continuous variables drawn as filled contour bands or contour lines. The
+  configuration surface follows FDR-113 — `x`, `y`, `series`, `weight`,
+  `levels`, `level_range`, `bandwidth`, `bandwidth_adjustment`, `grid_count`, `style`,
+  `colour_map` and `colour_scale` — and the builder requires an explicit backend
+  selection. The density is never reimplemented: `SVStat::Bin` derives the two
+  edge vectors and the recipe folds the observation pairs into the joint grid,
+  normalised so it integrates to one; sparse views are walked through their
+  stored entries and streaming views through their current window. A
+  marching-squares step turns the scalar field into backend-agnostic paths, and
+  the filled style paints each threshold region as one closed compound path
+  from the lowest level up, so the bands nest without gaps. SVG and native
+  serialize the same composition; every other kind reports a typed
+  unsupported-capability error. The example is `examples/density_contour_plot.rs`
+  and the generated figure is `docs/figures/density_contour_plot.svg`.
+- The distribution recipe `SVDensityPlot`
+  (`scienceview::sv_recipes::sv_distribution::sv_density_plot`): a smoothed
+  estimate of one continuous variable, composed exactly as
+  `data -> [SVStat::KernelDensity] -> (grid, density) -> [no move] -> [SVScale]
+  -> SVMark::Line | SVMark::Area`. The configuration surface follows FDR-112 —
+  `value`, `series`, `bandwidth`, `bandwidth_adjustment`, `kernel`, `grid_count`, `cut`,
+  `fill`, `normalise`, `line_width` — and the builder requires an explicit
+  backend selection. The estimate is never reimplemented:
+  `SVStat::KernelDensity` supplies the grid, the density and the Silverman
+  bandwidth for the Gaussian, Epanechnikov and uniform kernels. The recipe
+  scales the bandwidth linearly with `bandwidth_adjustment`, groups observations by
+  `series` into one curve per group with a palette colour, drops non-finite
+  observations by policy, and places `SVMark::Line` plus an optional
+  `SVMark::Area` fill over one axes pair. Dense, sparse and streaming input
+  agree within tolerance; a sparse value column is read through its stored
+  support without materialising implicit zeros, and grouping a sparse column is
+  rejected with the documented alternative rather than densified. The new
+  example `examples/density_plot.rs` generates `docs/figures/density_plot.svg`.
+- The distributional recipe `SVHistogramPlot` in
+  `scienceview::sv_recipes::sv_distribution::sv_histogram_plot`: a continuous
+  variable binned and drawn as bars, composed exactly as
+  `data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge] ->
+  [SVScale x, y, colour] -> SVMark::Bar`. The builder requires an explicit
+  backend, defaults `execution_mode` to `Automatic`, and exposes the FDR-111
+  surface: `value`, `series`, `bin_count`, `bin_width`, `bin_edges`,
+  `normalise`, `cumulative`, `common_normalisation`, `common_bins`, `shrink`,
+  `element`, `orientation`, `multiple` and a missing-value policy. Binning is
+  never reimplemented: `SVStat::Bin` supplies the edges and the count,
+  probability or density heights, and `SVMove` supplies stacking and dodging.
+  Dense, sparse and streaming input resolve once per operation; a sparse column
+  keeps its stored support and its implicit zeros, and a streaming window
+  renders without blocking. The composed geometry serializes through `to_svg()`
+  and, with `render-native`, through `to_native_frame()`; any other configured
+  kind fails with a typed error instead of being ignored. Weighted binning is
+  not implemented because the shipped bin kernel does not consume weights, and
+  a configured weight fails with a configuration error naming that gap. The
+  example `examples/histogram_plot.rs` calls the public `to_svg()` and writes
+  `docs/figures/histogram_plot.svg`.
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,

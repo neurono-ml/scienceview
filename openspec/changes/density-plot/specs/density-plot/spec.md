@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVDensityPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVDensityPlot` SHALL consume `value` and the optional `series`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. The FDR's optional `weight` column is out of scope for this change (design A1): weighting awaits a weighted kernel-density variant and is recorded as a follow-up in the FDR amendment.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
@@ -46,17 +46,20 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The chart emits transition-ready geometry
 
-`SVDensityPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVDensityPlot` SHALL emit one curve per series over a fixed evaluation grid, so
+a later transition integration can interpolate point by point. Wiring state
+transitions is deferred to that integration (design A5); the chart SHALL NOT
+claim animation before the wiring exists.
 
-#### Scenario: Transition: density curve
-- **WHEN** the state changes and density curve is affected
-- **THEN** interpolates point by point over the fixed grid
+#### Scenario: Fixed grid
+- **WHEN** the chart estimates a density
+- **THEN** each curve carries `grid_count` samples on a fixed lattice
 
-#### Scenario: Transition: bandwidth change
-- **WHEN** the state changes and bandwidth change is affected
-- **THEN** the curve morphs into the new estimate
+#### Scenario: Transition wiring is deferred
+- **WHEN** the transition integration has not been wired
+- **THEN** the chart renders static curves and the FDR records the deferral
 
 ### Requirement: The chart renders on every declared backend
 

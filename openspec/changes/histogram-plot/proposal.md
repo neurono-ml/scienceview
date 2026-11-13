@@ -4,7 +4,7 @@
 
 Bins a continuous variable and draws the count, probability or density in each bin. It is the reference recipe for the stat layer: the chart is a bar mark plus a binning stat, and almost every other distributional recipe is a variation of that arrangement.
 
-The chart is specified in `docs/FDRs/distribution-histogram-plot.md` (FDR-111) and is
+The chart is specified in `docs/FDRs/recipes/distribution-histogram-plot.md` (FDR-111) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVHistogramPlot`.
 

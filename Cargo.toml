@@ -53,7 +53,15 @@ name = "scatter_plot"
 required-features = ["render-svg"]
 
 [[example]]
+name = "rug_plot"
+required-features = ["render-svg"]
+
+[[example]]
 name = "band_plot"
+required-features = ["render-svg"]
+
+[[example]]
+name = "ecdf_plot"
 required-features = ["render-svg"]
 
 [[example]]
@@ -63,6 +71,11 @@ required-features = ["render-svg"]
 [[example]]
 name = "regression_plot"
 path = "examples/regression_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
+name = "histogram_plot"
+path = "examples/histogram_plot.rs"
 required-features = ["render-svg"]
 
 # The root package is a facade: it re-exports the core crate and every backend

@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVHistogramPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVHistogramPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. Weighted binning itself is deferred: the shipped bin kernel does not consume weights, so a configured `weight` SHALL fail with an explicit configuration error naming that gap.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
@@ -29,6 +29,10 @@
 #### Scenario: Missing column
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
+
+#### Scenario: Configured weight
+- **WHEN** a `weight` column is configured
+- **THEN** the build fails with an explicit configuration error naming the bin-kernel gap
 
 ### Requirement: Representations are equivalent
 
@@ -46,17 +50,17 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: Transition wiring is deferred
 
-`SVHistogramPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVHistogramPlot` SHALL NOT claim an animation path in this change. The
+temporal behaviour recorded in its FDR — bar-height interpolation and bin
+enter/exit — remains a target of the transition/streaming capability. Until
+that integration lands, `update` recomposes the current window and returns a
+fresh artifact.
 
-#### Scenario: Transition: bar height
-- **WHEN** the state changes and bar height is affected
-- **THEN** interpolates
-
-#### Scenario: Transition: new bin
-- **WHEN** the state changes and new bin is affected
-- **THEN** enters with the enter rule and grows to its height
+#### Scenario: Update recomposes the window
+- **WHEN** `update` is called after new samples arrive
+- **THEN** the current window is resolved again and rendered, without an incremental enter/update/exit animation
 
 ### Requirement: The chart renders on every declared backend
 
