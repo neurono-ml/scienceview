@@ -17,6 +17,6 @@
 
 ## Acceptance
 
-- [x] Add the example, generated figure and book chapter (book branch).
+- [x] Add the runnable example (`crates/scienceview_script/examples/scripting_engines.rs`; scripting produces actions, not pixels, so there is no generated figure) and the book chapter.
 - [x] Run the four gates and open the ADR issue.
 
