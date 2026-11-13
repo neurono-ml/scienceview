@@ -102,7 +102,7 @@ source and rendered to SVG, and the SVG is checked in under
 `docs/src/development-explained/assets/` so the book renders without a
 JavaScript dependency.
 
-Chapter 44 covers the joint-plot recipe, the first multivariate chart: it
+Chapter 44 covers the joint-plot recipe, a multivariate chart: it
 explains why the three panels are one figure solved by the layout kernel, how
 the central form delegates to the scatter mark, the hexbin recipe, the density
 contour recipe and the fit kernel, how the marginals compose `SVStat::Bin` and
