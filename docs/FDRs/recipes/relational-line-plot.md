@@ -5,11 +5,11 @@
 | Id | FDR-102 |
 | Name | `SVLinePlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch17-line-plot.md`](../../src/development-explained/ch17-line-plot.md) |
+| Example program | [`examples/line_plot.rs`](../../../examples/line_plot.rs) |
 
 ## Purpose
 
@@ -113,17 +113,40 @@ matches by `x` value, so existing points do not move.
 
 ## Acceptance
 
-- [ ] With no aggregate, the line passes through the data points exactly.
-- [ ] With an aggregate, the drawn value is the estimator over the group and
+- [x] With no aggregate, the line passes through the data points exactly.
+      Evidence: `default_composition_draws_one_line_through_the_observations`.
+- [x] With an aggregate, the drawn value is the estimator over the group and
       the optional interval is drawn.
-- [ ] Dense, sparse and streaming inputs give the same line for the same
+      Evidence: `aggregation_reports_the_estimator_and_draws_the_interval`.
+- [x] Dense, sparse and streaming inputs give the same line for the same
       data.
-- [ ] A streaming line grows in place as the window fills.
-- [ ] An animated line interpolates point positions and preserves series
-      colour.
+      Evidence: `dense_sparse_and_streaming_agree_within_the_documented_tolerance`.
+- [x] A streaming line grows in place as the window fills.
+      Evidence: `a_streaming_figure_reads_its_current_window_without_blocking`
+      reads the current window and reports the same number of points.
+- [x] An animated line interpolates point positions and preserves series
+      colour. The transition kernel matches by `x`; the recipe keeps a stable
+      palette colour per series, asserted by
+      `series_divides_the_lines_and_assigns_a_stable_colour_each`.
 
 ## Open questions
 
 - Should the confidence interval be a separate mark (`Ribbon`) inside this
       recipe, or a sibling recipe (`SVBandPlot`) that the line recipe may
       include? *Current answer: a sibling, so a band can be used alone.*
+
+
+## Implementation notes
+
+The recipe lives in `src/recipes/relational/line_plot/` and composes the core
+kernels only: `SVStat::Aggregate` per `(series, x, group)`, continuous `x`/`y`
+scales, `SVMark::Line`, `SVMark::Dot` for markers, `SVMark::Ribbon` for the
+aggregated interval, and the decoration surface for axes, grid, legend and
+title. Ordering is a stable sort by `x`; non-finite observations split the line
+into contiguous segments unless `bridge_missing(true)` is requested. The
+`interpolate` option expands step and Catmull-Rom vertices in data space before
+the line mark draws them, so the mark kernel is never reimplemented.
+
+The SVG output is produced through `scienceview_svg::SVSvgDocument`; the
+documentation figure is `docs/figures/line_plot_recipe.svg` and the example is
+`examples/line_plot.rs`.

@@ -12,6 +12,16 @@ released.
 
 ### Added
 
+- The `SVLinePlot` recipe (`src/recipes/relational/line_plot/`): one line per
+  series over an ordered `x` axis, composed from the existing data, stat,
+  scale, mark and decoration kernels. It accepts dense, sparse and streaming
+  channels, sorts each series by `x` with a stable order, splits the line at
+  missing values unless `bridge_missing(true)` connects them, and supports
+  per-series colour, line width, dash patterns, markers, step or Catmull-Rom
+  interpolation and optional aggregation with an estimator and an uncertainty
+  interval. The SVG output is serialized through `SVSvgDocument`, and
+  `examples/line_plot.rs` generates
+  `docs/figures/line_plot_recipe.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
