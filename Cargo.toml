@@ -8368,7 +8368,7 @@ theme-runtime-compilation = ["theme", "scienceview_theme/theme-runtime-compilati
 # One feature per rendering backend, one crate per feature.
 render-svg = ["dep:scienceview_svg"]
 render-html = ["dep:scienceview_html"]
-render-tui = ["dep:scienceview_tui"]
+render-tui = ["dep:scienceview_tui", "scienceview_tui/terminal"]
 render-native = ["dep:scienceview_native", "scienceview_native/window"]
 render-react = ["dep:scienceview_react"]
 render-vue = ["dep:scienceview_vue"]

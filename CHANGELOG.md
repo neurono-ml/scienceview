@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The terminal rendering backend `scienceview_tui` (`render-tui` feature): an
+  `SVRenderBackend` for `SVBackendKind::Tui` that rasterizes the
+  backend-agnostic mark and decoration primitives onto a character cell grid.
+  Paths and dots use braille sub-cell dots, filled rectangles use partial block
+  glyphs for fractional heights, text handles East Asian wide characters and
+  clipping, and colour is emitted as ANSI escape sequences at true-colour,
+  256-colour or 16-colour depth. `SVTickClock` advances animation by elapsed
+  time with a bounded tick rate, `SVTuiBackend::render_frame_for_terminal`
+  re-solves the layout on resize, and `SVTerminalSession` presents the frame
+  through ratatui and crossterm behind the optional `terminal` feature (the
+  default build pulls neither dependency). The backend declares events,
+  streaming, in-place update and presentation, and refuses `save`/export with
+  the typed missing-capability error; the frame's `to_text`/`to_ansi` values are
+  the caller-side capture path. Golden-frame, colour-mapping, degenerate-size,
+  wide-character, 10k-point, concurrency, capability and span tests cover it.
 - The HTML rendering backend `scienceview_html`, selected with
   `SVBackendKind::Html` and the `render-html` feature: one self-contained
   document with the compiled theme stylesheet, the SVG figure and a small
