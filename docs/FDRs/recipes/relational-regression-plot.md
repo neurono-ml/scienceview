@@ -8,7 +8,7 @@
 | Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | [`ch21-regression-plot.md`](../../src/development-explained/ch21-regression-plot.md) |
+| Public chapter | [`ch21-regression-plot.md`](https://neurono-ml.github.io/scienceview/development-explained/ch21-regression-plot.html) |
 | Example program | [`examples/regression_plot.rs`](../../../examples/regression_plot.rs) |
 
 ## Purpose
