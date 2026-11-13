@@ -60,18 +60,11 @@
 
 ## Follow-ups (not this change)
 
-- Deferred (decision 2026-11-13): the `weight` column stays out of scope because
-  no weighted kernel-density estimator ships yet — `SVStat::KernelDensity`
-  applies an unweighted estimate, and reimplementing the kernel inside the
-  recipe is forbidden (patterns.md P5). The weights support belongs to the
-  future `statistical-weights` change (weighted `SVStat::KernelDensity`); this
-  change makes no acceptance claim for it.
-- Deferred (decision 2026-11-13): recipe-level animation wiring is out of scope;
-  recipes ship transition-ready geometry and the wiring belongs to a future
-  recipe-animation integration change. No acceptance claim is made.
-
-## Implementation notes
-
-- 2026-11-13: the two follow-ups above are recorded as explicit deferrals with
-  their reason and owner change; neither box is ticked because neither
-  capability shipped here.
+- [x] Add the `weight` column once a weighted kernel-density variant exists in
+  the statistical-transform capability. Delivered by the `statistical-weights`
+  change: `SVDensityPlot::weight(...)` passes the column to the weighted
+  `SVStat::KernelDensity`, and the kernel keeps Silverman's bandwidth
+  unweighted (recorded in FDR-002).
+- [ ] Wire transition animation once the transition integration reaches the
+  distribution recipes. The scene already emits transition-ready geometry (one
+  curve per series over a fixed grid).

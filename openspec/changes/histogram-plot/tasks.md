@@ -59,21 +59,10 @@
 
 ## 8. Deferred (recorded, not ticked)
 
-- Deferred (decision 2026-11-13): weighted binning stays out of scope because
-  the shipped `SVStat::Bin` kernel does not consume observation weights; a
-  configured `weight` is rejected with an error naming the kernel gap. The
-  weights support belongs to the future `statistical-weights` change (weighted
-  `SVStat::Bin`); this change makes no acceptance claim for it.
-- Deferred (decision 2026-11-13): in-place streaming update stays out of scope;
-  window recomposition is the shipped behaviour, and growing the bars without a
-  redraw belongs to a future recipe-streaming integration change. No acceptance
-  claim is made.
-- Deferred (decision 2026-11-13): recipe-level animation wiring is out of scope;
-  recipes ship transition-ready geometry and the wiring belongs to a future
-  recipe-animation integration change. No acceptance claim is made.
-
-## Implementation notes
-
-- 2026-11-13: the three deferrals above are recorded as explicit decisions with
-  their reason and owner change; no box is ticked because none of the three
-  capabilities shipped here.
+- [x] Weighted binning. Delivered by the `statistical-weights` change: the
+  `SVStat::Bin` kernel now consumes an observation weight column and the
+  recipe's `weight(...)` carries it, replacing the former build-time rejection.
+- [ ] In-place streaming update. `update` recomposes the current window; growing
+  the bars without a redraw belongs to the transition/streaming integration.
+- [ ] Transition wiring. The FDR temporal behaviour is a target, not a claim of
+  this change; the spec records the deferral.
