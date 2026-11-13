@@ -8342,6 +8342,11 @@ path = "examples/pair_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
+name = "wasm_backend"
+path = "examples/wasm_backend.rs"
+required-features = ["render-svg"]
+
+[[example]]
 name = "joint_plot"
 path = "examples/joint_plot.rs"
 required-features = ["render-svg"]
@@ -8375,7 +8380,7 @@ render-vue = ["dep:scienceview_vue"]
 render-angular = ["dep:scienceview_angular"]
 render-tauri = ["dep:scienceview_tauri"]
 render-dioxus = ["dep:scienceview_dioxus"]
-wasm = ["dep:scienceview_wasm"]
+wasm = ["dep:scienceview_wasm", "scienceview_wasm/wasm"]
 # Live updates over standard-library channels; no async runtime in core.
 streaming = ["scienceview_core/streaming"]
 # Live updates over Tokio watch channels.
