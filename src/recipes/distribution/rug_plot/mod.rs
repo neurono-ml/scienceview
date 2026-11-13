@@ -59,11 +59,11 @@ mod concurrency_tests;
 #[path = "large_rug_tests.rs"]
 mod large_rug_tests;
 #[cfg(test)]
-#[path = "option_tests.rs"]
-mod option_tests;
-#[cfg(test)]
 #[path = "observability_tests.rs"]
 mod observability_tests;
+#[cfg(test)]
+#[path = "option_tests.rs"]
+mod option_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
