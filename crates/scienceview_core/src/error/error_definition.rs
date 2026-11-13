@@ -394,4 +394,125 @@ pub enum SVError {
         /// The engine that prepared the program.
         prepared: String,
     },
+
+    /// A dashboard grid was declared with an unusable shape or spacing.
+    #[error("invalid dashboard grid: {message}")]
+    InvalidDashboardGrid {
+        /// What is wrong and how to fix it.
+        message: String,
+    },
+
+    /// A panel placement falls outside the declared grid.
+    #[error(
+        "the panel `{panel}` at row {row}, column {column} with span {row_span}x{column_span} falls outside a {rows}x{columns} grid"
+    )]
+    DashboardPlacementOutOfBounds {
+        /// The offending panel.
+        panel: String,
+        /// The declared first row.
+        row: usize,
+        /// The declared first column.
+        column: usize,
+        /// The declared row span.
+        row_span: usize,
+        /// The declared column span.
+        column_span: usize,
+        /// The number of rows the grid declares.
+        rows: usize,
+        /// The number of columns the grid declares.
+        columns: usize,
+    },
+
+    /// Two dashboard panels occupy the same grid unit.
+    #[error("the dashboard panels `{first}` and `{second}` occupy the same grid unit")]
+    OverlappingDashboardPanels {
+        /// One of the two panels.
+        first: String,
+        /// The other panel.
+        second: String,
+    },
+
+    /// A panel identifier was registered twice.
+    #[error("the dashboard declares the panel `{panel}` more than once")]
+    DuplicateDashboardPanel {
+        /// The repeated identifier.
+        panel: String,
+    },
+
+    /// A dashboard operation named a panel that was never registered.
+    #[error("the dashboard has no panel named `{panel}`")]
+    UnknownDashboardPanel {
+        /// The requested identifier.
+        panel: String,
+    },
+
+    /// A panel or a filter named a shared source that was never registered.
+    #[error("the dashboard has no shared source named `{source_identifier}`")]
+    UnknownDashboardSource {
+        /// The requested identifier.
+        source_identifier: String,
+    },
+
+    /// A shared source identifier was registered twice.
+    #[error("the dashboard registers the shared source `{source_identifier}` more than once")]
+    DuplicateDashboardSource {
+        /// The repeated identifier.
+        source_identifier: String,
+    },
+
+    /// A panel or an event named a linked axis that was never registered.
+    #[error("the dashboard has no linked axis named `{axis}`")]
+    UnknownDashboardAxis {
+        /// The requested identifier.
+        axis: String,
+    },
+
+    /// A linked axis identifier was registered twice.
+    #[error("the dashboard registers the linked axis `{axis}` more than once")]
+    DuplicateDashboardAxis {
+        /// The repeated identifier.
+        axis: String,
+    },
+
+    /// An action targeted a local axis that the linked axis does not serve.
+    #[error(
+        "the linked axis `{axis}` serves the {expected} axis but the action targeted the {found} axis"
+    )]
+    DashboardAxisMismatch {
+        /// The linked axis identifier.
+        axis: String,
+        /// The direction the linked axis was registered with.
+        expected: SVControlAxis,
+        /// The direction the action targeted.
+        found: SVControlAxis,
+    },
+
+    /// A linked selection cascade exceeded its depth budget and was stopped.
+    #[error(
+        "the linked selection cascade reached depth {depth}, beyond the configured budget of {budget}"
+    )]
+    LinkedSelectionCycle {
+        /// The depth that exceeded the budget.
+        depth: usize,
+        /// The configured maximum depth.
+        budget: usize,
+    },
+
+    /// A panel produced markup the dashboard cannot place in a cell.
+    #[error("the panel `{panel}` did not produce a placeable SVG fragment: {message}")]
+    InvalidDashboardPanelFragment {
+        /// The offending panel.
+        panel: String,
+        /// Why the fragment was rejected.
+        message: String,
+    },
+
+    /// A control action was routed to a dashboard path that does not serve it.
+    #[error("a dashboard cannot route the `{action}` control action; {alternative}")]
+    UnsupportedDashboardAction {
+        /// The action family that was rejected.
+        action: &'static str,
+        /// The documented alternative path to use instead.
+        alternative: &'static str,
+    },
 }
