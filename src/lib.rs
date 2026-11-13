@@ -49,8 +49,7 @@ pub use scienceview_core::{
 };
 
 // Chart recipes: the public chart surface composed from the closed kernels.
-#[path = "recipes/mod.rs"]
-pub mod sv_recipes;
+pub mod recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;

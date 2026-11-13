@@ -5,5 +5,4 @@
 //! the core stays a kernel library, and every family owns a module that
 //! registers its charts (`docs/FDRs/patterns.md`, P4).
 
-#[path = "relational/mod.rs"]
-pub mod sv_relational;
+pub mod relational;

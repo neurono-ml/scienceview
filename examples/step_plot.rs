@@ -5,7 +5,7 @@
 //! cores, the real SVG backend serializes the primitives, and the checked-in
 //! `docs/figures/step_plot.svg` is the result.
 
-use scienceview::sv_recipes::sv_relational::sv_step_plot::SVStepPlot;
+use scienceview::recipes::relational::step_plot::SVStepPlot;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_svg::SVSvgDocument;

@@ -32,9 +32,9 @@ interval — where a sloped line would imply interpolation that does not exist.
 data -> [SVStat::Aggregate] -> values -> [no move] -> [SVScale] -> SVMark::Line
 ```
 
-with the step geometry selected on the line mark. The step shape is a
-*geometry* option of the line, not a separate mark, because it produces the
-same vertices plus one extra per corner.
+with the step geometry expanded by the recipe into explicit line vertices.
+The step shape is a *geometry* expansion of the line, not a separate mark,
+because it produces the same vertices plus one extra per corner.
 
 ## Data contract
 
