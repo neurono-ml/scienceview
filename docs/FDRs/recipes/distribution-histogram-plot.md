@@ -138,16 +138,17 @@ the acceptance checklist does not tick it.
       figure. *Deferred:* `update` recomposes the current window; a
       backend-incremental bin update belongs to the transition/streaming
       integration.
-- [x] The number of bins adapts to the space available, per `layout-engine`.
-      With no boundary option the recipe derives the count from the plot
-      extent at 14 pixels per bin.
+- [x] The number of bins adapts to the space available. With no boundary option
+      the recipe derives the count from its plot extent at 14 logical pixels per
+      bin, clamped to `4..=40`; a layout-driven composition supplies that extent.
 
 ## Open questions
 
 - Should the bin count be derived from the *pixel* width of the axis, or from
       the data only? *Current answer: derived from the available width, with
-      the data range as the other input — the layout engine owns the width,
-      the stat owns the range.*
+      the data range as the other input — the composition owns the width, the
+      stat owns the range. The recipe's plot extent stands in for the width a
+      layout-driven composition will supply.*
 - Should `shrink` be a mark option rather than a recipe option? *Current
       answer: a recipe option, since it changes the bar width, and the bar
       mark carries a width that the recipe computes.*
