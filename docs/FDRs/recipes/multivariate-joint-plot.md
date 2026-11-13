@@ -5,17 +5,18 @@
 | Id | FDR-145 |
 | Name | `SVJointPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 44 — Joint plots](../../src/development-explained/ch44-joint-plot.md) |
+| Example program | [`examples/joint_plot.rs`](../../../examples/joint_plot.rs) |
 
 ## Purpose
 
 `SVJointPlot` shows the relationship between two variables together with the
-marginal distribution of each: a central bivariate plot, with a univariate
-distribution along the bottom and along the left.
+marginal distribution of each: a central bivariate plot, with the univariate
+distribution of `x` along the top and the univariate distribution of `y` along
+the right, matching seaborn's `jointplot` layout.
 
 It is the composition that answers "what does the relationship look like, and
 what do the two marginals look like" in a single figure.
@@ -33,7 +34,7 @@ what do the two marginals look like" in a single figure.
 
 ```
 data -> [no stat] -> values
-     -> central cell:  SVMark::Dot (or a density contour)
+     -> central cell:  SVMark::Dot, SVHexbinPlot, SVDensityContourPlot or SVStat::Fit
      -> marginal cells: the distribution recipe for the variable type
      -> [SVScale per axis] -> three panels sharing a layout
 ```
@@ -42,9 +43,9 @@ data -> [no stat] -> values
 
 | Column | Role | Type | Required |
 |---|---|---|---|
-| `x` | the horizontal variable | continuous or nominal | yes |
-| `y` | the vertical variable | continuous or nominal | yes |
-| `series` | grouping | nominal | no |
+| `x` | the horizontal variable | continuous | yes |
+| `y` | the vertical variable | continuous | yes |
+| `series` | grouping | nominal, encoded numerically | no |
 
 Accepted representations: dense, sparse, streaming.
 
@@ -58,9 +59,9 @@ marginals.
 | Channel | Encodes | Scale |
 |---|---|---|
 | x, y in the central panel | the two variables | `Continuous` |
-| x in the bottom margin | the distribution of `x` | `Continuous` |
-| y in the left margin | the distribution of `y` | `Continuous` |
-| colour | `series` | `Nominal` |
+| x in the top margin | the distribution of `x` | `Continuous` |
+| y in the right margin | the distribution of `y` | `Continuous` |
+| colour | `series` | group palette |
 
 ## Configuration
 
@@ -72,12 +73,24 @@ marginals.
 | `marginal_kind` | `SVJointMarginal` | `Auto` | seaborn (`hist`, `kde`, `box`) |
 | `marker` | `SVDotShape` | `Circle` | seaborn |
 | `alpha` | `f32` | `1.0` | seaborn |
-| `reg_model` | `SVFitModel` | `Linear` | seaborn `kind='reg'` |
+| `regression_model` | `SVJointRegressionModel` | `Linear` | seaborn `kind='reg'` |
+| `missing_value_policy` | `SVJointMissingValuePolicy` | `Omit` | seaborn `dropna` |
+| `title`, `x_label`, `y_label` | `Option<String>` | column names | — |
+| `backend` | `SVBackendKind` | required | — |
+
+`SVJointKind` is `Scatter`, `Hexbin`, `DensityContour` or `Regression`; the hexbin
+form is covered by the FDR's `kind` enumeration through the "bivariate density"
+role rather than a separate seaborn name. `SVJointMarginal` is `Auto`,
+`Histogram`, `Density` or `Rug`; seaborn's `box` marginal is not implemented and
+is a documented follow-up. `Auto` resolves to `Density` for a density contour and
+to `Histogram` for every other central form.
 
 ## Theme
 
-Consumes `mark.palette`, `mark.size`, `mark.area_opacity`, `text.*`, axis
-tokens.
+Consumes the built-in decoration style (`text.*` and axis tokens) and the
+`SVMarkTheme` defaults for marker size, line width and default mark colour. The
+`series` palette is the built-in scale palette; a theme-aware palette override is
+not part of this change.
 
 ## Temporal
 
@@ -85,7 +98,7 @@ tokens.
 |---|---|
 | point position | interpolates in the central panel |
 | marginal distribution | re-computed per frame and morphed |
-| kind change | the central panel swaps between the scatter, the contour and the fit |
+| kind change | the central panel swaps between the scatter, the hexbin, the contour and the fit |
 
 ## Backend notes
 
@@ -100,16 +113,37 @@ tokens.
 
 ## Acceptance
 
-- [ ] The central panel shows the bivariate relationship and the two margins
-      show the corresponding marginals.
-- [ ] The three panels share their axes, so a point's position in the centre
-      agrees with the marginal's scale.
-- [ ] The kind option switches the central panel between the scatter, the
-      density contour and the regression.
-- [ ] Dense, sparse and streaming inputs give the same figure.
+- [x] The central panel shows the bivariate relationship and the two margins
+      show the corresponding marginals. Evidence:
+      `joint_plot_tests::the_default_composition_builds_the_three_panels`
+      asserts the top marginal sits above the central panel and the right
+      marginal to its right.
+- [x] The three panels share their axes, so a point's position in the centre
+      agrees with the marginal's scale. Evidence:
+      `joint_plot_tests::the_three_panels_share_the_central_axes` asserts the
+      scene's horizontal and vertical scales span exactly the central panel.
+- [x] The kind option switches the central panel between the scatter, the
+      hexbin, the density contour and the regression. Evidence:
+      `joint_plot_tests::every_central_kind_composes`.
+- [x] Dense, sparse and streaming inputs give the same figure. Evidence:
+      `parity_tests::dense_sparse_and_streaming_agree`.
+
+The scene's serializers are covered by
+`render_tests::the_svg_kind_serializes_the_svg_document`,
+`render_tests::the_native_kind_rasterizes_the_native_frame` and
+`render_tests::a_kind_without_a_recipe_serializer_reports_its_capability`; the
+operation span by
+`observability_tests::a_compose_records_the_backend_representation_and_point_count`;
+thread safety by
+`concurrency_tests::the_same_figure_renders_from_several_threads`.
+
+Transition and animation wiring is deferred to the transition integration; the
+composed geometry is transition-ready.
 
 ## Open questions
 
 - Should the joint plot be a figure with three panels (one figure, three
-      layout regions) or three figures composed by the dashboard? *Open — the
-      answer determines whether the recipe owns a layout or borrows one.*
+      layout regions) or three figures composed by the dashboard? **Resolved in
+      this implementation: one figure with three layout regions.** The recipe
+      names the regions and hands their relative weights to `sv_layout`, which
+      solves the rectangles, so a viewport change re-solves the whole figure.

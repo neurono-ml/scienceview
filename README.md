@@ -77,6 +77,7 @@ cargo run --example area_plot
 cargo run --example density_contour_plot
 cargo run --example density_plot --features render-svg
 cargo run --example hexbin_plot --features render-svg
+cargo run --example joint_plot --features render-svg
 cargo run --example parallel_coordinates_plot
 cargo run --example image_plot --features render-svg
 cargo run --example heatmap_plot --features render-svg
@@ -342,6 +343,28 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](docs/figures/hexbin_plot.svg)
+
+Joint plot (`examples/joint_plot.rs`) composes the `SVJointPlot` recipe: a
+central bivariate panel with the marginal distribution of each variable on the
+top and the right, all sharing the central scales. The central form is chosen
+with `kind(...)` — scatter, hexbin, density contour or regression — and the
+marginal form with `marginal_kind(...)` — histogram, density or rug:
+
+```rust
+use scienceview::sv_recipes::sv_multivariate::sv_joint_plot::SVJointPlot;
+
+let scene = SVJointPlot::builder()
+    .data_source(&table)
+    .x("height")
+    .y("weight")
+    .series("cohort")
+    .alpha(0.7)
+    .backend(SVBackendKind::Svg)
+    .build()?;
+let document = scene.compose()?.to_svg()?;
+```
+
+![Joint distribution of height and weight](docs/figures/joint_plot.svg)
 Parallel coordinates (`examples/parallel_coordinates_plot.rs`) composes the
 `SVParallelCoordinatesPlot` recipe: every continuous variable gets its own
 vertical axis, every observation is a polyline through those axes, and an

@@ -6,6 +6,12 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "joint_plot/mod.rs"]
+pub mod sv_joint_plot;
+pub use sv_joint_plot::{
+    SVJointFrame, SVJointPlot, SVJointPlotBuilder, SVJointRenderOutput, SVJointScene,
+};
+
 #[path = "pair_plot/mod.rs"]
 pub mod sv_pair_plot;
 pub use sv_pair_plot::{
