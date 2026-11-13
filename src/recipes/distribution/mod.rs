@@ -12,6 +12,13 @@ pub use sv_box_plot::{
     SVBoxPlot, SVBoxPlotBuilder, SVBoxRenderOutput, SVBoxSummary, SVWhiskerRule,
 };
 
+#[path = "boxen_plot/mod.rs"]
+pub mod sv_boxen_plot;
+pub use sv_boxen_plot::{
+    SVBoxenLevel, SVBoxenPlot, SVBoxenPlotBuilder, SVBoxenRenderOutput, SVBoxenSummary,
+    SVBoxenTailRule,
+};
+
 #[path = "density_contour_plot/mod.rs"]
 pub mod sv_density_contour_plot;
 pub use sv_density_contour_plot::{
@@ -37,3 +44,16 @@ pub use sv_histogram_plot::{SVBarElement, SVHistogramPlot, SVHistogramPlotBuilde
 #[path = "rug_plot/mod.rs"]
 pub mod sv_rug_plot;
 pub use sv_rug_plot::{SVRugPlot, SVRugPlotBuilder, SVRugRenderOutput, SVRugScene};
+
+#[path = "strip_plot/mod.rs"]
+pub mod sv_strip_plot;
+pub use sv_strip_plot::{
+    SVStripMissingValuePolicy, SVStripPlot, SVStripPlotBuilder, SVStripRenderOutput, SVStripScene,
+};
+
+#[path = "violin_plot/mod.rs"]
+pub mod sv_violin_plot;
+pub use sv_violin_plot::{
+    SVViolinMissingValuePolicy, SVViolinPlot, SVViolinPlotBuilder, SVViolinRenderOutput,
+    SVViolinScale,
+};
