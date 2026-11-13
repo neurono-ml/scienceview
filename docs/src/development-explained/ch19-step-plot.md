@@ -65,9 +65,12 @@ representations:
 
 `extraction/cursor.rs` dispatches on a column exactly once with
 `SVColumnView::dispatch`, then iterates the representation through a small
-cursor. Nothing is densified, and nothing waits for new data. The recipe reads
-`x`, `y` and the optional `series` column, checks that their lengths agree, and
-then builds owned samples in input order.
+cursor. Nothing is densified, and nothing waits for new data. A sparse ordering
+column needs one extra thought: every unlisted position has `x = 0`, and the
+duplicate-`x` policy collapses those positions to a single observation, so the
+reader visits the stored entries plus that one representative position instead
+of expanding the column. Aggregation needs every observation of the group, so it
+falls back to the full logical length.
 
 Non-finite values are *missing*, not errors: the pair is skipped. If every row
 is missing, the operation reports `SVError::EmptyInput` instead of drawing a
@@ -105,15 +108,22 @@ stat up front with `SVError::InvalidConfiguration`.
 
 The optional `series` column splits the samples into groups. Each group gets its
 own colour from the default scale palette, its own markers and its own legend
-entry. The first-appearance order is preserved, so a live figure does not
-reshuffle its series when a new sample arrives.
+entry. Markers sit on the original samples, never on the expanded corners: a
+step corner is geometry, not a measurement. The first-appearance order is
+preserved, so a live figure does not reshuffle its series when a new sample
+arrives.
+
+The horizontal axis is continuous by default and can be declared temporal with
+`.x_scale(SVScaleKind::Temporal)`; the scale kernel and the axis decoration
+consume either kind unchanged.
 
 ## The builder and the explicit backend
 
 `SVStepPlot::builder()` is the only public constructor. It requires a data
 source, an `x` and a `y` column, and an explicit `backend(SVBackendKind)`; there
-is no automatic backend. `execution_mode(...)` defaults to `Automatic`, and the
-built figure carries the configured kind so every operation can record it.
+is no automatic backend. `execution_mode(...)` defaults to `Automatic`, the
+horizontal scale defaults to `Continuous` and accepts `Temporal`, and the built
+figure carries the configured kind so every operation can record it.
 
 `build()` is where every invalid configuration fails — before any pixel is
 drawn. It checks that the columns exist, that a numeric channel is not a

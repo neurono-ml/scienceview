@@ -17,7 +17,8 @@ released.
   composes the documented pipeline — source columns, optional
   `SVStat::Aggregate`, scales and `SVMark::Line` — and exposes `SVStepPosition`
   (`Before`, `After`, `Center`), `SVStepDuplicatePolicy` (`LastWins`,
-  `FirstWins`), `x`/`y`/`series` columns, line width, dash, markers, aggregate
+  `FirstWins`), `x`/`y`/`series` columns, a continuous or temporal `x` scale,
+  line width, dash, markers, aggregate
   and a title. Dense, sparse and streaming columns are read through the single
   `SVDataSource` boundary without densifying sparse storage or blocking on a
   stream; the operation span carries the configured backend kind, the
