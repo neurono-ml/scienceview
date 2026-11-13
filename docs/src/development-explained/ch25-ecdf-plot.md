@@ -132,10 +132,13 @@ the curve, and the companion test
 that each riser shares an `x` and each run shares a `y`.
 
 A complementary curve starts at the total instead of zero and descends with the
-same geometry; horizontal orientation swaps which channel carries the value and
-which carries the probability. In both cases the axes titles follow the
-orientation, so the reader is never told to read a vertical value on the wrong
-axis.
+same geometry. Horizontal orientation mirrors the very same vertices: the step
+is expanded in (value, probability) space and the two channels are swapped
+afterwards, so the risers run along the probability channel at a constant
+observation and the curve still starts at probability zero on the minimum
+observation — never at an invented value zero. The axes titles follow the
+orientation as well, so the reader is never told to read a vertical value on
+the wrong axis.
 
 ## Series and missing values
 
@@ -146,7 +149,9 @@ legend appears only when there is more than one curve.
 
 Missing data is omitted, not interpolated: a non-finite observation, or a row
 whose series code is non-finite, simply does not enter its group. If nothing
-finite remains, the kernel returns `EmptyInput` and the render reports it. The
+finite remains, the recipe reports `EmptyInput { operation: "ecdf_plot" }`
+before the kernel is asked for a curve that cannot exist, so callers see the
+chart operation rather than a kernel name. The
 test `non_finite_observations_are_omitted` checks that the surviving curve's
 probabilities are normalised over the surviving observations, not over the
 original row count.
@@ -157,7 +162,8 @@ The data boundary is the same as every recipe (spec `data-view-boundary`):
 
 - **Dense** columns are borrowed slices.
 - **Sparse** columns borrow their indices and stored values. Without a `series`
-  column the sparse view reaches `SVStat::EmpiricalCdf` unchanged: the kernel
+  column, and while every stored value is finite, the sparse view reaches
+  `SVStat::EmpiricalCdf` unchanged: the kernel
   sorts the stored entries and folds the implicit zeros analytically, so a
   column with a million logical zeros is never expanded. The test
   `a_sparse_column_is_never_expanded` uses a logical length of `1_000_000` with
@@ -176,8 +182,9 @@ materialised as a single dense buffer: each group owns only its own values.
 
 `render`, `update` and `save` each emit one operation span carrying the
 configured backend kind, the widest representation of the resolved columns and
-the number of finite observations. The span is created before the geometry is
-composed, so the count is the real number the scene draws;
+the number of finite observations behind the curves. The span is created before
+the geometry is composed, so the count describes exactly the data the scene
+draws from;
 `render_span_records_backend_representation_and_points` and
 `render_span_counts_only_finite_observations` read the fields through a real
 subscriber.
