@@ -64,7 +64,7 @@ Every example below is a runnable program under `examples/` whose figure is gene
 cargo run --example line_plot_svg
 cargo run --example bar_chart_svg
 cargo run --example scatter_svg
-cargo run --example regression_plot
+cargo run --example regression_plot --features render-svg
 ```
 
 Line plot (`examples/line_plot_svg.rs`) renders a built figure through the
@@ -143,7 +143,8 @@ Regression plot (`examples/regression_plot.rs`) composes the real
 and the scatter, line and ribbon marks sharing one axes and one legend.
 
 ```rust
-use scienceview::recipes::relational::SVRegressionPlotBuilder;
+use scienceview::sv_recipes::sv_relational::SVRegressionPlotBuilder;
+use std::path::Path;
 
 let plot = SVRegressionPlotBuilder::new()
     .data_source(&table)
@@ -154,7 +155,7 @@ let plot = SVRegressionPlotBuilder::new()
     .title("Sepal width against petal length")
     .backend(SVBackendKind::Svg)
     .build()?;
-let composition = plot.compose()?;
+plot.save(Path::new("regression_plot.svg"))?;
 ```
 
 Model selection is a value of `SVFitModel` (`Linear`, `Polynomial`,

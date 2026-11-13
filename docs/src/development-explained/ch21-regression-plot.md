@@ -63,7 +63,7 @@ called, so the explicit backend rule cannot be bypassed. Every other option is
 optional and can be applied at any stage.
 
 ```rust
-use scienceview::recipes::relational::SVRegressionPlotBuilder;
+use scienceview::sv_recipes::sv_relational::SVRegressionPlotBuilder;
 use scienceview_core::sv_stat::SVFitModel;
 
 let plot = SVRegressionPlotBuilder::new()
@@ -90,16 +90,18 @@ never a recipe-computed copy.
 ## The data boundary, once per operation
 
 `compose` resolves every bound column once, through `SVDataSource`. Dense and
-streaming columns pair by logical position. Two sparse columns pair only when
-they share the identical stored support: the fit kernel rejects sparse storage
-because two independently sparse columns describe implicit zeros at different
-positions, and the recipe must not quietly densify one to get around that. A
-mismatched support is rejected with the same `UnsupportedRepresentation` and
-the same alternative path the kernel documents. The parity test
-`dense_sparse_and_streaming_agree_within_the_tolerance` compares the three
-representations to `1e-9`, and
-`a_sparse_view_is_paired_through_its_stored_support_without_zeros` proves that
-four stored entries in a length-six column stay four observations, not six.
+streaming columns pair by logical position. A sparse view is accepted only when
+its stored support covers its whole logical length: an implicit zero is an
+observation, and fitting only the stored entries would silently produce a
+different model from the dense twin of the same data. A view that leaves any
+position unstored is rejected with `UnsupportedRepresentation`, naming dense
+and streaming columns as the alternative; the recipe never densifies it and
+never drops the implicit zeros. The parity test
+`a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows`
+compares a sparse column that stores its zeros explicitly to the dense twin to
+`1e-9`, and `a_sparse_column_with_implicit_zeros_is_rejected` proves that the
+lossy view is refused instead of quietly fitting four observations in a
+length-six column.
 
 A pair is dropped when the predictor, the response or the group code is not
 finite. The kernel never sees a missing value; the chart counts what it dropped
@@ -114,16 +116,21 @@ The companion tests read as the acceptance record of the FDR:
 |---|---|
 | `the_linear_fit_recovers_the_generating_line` | the coefficients are `1.0` and `2.0`, exactly the kernel's result |
 | `a_polynomial_order_is_fitted_not_interpolated` | order two recovers a quadratic and keeps the 128-sample grid |
-| `the_confidence_band_brackets_the_curve` | every prediction lies inside the kernel's lower and upper samples |
+| `every_documented_model_recovers_its_generating_coefficients` | all five models recover their known coefficients, not just a finite curve |
+| `the_confidence_band_is_the_kernel_interval` | the recipe's lower and upper samples are byte-for-byte the kernel's interval values |
 | `each_series_receives_its_own_fit_and_colour` | two group codes produce two fits and two palette colours |
 | `a_non_finite_pair_is_dropped_before_the_fit` | two invalid pairs leave three observations and the same slope |
 | `incomplete_and_inconsistent_configurations_fail_at_build_time` | missing columns, equal columns, a zero order, an invalid confidence and an inverted domain all fail before rendering |
 | `the_same_chart_composes_concurrently_with_identical_results` | eight threads compose the same built chart and get identical output |
 | `composing_records_the_backend_representation_and_point_count` | the operation span carries `backend.kind`, `representation`, `points`, `duration` and the outcome |
+| `a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows` | an explicitly stored sparse column and its dense twin fit identically |
+| `a_sparse_column_with_implicit_zeros_is_rejected` | a lossy sparse view is refused with the dense/streaming alternative |
+| `the_checked_in_figure_is_the_public_render_output` | the checked-in SVG is exactly what `render()` returns |
 
 The SVG tests add determinism: rendering twice is byte-identical, the document
-is self-contained, an unsupported backend is refused explicitly, and `save`
-writes exactly what `render` returned.
+is self-contained, a non-SVG configured kind is refused with the typed
+missing-capability error carrying that kind, and `save` writes exactly what
+`render` returned.
 
 ## Extrapolation, honestly
 
@@ -146,13 +153,15 @@ Doing so would be a second implementation of the fit under a different name.
 - **A residual plot.** Deferred from seaborn's `residplot`; it is a separate
   chart, not a mode of this one.
 - **A point-by-point animation of the curve.** The kernel exposes coefficients,
-  so a transition interpolates the coefficients and recomputes the curve. An
-  interpolated sample path would pass through nonsense for a polynomial.
+  so a future transition can interpolate the coefficients and recompute the
+  curve. An interpolated sample path would pass through nonsense for a
+  polynomial. Transitions are deferred to the transition integration: this
+  change has no transition surface and draws the chart statically.
 
 ## The figure
 
-Run `cargo run --example regression_plot` to regenerate the picture from the
-real builder:
+Run `cargo run --example regression_plot --features render-svg` to regenerate
+the picture through the public `save()` path from the real builder:
 
 ![Two fitted regressions with confidence bands](../assets/regression_plot.svg)
 
