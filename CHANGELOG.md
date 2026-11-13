@@ -12,6 +12,11 @@ released.
 
 ### Added
 
+- The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  two variables shown together with the marginal distribution of each, on the
+  top and the right, sharing the central scales. It composes the scatter mark,
+  the hexbin and density-contour recipes, `SVStat::Fit`, `SVStat::Bin` and
+  `SVStat::KernelDensity`, and solves its three panels through `sv_layout`.
 - The multivariate recipe `SVParallelCategoriesPlot`
   (`scienceview::sv_recipes::sv_multivariate`): a set of categorical axes whose
   observations become aggregated ribbons between adjacent axes. The chart is
