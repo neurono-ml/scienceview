@@ -2,8 +2,8 @@
 
 ## Engine abstraction
 
-- [ ] Write the failing tests for loading, invoking and reloading.
-- [ ] Implement the engine trait and the host execution path.
+- [x] Write the failing tests for loading, invoking and reloading.
+- [x] Implement the engine trait and the host execution path.
 
 ## Lua and TypeScript engines
 
