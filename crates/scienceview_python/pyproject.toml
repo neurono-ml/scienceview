@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "scienceview"
+dynamic = ["version"]
 description = "Scientific visualization for Python: builder-style figures with explicit backends and streaming updates."
 readme = "README.md"
 requires-python = ">=3.9"
