@@ -56,6 +56,9 @@ mod observability_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
+#[cfg(all(test, any(feature = "render-svg", feature = "render-native")))]
+#[path = "render_tests.rs"]
+mod render_tests;
 #[cfg(test)]
 #[path = "scatter_plot_tests.rs"]
 mod scatter_plot_tests;

@@ -7,6 +7,8 @@
 
 use super::SVScatterLegendPlacement;
 use crate::sv_decoration::SVDecorationPrimitive;
+#[cfg(feature = "render-native")]
+use crate::sv_error::SVError;
 use crate::sv_layout::{SVResolvedRectangle, SVViewport};
 use crate::sv_mark::SVMarkGeometry;
 use crate::sv_scale::SVColour;
@@ -96,5 +98,48 @@ impl SVScatterScene {
     /// Returns the placement the builder requested.
     pub fn legend_placement(&self) -> SVScatterLegendPlacement {
         self.legend_placement
+    }
+
+    /// Serializes the scene as a self-contained SVG document.
+    ///
+    /// Only available with the `render-svg` feature, which makes the SVG
+    /// backend crate available; the scene itself is backend-agnostic.
+    #[cfg(feature = "render-svg")]
+    pub fn to_svg(&self) -> String {
+        let mut document = scienceview_svg::SVSvgDocument::new(self.viewport)
+            .with_title(
+                self.title
+                    .clone()
+                    .unwrap_or_else(|| "scatter plot".to_string()),
+            )
+            .with_description(
+                self.description
+                    .clone()
+                    .unwrap_or_else(|| "scatter plot".to_string()),
+            )
+            .with_background(self.background);
+        document.push_decoration_primitives(&self.decoration_primitives_before_marks);
+        for geometry in &self.mark_geometries {
+            document.push_mark_geometry(geometry);
+        }
+        document.push_decoration_primitives(&self.decoration_primitives_after_marks);
+        document.to_svg()
+    }
+
+    /// Rasterizes the scene with the from-scratch native renderer.
+    ///
+    /// Only available with the `render-native` feature. The same scene the SVG
+    /// backend serializes is drawn into an RGBA frame, which is what makes the
+    /// two backends comparable within rasterization differences.
+    #[cfg(feature = "render-native")]
+    pub fn to_native_frame(&self) -> Result<scienceview_native::SVNativeFrame, SVError> {
+        let mut canvas = scienceview_native::SVRasterCanvas::new(&self.viewport);
+        canvas.fill(self.background);
+        canvas.draw_decoration_primitives(&self.decoration_primitives_before_marks);
+        for geometry in &self.mark_geometries {
+            canvas.draw_mark_geometry(geometry);
+        }
+        canvas.draw_decoration_primitives(&self.decoration_primitives_after_marks);
+        Ok(canvas.to_frame())
     }
 }
