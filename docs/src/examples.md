@@ -192,6 +192,8 @@ let scene = SVCountPlot::builder()
     .series_labels(&["Biscoe", "Dream", "Torgersen"])
     .multiple(SVCountMultiple::Dodge)
     .title("Penguins observed per species and island")
+```
+
 ## Swarm plot
 
 `examples/swarm_plot.rs` composes the `SVSwarmPlot` recipe: `SVMove::Swarm`
@@ -231,6 +233,8 @@ let plot = SVBoxenPlotBuilder::new()
     .series("scenario")
     .show_outliers(true)
     .title("Letter-value distribution by station and scenario")
+```
+
 ## Point plot
 
 `examples/point_plot.rs` composes the `SVPointPlot` recipe: `SVStat::Aggregate`
