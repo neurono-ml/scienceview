@@ -19,5 +19,7 @@
 
 ## Acceptance
 
-- [x] Add the example, generated figure and book chapter (book branch).
+- [x] Add the page example and the book chapter (book branch). A self-contained
+  page is not a vector figure, so this change generates no SVG under
+  `docs/figures/`.
 - [x] Run the four gates and open the ADR issue.
