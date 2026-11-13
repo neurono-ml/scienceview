@@ -62,6 +62,12 @@ pub use render_output::{SVSplomFrame, SVSplomRenderOutput};
 pub use scene::{SVSplomCell, SVSplomCellKind, SVSplomScene};
 
 #[cfg(test)]
+#[path = "concurrency_tests.rs"]
+mod concurrency_tests;
+#[cfg(test)]
+#[path = "observability_tests.rs"]
+mod observability_tests;
+#[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
 #[cfg(test)]
