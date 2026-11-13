@@ -1,12 +1,21 @@
 //! Turning the data source into the data-space areas the marks draw.
 //!
-//! The preparation reads each column once through the data boundary, orders the
-//! samples on the horizontal axis, applies the missing-value policy and — when
-//! the chart is stacked — hands the values to [`SVMove::Stack`]. The stack is
-//! never reimplemented here: the kernel produces both the cumulative top and the
-//! per-point baseline, and the renderer only places them.
+//! The preparation reads each column once through the data boundary and keeps
+//! the representation it arrived in: a dense or streaming column is borrowed
+//! in place, while a sparse column is read through its stored entries and its
+//! implicit zeros. Only the logical positions the geometry needs become
+//! vertices, so a million-slot sparse column stays proportional to its stored
+//! slots instead of its logical length.
+//!
+//! The stack is never reimplemented here: [`SVMove::Stack`] produces both the
+//! cumulative top and the per-point baseline, and the renderer only places
+//! them.
 
-use scienceview_core::sv_data::{SVColumnSnapshot, SVColumnView, SVRepresentation};
+use std::collections::BTreeSet;
+
+use scienceview_core::sv_data::{
+    SVColumnSnapshot, SVColumnView, SVRepresentation, SVSparseView, SVStreamingView,
+};
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_move::{SVMove, SVMoveRequest, SVMoveSequence};
 use scienceview_core::sv_scale::{SVColour, sv_default_scale_palette};
@@ -37,6 +46,100 @@ pub(crate) struct SVPreparedSegment {
     pub(crate) baseline: Option<Vec<f64>>,
 }
 
+/// A column resolved once, keeping its representation instead of copying it.
+///
+/// The accessor never densifies a sparse view: unstored positions answer their
+/// implicit zero, and the geometry walks the stored entries plus the boundaries
+/// of each implicit-zero gap.
+#[derive(Clone, Copy)]
+enum SVColumnAccess<'a> {
+    Dense(&'a [f64]),
+    Sparse(SVSparseView<'a>),
+    Streaming(SVStreamingView<'a>),
+}
+
+impl<'a> SVColumnAccess<'a> {
+    fn resolve(view: SVColumnView<'a>) -> Self {
+        view.dispatch(
+            Self::Dense,
+            |sparse| Self::Sparse(*sparse),
+            |streaming| Self::Streaming(*streaming),
+        )
+    }
+
+    fn length(&self) -> usize {
+        match self {
+            Self::Dense(values) => values.len(),
+            Self::Sparse(sparse) => sparse.length(),
+            Self::Streaming(streaming) => streaming.length(),
+        }
+    }
+
+    fn value_at(&self, index: usize) -> f64 {
+        match self {
+            Self::Dense(values) => values.get(index).copied().unwrap_or(0.0),
+            Self::Sparse(sparse) => sparse.value_at(index).unwrap_or(0.0),
+            Self::Streaming(streaming) => streaming.values().get(index).copied().unwrap_or(0.0),
+        }
+    }
+
+    fn is_sparse(&self) -> bool {
+        matches!(self, Self::Sparse(_))
+    }
+
+    /// Adds the logical positions that carry the shape of a sparse column.
+    ///
+    /// Every stored entry is a vertex. Between two stored entries, only the two
+    /// positions that border the stored runs are needed: the implicit zeros in
+    /// between are collinear, so they add no pixel and must not become a vertex
+    /// per logical slot. The first and last logical positions keep the area's
+    /// horizontal domain complete.
+    fn collect_geometry_indices(&self, indices: &mut BTreeSet<usize>, length: usize) {
+        let Self::Sparse(sparse) = self else {
+            return;
+        };
+        if length == 0 {
+            return;
+        }
+        if length == 1 {
+            indices.insert(0);
+            return;
+        }
+
+        let mut previous: Option<usize> = None;
+        for (index, _) in sparse.stored_entries() {
+            indices.insert(index);
+            match previous {
+                None => {
+                    indices.insert(0);
+                    if index > 0 {
+                        indices.insert(index - 1);
+                    }
+                }
+                Some(previous_index) if index > previous_index + 1 => {
+                    indices.insert(previous_index + 1);
+                    indices.insert(index - 1);
+                }
+                Some(_) => {}
+            }
+            previous = Some(index);
+        }
+
+        match previous {
+            None => {
+                indices.insert(0);
+                indices.insert(length - 1);
+            }
+            Some(last) => {
+                indices.insert(length - 1);
+                if last + 1 < length {
+                    indices.insert(last + 1);
+                }
+            }
+        }
+    }
+}
+
 /// Resolves the columns and computes the areas in data space.
 ///
 /// # Errors
@@ -55,38 +158,45 @@ pub(crate) fn sv_prepare_area(
         None => None,
     };
 
-    let x_view = x_snapshot.column_view();
-    let y_view = y_snapshot.column_view();
-    let series_view = series_snapshot.as_mut().map(SVColumnSnapshot::column_view);
+    let x_access = SVColumnAccess::resolve(sv_snapshot_view(&mut x_snapshot));
+    let y_access = SVColumnAccess::resolve(sv_snapshot_view(&mut y_snapshot));
+    let series_access = series_snapshot
+        .as_mut()
+        .map(sv_snapshot_view)
+        .map(SVColumnAccess::resolve);
 
-    let representation = y_view.representation();
-    let length = x_view.length();
-    let x_values = sv_read_column(x_view);
-    let y_values = sv_read_column(y_view);
-    let series_values = series_view.map(sv_read_column);
-
-    if y_values.len() != length {
+    let representation = y_access.representation();
+    let length = x_access.length();
+    if y_access.length() != length {
         return Err(SVError::MismatchedLengths {
             name: configuration.y.to_string(),
             expected: length,
-            actual: y_values.len(),
+            actual: y_access.length(),
         });
     }
-    if let Some(values) = &series_values {
-        if values.len() != length {
+    if let Some(access) = &series_access {
+        if access.length() != length {
             return Err(SVError::MismatchedLengths {
                 name: configuration.series.unwrap_or("series").to_string(),
                 expected: length,
-                actual: values.len(),
+                actual: access.length(),
             });
         }
     }
 
-    let groups = sv_group_indices(series_values.as_deref(), length)?;
+    let indices = sv_sample_indices(&x_access, &y_access, length);
+    let groups = sv_group_indices(series_access.as_ref(), &indices)?;
     let palette = sv_default_scale_palette();
 
     if configuration.stack {
-        let series = sv_stack_series(configuration, &groups, &x_values, &y_values, &palette)?;
+        let series = sv_stack_series(
+            configuration,
+            &groups,
+            &indices,
+            &x_access,
+            &y_access,
+            &palette,
+        )?;
         let point_count = series
             .iter()
             .flat_map(|series| series.segments.iter())
@@ -101,8 +211,8 @@ pub(crate) fn sv_prepare_area(
 
     let mut series = Vec::with_capacity(groups.len());
     let mut point_count = 0;
-    for (ordinal, indices) in groups.iter().enumerate() {
-        let points = sv_ordered_points(configuration, &x_values, &y_values, indices)?;
+    for (ordinal, group) in groups.iter().enumerate() {
+        let points = sv_ordered_points(configuration, &x_access, &y_access, group)?;
         let segments = sv_split_runs(points);
         point_count += segments
             .iter()
@@ -121,31 +231,52 @@ pub(crate) fn sv_prepare_area(
     })
 }
 
-/// Reads one column without ever expanding a sparse view through a dense buffer.
-fn sv_read_column(view: SVColumnView<'_>) -> Vec<f64> {
-    view.dispatch(
-        |dense| dense.to_vec(),
-        |sparse| {
-            (0..sparse.length())
-                .map(|index| sparse.value_at(index).unwrap_or(0.0))
-                .collect()
-        },
-        |streaming| streaming.values().to_vec(),
-    )
+fn sv_snapshot_view<'snapshot>(
+    snapshot: &'snapshot mut SVColumnSnapshot<'_>,
+) -> SVColumnView<'snapshot> {
+    snapshot.column_view()
+}
+
+impl SVColumnAccess<'_> {
+    fn representation(&self) -> SVRepresentation {
+        match self {
+            Self::Sparse(_) => SVRepresentation::Sparse,
+            Self::Dense(_) => SVRepresentation::Dense,
+            Self::Streaming(_) => SVRepresentation::Streaming,
+        }
+    }
+}
+
+/// Selects the logical positions whose value can change a vertex.
+///
+/// A dense or streaming column already owns one value per logical position, so
+/// every position is a candidate. When either channel is sparse, only the
+/// stored entries and the boundaries of the implicit-zero gaps are needed; the
+/// union of both channels keeps the point where each channel changes shape.
+fn sv_sample_indices(x: &SVColumnAccess<'_>, y: &SVColumnAccess<'_>, length: usize) -> Vec<usize> {
+    if !x.is_sparse() && !y.is_sparse() {
+        return (0..length).collect();
+    }
+
+    let mut indices = BTreeSet::new();
+    x.collect_geometry_indices(&mut indices, length);
+    y.collect_geometry_indices(&mut indices, length);
+    indices.into_iter().collect()
 }
 
 /// Groups the sample indices by their distinct series code, in first-appearance
 /// order.
 fn sv_group_indices(
-    series_values: Option<&[f64]>,
-    length: usize,
+    series: Option<&SVColumnAccess<'_>>,
+    indices: &[usize],
 ) -> Result<Vec<Vec<usize>>, SVError> {
-    let Some(values) = series_values else {
-        return Ok(vec![(0..length).collect()]);
+    let Some(series) = series else {
+        return Ok(vec![indices.to_vec()]);
     };
 
     let mut groups: Vec<(f64, Vec<usize>)> = Vec::new();
-    for (index, code) in values.iter().copied().enumerate() {
+    for index in indices.iter().copied() {
+        let code = series.value_at(index);
         if !code.is_finite() {
             return Err(SVError::InvalidConfiguration {
                 message: format!(
@@ -154,38 +285,38 @@ fn sv_group_indices(
             });
         }
         match groups.iter_mut().find(|(group, _)| *group == code) {
-            Some((_, indices)) => indices.push(index),
+            Some((_, group)) => group.push(index),
             None => groups.push((code, vec![index])),
         }
     }
 
-    Ok(groups.into_iter().map(|(_, indices)| indices).collect())
+    Ok(groups.into_iter().map(|(_, group)| group).collect())
 }
 
 /// Orders one series on the horizontal axis and records the missing samples.
 fn sv_ordered_points(
     configuration: &SVAreaPlotConfiguration<'_>,
-    x_values: &[f64],
-    y_values: &[f64],
+    x: &SVColumnAccess<'_>,
+    y: &SVColumnAccess<'_>,
     indices: &[usize],
 ) -> Result<Vec<(f64, Option<f64>)>, SVError> {
     let mut points = Vec::with_capacity(indices.len());
     for index in indices.iter().copied() {
-        let x = x_values[index];
-        let y = y_values[index];
-        if !x.is_finite() {
+        let x_value = x.value_at(index);
+        let y_value = y.value_at(index);
+        if !x_value.is_finite() {
             configuration
                 .missing_value_policy
                 .report(configuration.x, index)?;
             continue;
         }
-        if y.is_finite() {
-            points.push((x, Some(y)));
+        if y_value.is_finite() {
+            points.push((x_value, Some(y_value)));
         } else {
             configuration
                 .missing_value_policy
                 .report(configuration.y, index)?;
-            points.push((x, None));
+            points.push((x_value, None));
         }
     }
     points.sort_by(|left, right| left.0.total_cmp(&right.0));
@@ -219,39 +350,35 @@ fn sv_flush_run(current: &mut Vec<(f64, f64)>, segments: &mut Vec<SVPreparedSegm
     current.clear();
 }
 
-/// Stacks every series over the shared horizontal grid with
+/// Stacks every series over the reduced horizontal grid with
 /// [`SVMove::Stack`], then writes one cumulative-baseline segment per series.
 fn sv_stack_series(
     configuration: &SVAreaPlotConfiguration<'_>,
     groups: &[Vec<usize>],
-    x_values: &[f64],
-    y_values: &[f64],
+    indices: &[usize],
+    x: &SVColumnAccess<'_>,
+    y: &SVColumnAccess<'_>,
     palette: &scienceview_core::sv_scale::SVScalePalette,
 ) -> Result<Vec<SVPreparedSeries>, SVError> {
     // The stack aligns every series on a shared grid, so the missing-value
     // policy is applied here too: `Omit` drops the sample from the grid and
     // `Error` rejects the render before any alignment happens.
-    for indices in groups {
-        for index in indices.iter().copied() {
-            if !x_values[index].is_finite() {
-                configuration
-                    .missing_value_policy
-                    .report(configuration.x, index)?;
-            } else if !y_values[index].is_finite() {
-                configuration
-                    .missing_value_policy
-                    .report(configuration.y, index)?;
-            }
+    for index in indices.iter().copied() {
+        if !x.value_at(index).is_finite() {
+            configuration
+                .missing_value_policy
+                .report(configuration.x, index)?;
+        } else if !y.value_at(index).is_finite() {
+            configuration
+                .missing_value_policy
+                .report(configuration.y, index)?;
         }
     }
 
-    let mut grid: Vec<f64> = groups
+    let mut grid: Vec<f64> = indices
         .iter()
-        .flatten()
-        .filter_map(|index| {
-            let x = x_values[*index];
-            x.is_finite().then_some(x)
-        })
+        .map(|index| x.value_at(*index))
+        .filter(|value| value.is_finite())
         .collect();
     grid.sort_by(f64::total_cmp);
     grid.dedup_by(|left, right| *left == *right);
@@ -262,13 +389,13 @@ fn sv_stack_series(
 
     let ordered: Vec<Vec<(f64, f64)>> = groups
         .iter()
-        .map(|indices| {
-            let mut points: Vec<(f64, f64)> = indices
+        .map(|group| {
+            let mut points: Vec<(f64, f64)> = group
                 .iter()
                 .filter_map(|index| {
-                    let x = x_values[*index];
-                    let y = y_values[*index];
-                    (x.is_finite() && y.is_finite()).then_some((x, y))
+                    let x_value = x.value_at(*index);
+                    let y_value = y.value_at(*index);
+                    (x_value.is_finite() && y_value.is_finite()).then_some((x_value, y_value))
                 })
                 .collect();
             points.sort_by(|left, right| left.0.total_cmp(&right.0));
@@ -279,9 +406,9 @@ fn sv_stack_series(
     let number_of_series = groups.len();
     let mut values = Vec::with_capacity(grid.len() * number_of_series);
     let mut group_keys = Vec::with_capacity(grid.len() * number_of_series);
-    for (x_index, x) in grid.iter().copied().enumerate() {
+    for (x_index, x_value) in grid.iter().copied().enumerate() {
         for points in &ordered {
-            values.push(sv_value_at(points, x));
+            values.push(sv_value_at(points, x_value));
             group_keys.push(x_index as u32);
         }
     }

@@ -24,5 +24,8 @@ pub use missing_value_policy::SVAreaMissingValuePolicy;
 pub use rendering::SVAreaRendering;
 
 #[cfg(test)]
+#[path = "allocation_probe.rs"]
+mod allocation_probe;
+#[cfg(test)]
 #[path = "area_plot_tests.rs"]
 mod area_plot_tests;

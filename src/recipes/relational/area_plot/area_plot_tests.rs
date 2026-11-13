@@ -4,6 +4,7 @@
 //! so the three representations are exercised without owning a copy of the
 //! columns.
 
+use super::allocation_probe::sv_measure_allocations;
 use super::{SVAreaInterpolation, SVAreaMissingValuePolicy, SVAreaPlot};
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{
@@ -784,4 +785,183 @@ fn the_operation_span_carries_the_backend_representation_and_points() {
     );
     assert_eq!(span.get("points").map(String::as_str), Some("5"));
     assert_eq!(span.get("operation").map(String::as_str), Some("render"));
+}
+
+#[test]
+fn a_million_logical_sparse_column_is_not_expanded() {
+    let count = 1_000_000usize;
+    let horizontal: &'static [f64] = Box::leak(
+        (0..count)
+            .map(|index| index as f64)
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    );
+    let indices: &'static [usize] = Box::leak(vec![0, count / 2, count - 1].into_boxed_slice());
+    let values: &'static [f64] = Box::leak(vec![1.0, 2.0, 3.0].into_boxed_slice());
+    let source = SVTestSource {
+        x: SVTestView::Dense(horizontal),
+        y: SVTestView::Sparse {
+            indices,
+            values,
+            length: count,
+        },
+        series: None,
+        reads: None,
+    };
+
+    let rendering = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .line(false)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .rendering()
+        .expect("the large sparse chart draws");
+
+    assert_eq!(rendering.representation(), SVRepresentation::Sparse);
+    assert_eq!(
+        indices.len(),
+        3,
+        "the sparse column keeps only its stored slots"
+    );
+    assert!(
+        rendering.point_count() <= 16,
+        "a sparse column of {count} logical slots must not expand into {count} drawn points; got {}",
+        rendering.point_count()
+    );
+    assert!(
+        path_points(rendering.primitives()).len() <= 32,
+        "the path only carries the vertices the geometry needs"
+    );
+}
+
+#[test]
+fn a_stacked_million_logical_sparse_column_is_bounded() {
+    let count = 1_000_000usize;
+    let horizontal: &'static [f64] = Box::leak(
+        (0..count)
+            .map(|index| index as f64)
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    );
+    let indices: &'static [usize] = Box::leak(vec![0, count / 2, count - 1].into_boxed_slice());
+    let values: &'static [f64] = Box::leak(vec![1.0, 2.0, 3.0].into_boxed_slice());
+    let series_indices: &'static [usize] =
+        Box::leak(vec![0, count / 2, count - 1].into_boxed_slice());
+    let series_values: &'static [f64] = Box::leak(vec![0.0, 0.0, 0.0].into_boxed_slice());
+    let source = SVTestSource {
+        x: SVTestView::Dense(horizontal),
+        y: SVTestView::Sparse {
+            indices,
+            values,
+            length: count,
+        },
+        series: Some(SVTestView::Sparse {
+            indices: series_indices,
+            values: series_values,
+            length: count,
+        }),
+        reads: None,
+    };
+
+    let rendering = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .series("series")
+        .stack(true)
+        .line(false)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .rendering()
+        .expect("the large stacked sparse chart draws");
+
+    assert!(
+        rendering.point_count() <= 16,
+        "the stack keeps only the reduced grid; got {} points",
+        rendering.point_count()
+    );
+    assert_eq!(rendering.primitives().len(), 1);
+}
+
+#[test]
+fn a_strict_missing_value_policy_rejects_a_sparse_stacked_render() {
+    let indices: &'static [usize] = Box::leak(vec![0, 1, 2].into_boxed_slice());
+    let values: &'static [f64] = Box::leak(vec![1.0, f64::NAN, 3.0].into_boxed_slice());
+    let series_values: &'static [f64] = Box::leak(vec![0.0, 0.0, 0.0].into_boxed_slice());
+    let indices_series: &'static [usize] = Box::leak(vec![0, 1, 2].into_boxed_slice());
+    let source = SVTestSource {
+        x: SVTestView::Dense(&[0.0, 1.0, 2.0]),
+        y: SVTestView::Sparse {
+            indices,
+            values,
+            length: 3,
+        },
+        series: Some(SVTestView::Sparse {
+            indices: indices_series,
+            values: series_values,
+            length: 3,
+        }),
+        reads: None,
+    };
+    let error = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .series("series")
+        .stack(true)
+        .missing_value_policy(SVAreaMissingValuePolicy::Error)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .rendering()
+        .expect_err("the strict policy rejects a non-finite stored value while stacking");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
+
+#[test]
+fn a_million_logical_sparse_column_allocates_proportionally_to_its_stored_slots() {
+    let count = 1_000_000usize;
+    let horizontal: &'static [f64] = Box::leak(
+        (0..count)
+            .map(|index| index as f64)
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    );
+    let indices: &'static [usize] = Box::leak(vec![0, count / 2, count - 1].into_boxed_slice());
+    let values: &'static [f64] = Box::leak(vec![1.0, 2.0, 3.0].into_boxed_slice());
+    let source = SVTestSource {
+        x: SVTestView::Dense(horizontal),
+        y: SVTestView::Sparse {
+            indices,
+            values,
+            length: count,
+        },
+        series: None,
+        reads: None,
+    };
+    let plot = SVAreaPlot::new()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .line(false)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+
+    // Warm the theme and kernel caches so the measurement covers the sparse
+    // geometry, not one-time initialisation.
+    let _ = plot.rendering().expect("the warm-up draw succeeds");
+    let (rendering, allocated_bytes) =
+        sv_measure_allocations(|| plot.rendering().expect("the sparse draw succeeds"));
+
+    assert_eq!(rendering.point_count(), 7);
+    assert!(
+        allocated_bytes < 1_048_576,
+        "a million-slot sparse column allocated {allocated_bytes} bytes; the geometry must stay proportional to the three stored slots"
+    );
 }
