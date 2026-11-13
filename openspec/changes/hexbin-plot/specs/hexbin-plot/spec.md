@@ -50,17 +50,16 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: Transitions are deferred, not claimed
 
-`SVHexbinPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVHexbinPlot` SHALL NOT claim transition or animation support in this change.
+The lattice is recomputed on every call and the geometry is deterministic, so a
+later transition change can interpolate cell colours and enter or exit new
+cells; that wiring is out of scope here.
 
-#### Scenario: Transition: cell colour
-- **WHEN** the state changes and cell colour is affected
-- **THEN** interpolates
-
-#### Scenario: Transition: lattice growing
-- **WHEN** the state changes and lattice growing is affected
-- **THEN** new cells enter
+#### Scenario: Recomputed on every call
+- **WHEN** the same chart is composed twice from the same data
+- **THEN** the same cells and colours are produced and no animation state is created
 
 ### Requirement: The chart renders on every declared backend
 

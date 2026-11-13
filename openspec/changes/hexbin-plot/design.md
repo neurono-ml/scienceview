@@ -26,9 +26,11 @@ sparse and streaming representations are accepted; the recipe dispatches on the
 representation once per operation and never densifies or blocks (patterns.md
 P6).
 
-### D3 — Temporal behaviour
+### D3 — Temporal behaviour is deferred
 
-cell colour: interpolates. cell entering or leaving: enters or exits. lattice growing: new cells enter.
+This change wires no animation. The intended future behaviour — cell colour
+interpolating, a cell entering or exiting, a growing lattice adding new cells —
+is a design target; no `update` surface ships here.
 
 ### D4 — Registration
 
@@ -39,5 +41,13 @@ central registry would serialise every recipe change against every other one
 
 ## Open Questions
 
-- Should the hexagonal lattice be an option of the 2D bin stat, rather than a separate stat? *Current answer: yes — the lattice geometry is an option of `SVStat::Bin`, and this recipe configures it. Open whether the recipe earns its own type at all.*
+- Should the hexagonal lattice be an option of the 2D bin stat, rather than a separate stat? *Current answer: no — `SVStat::Bin` bins one continuous column and the closed vocabulary (patterns P5) has no bivariate hexagonal variant, so this recipe owns the lattice geometry. Promoting it to a shared kernel would be a core change; open whether the recipe then earns its own type.*
 
+## Independent review
+
+The independent review of 2026-11-13 found the FDR open question and the task
+list still claiming the lattice was an option of `SVStat::Bin`, which no kernel
+provides; both now say the recipe owns the lattice, matching design D1 and the
+code. The transition requirement moved from an asserted capability to an
+explicit deferral, and the book branch's figure pin and mirrored meta files were
+corrected.

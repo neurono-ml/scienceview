@@ -9,7 +9,7 @@
   dispatcher.
 - [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVHexbinPlot` carrying its configured kind.
-- [x] Wire the composition `data -> [SVStat::Bin (2D, hexagonal lattice)] -> (cells, counts) -> [SVScale::Continuous over a colour map] -> SVMark::HexTile` through the core kernels.
+- [x] Wire the composition `data -> [hexagonal lattice owned by the recipe] -> (cells, counts) -> [SVScale::Continuous over a colour map] -> one path per hexagon` through the core kernels.
 
 ## 2. Data contract and parity
 
