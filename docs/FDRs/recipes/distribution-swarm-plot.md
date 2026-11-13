@@ -5,11 +5,11 @@
 | Id | FDR-120 |
 | Name | `SVSwarmPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch31-swarm-plot.md` |
+| Example program | `examples/swarm_plot.rs` → `docs/figures/swarm_plot.svg` |
 
 ## Purpose
 
@@ -107,11 +107,24 @@ non-overlap and point identity stable when the values themselves move.
 
 ## Acceptance
 
-- [ ] No two points within a category overlap, for any input.
-- [ ] The layout is deterministic: the same data produces the same swarm.
-- [ ] The swarm respects the configured width.
-- [ ] Dense, sparse and streaming inputs give the same swarm for the same
-      data.
+- [x] No two points within a category overlap, for any input. Evidence:
+      `swarm_plot_tests::no_two_dots_of_a_category_overlap` checks every pair of
+      dots of a clustered category against the marker diameter.
+- [x] The layout is deterministic: the same data produces the same swarm.
+      Evidence: `swarm_plot_tests::the_layout_is_deterministic` and the
+      byte-for-byte concurrent renders.
+- [x] The swarm respects the configured width. Evidence:
+      `swarm_plot_tests::the_configured_width_bounds_the_displacement`; a
+      fraction that leaves the move fewer than two marker extents propagates
+      the kernel's typed error.
+- [x] Dense, sparse and streaming inputs give the same swarm for the same
+      data. Evidence: `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_scene`;
+      a sparse column contributes exactly its stored entries, matching the
+      dense column that stores them.
+
+Transitions: the composition is transition-ready geometry; animation wiring is
+deferred to the transition integration (the swarm offset is a layout recomputed
+per frame, not a stored position).
 
 ## Open questions
 
