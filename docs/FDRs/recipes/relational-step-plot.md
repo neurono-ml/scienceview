@@ -5,11 +5,11 @@
 | Id | FDR-104 |
 | Name | `SVStepPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch19 — Step plots`](../../src/development-explained/ch19-step-plot.md) |
+| Example program | [`examples/step_plot.rs`](../../../examples/step_plot.rs) |
 
 ## Purpose
 
@@ -63,18 +63,19 @@ Accepted representations: dense, sparse, streaming.
 
 | Option | Type | Default | Source |
 |---|---|---|---|
-| `x`, `y` | `SVColumnRef` | — | bokeh, plotly |
-| `series` | `Option<SVColumnRef>` | `None` | all three |
+| `x`, `y` | named column | — | bokeh, plotly |
+| `series` | `Option<named column>` | `None` | all three |
 | `step` | `SVStepPosition` | `After` | bokeh `Step` (`before`, `after`, `center`), plotly `hv`/`vh`/`hvh`/`vhv` |
-| `where` | `SVStepWhere` | `After` | — |
 | `line_width` | `SVLength` | token `mark.line_width` | bokeh, plotly |
 | `dash` | `Option<SVDashPattern>` | `None` | bokeh, plotly |
 | `markers` | `bool` | `true` | bokeh `Step` draws markers by default |
 | `aggregate` | `Option<SVStat>` | `None` | — |
+| `duplicate_policy` | `SVStepDuplicatePolicy` | `LastWins` | — |
 
-`SVStepPosition` has the values `Before`, `After` and `Center`; `SVStepWhere`
-selects the horizontal edge the vertical segment is drawn on (`Horizontal`
-before the value, `Vertical` after it, and both). The bokeh vocabulary is kept
+`SVStepPosition` has the values `Before`, `After` and `Center`. The three
+values fully express the pre/post/mid geometry, so the provisional
+`SVStepWhere` column was folded into `SVStepPosition` rather than shipping a
+second control that selects the same corner. The bokeh vocabulary is kept
 because it names the geometry precisely.
 
 ## Theme
@@ -103,10 +104,26 @@ Consumes `mark.line_width`, `mark.palette`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The drawn geometry matches the requested step position exactly.
-- [ ] A step over a streaming source extends without redrawing the history.
-- [ ] Dense, sparse and streaming inputs give the same steps.
-- [ ] An animated step interpolates its corners.
+- [x] The drawn geometry matches the requested step position exactly —
+      `option_tests::each_step_position_expands_different_vertices`.
+- [x] A step over a streaming source extends without redrawing the history —
+      `parity_tests::a_streaming_window_extends_to_the_new_sample` and
+      `svg_tests::update_extends_the_step_and_save_writes_the_report`.
+- [x] Dense, sparse and streaming inputs give the same steps —
+      `parity_tests::dense_sparse_and_streaming_agree`.
+- [x] An animated step interpolates its corners — the expansion turns every
+      corner into an explicit `SVMark::Line` vertex, and the transition kernel
+      interpolates positions; the animation chapter consumes the same vertices.
+
+## Implementation
+
+- Module: `src/recipes/relational/step_plot/` (`builder/`,
+  `core_implementation/`, `extraction/`, `composition.rs`, `decorations.rs`,
+  `render_svg.rs`).
+- Tests: `src/recipes/relational/step_plot/step_plot_tests/` — options, data
+  contract, parity, concurrency, SVG and observability.
+- Example: `examples/step_plot.rs` → `docs/figures/step_plot.svg`.
+- Chapter: `docs/src/development-explained/ch19-step-plot.md`.
 
 ## Open questions
 

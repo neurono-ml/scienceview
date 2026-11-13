@@ -12,6 +12,19 @@ released.
 
 ### Added
 
+- The `SVStepPlot` relational recipe: a value held constant between discrete
+  events, drawn as explicit step vertices through the existing line mark. It
+  composes the documented pipeline — source columns, optional
+  `SVStat::Aggregate`, scales and `SVMark::Line` — and exposes `SVStepPosition`
+  (`Before`, `After`, `Center`), `SVStepDuplicatePolicy` (`LastWins`,
+  `FirstWins`), `x`/`y`/`series` columns, line width, dash, markers, aggregate
+  and a title. Dense, sparse and streaming columns are read through the single
+  `SVDataSource` boundary without densifying sparse storage or blocking on a
+  stream; the operation span carries the configured backend kind, the
+  representation and the point count. The chart renders through the real SVG
+  backend, and `examples/step_plot.rs` produces
+  `docs/figures/step_plot.svg`.
+
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
