@@ -53,8 +53,11 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/multivariate-joint-plot.md` before opening the code PR.
+  The review verified the composition, the shared scales, the marginal reuse,
+  the data boundary and the backend dispatch; it corrected the FDR/spec
+  marginal position to top/right and recorded the implemented option surface.
 
 ## Deviations recorded during the independent review
 
