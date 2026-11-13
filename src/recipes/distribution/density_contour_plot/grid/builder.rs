@@ -91,7 +91,7 @@ pub(crate) fn sv_build_density_grids(
     for (group, counts) in counts.into_iter().enumerate() {
         let mut densities = sv_normalise(&counts, &x_edges, &y_edges, totals[group]);
         if let Some(bandwidth) = configuration.bandwidth {
-            let sigma = bandwidth * configuration.bw_adjust;
+            let sigma = bandwidth * configuration.bandwidth_adjustment;
             densities = sv_smooth(
                 &densities,
                 x_edges.len() - 1,

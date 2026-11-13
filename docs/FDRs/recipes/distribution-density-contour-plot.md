@@ -27,14 +27,22 @@ distribution when the sample is too sparse for a histogram.
 
 ## Recipe
 
+The closed stat vocabulary has no bivariate density variant, so the 2D density
+is a documented composition of the existing one-dimensional `SVStat::Bin`
+kernel on each axis, not a new stat implementation:
+
 ```
-data -> [SVStat::KernelDensity (2D)] -> (grid, density)
+data -> [SVStat::Bin on x] + [SVStat::Bin on y] -> joint grid of counts
+     -> density = count / (total weight * cell area)
+     -> [Gaussian smoothing when bandwidth is set]
      -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area
 ```
 
-The contour extraction is a step between the stat and the mark: the density
-kernel produces a scalar field, and the recipe turns level sets of that field
-into paths.
+The contour extraction is a step between the density field and the mark: the
+joint aggregation produces a scalar field, and the recipe turns level sets of
+that field into paths. `bandwidth` and `bandwidth_adjustment` request one
+Gaussian pass over the binned field; there is no hidden kernel-density
+implementation.
 
 ## Data contract
 
@@ -45,11 +53,29 @@ into paths.
 | `series` | one field each | nominal | no |
 | `weight` | observation weight | continuous | no |
 
-Accepted representations: dense, sparse, streaming (windowed).
+Accepted representations: dense, sparse, streaming (windowed). A streaming
+window requires a backend that declares the streaming capability; a static
+export backend such as `Svg` rejects it at build with
+`UnsupportedBackendCapability` instead of silently freezing the first window.
+
+### Missing values
+
+A pair whose `x` or `y` value is not finite is omitted before binning, and an
+input with no finite pair fails with `EmptyInput`. A non-finite `series` code or
+`weight` is rejected with `NonFiniteValue`, and a negative weight is rejected as
+a configuration error: dropping a bad weight would silently change the joint
+mass, so the recipe never does it implicitly.
 
 ### Match key
 
 `Index` over the grid.
+
+### Parity tolerance
+
+The documented tolerance is zero. Dense, sparse and streaming views of the same
+values produce bit-identical grids and contour paths, because all three feed the
+same accumulation loop; sparse views are walked through their stored entries and
+the implicit-zero run, never densified.
 
 ## Visual channels
 
@@ -69,7 +95,7 @@ Accepted representations: dense, sparse, streaming (windowed).
 | `levels` | `Option<usize>` | `10` | plotly `contours.start/end/size` |
 | `level_range` | `Option<(f64, f64)>` | `None` | plotly |
 | `bandwidth` | `Option<f64>` | `None` | seaborn |
-| `bw_adjust` | `f64` | `1.0` | seaborn |
+| `bandwidth_adjustment` | `f64` | `1.0` | seaborn `bw_adjust` |
 | `grid_count` | `usize` | `256` | — |
 | `style` | `SVContourStyle` | `Filled` | plotly (`lines`, `fill`) |
 | `colour_map` | `SVColourMapRef` | theme default | — |
@@ -97,9 +123,9 @@ that a topology change is a visible cut. This is an open question.
 
 | Backend | Notes |
 |---|---|
-| `Svg` | one `<path>` per contour level |
+| `Svg` | one `<path>` per contour level; export only, so a streaming window is rejected at build |
 | `Html` | same |
-| `Native` / `Wasm` | polyline and polygon rasterization |
+| `Native` / `Wasm` | polyline and polygon rasterization; a streaming window is read from its current chunk |
 | `Tui` | contour lines as polylines across the cell grid |
 | `React` / `Vue` / `Angular` | one `<path>` per level |
 | `Tauri` / `Dioxus` | same as native |
@@ -117,8 +143,20 @@ that a topology change is a visible cut. This is an open question.
       and `dense_sparse_and_streaming_produce_the_same_contours`.
 - [x] A filled contour renders as nested closed paths without gaps.
       Evidence: `filled_contours_are_filled_paths_and_lines_are_stroked_paths`,
+      `every_filled_contour_subpath_is_closed`,
+      `an_explicit_range_below_the_field_fills_every_band_as_a_closed_region`,
       `the_contour_stitcher_closes_a_ring_of_cell_segments` and the generated
       figure in `docs/figures/density_contour_plot.svg`.
+- [x] The composition really uses the bin kernel, and a constant field or a
+      level range outside the observed field is still a valid render.
+      Evidence: `the_grid_edges_come_from_the_bin_kernel`,
+      `a_constant_density_field_still_renders_the_background_band`,
+      `an_all_equal_input_composes_without_a_degenerate_grid_error`,
+      `an_explicit_range_above_the_field_leaves_only_the_background`.
+- [x] The missing-value policy is explicit and tested.
+      Evidence: `a_non_finite_pair_is_skipped_instead_of_failing_the_render`,
+      `an_all_non_finite_input_is_an_empty_input_error` and
+      `a_non_finite_weight_is_rejected`.
 
 ## Implementation notes
 
@@ -126,8 +164,10 @@ The closed stat vocabulary has no bivariate density variant (patterns P5), so
 the recipe composes the existing `SVStat::Bin` kernel on each axis and folds
 every observation pair into the joint grid. The density is the joint count
 divided by the total observation weight and the cell area, which is why it
-integrates to one. `bandwidth` and `bw_adjust` request a Gaussian smoothing pass
-over the grid; there is no hidden kernel-density implementation.
+integrates to one. `bandwidth` and `bandwidth_adjustment` request a Gaussian
+smoothing pass over the grid, with the kernel radius capped at the axis length
+so an extreme bandwidth stays bounded; there is no hidden kernel-density
+implementation.
 
 Contour isolation is a recipe-level marching-squares step: line style emits one
 stroked compound path per level, and filled style emits the threshold region

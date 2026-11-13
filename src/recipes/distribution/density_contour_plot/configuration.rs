@@ -26,7 +26,7 @@ pub(super) struct SVDensityContourConfiguration<'data> {
     pub(super) levels: usize,
     pub(super) level_range: Option<(f64, f64)>,
     pub(super) bandwidth: Option<f64>,
-    pub(super) bw_adjust: f64,
+    pub(super) bandwidth_adjustment: f64,
     pub(super) grid_count: usize,
     pub(super) style: SVContourStyle,
     pub(super) colour_map: SVColourMap,

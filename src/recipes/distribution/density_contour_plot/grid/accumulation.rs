@@ -97,8 +97,17 @@ fn sv_blur_axis(
     sigma: f64,
     along_x: bool,
 ) -> Vec<f64> {
+    let (outer, inner) = if along_x {
+        (vertical, horizontal)
+    } else {
+        (horizontal, vertical)
+    };
     let mut output = vec![0.0; densities.len()];
-    let radius = (3.0 * sigma).ceil().max(1.0) as isize;
+    // The kernel samples with clamped edge indices, so a radius wider than the
+    // axis only repeats the edge values. Capping it at the axis length keeps a
+    // very large `bandwidth` finite in both memory and work.
+    let radius_limit = inner.saturating_sub(1).max(1) as isize;
+    let radius = ((3.0 * sigma).ceil() as isize).clamp(1, radius_limit);
     let mut kernel = Vec::with_capacity((2 * radius + 1) as usize);
     let mut norm = 0.0;
     for offset in -radius..=radius {
@@ -108,11 +117,6 @@ fn sv_blur_axis(
     }
     kernel.iter_mut().for_each(|weight| *weight /= norm);
 
-    let (outer, inner) = if along_x {
-        (vertical, horizontal)
-    } else {
-        (horizontal, vertical)
-    };
     for outer_index in 0..outer {
         for inner_index in 0..inner {
             let mut sum = 0.0;

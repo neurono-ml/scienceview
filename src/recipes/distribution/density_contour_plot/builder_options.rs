@@ -70,8 +70,8 @@ impl<'data> SVDensityContourPlotBuilder<'data> {
 
     /// Scales the requested bandwidth; defaults to `1.0`.
     #[must_use]
-    pub fn bw_adjust(mut self, bw_adjust: f64) -> Self {
-        self.bw_adjust = bw_adjust;
+    pub fn bandwidth_adjustment(mut self, bandwidth_adjustment: f64) -> Self {
+        self.bandwidth_adjustment = bandwidth_adjustment;
         self
     }
 

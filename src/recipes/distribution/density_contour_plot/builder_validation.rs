@@ -25,7 +25,7 @@ pub(super) fn sv_validate_options(
             });
         }
     }
-    if !builder.bw_adjust.is_finite() || builder.bw_adjust <= 0.0 {
+    if !builder.bandwidth_adjustment.is_finite() || builder.bandwidth_adjustment <= 0.0 {
         return Err(SVError::InvalidConfiguration {
             message: "the bandwidth adjustment must be a positive finite number".to_string(),
         });

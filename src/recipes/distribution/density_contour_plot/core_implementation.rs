@@ -75,8 +75,8 @@ impl<'data> SVDensityContourPlot<'data> {
     }
 
     /// Returns the bandwidth adjustment.
-    pub fn bw_adjust(&self) -> f64 {
-        self.configuration.bw_adjust
+    pub fn bandwidth_adjustment(&self) -> f64 {
+        self.configuration.bandwidth_adjustment
     }
 
     /// Returns the number of grid cells per axis.

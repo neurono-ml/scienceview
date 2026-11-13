@@ -10,7 +10,7 @@ use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{SVColumnRole, SVColumnView};
 use crate::sv_error::SVError;
 use crate::sv_figure::SVExecutionMode;
-use crate::sv_mark::SVMarkShape;
+use crate::sv_mark::{SVMarkShape, SVPathCommand};
 use crate::sv_scale::{
     SVColour, SVColourMap, SVContinuousColourScaleBuilder, SVScaleTransform, sv_default_colour_map,
 };
@@ -42,7 +42,7 @@ fn the_documented_options_are_exposed() {
         .levels(7)
         .level_range(0.1, 0.9)
         .bandwidth(0.4)
-        .bw_adjust(1.5)
+        .bandwidth_adjustment(1.5)
         .grid_count(24)
         .style(SVContourStyle::Lines)
         .colour_scale(SVScaleTransform::SquareRoot)
@@ -53,7 +53,7 @@ fn the_documented_options_are_exposed() {
     assert_eq!(plot.levels(), 7);
     assert_eq!(plot.level_range(), Some((0.1, 0.9)));
     assert_eq!(plot.bandwidth(), Some(0.4));
-    assert_eq!(plot.bw_adjust(), 1.5);
+    assert_eq!(plot.bandwidth_adjustment(), 1.5);
     assert_eq!(plot.grid_count(), 24);
     assert_eq!(plot.style(), SVContourStyle::Lines);
     assert_eq!(plot.colour_scale_kind(), SVScaleTransform::SquareRoot);
@@ -327,7 +327,10 @@ fn invalid_options_fail_at_build_time() {
         sv_builder(&source).levels(0).build().map(|_| ()),
         sv_builder(&source).grid_count(1).build().map(|_| ()),
         sv_builder(&source).bandwidth(0.0).build().map(|_| ()),
-        sv_builder(&source).bw_adjust(-1.0).build().map(|_| ()),
+        sv_builder(&source)
+            .bandwidth_adjustment(-1.0)
+            .build()
+            .map(|_| ()),
         sv_builder(&source)
             .level_range(0.9, 0.1)
             .build()
@@ -421,4 +424,180 @@ fn the_contour_stitcher_closes_a_ring_of_cell_segments() {
         super::contour::sv_stitch_regions(&segments, super::contour::sv_contour_epsilon(5.0));
     assert_eq!(loops.len(), 1, "the segments form one closed ring");
     assert_eq!(loops[0].len(), 12);
+}
+
+#[test]
+fn the_grid_edges_come_from_the_bin_kernel() {
+    use crate::sv_stat::{SVBinOptions, SVStat, SVStatInput, SVStatResult};
+
+    let source = sv_dense_source();
+    let composition = sv_compose_default(&source);
+    let grid = composition.grids().first().expect("one grid");
+    let expected = SVStat::bin(SVBinOptions::new().bin_count(16))
+        .apply(SVStatInput::new(SVColumnView::Dense(
+            &super::test_support::HORIZONTAL,
+        )))
+        .expect("the bin kernel runs");
+    let SVStatResult::Bins(bins) = expected else {
+        panic!("the bin kernel returns bins");
+    };
+    assert_eq!(grid.x_edges(), bins.edges());
+}
+
+#[test]
+fn a_constant_density_field_still_renders_the_background_band() {
+    // One observation per cell of an 8x8 lattice makes every cell equally
+    // dense: the field has no level set inside the domain.
+    let horizontal: Vec<f64> = (0..64).map(|index| (index % 8) as f64).collect();
+    let vertical: Vec<f64> = (0..64).map(|index| (index / 8) as f64).collect();
+    let constant = SVTestSource::dense(&horizontal, &vertical);
+    let composition = sv_builder(&constant)
+        .grid_count(8)
+        .levels(4)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("the chart composes");
+    let primitives = sv_primitives(&composition);
+
+    assert_eq!(composition.grids().len(), 1);
+    assert_eq!(
+        primitives.len(),
+        1,
+        "a constant field has no level set, so only the background band is drawn"
+    );
+    assert!(matches!(primitives[0].shape(), SVMarkShape::Rectangle(_)));
+    assert!((composition.grids()[0].integrated_probability() - 1.0).abs() < 1.0e-9);
+}
+
+#[test]
+fn an_all_equal_input_composes_without_a_degenerate_grid_error() {
+    let constant = SVTestSource::dense(&[2.0; 8], &[3.0; 8]);
+    let composition = sv_compose_default(&constant);
+
+    assert_eq!(composition.grids().len(), 1);
+    assert!((composition.grids()[0].integrated_probability() - 1.0).abs() < 1.0e-9);
+}
+
+#[test]
+fn an_explicit_range_above_the_field_leaves_only_the_background() {
+    let source = sv_dense_source();
+    let composition = sv_builder(&source)
+        .levels(3)
+        .level_range(1000.0, 2000.0)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("the chart composes");
+
+    let primitives = sv_primitives(&composition);
+    assert_eq!(primitives.len(), 1, "every cell is below the lowest level");
+    assert!(matches!(primitives[0].shape(), SVMarkShape::Rectangle(_)));
+}
+
+#[test]
+fn an_explicit_range_below_the_field_fills_every_band_as_a_closed_region() {
+    let source = sv_dense_source();
+    let composition = sv_builder(&source)
+        .levels(2)
+        .level_range(-2000.0, -1000.0)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("the chart composes");
+
+    let primitives = sv_primitives(&composition);
+    assert_eq!(
+        primitives.len(),
+        3,
+        "the background plus one full-domain region per level"
+    );
+    for primitive in &primitives[1..] {
+        let SVMarkShape::Path(path) = primitive.shape() else {
+            panic!("a band above a level is a path");
+        };
+        assert_eq!(
+            path.commands().last(),
+            Some(&SVPathCommand::Close),
+            "every filled band ends with a closed subpath"
+        );
+    }
+}
+
+#[test]
+fn every_filled_contour_subpath_is_closed() {
+    let source = sv_dense_source();
+    let composition = sv_compose_default(&source);
+
+    for primitive in sv_primitives(&composition) {
+        let SVMarkShape::Path(path) = primitive.shape() else {
+            continue;
+        };
+        let mut open_subpath = false;
+        for command in path.commands() {
+            match command {
+                SVPathCommand::MoveTo(_) => {
+                    assert!(!open_subpath, "a subpath was left open before a MoveTo");
+                    open_subpath = true;
+                }
+                SVPathCommand::Close => open_subpath = false,
+                SVPathCommand::LineTo(_) | SVPathCommand::ArcTo(_) => {}
+            }
+        }
+        assert!(!open_subpath, "the last subpath is open");
+    }
+}
+
+#[test]
+fn an_extreme_bandwidth_stays_bounded_and_normalised() {
+    let source = sv_dense_source();
+    let composition = sv_builder(&source)
+        .bandwidth(1.0e9)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("the chart composes");
+
+    assert!((composition.grids()[0].integrated_probability() - 1.0).abs() < 1.0e-9);
+}
+
+#[test]
+fn the_colour_scale_option_changes_the_band_colours() {
+    let source = sv_dense_source();
+    let linear = sv_compose_default(&source);
+    let transformed = sv_builder(&source)
+        .levels(4)
+        .colour_scale(SVScaleTransform::SquareRoot)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("the chart composes");
+
+    let linear_colours: Vec<Option<SVColour>> = sv_primitives(&linear)
+        .iter()
+        .map(|primitive| primitive.paint().fill())
+        .collect();
+    let transformed_colours: Vec<Option<SVColour>> = sv_primitives(&transformed)
+        .iter()
+        .map(|primitive| primitive.paint().fill())
+        .collect();
+    assert_ne!(linear_colours, transformed_colours);
+}
+
+#[test]
+fn a_non_finite_weight_is_rejected() {
+    let weights = [1.0, 1.0, f64::NAN, 1.0];
+    let source = SVTestSource {
+        horizontal: SVColumnView::Dense(&[0.0, 1.0, 2.0, 3.0]),
+        vertical: SVColumnView::Dense(&[0.0, 1.0, 2.0, 3.0]),
+        series: None,
+        weight: Some(SVColumnView::Dense(&weights)),
+    };
+    let result = sv_builder(&source)
+        .weight("weight")
+        .build()
+        .expect("the chart builds")
+        .compose();
+
+    assert!(matches!(result, Err(SVError::NonFiniteValue { .. })));
 }

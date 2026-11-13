@@ -16,7 +16,7 @@ released.
   (`scienceview::sv_recipes::sv_distribution`): the joint distribution of two
   continuous variables drawn as filled contour bands or contour lines. The
   configuration surface follows FDR-113 — `x`, `y`, `series`, `weight`,
-  `levels`, `level_range`, `bandwidth`, `bw_adjust`, `grid_count`, `style`,
+  `levels`, `level_range`, `bandwidth`, `bandwidth_adjustment`, `grid_count`, `style`,
   `colour_map` and `colour_scale` — and the builder requires an explicit backend
   selection. The density is never reimplemented: `SVStat::Bin` derives the two
   edge vectors and the recipe folds the observation pairs into the joint grid,
