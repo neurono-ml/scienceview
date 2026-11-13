@@ -49,9 +49,9 @@
 
 ## 7. Acceptance
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
+- [x] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [x] Open the ADR issue and reference it from both PRs with a closing keyword.
 - [ ] Trigger the independent acceptance review against
   `docs/FDRs/multivariate-joint-plot.md` before opening the code PR.
