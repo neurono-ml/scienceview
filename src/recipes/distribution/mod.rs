@@ -12,6 +12,13 @@ pub use sv_box_plot::{
     SVBoxPlot, SVBoxPlotBuilder, SVBoxRenderOutput, SVBoxSummary, SVWhiskerRule,
 };
 
+#[path = "count_plot/mod.rs"]
+pub mod sv_count_plot;
+pub use sv_count_plot::{
+    SVCountMissingValuePolicy, SVCountMultiple, SVCountPlot, SVCountPlotBuilder, SVCountScene,
+    SVCountSeriesSummary,
+};
+
 #[path = "density_contour_plot/mod.rs"]
 pub mod sv_density_contour_plot;
 pub use sv_density_contour_plot::{
