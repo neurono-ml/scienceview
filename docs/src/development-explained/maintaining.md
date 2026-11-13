@@ -83,6 +83,11 @@ Chapter 29 covers the boxen plot recipe, which nests letter values from the
 percentile kernel into `SVBoxenPlot`: it explains the depth rules, the nested
 widths and the sparse and streaming parity tests.
 
+Chapter 37 covers the density heatmap recipe, which asks the bin kernel for the
+two edge vectors, folds the observations through the aggregate kernel and
+paints one rectangle per cell over a continuous colour scale; it explains the
+normalisation choices, the empty-bin policy and the sparse and streaming
+parity tests.
 Chapter 35 covers the heatmap recipe, which turns a long table or a direct
 matrix into coloured cells through `SVStat::Aggregate` and draws the colour bar
 from the same continuous scale the cells use.
