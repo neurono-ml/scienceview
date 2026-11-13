@@ -35,11 +35,11 @@
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/image_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/image_plot.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
@@ -55,7 +55,8 @@
 - [x] Open the ADR issue (#147) and reference it from both PRs with a closing
   keyword.
 - [ ] Trigger the independent acceptance review against
-  `docs/FDRs/matrix-image-plot.md` before opening the code PR.
+  `docs/FDRs/recipes/matrix-image-plot.md` before opening the code PR.
+  Deferred to the integration owner's review agent.
 
 ## Implementation notes
 
