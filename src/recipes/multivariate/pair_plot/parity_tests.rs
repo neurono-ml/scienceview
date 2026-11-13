@@ -1,10 +1,12 @@
 //! Representation parity, the data boundary and the streaming path.
 
 use super::SVPairOffDiagonalKind;
+use super::SVPairPlot;
+#[cfg(feature = "render-svg")]
+use super::SVPairRenderOutput;
 use super::test_support::{
     sv_build_default, sv_dense_source, sv_scene_to_svg, sv_sparse_source, sv_streaming_source,
 };
-use super::{SVPairPlot, SVPairRenderOutput};
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::SVRepresentation;
 
@@ -67,6 +69,7 @@ fn a_streaming_input_returns_promptly_and_shows_the_window() {
     assert_eq!(scene.cell_rectangles().len(), 9);
 }
 
+#[cfg(feature = "render-svg")]
 #[test]
 fn update_recomposes_the_current_window() {
     let streaming = sv_streaming_source();

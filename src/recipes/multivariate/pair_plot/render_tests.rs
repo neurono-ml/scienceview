@@ -1,3 +1,5 @@
+#![cfg(all(feature = "render-svg", feature = "render-native"))]
+
 //! Backend dispatch of `SVPairPlot` (patterns P2 and P7).
 
 use super::SVPairPlot;
