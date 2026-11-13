@@ -48,6 +48,8 @@ path = "src/lib.rs"
 
 # Charts that call the public serializers declare the backend feature that
 # compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
 [[example]]
 name = "scatter_plot"
 required-features = ["render-svg"]
@@ -89,6 +91,11 @@ required-features = ["render-svg"]
 
 [[example]]
 name = "strip_plot"
+required-features = ["render-svg"]
+
+[[example]]
+name = "bar_plot"
+path = "examples/bar_plot.rs"
 required-features = ["render-svg"]
 
 # The root package is a facade: it re-exports the core crate and every backend

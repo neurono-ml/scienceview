@@ -6,6 +6,10 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "bar_plot/mod.rs"]
+pub mod sv_bar_plot;
+pub use sv_bar_plot::{SVBarPlot, SVBarPlotBuilder, SVBarRenderOutput};
+
 #[path = "box_plot/mod.rs"]
 pub mod sv_box_plot;
 pub use sv_box_plot::{SVBoxPlot, SVBoxPlotBuilder, SVBoxRenderOutput};
@@ -16,7 +20,9 @@ pub use sv_boxen_plot::{SVBoxenPlot, SVBoxenPlotBuilder, SVBoxenRenderOutput};
 
 #[path = "density_contour_plot/mod.rs"]
 pub mod sv_density_contour_plot;
-pub use sv_density_contour_plot::{SVDensityContourPlot, SVDensityContourPlotBuilder};
+pub use sv_density_contour_plot::{
+    SVDensityContourComposition, SVDensityContourPlot, SVDensityContourPlotBuilder,
+};
 
 #[path = "density_plot/mod.rs"]
 pub mod sv_density_plot;
@@ -24,7 +30,7 @@ pub use sv_density_plot::{SVDensityPlot, SVDensityPlotBuilder};
 
 #[path = "ecdf_plot/mod.rs"]
 pub mod sv_ecdf_plot;
-pub use sv_ecdf_plot::{SVECdfPlot, SVECdfPlotBuilder};
+pub use sv_ecdf_plot::{SVECdfPlot, SVECdfPlotBuilder, SVEcdfPlotComposition};
 
 #[path = "histogram_plot/mod.rs"]
 pub mod sv_histogram_plot;
