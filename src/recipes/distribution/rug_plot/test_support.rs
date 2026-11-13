@@ -87,7 +87,6 @@ pub(crate) fn sv_build_default(source: &dyn SVDataSource) -> SVRugPlot<'_> {
         .expect("the default configuration is complete")
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_build_with_source(
     source: &dyn SVDataSource,
     backend_kind: SVBackendKind,
