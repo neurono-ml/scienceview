@@ -12,6 +12,16 @@ released.
 
 ### Added
 
+- The dashboard composition crate (`scienceview_dashboard`): a grid of rows,
+  columns and spans whose cells are solved through `sv_layout`; shared
+  `SVDataSource` registrations read by several panels without copying; linked
+  selections expressed as derived filters over the shared source, exposed to the
+  host and bounded by a cascade depth budget so a cycle stops with a typed
+  error; coordinated zoom, pan, range and panel actions routed by linked axis
+  identifier; and one deterministic, accessible self-contained SVG document
+  with every panel embedded as a nested inline SVG (plus the opt-in
+  `render-html` page). The example composes three real scatter recipes over one
+  table and writes `docs/figures/dashboard.svg`.
 - The interactive control kit (`scienceview_core::sv_control`): controls are
   model objects, never artists, that dispatch one closed action vocabulary
   (`Zoom`, `Pan`, `Reset`, `ToggleSeries`, `SetSeriesVisibility`, `SetRange`,
