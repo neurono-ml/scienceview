@@ -163,8 +163,8 @@ figure = sv.scatter_plot(
 
 ## Packaging and the tests that keep it honest
 
-`pyproject.toml` selects maturin and the `python,extension-module` features. A
-wheel is built with `maturin build --release`; `maturin develop` installs into a
+`pyproject.toml` selects maturin and the `python` feature; maturin enables PyO3's
+`extension-module` behaviour itself. A wheel is built with `maturin build --release`; `maturin develop` installs into a
 virtual environment. The extension module is named `scienceview`, so `import
 scienceview` reaches the binding.
 
