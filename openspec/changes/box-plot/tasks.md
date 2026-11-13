@@ -43,8 +43,8 @@
 
 ## 6. FDR and changelog
 
-- [x] Change `docs/FDRs/distribution-box-plot.md` status to `shipped`, linking the
-  example and the chapter.
+- [x] Change `docs/FDRs/recipes/distribution-box-plot.md` status to `shipped`,
+  linking the example and the chapter.
 - [x] Add the `CHANGELOG.md` entry.
 
 ## 7. Acceptance

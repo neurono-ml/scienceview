@@ -46,17 +46,102 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The five-number summary comes from the percentile kernel
 
-`SVBoxPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVBoxPlot` SHALL obtain the box edges and any percentile whisker from
+`SVStat::Percentile`, using its documented linear interpolation between
+neighbouring ranks, and SHALL NOT reimplement a quantile estimator.
 
-#### Scenario: Transition: box extent
-- **WHEN** the state changes and box extent is affected
-- **THEN** interpolates (the quartiles move)
+#### Scenario: Known dataset
+- **WHEN** the observations are `1, 2, …, 10` with the default configuration
+- **THEN** `q1 = 3.25`, the median is `5.5`, `q3 = 7.75`, the whiskers are
+  `1` and `10`, and there is no outlier
 
-#### Scenario: Transition: median line
-- **WHEN** the state changes and median line is affected
-- **THEN** interpolates
+#### Scenario: Explicit quartiles
+- **WHEN** `quartiles` is set to `[0.1, 0.5, 0.9]`
+- **THEN** the box edges are the `0.1` and `0.9` quantiles of the same kernel
+
+### Requirement: The whisker rule selects the ends and the outliers
+
+`SVBoxPlot` SHALL apply `SVWhiskerRule` exactly as recorded in its FDR:
+`Tukey` selects the most extreme observations inside `q1 - 1.5 · IQR` and
+`q3 + 1.5 · IQR`, `MinMax` selects the extremes, and `Percentile(p)` selects
+the `p` and `1 - p` quantiles. The observations outside the selected ends SHALL
+be the outliers, drawn individually and toggleable with `show_outliers`.
+
+#### Scenario: Tukey fence
+- **WHEN** the observations are `1, 2, …, 9, 100`
+- **THEN** the upper whisker is `9` and `100` is the only outlier
+
+#### Scenario: Min and max
+- **WHEN** the whisker rule is `MinMax`
+- **THEN** the whiskers reach the extremes and the outlier set is empty
+
+#### Scenario: Outliers hidden
+- **WHEN** `show_outliers` is `false`
+- **THEN** the summary keeps the outliers and the drawing omits them
+
+### Requirement: The notch uses the documented half-width
+
+`SVBoxPlot` SHALL draw a notched box as three stacked ribbon segments when
+`notch` is `true`, using the half-width `1.58 · IQR / √n` clamped to half the
+interquartile range so the notch can never invert the box.
+
+#### Scenario: Notched box
+- **WHEN** `notch` is `true`
+- **THEN** the body is three filled segments and the middle segment around the
+  median is narrower than the other two
+
+#### Scenario: Degenerate spread
+- **WHEN** the interquartile range is zero
+- **THEN** the box is drawn without a notch instead of a zero-height band
+
+### Requirement: Orientation and series dodge are explicit
+
+`SVBoxPlot` SHALL draw the value axis vertically or horizontally according to
+`orient`, and SHALL place one box per series inside a category through
+`SVMove::Dodge`, using the offset and narrowed width the move kernel returns.
+
+#### Scenario: Horizontal orientation
+- **WHEN** `orient` is `Horizontal`
+- **THEN** the quartile span runs along x and the category slot along y
+
+#### Scenario: Two series
+- **WHEN** a category contains two series
+- **THEN** the two boxes have different dodge offsets and share the category slot
+
+#### Scenario: A single category
+- **WHEN** all observations belong to one category
+- **THEN** the box keeps a visible slot width instead of collapsing to a line
+
+### Requirement: Missing observations follow the documented policy
+
+`SVBoxPlot` SHALL skip a row whose value or category coding is not finite, SHALL
+fail with `EmptyInput` when no row survives, and SHALL treat only the stored
+entries of a sparse column as observations.
+
+#### Scenario: Some missing values
+- **WHEN** one value of the column is not finite
+- **THEN** that row is skipped and the summary uses the remaining observations
+
+#### Scenario: All missing
+- **WHEN** no value is finite
+- **THEN** the render fails with `EmptyInput` instead of drawing an empty chart
+
+#### Scenario: Sparse implicit zeros
+- **WHEN** a sparse column of huge logical length stores five entries
+- **THEN** exactly five observations are summarised and the zeros are not expanded
+
+### Requirement: Transitions are deferred
+
+`SVBoxPlot` composes interpolable `Ribbon` and `Line` paths and SHALL NOT claim a
+transition API in this change. The temporal behaviour recorded in the FDR is
+provided by the transition and animation integration in a later change.
+
+#### Scenario: No transition surface
+- **WHEN** the recipe is built
+- **THEN** no transition or animation method is exposed by the recipe, and the
+  deferred acceptance item stays unticked
 
 ### Requirement: The chart renders on every declared backend
 
