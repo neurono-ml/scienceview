@@ -51,8 +51,13 @@ transition scenario in the spec.
 the bottom margin; `Horizontal` places them on the vertical axis and draws
 horizontal ticks in the left margin. The ticks sit in the outer part of the
 margin, so they never cover the plot area's data region nor the axis tick
-labels. A non-finite value draws no tick; a non-finite series value marks the
-whole observation as missing.
+labels; the tick length is capped at the margin depth, so even `height = 1.0`
+cannot reach the plot rectangle. The value scale is derived from the drawn
+observations rather than the raw column, so implicit sparse zeros and values
+dropped for a missing series value never widen the axis. A non-finite value
+draws no tick; a non-finite series value marks the whole observation as
+missing; a column with no drawable observation renders an empty scene instead
+of failing on a domain it never needed.
 
 ## Open Questions
 

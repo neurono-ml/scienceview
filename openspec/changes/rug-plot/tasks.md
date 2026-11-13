@@ -53,5 +53,11 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
-  `docs/FDRs/distribution-rug-plot.md` before opening the code PR.
+- [x] Trigger the independent acceptance review against
+  `docs/FDRs/distribution-rug-plot.md` before opening the code PR. The review
+  found and fixed three acceptance gaps: `height = 1.0` could push a tick into
+  the plot rectangle (now capped at the margin depth), an all-missing column
+  failed instead of rendering an empty scene (now falls back to the unit
+  interval), and implicit sparse zeros widened the value axis although no tick
+  was drawn there (the scale now derives from the drawn observations). The
+  operation-span test was also stabilized against the shared tracing callsite.
