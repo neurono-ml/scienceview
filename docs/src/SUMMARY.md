@@ -32,5 +32,6 @@
 - [Chapter 25 — ECDF plots: describing a distribution without choosing a shape](development-explained/ch25-ecdf-plot.md)
 - [Chapter 26 — Rug plots: keeping the raw sample visible](development-explained/ch26-rug-plot.md)
 - [Chapter 27 — Box plots: five numbers that describe a whole distribution](development-explained/ch27-box-plot.md)
+- [Chapter 28 — Violin plots: the whole shape of a distribution](development-explained/ch28-violin-plot.md)
 - [Chapter 29 — Boxen plots: a nest of letter values](development-explained/ch29-boxen-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
