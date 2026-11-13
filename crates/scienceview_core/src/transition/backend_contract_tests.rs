@@ -31,15 +31,12 @@ fn a_static_export_backend_declares_transition_unsupported() {
         sv_transition_support(SVBackendKind::Svg),
         SVTransitionSupport::FinalStateOnly
     );
-    assert_eq!(
-        sv_transition_support(SVBackendKind::Html),
-        SVTransitionSupport::FinalStateOnly
-    );
 }
 
 #[test]
 fn every_in_place_backend_declares_transition_support() {
     for backend_kind in [
+        SVBackendKind::Html,
         SVBackendKind::Tui,
         SVBackendKind::Native,
         SVBackendKind::Wasm,
