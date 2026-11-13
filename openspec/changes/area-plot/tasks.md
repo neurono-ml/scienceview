@@ -53,7 +53,7 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/recipes/relational-area-plot.md` before opening the code PR.
 
 ## 8. Review follow-ups
@@ -66,3 +66,19 @@
   numeric positions while `SVScaleKind::Temporal` answers timestamps.
 - [x] Reject a backend with no recipe rendering path at build time; only the
   SVG serializer is wired in this change.
+- [x] Honour the missing-value policy while stacking: the shared grid used to
+  read a non-finite sample as a zero before the policy ran, so `Error` did not
+  reject a stacked render. Covered by
+  `a_strict_missing_value_policy_rejects_a_stacked_render`.
+- [x] Prove stacking tiles: `the_stacked_areas_tile_against_the_cumulative_baseline`
+  asserts that the upper area's baseline is the lower area's top, instead of
+  only counting primitives.
+- [ ] Close the P6 density gap: `sv_read_column` expands a sparse column into a
+  `Vec<f64>`, so the recipe currently densifies a sparse input even though the
+  `data-view-boundary` spec and patterns.md P6 forbid it. Needs either a truly
+  non-densifying preparation or a spec delta agreed across the recipe family
+  (`band_plot` shares the same helper).
+- [ ] Split the modules that exceed 200 lines into folder modules (P3):
+  `builder.rs`, `core_implementation.rs`, `preparation.rs` and `rendering.rs`.
+- [ ] Reduce the change history to one commit per task: the first implementation
+  landed 18 checked tasks in two commits.
