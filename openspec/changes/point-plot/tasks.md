@@ -53,5 +53,11 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/distribution-point-plot.md` before opening the code PR.
+
+## 8. Review fixes
+
+- [x] Independent acceptance review performed against FDR-123: every acceptance
+  item is exercised by a named test, and the transition requirement is claimed
+  only as transition-ready geometry with animation wiring deferred.
