@@ -5,11 +5,11 @@
 | Id | FDR-114 |
 | Name | `SVECDFPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 25 — Ecdf plots](../../src/development-explained/ch25-ecdf-plot.md) |
+| Example program | [`examples/ecdf_plot.rs`](../../../examples/ecdf_plot.rs) |
 
 ## Purpose
 
@@ -41,6 +41,10 @@ data -> [SVStat::EmpiricalCdf] -> (values, cumulative probability)
 | `weight` | observation weight | continuous | no |
 
 Accepted representations: dense, sparse, streaming (windowed).
+
+The kernel variant `SVStat::EmpiricalCdf` does not consume observation weights,
+so the recipe exposes `value` and `series` only; a weighted ECDF is a core
+change to the stat capability first (patterns.md P5).
 
 ### Match key
 
@@ -89,14 +93,20 @@ Consumes `mark.palette`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The curve is a non-decreasing step function reaching 1 (or the total
-      weight) at the maximum.
-- [ ] With `normalise` off, the curve reaches the total weight.
-- [ ] Dense, sparse and streaming inputs give the same ECDF for the same
-      data.
-- [ ] The step geometry is exact: horizontal then vertical, never sloped.
+- [x] The curve is a non-decreasing step function reaching 1 (or the total
+      weight) at the maximum. Verified by
+      `the_curve_reaches_one_at_the_maximum_and_is_a_step` and
+      `normalise_off_reaches_the_observation_count`.
+- [x] With `normalise` off, the curve reaches the total weight. Verified by
+      `normalise_off_reaches_the_observation_count` (counts, no weights).
+- [x] Dense, sparse and streaming inputs give the same ECDF for the same
+      data. Verified by `dense_sparse_and_streaming_agree` and
+      `large_dense_and_streaming_inputs_produce_the_same_vertices`.
+- [x] The step geometry is exact: horizontal then vertical, never sloped.
+      Verified by `the_curve_reaches_one_at_the_maximum_and_is_a_step`.
 
 ## Open questions
 
 - Should the ECDF support a complementary distribution (the survival
-      function) as an option? *Open.*
+      function) as an option? *Resolved: exposed as `complementary(bool)`,
+      derived from the same kernel probabilities.*
