@@ -39,6 +39,7 @@
 
 mod backend;
 mod canvas;
+mod frame;
 
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 mod bindings;
@@ -48,12 +49,18 @@ pub use backend::SVWasmBackendProvider;
 pub use backend::sv_register_wasm_backend;
 pub use canvas::SVCanvasSurface;
 pub use canvas::SVHeadlessCanvas;
+pub use frame::SVPausedWasmClock;
+pub use frame::SVWasmFrameLoop;
+pub use frame::SVWasmFrameOutcome;
+pub use frame::SVWasmModelClock;
 pub use scienceview_native::SVNativeFrame;
 
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 pub use bindings::SVWasmFigure;
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 pub use canvas::SVBrowserCanvasHandle;
+#[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+pub use frame::SVBrowserFrameDriver;
 
 #[cfg(test)]
 #[path = "crate_tests/mod.rs"]
