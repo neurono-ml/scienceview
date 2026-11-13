@@ -108,6 +108,11 @@ path = "examples/count_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
+name = "contour_plot"
+path = "examples/contour_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
 name = "point_plot"
 path = "examples/point_plot.rs"
 required-features = ["render-svg"]
