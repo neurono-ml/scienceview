@@ -17,6 +17,27 @@ released.
   top and the right, sharing the central scales. It composes the scatter mark,
   the hexbin and density-contour recipes, `SVStat::Fit`, `SVStat::Bin` and
   `SVStat::KernelDensity`, and solves its three panels through `sv_layout`.
+- The multivariate recipe `SVParallelCategoriesPlot`
+  (`scienceview::sv_recipes::sv_multivariate`): a set of categorical axes whose
+  observations become aggregated ribbons between adjacent axes. The chart is
+  the composition of FDR-142 —
+  `data -> [SVStat::Count] -> category bands per axis -> [SVScale per axis
+  (nominal bands)] -> SVMark::Ribbon` — and its configuration surface is
+  `variables`, `variable_labels`, `category_labels`, `colour`, `colour_mode`,
+  `opacity`, `band_gap`, `category_order`, `label_angle`,
+  `missing_value_policy` and `title`, with `backend(...)` required and
+  `execution_mode` defaulting to `Automatic`. Every axis is counted through
+  `SVStat::Count`, and the observations are aggregated per adjacent-axis
+  category pair through the same kernel; the ribbon slice thickness encodes the
+  count. Ribbons are coloured by count or by category. Dense, sparse and
+  streaming inputs produce byte-identical figures, a sparse column is never
+  densified, and a streaming window renders without blocking. The scene
+  serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error.
+  Transition and animation wiring is deferred to the transition integration;
+  the geometry is transition-ready. The example
+  `examples/parallel_categories_plot.rs` writes
+  `docs/figures/parallel_categories_plot.svg`.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is
@@ -57,46 +78,27 @@ released.
   FDR names — is deferred to the transition integration; the geometry is
   transition-ready. The example `examples/image_plot.rs` computes its field
   analytically and writes the deterministic figure `docs/figures/image_plot.svg`.
-- The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
-  the point estimate of every category with its uncertainty, optionally joined
-  by a line. The chart is the composition of FDR-123 —
-  `data -> [SVStat::Aggregate + interval] -> (estimate, lower, upper) -> [SVMove::Dodge] -> [SVScale] -> SVMark::Dot + ErrorBar + optional Line` —
-  and its configuration surface is `category`, `value`, `series`, `estimator`,
-  `error`, `confidence_interval`, `ordering`, `missing_value_policy`, `orient`,
-  `marker`, `caps`, `cap_width`, `join`, `line_width`, `dash`, `colour`, the
-  titles and the viewport, with `backend(...)` required and `execution_mode`
-  defaulting to `Automatic`. The estimator and the interval come from
-  `SVStat::Aggregate` and are never reimplemented; `SVMove::Dodge` places
-  several series inside a category slot. A sparse column contributes only its
-  stored entries and a streaming column its current window; both are resolved
-  once per operation. The composed geometry serializes through `to_svg()` and,
+- The matrix recipe `SVDensityHeatmapPlot` (`scienceview::sv_recipes::sv_matrix`):
+  the two-dimensional density of two continuous variables drawn as a raster of
+  coloured cells. The chart is the composition of FDR-133 —
+  `data -> [SVStat::Bin (2D)] -> (grid, counts) -> [SVScale::Continuous over a colour map] -> SVMark::Image` —
+  and its configuration surface is `x`, `y`, `series`, `weight`, `bin_count_x`,
+  `bin_count_y`, `normalise`, `colour_map`, `colour_bar`, `opacity`,
+  `empty_bin_policy`, the titles and the viewport, with `backend(...)` required
+  and `execution_mode` defaulting to `Automatic`. Both edge vectors come from
+  `SVStat::Bin` per axis and the per-cell fold from `SVStat::Aggregate` (`Sum`)
+  over derived row-major cell codes; the recipe adds no kernel variant.
+  `SVNormalisation` normalises the cells (`Count`, `Probability`, `Density`) and
+  `SVEmptyBinPolicy` paints an empty bin with the map's lowest value or omits
+  it. A sparse column is walked through its stored entries plus the implicit-zero
+  run and is never densified; a streaming column is read from its current window
+  and never blocks. The composed geometry serializes through `to_svg()` and,
   with `render-native`, through `to_native_frame()`; any other configured kind
-  fails with a typed error instead of being ignored. Transition and animation
-  wiring is deferred to the transition integration; the geometry is
-  transition-ready. The example `examples/point_plot.rs` writes
-  `docs/figures/point_plot.svg`.
-- The distributional recipe `SVCountPlot` (`scienceview::sv_recipes::sv_distribution`):
-  the number of observations in every category, drawn as a bar. The chart is
-  the composition of FDR-122 —
-  `data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge] -> [SVScale] -> SVMark::Bar` —
-  and its configuration surface is `category`, `series`, `category_labels`,
-  `series_labels`, `orient`, `width`, `normalise`, `order`, `colour`, `multiple`
-  and `missing_value_policy`, with `backend(...)` required and `execution_mode`
-  defaulting to `Automatic`. Counting is never reimplemented:
-  `SVStat::Count` counts each series' category column and applies the requested
-  `SVCountOrder`, while the recipe only aligns the returned category sets on one
-  shared axis. `SVMove::Stack` and `SVMove::Dodge` arrange several series inside
-  a category slot; `normalise` divides the counted values by the grand total.
-  A sparse category column keeps its implicit zeros as category-zero
-  observations and is never densified; a streaming window renders without
-  blocking and `update(...)` recomposes the current window. The composed scene
-  serializes through `to_svg()` and, with `render-native`, through
-  `to_native_frame()`; any other configured kind fails with a typed error
-  instead of being ignored. Weighted counting is rejected with a typed
-  configuration error naming the `SVStat::Count` kernel gap. Transition and
-  animation wiring is deferred to the transition integration; the geometry is
-  transition-ready. The example `examples/count_plot.rs` writes
-  `docs/figures/count_plot.svg`.
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/density_heatmap_plot.rs` writes
+  `docs/figures/density_heatmap_plot.svg`.
+
 - The matrix recipe `SVContourPlot` (`scienceview::sv_recipes::sv_matrix`):
   contour lines and filled bands over a supplied two-dimensional scalar field.
   The chart is the composition of FDR-132 —
@@ -137,6 +139,46 @@ released.
   and animation wiring is deferred to the transition integration; the geometry
   is transition-ready. The example `examples/heatmap_plot.rs` writes
   `docs/figures/heatmap_plot.svg`.
+- The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the point estimate of every category with its uncertainty, optionally joined
+  by a line. The chart is the composition of FDR-123 —
+  `data -> [SVStat::Aggregate + interval] -> (estimate, lower, upper) -> [SVMove::Dodge] -> [SVScale] -> SVMark::Dot + ErrorBar + optional Line` —
+  and its configuration surface is `category`, `value`, `series`, `estimator`,
+  `error`, `confidence_interval`, `ordering`, `missing_value_policy`, `orient`,
+  `marker`, `caps`, `cap_width`, `join`, `line_width`, `dash`, `colour`, the
+  titles and the viewport, with `backend(...)` required and `execution_mode`
+  defaulting to `Automatic`. The estimator and the interval come from
+  `SVStat::Aggregate` and are never reimplemented; `SVMove::Dodge` places
+  several series inside a category slot. A sparse column contributes only its
+  stored entries and a streaming column its current window; both are resolved
+  once per operation. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error instead of being ignored. Transition and animation
+  wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/point_plot.rs` writes
+  `docs/figures/point_plot.svg`.
+- The distributional recipe `SVCountPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the number of observations in every category, drawn as a bar. The chart is
+  the composition of FDR-122 —
+  `data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge] -> [SVScale] -> SVMark::Bar` —
+  and its configuration surface is `category`, `series`, `category_labels`,
+  `series_labels`, `orient`, `width`, `normalise`, `order`, `colour`, `multiple`
+  and `missing_value_policy`, with `backend(...)` required and `execution_mode`
+  defaulting to `Automatic`. Counting is never reimplemented:
+  `SVStat::Count` counts each series' category column and applies the requested
+  `SVCountOrder`, while the recipe only aligns the returned category sets on one
+  shared axis. `SVMove::Stack` and `SVMove::Dodge` arrange several series inside
+  a category slot; `normalise` divides the counted values by the grand total.
+  A sparse category column keeps its implicit zeros as category-zero
+  observations and is never densified; a streaming window renders without
+  blocking and `update(...)` recomposes the current window. The composed scene
+  serializes through `to_svg()` and, with `render-native`, through
+  `to_native_frame()`; any other configured kind fails with a typed error
+  instead of being ignored. Weighted counting is rejected with a typed
+  configuration error naming the `SVStat::Count` kernel gap. Transition and
+  animation wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/count_plot.rs` writes
+  `docs/figures/count_plot.svg`.
 - The distributional recipe `SVBarPlot` (`scienceview::sv_recipes::sv_distribution`):
   the aggregate value of every category as a bar, optionally with an error
   interval. The composition is FDR-121's exactly — `SVStat::Aggregate` produces

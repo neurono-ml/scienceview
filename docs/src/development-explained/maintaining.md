@@ -54,6 +54,9 @@ examples.
 | 36 | `ch36-contour-plot.md` | Contours: a supplied scalar field read from a matrix or interpolated from a point cloud through `SVStat::Bin`, level count/range/size selection, marching squares and stitched closed regions, the `Lines`/`Filled` styles, the missing-value policy, sparse implicit zeros, streaming windows, labels, and the SVG/native dispatch |
 | 38 | `ch38-image-plot.md` | Image plots: a raster on its data extent through `SVMark::Image`, numeric fields mapped by `SVContinuousColourScale` and RGBA pixels drawn as stored, nearest and bilinear sampling, the extent and origin, equal and stretched aspect ratios, transparent and domain-lower missing pixels, dense/sparse/streaming parity, the PNG data URI and the native frame |
 | 39 | `ch39-hexbin-plot.md` | Hexbin plots: the pointy-top hexagonal lattice and its exact axial inverse, count and mean aggregation, grid size and extent, the minimum-count filter, the continuous colour scale and colour bar, the missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
+| 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
+| 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
+| 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
@@ -108,3 +111,13 @@ the central form delegates to the scatter mark, the hexbin recipe, the density
 contour recipe and the fit kernel, how the marginals compose `SVStat::Bin` and
 `SVStat::KernelDensity`, and how the dense, sparse and streaming parity tests
 prove that the shared scales are real.
+Chapter 43 covers the pair-plot recipe, which solves a matrix of cells through
+the layout engine and gives every cell the shared domain of its row and column.
+It explains the schema-driven variable list, the density and histogram
+diagonals, the scatter, hexbin and density-contour off-diagonal forms, the hue
+grouping and the dense/sparse/streaming parity tests.
+Chapter 42 covers the scatterplot matrix recipe, which arranges one scatter cell
+per variable pair and a univariate diagonal into a grid solved by the layout
+kernel: it explains the shared observations, the missing-value policy, the
+independent and common scale domains, the three diagonal modes, the colour
+grouping and the parity, concurrency and observability tests.
