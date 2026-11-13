@@ -134,6 +134,13 @@ failures with line/column/byte spans, the statement budget, and the concurrency
 and placement tests. It states the limitation honestly: full-language scripts
 need an `SVScriptEngine` implementation over a real interpreter.
 
+Chapter 50 covers dashboard composition (`scienceview_dashboard`): why a
+dashboard is a separate crate, how a grid of rows, columns and spans is solved
+through the layout kernel, how one shared source fans a single read out to
+every panel without copying, how a selection becomes a derived filter bounded
+by a cascade budget, how zoom, pan and range actions travel by linked axis
+identifier, and how every panel is embedded as a nested inline SVG in one
+deterministic accessible document.
 Chapter 49 covers the control kit: why controls are model objects rather than
 artists, the closed action vocabulary shared with third-party widgets, the pure
 reducer with its transform-aware zoom and clamped bounds, the event payloads
