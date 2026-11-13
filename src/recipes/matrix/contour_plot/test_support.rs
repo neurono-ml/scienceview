@@ -98,8 +98,12 @@ pub(crate) fn sv_sparse_points_source() -> SVTestSource<'static> {
 pub(crate) fn sv_streaming_points_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Streaming(SVStreamingView::new(&POINT_VALUE, 9, 0)),
-        x: Some(SVColumnView::Streaming(SVStreamingView::new(&POINT_X, 9, 0))),
-        y: Some(SVColumnView::Streaming(SVStreamingView::new(&POINT_Y, 9, 0))),
+        x: Some(SVColumnView::Streaming(SVStreamingView::new(
+            &POINT_X, 9, 0,
+        ))),
+        y: Some(SVColumnView::Streaming(SVStreamingView::new(
+            &POINT_Y, 9, 0,
+        ))),
     }
 }
 
