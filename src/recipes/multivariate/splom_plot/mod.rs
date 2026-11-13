@@ -62,6 +62,9 @@ pub use render_output::{SVSplomFrame, SVSplomRenderOutput};
 pub use scene::{SVSplomCell, SVSplomCellKind, SVSplomScene};
 
 #[cfg(test)]
+#[path = "parity_tests.rs"]
+mod parity_tests;
+#[cfg(test)]
 #[path = "splom_plot_tests.rs"]
 mod splom_plot_tests;
 #[cfg(test)]
