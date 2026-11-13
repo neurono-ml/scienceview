@@ -13,3 +13,7 @@ mod lattice;
 pub use definition::{SVHexbinCell, SVHexbinComposition};
 
 pub(crate) use build::sv_compose;
+
+#[cfg(test)]
+#[path = "lattice_tests.rs"]
+mod lattice_tests;
