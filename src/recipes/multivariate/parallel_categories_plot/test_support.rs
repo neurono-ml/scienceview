@@ -132,7 +132,18 @@ pub(crate) fn sv_build_default(source: &dyn SVDataSource) -> SVParallelCategorie
         .expect("the configuration is complete")
 }
 
-#[cfg(feature = "render-svg")]
+/// Serializes a composed scene through the SVG backend for byte comparisons.
 pub(crate) fn sv_scene_to_svg(scene: &super::SVParallelCategoriesScene) -> String {
-    scene.to_svg().expect("the scene serializes")
+    use scienceview_svg::SVSvgDocument;
+
+    let mut document = SVSvgDocument::new(scene.viewport())
+        .with_title(scene.title().unwrap_or("parallel categories plot"))
+        .with_description(scene.description().unwrap_or("parallel categories plot"))
+        .with_background(scene.background());
+    document.push_decoration_primitives(scene.decoration_primitives_before_marks());
+    for geometry in scene.mark_geometries() {
+        document.push_mark_geometry(geometry);
+    }
+    document.push_decoration_primitives(scene.decoration_primitives_after_marks());
+    document.to_svg()
 }
