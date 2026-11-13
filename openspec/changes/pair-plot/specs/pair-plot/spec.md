@@ -2,13 +2,13 @@
 
 ## Purpose
 
-`SVPairPlot` — Is the categorical scatterplot matrix: a grid whose cells show the relationship between every pair of variables, with the categories of a third variable distinguished by colour, and the diagonal showing the distribution of each variable per category. It differs from `SVSplomPlot` in the way seaborn's `pairplot` differs from plotly's `splom`: seaborn's is designed for categorical data, with dodging, jitter and per-category distributions on the diagonal.
+`SVPairPlot` — Is the pair scatterplot matrix: a grid whose cells show the relationship between every pair of continuous variables, with the categories of a third variable distinguished by colour, and the diagonal showing the distribution of each variable per category. It differs from `SVSplomPlot` in the way seaborn's `pairplot` differs from plotly's `splom`: seaborn's is designed for categorical data, with dodging, jitter and per-category distributions on the diagonal.
 
 ## ADDED Requirements
 
 ### Requirement: The chart is the specified composition
 
-`SVPairPlot` SHALL be produced by exactly the composition `data -> [no stat] -> values -> [SVMove::Dodge (+ Jitter) within each cell] -> [SVScale per axis] -> SVMark::Dot, one cell per pair` and SHALL expose the configuration surface recorded in its FDR.
+`SVPairPlot` SHALL be produced by exactly the composition `data -> [no stat] -> values -> [SVMove::Jitter/Dodge within each cell] -> [SVScale per axis] -> SVMark::Dot (or a chart-owned hexbin/binned-contour cell), one cell per pair` and SHALL expose the configuration surface recorded in its FDR.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
@@ -20,7 +20,7 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVPairPlot` SHALL consume `x_variables`, `y_variables`, `hue`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVPairPlot` SHALL consume `x_variables`, `y_variables`, `hue`, with the continuous roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied

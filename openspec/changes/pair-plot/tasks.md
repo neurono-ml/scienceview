@@ -66,3 +66,20 @@
 - Transition and animation wiring is deferred to the transition integration, as
   in the other recipes of this wave; the composed geometry is transition-ready
   and no transition test is claimed.
+- The independent review amended the FDR's configuration and data-contract
+  tables to the implemented surface: the continuous-variable scope, the
+  explicit `jitter(...)` displacement instead of the `dodge` boolean, the
+  deferred `palette` override, the deferred nominal variables and their
+  count-plot diagonal, and the implemented `off_diagonal_kind`, `alpha`,
+  `missing_value_policy` and `title` options.
+- The off-diagonal hexbin and binned-contour cells are chart-owned geometry over
+  the closed kernels, not delegated recipe compositions: `SVHexbinPlot` and
+  `SVDensityContourPlot` solve their own figure and cannot be handed a single
+  pair cell while preserving the shared per-variable domain. ADR #182 records
+  the trade-off; the binned contour is deliberately not the KDE-based
+  `SVDensityContourPlot`.
+- The review fixed a positional-alignment defect in the hue grouping: a missing
+  hue value now keeps its slot in the group-index vector, so the observations
+  after it keep their category and the SVG matches the equivalent source with
+  the row removed. Regression:
+  `pair_plot_tests::a_missing_hue_stays_aligned_with_its_observation`.
