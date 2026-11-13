@@ -46,18 +46,6 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
-
-`SVRugPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
-
-#### Scenario: Transition: tick position
-- **WHEN** the state changes and tick position is affected
-- **THEN** interpolates
-
-#### Scenario: Transition: removed observation
-- **WHEN** the state changes and removed observation is affected
-- **THEN** the tick exits
-
 ### Requirement: The chart renders on every declared backend
 
 `SVRugPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
