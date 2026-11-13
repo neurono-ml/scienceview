@@ -11,8 +11,8 @@
 #[path = "distribution/mod.rs"]
 pub mod sv_distribution;
 
-#[path = "relational/mod.rs"]
-pub mod sv_relational;
-
 #[path = "matrix/mod.rs"]
 pub mod sv_matrix;
+
+#[path = "relational/mod.rs"]
+pub mod sv_relational;

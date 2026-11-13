@@ -1,4 +1,4 @@
-//! The matrix family: charts that show a two-dimensional field.
+//! Matrix recipes: charts whose data is a two-dimensional field.
 //!
 //! Every chart in this family appends one `#[path] pub mod` and one
 //! `pub use` to this dispatcher; the family batch integrator resolves the
@@ -6,9 +6,18 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "contour_plot/mod.rs"]
+pub mod sv_contour_plot;
+pub use sv_contour_plot::{SVContourComposition, SVContourPlot, SVContourPlotBuilder};
+
 #[path = "density_heatmap_plot/mod.rs"]
 pub mod sv_density_heatmap_plot;
 pub use sv_density_heatmap_plot::{
-    SVDensityHeatmapComposition, SVDensityHeatmapGrid, SVDensityHeatmapPlot,
-    SVDensityHeatmapPlotBuilder, SVEmptyBinPolicy,
+    SVDensityHeatmapComposition, SVDensityHeatmapPlot, SVDensityHeatmapPlotBuilder,
+};
+
+#[path = "heatmap_plot/mod.rs"]
+pub mod sv_heatmap_plot;
+pub use sv_heatmap_plot::{
+    SVHeatmapFrame, SVHeatmapPlot, SVHeatmapPlotBuilder, SVHeatmapRenderOutput, SVHeatmapScene,
 };
