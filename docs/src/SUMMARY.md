@@ -39,5 +39,7 @@
 - [Chapter 32 — Bar plots: saying one number about each category](development-explained/ch32-bar-plot.md)
 - [Chapter 33 — Count plots: how many observations fall into each category](development-explained/ch33-count-plot.md)
 - [Chapter 34 — Point plots: one estimate and its uncertainty per category](development-explained/ch34-point-plot.md)
+- [Chapter 35 — Heatmaps: a matrix where colour is the number](development-explained/ch35-heatmap-plot.md)
+- [Chapter 36 — Contours: drawing a field that was handed to you](development-explained/ch36-contour-plot.md)
 - [Chapter 37 — Density heatmaps: the binned field, cell by cell](development-explained/ch37-density-heatmap-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
