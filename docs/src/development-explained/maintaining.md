@@ -42,6 +42,7 @@ examples.
 | 23 | `ch23-density-plot.md` | Density plots: `SVStat::KernelDensity` with three kernel shapes, Silverman's bandwidth and `bandwidth_adjustment`, the fixed evaluation grid and `cut`, the `normalise` modes, series grouping, missing-value policy, sparse and streaming parity, SVG/native dispatch and the generated figure |
 | 24 | `ch24-density-contour-plot.md` | Density contours: the binned joint density over the bin kernel, marching squares and loop stitching, nested filled bands, the data boundary, backends and the acceptance tests |
 | 25 | `ch25-ecdf-plot.md` | The ECDF recipe: the empirical cumulative distribution through `SVStat::EmpiricalCdf`, exact horizontal-then-vertical step geometry, normalisation and the derived survival curve, orientation, series grouping, missing values, non-densifying sparse reads, streaming windows and SVG/native serialization |
+| 26 | `ch26-rug-plot.md` | The distributional rug recipe: the one-dimensional marginal tick, the line-kernel segment composition, the value and depth scales, orientation and the axis margin, series colours, missing observations, sparse stored-entry semantics, the bounded compound path and the acceptance tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
