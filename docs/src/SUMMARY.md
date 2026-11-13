@@ -21,4 +21,5 @@
 - [Chapter 14 — Animation: one clock, two keyframe sources](development-explained/ch14-animation-timeline.md)
 - [Chapter 15 — Native: drawing pixels yourself, without a GPU](development-explained/ch15-native-backend.md)
 - [Chapter 16 — A scatter plot from zero: how a recipe composes the kernels](development-explained/ch16-scatter-plot.md)
+- [Chapter 17 — A line plot: turning columns into a composed chart](development-explained/ch17-line-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
