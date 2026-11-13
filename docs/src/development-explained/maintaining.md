@@ -57,6 +57,7 @@ examples.
 | 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
 | 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
 | 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
+| 46 | `ch46-tui-backend.md` | The terminal backend: the cell-grid viewport, snapping only at the end, braille dots, partial blocks, wide characters, three ANSI colour depths, the elapsed-time tick clock, resize handling, registry dispatch and the honest export refusal |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
