@@ -54,18 +54,6 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
-
-`SVRegressionPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
-
-#### Scenario: Transition: fit line
-- **WHEN** the state changes and fit line is affected
-- **THEN** morphs — the coefficients interpolate, and the curve is recomputed per frame
-
-#### Scenario: Transition: points
-- **WHEN** the state changes and points is affected
-- **THEN** redraw unless an identity key is available
-
 ### Requirement: The chart renders through the backend it selects
 
 `SVRegressionPlot` SHALL render through the SVG backend in this change and SHALL build for every backend whose mark matrix declares support for `Dot`, `Line` and `Ribbon`. A backend whose composed render path is not implemented yet SHALL refuse the operation explicitly instead of drawing nothing.

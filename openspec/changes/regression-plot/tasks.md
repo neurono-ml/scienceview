@@ -73,9 +73,9 @@
   accept a sparse view only when every logical position is stored. Add
   dense-vs-sparse parity tests with explicit zero observations and the
   rejection path.
-- [ ] Tick the temporal requirements only when a transition surface exists, or
+- [x] Tick the temporal requirements only when a transition surface exists, or
   defer them in the FDR.
-- [ ] Replace the claimed-but-hardcoded theme consumption with `theme(...)`
+- [x] Replace the claimed-but-hardcoded theme consumption with `theme(...)`
   wiring or an explicit deferral in the FDR.
 - [ ] Split `regression_plot_tests.rs` into a `regression_plot_tests/` folder
   module.

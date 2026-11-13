@@ -25,7 +25,12 @@ P6).
 
 ### D3 — Temporal behaviour
 
-fit line: morphs — the coefficients interpolate, and the curve is recomputed per frame. confidence band: morphs with the fit. points: redraw unless an identity key is available.
+Deferred to the transition integration. This change exposes no state, no
+transition registration and no per-frame callback, so the fit line, band and
+points are drawn statically. The FDR records the intended behaviour
+(coefficient interpolation with a per-frame curve recomputation) for the
+change that adds transitions, and its animation acceptance bullet stays
+unticked.
 
 ### D4 — Registration
 
@@ -36,13 +41,14 @@ central registry would serialise every recipe change against every other one
 
 ### D5 — Sparse pairing
 
-The closed fit kernel rejects sparse storage: two independently sparse columns
-describe implicit zeros at different positions. The recipe accepts a sparse
-predictor and response only when they share the identical stored support and
-pairs the stored entries without materialising an implicit zero; a mismatched
-support is rejected with the kernel's documented `UnsupportedRepresentation`
-alternative. Streaming input is read from its bounded window and reported as
-windowed.
+Implicit zeros are observations. The closed fit kernel rejects sparse storage,
+and fitting only the stored entries would silently describe a different model
+from the dense twin of the same logical column. The recipe therefore accepts a
+sparse column only when its stored support covers its whole logical length —
+the stored entries are then exactly the dense observation set — and rejects any
+view with implicit zeros with the kernel's documented
+`UnsupportedRepresentation` alternative, naming dense and streaming columns.
+Streaming input is read from its bounded window and reported as windowed.
 
 ### D6 — Backend scope
 
@@ -60,6 +66,13 @@ observation-weight column nor an interval selector. Adding either inside the
 recipe would be a kernel change smuggled into a chart (P5), so both are
 deferred to a core-stat change. The recipe exposes `confidence` for the band the
 kernel actually computes.
+
+### D8 — Theme is deferred
+
+The composed scene uses the built-in palette (`sv_default_scale_palette`) and
+`SVDecorationStyle::built_in`. This change exposes no `theme(...)` setter, so
+the FDR does not claim theme consumption; wiring a theme through the mark and
+decoration styles is deferred to the theme integration.
 
 ## Open Questions
 
