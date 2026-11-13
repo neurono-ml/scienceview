@@ -5,11 +5,11 @@
 | Id | FDR-123 |
 | Name | `SVPointPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 34](../../src/development-explained/ch34-point-plot.md) |
+| Example program | [`examples/point_plot.rs`](../../../examples/point_plot.rs) |
 
 ## Purpose
 
@@ -101,11 +101,26 @@ Consumes `mark.palette`, `mark.size`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The point is the estimator over the category.
-- [ ] The error bar matches the requested error kind and confidence.
-- [ ] The caps are drawn when enabled.
-- [ ] The connecting line joins the points of one series in category order.
-- [ ] Dense, sparse and streaming inputs give the same estimates.
+- [x] The point is the estimator over the category
+      (`point_plot_tests::the_default_point_is_the_mean_of_its_category`,
+      `estimator_selects_a_different_summary`).
+- [x] The error bar matches the requested error kind and confidence
+      (`the_default_error_is_one_standard_deviation`,
+      `confidence_interval_widens_the_percentile_band`).
+- [x] The caps are drawn when enabled (`caps_can_be_switched_off`).
+- [x] The connecting line joins the points of one series in category order
+      (`join_draws_one_line_per_series`).
+- [x] Dense, sparse and streaming inputs give the same estimates
+      (`parity_tests::dense_sparse_and_streaming_agree`,
+      `the_point_estimates_agree_across_representations`).
+- [x] Concurrency and observability: `concurrency_tests::concurrent_renders_are_identical`,
+      `observability_tests::render_span_records_backend_representation_and_points`.
+- [x] SVG and native serialization: `svg_tests`, `native_tests`; other kinds fail
+      with a typed error.
+
+Transition and animation wiring is deferred to the transition integration: the
+composed geometry is transition-ready, but this change ships no animation
+driver.
 
 ## Open questions
 
