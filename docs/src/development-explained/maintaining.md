@@ -94,9 +94,3 @@ theme; ASCII-art diagrams are forbidden. A diagram is authored as Mermaid
 source and rendered to SVG, and the SVG is checked in under
 `docs/src/development-explained/assets/` so the book renders without a
 JavaScript dependency.
-
-Chapter 37 covers the density heatmap recipe, which asks the bin kernel for the
-two edge vectors, folds the observations through the aggregate kernel and
-paints one rectangle per cell over a continuous colour scale; it explains the
-normalisation choices, the empty-bin policy and the sparse and streaming
-parity tests.
