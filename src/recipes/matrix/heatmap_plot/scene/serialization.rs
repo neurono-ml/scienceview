@@ -1,7 +1,9 @@
 //! Serializing the scene through the backend that produced it.
 
 use super::SVHeatmapScene;
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use crate::sv_backend::SVBackendKind;
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use crate::sv_error::SVError;
 
 impl SVHeatmapScene {

@@ -11,6 +11,7 @@ fn sv_matrix() -> SVHeatmapMatrix<'static> {
     SVHeatmapMatrix::new(&VALUES, 2, 2).expect("the shape matches")
 }
 
+#[cfg(feature = "render-svg")]
 #[test]
 fn an_svg_render_is_a_self_contained_deterministic_document() {
     let plot = SVHeatmapPlot::builder()
