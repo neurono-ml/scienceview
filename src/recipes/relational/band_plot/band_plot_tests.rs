@@ -3,7 +3,10 @@
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_core::sv_error::SVError;
+use scienceview_core::sv_figure::SVExecutionMode;
+use scienceview_core::sv_layout::SVViewport;
 use scienceview_core::sv_mark::{SVDashPattern, SVMarkShape, SVPathCommand};
+use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 
 use super::{SVBandPlotBuilder, SVBandRenderOutput};
 
@@ -80,18 +83,23 @@ fn explicit_bounds_are_drawn_exactly() {
     let plot = output.plot_area();
     let x_range = plot.right() - plot.x;
     let y_range = plot.bottom() - plot.y;
+    // The y domain is the joint extent of both boundaries: 0.5 .. 4.0.
+    let scaled_y = |value: f64| plot.bottom() - ((value - 0.5) / 3.5) * y_range;
     let drawn = points(&output);
-    let expected = [
-        (plot.x, plot.bottom() - ((1.5 - 0.5) / 3.5) * y_range),
-        (
-            plot.x + x_range / 4.0,
-            plot.bottom() - ((2.2 - 0.5) / 3.5) * y_range,
-        ),
-    ];
-    assert!((drawn[0].0 - expected[0].0).abs() < 1e-9);
-    assert!((drawn[0].1 - expected[0].1).abs() < 1e-9);
-    assert!((drawn[1].0 - expected[1].0).abs() < 1e-9);
-    assert!((drawn[1].1 - expected[1].1).abs() < 1e-9);
+
+    // Both boundaries are present at every x, not only the upper one.
+    for index in 0..X.len() {
+        let x_position = plot.x + index as f64 * x_range / 4.0;
+        for boundary in [LOWER[index], UPPER[index]] {
+            let expected = (x_position, scaled_y(boundary));
+            assert!(
+                drawn.iter().any(|point| {
+                    (point.0 - expected.0).abs() < 1e-9 && (point.1 - expected.1).abs() < 1e-9
+                }),
+                "the boundary point {expected:?} is missing from {drawn:?}"
+            );
+        }
+    }
 }
 
 #[test]
@@ -185,4 +193,98 @@ fn centre_line_adds_a_solid_line() {
     assert_eq!(output.geometries().len(), 2);
     let line = &output.geometries()[1];
     assert_eq!(line.primitives()[0].paint().dash(), &SVDashPattern::Solid);
+}
+
+#[test]
+fn invalid_x_scale_kind_fails_at_build_time() {
+    let data = table();
+    for x_scale_kind in [SVScaleKind::Nominal, SVScaleKind::Boolean] {
+        let error = explicit(&data)
+            .x_scale_kind(x_scale_kind)
+            .backend(SVBackendKind::Svg)
+            .build()
+            .err()
+            .expect("a categorical or boolean x axis cannot order a band");
+        assert!(
+            matches!(error, SVError::InvalidConfiguration { .. }),
+            "expected an invalid configuration, received {error:?}"
+        );
+        assert!(error.to_string().contains("Continuous"));
+    }
+}
+
+#[test]
+fn temporal_x_scale_kind_and_unit_are_carried_to_render() {
+    let data = table();
+    let output = explicit(&data)
+        .x_scale_kind(SVScaleKind::Temporal)
+        .temporal_unit(SVTemporalUnit::Month)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("a temporal x axis is a valid band configuration")
+        .render()
+        .expect("the band draws");
+    assert_eq!(output.number_of_points(), X.len());
+    assert!(!output.decorations().is_empty());
+}
+
+#[test]
+fn execution_mode_defaults_to_automatic_and_is_carried() {
+    let data = table();
+    let default_plot = explicit(&data)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    assert_eq!(default_plot.execution_mode(), SVExecutionMode::Automatic);
+
+    let automatic_plot = explicit(&data)
+        .execution_mode(SVExecutionMode::Automatic)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    assert_eq!(automatic_plot.execution_mode(), SVExecutionMode::Automatic);
+}
+
+#[test]
+fn viewport_is_carried_into_the_output() {
+    let data = table();
+    let viewport = SVViewport::new(800.0, 500.0);
+    let output = explicit(&data)
+        .viewport(viewport)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete")
+        .render()
+        .expect("the band draws");
+    assert_eq!(output.viewport(), viewport);
+    assert!(output.plot_area().right() <= viewport.width());
+}
+
+#[test]
+fn a_missing_column_fails_at_build_time() {
+    let data = table();
+    let error = explicit(&data)
+        .lower("absent")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .err()
+        .expect("a missing boundary column is a configuration error");
+    assert!(matches!(error, SVError::ColumnNotFound { name } if name == "absent"));
+}
+
+#[test]
+fn a_wrong_column_role_fails_at_build_time() {
+    let data = SVDataTable::builder()
+        .with_column("x", SVColumnRole::X, &X)
+        .with_column("lower", SVColumnRole::Grouping, &LOWER)
+        .with_column("upper", SVColumnRole::Y, &UPPER)
+        .build()
+        .expect("the columns share one length");
+    let error = explicit(&data)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .err()
+        .expect("a grouping column cannot be a boundary");
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+    assert!(error.to_string().contains("lower"));
 }

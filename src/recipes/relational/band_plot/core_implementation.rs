@@ -14,7 +14,10 @@ use super::configuration::SVBandPlotConfiguration;
 use super::data_contract::{SVBandData, sv_resolve_band_data};
 use super::decoration::sv_compose_decorations;
 use super::output::SVBandRenderOutput;
-use super::scales::{sv_band_domain, sv_horizontal_scale, sv_plot_area, sv_vertical_scale};
+use super::scales::{
+    sv_band_domain, sv_horizontal_axis_scale, sv_horizontal_placement_scale, sv_plot_area,
+    sv_vertical_scale,
+};
 
 /// The band plot: the filled region between two boundary lines (FDR-105).
 ///
@@ -81,7 +84,8 @@ impl<'values> SVBandPlot<'values> {
         sv_verify_mark_supported(SVMarkKind::Ribbon, self.backend_kind)?;
         let domain = sv_band_domain(data)?;
         let plot_area = sv_plot_area(self.configuration.viewport);
-        let horizontal = sv_horizontal_scale(&self.configuration, &domain, plot_area)?;
+        let horizontal = sv_horizontal_placement_scale(&self.configuration, &domain, plot_area)?;
+        let axis = sv_horizontal_axis_scale(&self.configuration, &domain, plot_area)?;
         let vertical = sv_vertical_scale(&domain, plot_area)?;
         let geometries = sv_compose_band_geometries(
             data,
@@ -93,7 +97,7 @@ impl<'values> SVBandPlot<'values> {
         let series = sv_series_entries(data);
         let decorations = sv_compose_decorations(
             &self.configuration,
-            &horizontal,
+            &axis,
             &vertical,
             plot_area,
             self.configuration.viewport,

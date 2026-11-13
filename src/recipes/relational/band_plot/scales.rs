@@ -64,8 +64,29 @@ pub(crate) fn sv_band_domain(data: &mut SVBandData<'_>) -> Result<SVBandDomain, 
     Ok(domain)
 }
 
-/// Builds the horizontal scale.
-pub(crate) fn sv_horizontal_scale<'scale>(
+/// Builds the horizontal scale the mark kernel places through.
+///
+/// The mark kernel offers only numeric values to the horizontal scale, so a
+/// temporal axis is placed by a continuous scale over the same domain and
+/// range; the temporal scale built by [`sv_horizontal_axis_scale`] supplies the
+/// date ticks and labels. Both place a timestamp at the same pixel.
+pub(crate) fn sv_horizontal_placement_scale<'scale>(
+    configuration: &SVBandPlotConfiguration<'_>,
+    domain: &SVBandDomain,
+    plot: SVResolvedRectangle,
+) -> Result<SVScale<'scale>, SVError> {
+    let placement_kind = match configuration.x_scale_kind {
+        SVScaleKind::Temporal => SVScaleKind::Continuous,
+        kind => kind,
+    };
+    SVScaleBuilder::new(placement_kind)
+        .domain(domain.x_minimum, domain.x_maximum)
+        .range(plot.x, plot.right())
+        .build()
+}
+
+/// Builds the horizontal scale the axes and the grid read.
+pub(crate) fn sv_horizontal_axis_scale<'scale>(
     configuration: &SVBandPlotConfiguration<'_>,
     domain: &SVBandDomain,
     plot: SVResolvedRectangle,

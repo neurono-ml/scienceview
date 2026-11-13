@@ -10,10 +10,11 @@ use scienceview_core::sv_layout::SVViewport;
 use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 use scienceview_core::sv_stat::SVAggregateErrorKind;
 
+use super::super::column_access::sv_validate_columns;
 use super::super::configuration::{SVBandPlotConfiguration, sv_invalid};
 use super::super::core_implementation::SVBandPlot;
 use super::super::missing_value_policy::SVBandMissingValuePolicy;
-use super::validation::sv_validate_mode;
+use super::validation::{sv_validate_mode, sv_validate_x_scale_kind};
 
 /// Builds an [`SVBandPlot`].
 ///
@@ -135,6 +136,7 @@ impl<'values> SVBandPlotBuilder<'values, SVWithBackend> {
             .x
             .ok_or_else(|| sv_invalid("a band plot needs the `x` column"))?;
         sv_validate_mode(&self)?;
+        sv_validate_x_scale_kind(self.x_scale_kind)?;
         if let Some(opacity) = self.opacity {
             if !opacity.is_finite() || !(0.0..=1.0).contains(&opacity) {
                 return Err(sv_invalid(
@@ -172,6 +174,8 @@ impl<'values> SVBandPlotBuilder<'values, SVWithBackend> {
             temporal_unit: self.temporal_unit,
             viewport: self.viewport,
         };
+
+        sv_validate_columns(&configuration)?;
 
         Ok(SVBandPlot::from_configuration(
             configuration,
