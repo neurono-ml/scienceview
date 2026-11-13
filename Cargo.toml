@@ -48,6 +48,8 @@ path = "src/lib.rs"
 
 # Charts that call the public serializers declare the backend feature that
 # compiles them as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
 [[example]]
 name = "scatter_plot"
 required-features = ["render-svg"]
@@ -69,6 +71,10 @@ name = "box_plot"
 required-features = ["render-svg"]
 
 [[example]]
+name = "boxen_plot"
+required-features = ["render-svg"]
+
+[[example]]
 name = "regression_plot"
 path = "examples/regression_plot.rs"
 required-features = ["render-svg"]
@@ -76,6 +82,15 @@ required-features = ["render-svg"]
 [[example]]
 name = "histogram_plot"
 path = "examples/histogram_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
+name = "swarm_plot"
+path = "examples/swarm_plot.rs"
+required-features = ["render-svg"]
+
+[[example]]
+name = "strip_plot"
 required-features = ["render-svg"]
 
 [[example]]

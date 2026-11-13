@@ -4,7 +4,7 @@
 
 Shows every observation of a variable, positioned along the categorical axis, with a small random displacement so that overlapping observations remain visible. It is the raw-data counterpart of the box and violin plots: the summary disappears and the sample appears.
 
-The chart is specified in `docs/FDRs/distribution-strip-plot.md` (FDR-119) and is
+The chart is specified in `docs/FDRs/recipes/distribution-strip-plot.md` (FDR-119) and is
 part of the scientific core defined in `docs/FDRs/patterns.md`. No
 implementation exists for `SVStripPlot`.
 

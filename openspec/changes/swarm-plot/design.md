@@ -34,6 +34,24 @@ line to `src/recipes/distribution/mod.rs`. No central registry exists, because a
 central registry would serialise every recipe change against every other one
 (patterns.md P4).
 
+## Implementation notes
+
+- The move works in data-space units. The recipe derives `marker_extent` from
+  the solved value scale and the marker diameter, and converts the category slot
+  into the same units, so the kernel's collision test is the pixel-space
+  non-overlap test. The returned offset is mapped back onto the categorical axis
+  by the same ratio; both orientations share the one layout pass.
+- `swarm_width` is a fraction of the category slot (`None` = the whole slot).
+  The fraction is converted to the move's data-space width, so the kernel's
+  typed minimum (two marker extents) and its "cannot place without a collision"
+  error propagate unchanged.
+- A sparse value column contributes exactly its stored entries and is never
+  expanded, matching the box and rug recipes; the dense column that stores the
+  same entries produces the same scene. A streaming column contributes its
+  bounded window.
+- Transitions: the composition is transition-ready geometry; animation wiring is
+  deferred to the transition integration.
+
 ## Open Questions
 
 - What is the complexity bound of the collision-avoiding layout? *Open — a naive pairwise algorithm is quadratic, and a large swarm needs a smarter sweep.*
