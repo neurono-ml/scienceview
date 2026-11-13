@@ -19,10 +19,12 @@ released.
   `quartiles`, `whisker`, `whisker_range`, `show_outliers`, `outlier_marker`,
   `notch`, `show_mean`, `width` and `orient` — and the builder requires an
   explicit backend selection. The quartiles, median and percentile whiskers are
-  never reimplemented: `SVStat::Percentile` supplies them, while `SVWhiskerRule`
+  never reimplemented: `SVStat::Percentile` supplies them with its documented
+  linear interpolation between neighbouring ranks, while `SVWhiskerRule`
   (`Tukey`, `MinMax`, `Percentile`) only selects which observations become the
   whisker ends and which become outliers. `SVMove::Dodge` lays one box per
-  series inside a category. The box body is composed from `SVMark::Ribbon`
+  series inside a category, and a category slot stays one unit wide even when
+  the chart has a single category. The box body is composed from `SVMark::Ribbon`
   (three stacked segments when the notch is enabled), the median, whiskers and
   caps from `SVMark::Line`, and the outliers and mean from `SVMark::Dot`; no
   mark, stat, move or scale variant is added by the recipe. Both orientations

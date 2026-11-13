@@ -212,7 +212,9 @@ chooses the ends and the outliers, and the dodge places one box per series
 inside each category:
 
 ```rust
-use scienceview::sv_recipes::sv_distribution::sv_box_plot::SVBoxPlotBuilder;
+use scienceview::sv_recipes::sv_distribution::sv_box_plot::{
+    SVBoxPlotBuilder, SVWhiskerRule,
+};
 
 let plot = SVBoxPlotBuilder::new()
     .data_source(&table)
