@@ -5,11 +5,11 @@
 | Id | FDR-142 |
 | Name | `SVParallelCategoriesPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch41-parallel-categories-plot.md` |
+| Example program | `examples/parallel_categories_plot.rs` |
 
 ## Purpose
 
@@ -90,10 +90,33 @@ Consumes `mark.palette`, `mark.area_opacity`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] One axis is drawn per variable, with the categories as bands.
-- [ ] Each observation is drawn as a ribbon through the bands.
-- [ ] The category order is honoured on every axis.
-- [ ] Dense, sparse and streaming inputs give the same ribbons.
+- [x] One axis is drawn per variable, with the categories as bands.
+- [x] Each observation is drawn as a ribbon through the bands (observations are
+  aggregated per adjacent-axis category pair through `SVStat::Count`; the
+  ribbon slice thickness encodes the count).
+- [x] The category order is honoured on every axis.
+- [x] Dense, sparse and streaming inputs give the same ribbons.
+- [x] The recipe renders on the SVG and native backends, with a typed error for
+  a kind that has no recipe serializer.
+- [x] Transition-ready geometry: ribbon geometry and colours interpolate; the
+  transition wiring itself is deferred to the transition integration.
+- [x] The example `examples/parallel_categories_plot.rs` writes
+  `docs/figures/parallel_categories_plot.svg`, and the book chapter is
+  `docs/src/development-explained/ch41-parallel-categories-plot.md`.
+
+## Implementation notes
+
+- `variables` is `&[&str]`, one column per axis; `variable_labels` titles the
+  axes and `category_labels(variable, &[...])` labels the bands of one axis.
+- `colour` names an optional grouping column; `colour_mode` chooses between
+  colour-by-count (default) and colour-by-category.
+- `band_gap`, `opacity`, `category_order`, `label_angle` and
+  `missing_value_policy` complete the configuration surface. A non-finite
+  value drops the whole observation (`Omit`) or fails with
+  `SVError::NonFiniteValue` (`Error`).
+- Category axes are counted once through `SVStat::Count`; the aggregation key
+  is the derived adjacent-axis rank pair, also counted through `SVStat::Count`,
+  so the recipe never counts observations itself.
 
 ## Open questions
 
