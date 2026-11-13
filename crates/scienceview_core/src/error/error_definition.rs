@@ -11,6 +11,7 @@
 use crate::sv_animation::SVKeyframeSource;
 use crate::sv_backend::SVBackendCapability;
 use crate::sv_backend::SVBackendKind;
+use crate::sv_control::SVControlAxis;
 use crate::sv_data::SVRepresentation;
 use crate::sv_mark::{SVMarkKind, SVMarkProperty};
 use crate::sv_move::SVMoveStage;
@@ -276,4 +277,26 @@ pub enum SVError {
         /// The rejected capacity.
         capacity: usize,
     },
+
+    /// A control was built with an extent that is not finite or not positive.
+    #[error("a control needs finite, strictly positive width and height")]
+    InvalidControlSize,
+
+    /// A disabled control refused to activate.
+    #[error("the control `{name}` is disabled and cannot be activated")]
+    ControlDisabled {
+        /// The control identity.
+        name: String,
+    },
+
+    /// An action targeted an axis the reducer never registered.
+    #[error("the {axis} axis is not registered with the control state")]
+    UnknownControlAxis {
+        /// The axis the action targeted.
+        axis: SVControlAxis,
+    },
+
+    /// A playback action was dispatched without an animation timeline.
+    #[error("a playback control needs an animation timeline attached to the session")]
+    MissingAnimationTimeline,
 }

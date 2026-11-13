@@ -169,6 +169,25 @@
 //! and time only moves when the caller supplies it through `advance(Duration)`
 //! — no wall clock, no timer and no async runtime, so playback is reproducible.
 //!
+//! ## Controls
+//!
+//! [`sv_control`] is the interactive kit: controls are model objects, not
+//! artists, that dispatch one semantic action vocabulary. `SVControl` carries a
+//! label, a size, a placement, a style resolved from theme tokens, an enabled
+//! state and bounds, and derives an `SVControlAction` from its kind. The
+//! `SVControlState` reducer applies zoom, pan, reset, series visibility, range
+//! and region actions to axis domains, the hidden-series set and the selection,
+//! emitting `SVControlEvent` payloads with the previous and the current value;
+//! zoom and pan work in the scale transform's space, so a logarithmic axis
+//! zooms symmetrically, and every domain stays clamped to its registered
+//! bounds. Playback controls reuse `SVAnimationAction`, and `SVControlSession`
+//! applies them to the animation timeline while delivering the same payloads to
+//! every built-in and third-party subscriber. Gestures are a data table from
+//! keyboard or pointer input to actions, so a toolkit adapter implements
+//! `SVControlSurface` and behaves exactly like a built-in control. There is no
+//! wall clock in the kit: every dispatch is a pure function of the previous
+//! state and the action.
+//!
 //! ## Moves
 //!
 //! [`sv_move`] is the closed vocabulary of positional moves — stack, dodge,
@@ -207,6 +226,8 @@
 
 #[path = "animation/mod.rs"]
 pub mod sv_animation;
+#[path = "control/mod.rs"]
+pub mod sv_control;
 #[path = "data/mod.rs"]
 pub mod sv_data;
 #[path = "decoration/mod.rs"]
