@@ -131,3 +131,23 @@ fn setting_a_range_clamps_it_to_the_axis_bounds() {
         Some(SVDomain::new(0.0, 40.0).expect("clamped domain"))
     );
 }
+
+#[test]
+fn bounds_must_be_inside_the_transform_space() {
+    let mut state = SVControlState::new();
+    state
+        .register_axis_with_transform(
+            SVControlAxis::Horizontal,
+            SVDomain::new(1.0, 1000.0).expect("ordered domain"),
+            SVScaleTransform::Logarithmic,
+        )
+        .expect("the axis is new");
+
+    assert!(matches!(
+        state.set_axis_bounds(
+            SVControlAxis::Horizontal,
+            SVDomain::new(-1.0, 100.0).expect("ordered domain"),
+        ),
+        Err(crate::sv_error::SVError::InvalidConfiguration { .. })
+    ));
+}

@@ -144,6 +144,16 @@ impl SVControlState {
         let state = self
             .sv_axis_state_mut(axis)
             .ok_or(SVError::UnknownControlAxis { axis })?;
+        if !state.transform.domain_is_defined(bounds) {
+            return Err(SVError::InvalidConfiguration {
+                message: format!(
+                    "the {} transform is not defined on the {axis} bounds ({}, {})",
+                    state.transform,
+                    bounds.lower(),
+                    bounds.upper()
+                ),
+            });
+        }
         state.bounds = bounds;
         state.visible = sv_clamp_domain(state.visible, bounds);
         Ok(())
