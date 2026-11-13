@@ -83,12 +83,19 @@ the fit line morphs.
 
 ## Theme
 
-Consumes `mark.palette`, `mark.size`, `mark.area_opacity`, `text.*`, axis
-tokens.
+Deferred. The recipe consumes `mark.palette`, `mark.size`, `mark.area_opacity`,
+`text.*` and axis tokens only through the built-in palette and decoration style;
+this change exposes no `theme(...)` setter, so the record must not claim a theme
+surface it does not wire. Theme wiring is deferred to the theme integration.
 
 ## Temporal
 
-| Property | Behaviour |
+Deferred to the transition integration. This change has no transition surface —
+no state, no transition registration, no per-frame callback — so the fit line,
+band and points are drawn statically. The table below records the intended
+behaviour for the change that adds transitions; it is not implemented here.
+
+| Property | Intended behaviour (deferred) |
 |---|---|
 | fit line | morphs — the coefficients interpolate, and the curve is recomputed per frame |
 | confidence band | morphs with the fit |
@@ -131,13 +138,13 @@ curve would pass through nonsense for a polynomial.
       `sparse_columns_with_different_supports_are_rejected` prove that a view
       whose support leaves implicit zeros is refused with the documented
       alternative instead of silently fitting fewer observations.
-- [x] An animated model change morphs the curve through interpolated
-      coefficients, not through interpolated samples. The recipe exposes the
-      kernel coefficients (`SVRegressionSeriesFit::coefficients`) and the
-      recomputed grid, so the transition kernel can interpolate the
-      coefficients and re-evaluate the curve per frame; the composition test
-      suite asserts the coefficients and the 128-sample grid are the kernel's
-      own values.
+- [ ] An animated model change morphs the curve through interpolated
+      coefficients, not through interpolated samples. **Deferred to the
+      transition integration:** this change has no transition surface. The
+      recipe already exposes the kernel coefficients
+      (`SVRegressionSeriesFit::coefficients`) and the recomputed grid, so the
+      transition change can interpolate the coefficients and re-evaluate the
+      curve per frame without touching the recipe.
 
 ## Implementation notes
 
@@ -164,6 +171,14 @@ curve would pass through nonsense for a polynomial.
 - **Missing values.** A pair whose predictor, response or group code is not
   finite is dropped and counted (`SVRegressionComposition::dropped_pairs`);
   an input with no finite pair fails with `SVError::EmptyInput`.
+- **Theme is deferred.** The composed scene uses the built-in palette
+  (`sv_default_scale_palette`) and `SVDecorationStyle::built_in`; no
+  `theme(...)` setter exists in this change. The book's theme claim is removed
+  rather than left as an unwired surface.
+- **Transitions are deferred.** The recipe has no state machine, transition
+  registration or per-frame callback; the temporal table records the intended
+  behaviour for the transition integration. The acceptance bullet is unticked
+  accordingly.
 - **Backends.** SVG is the implemented render path in this change. The plot
   builds for every backend whose mark matrix includes Dot, Line and Ribbon;
   `render` reports the missing export capability for the others until a later
