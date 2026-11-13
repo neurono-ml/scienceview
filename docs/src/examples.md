@@ -23,6 +23,7 @@ cargo run --example histogram_plot --features render-svg
 cargo run --example line_plot
 cargo run --example density_plot --features render-svg
 cargo run --example hexbin_plot --features render-svg
+cargo run --example joint_plot --features render-svg
 cargo run --example density_heatmap_plot --features render-svg
 ```
 
@@ -494,6 +495,27 @@ let document = plot.compose()?.to_svg()?;
 ```
 
 ![Hexagonal density of two measurements](assets/hexbin_plot.svg)
+## Joint plot
+
+`examples/joint_plot.rs` builds an `SVJointPlot`: a central bivariate panel with
+the marginal distribution of each variable on the top and on the right, all
+sharing the central scales. `kind(...)` selects the central form (scatter,
+hexbin, density contour or regression) and `marginal_kind(...)` the marginal
+form (histogram, density or rug):
+
+```rust,ignore
+let scene = SVJointPlot::builder()
+    .data_source(&table)
+    .x("height")
+    .y("weight")
+    .series("cohort")
+    .alpha(0.7)
+    .backend(SVBackendKind::Svg)
+    .build()?;
+let document = scene.compose()?.to_svg()?;
+```
+
+![Joint distribution of height and weight](assets/joint_plot.svg)
 ## Contour plot
 
 `examples/contour_plot.rs` builds an `SVContourPlot`. The recipe reads a
