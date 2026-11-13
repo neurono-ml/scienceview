@@ -36,6 +36,22 @@ released.
   to the transition integration; the geometry is transition-ready. The example
   `examples/box_plot.rs` writes `docs/figures/box_plot.svg`.
 
+- The distributional recipe `SVRugPlot` (`scienceview::sv_recipes::sv_distribution`):
+  one small tick per observation, drawn in the margin of the axis the values
+  occupy. The configuration surface follows FDR-115 — `value`, `series`,
+  `orientation`, `height`, `alpha`, `line_width`, `title` and `value_label` —
+  and the builder requires an explicit backend selection. Every tick is the
+  two-point `SVMark::Line` segment geometry of the closed mark vocabulary; the
+  recipe places each stored observation once through a continuous value scale
+  and a bounded depth scale that spans the margin, so the ticks never enter the
+  plot area — the tick length is capped at the margin depth even at
+  `height = 1.0`. Dense, sparse and streaming input of the same observations
+  agree byte for byte, a sparse column marks only its stored support without
+  being densified and without letting implicit zeros widen the axis, and a
+  large sample is grouped into one compound path per paint so the document
+  stays bounded. Non-finite observations draw no tick, and a column with no
+  drawable observation renders an empty scene. The new example
+  `examples/rug_plot.rs` generates `docs/figures/rug_plot.svg`.
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
