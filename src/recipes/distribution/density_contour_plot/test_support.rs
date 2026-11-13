@@ -74,7 +74,6 @@ pub(crate) fn sv_full_source() -> SVTestSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     const INDICES: [usize; 10] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     let horizontal = SVSparseView::new(&INDICES, &HORIZONTAL, 10)
@@ -89,7 +88,6 @@ pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn sv_streaming_source() -> SVTestSource<'static> {
     SVTestSource {
         horizontal: SVColumnView::Streaming(SVStreamingView::new(&HORIZONTAL, 10, 0)),
