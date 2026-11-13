@@ -97,3 +97,17 @@ fn a_non_finite_category_is_rejected() {
         }
     );
 }
+
+#[test]
+fn a_configured_weight_column_is_rejected_instead_of_ignored() {
+    let values = [1.0, 2.0, 3.0];
+    let weights = [1.0, 1.0, 1.0];
+    let error = SVStat::count(SVCountOptions::new())
+        .apply(
+            SVStatInput::new(SVColumnView::Dense(&values))
+                .with_weights(SVColumnView::Dense(&weights)),
+        )
+        .expect_err("counting does not accept weights");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}

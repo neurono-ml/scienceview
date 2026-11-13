@@ -125,14 +125,29 @@ impl SVStat {
             self.kind(),
             input.values().representation(),
             input.values().length(),
-            || match self {
-                SVStat::Bin(options) => sv_apply_bin(options, &input),
-                SVStat::Count(options) => sv_apply_count(options, &input),
-                SVStat::Aggregate(options) => sv_apply_aggregate(options, &input),
-                SVStat::Percentile(options) => sv_apply_percentile(options, &input),
-                SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
-                SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
-                SVStat::Fit(options) => sv_apply_fit(options, &input),
+            || {
+                if input.weights().is_some()
+                    && !matches!(
+                        self,
+                        SVStat::Bin(_) | SVStat::KernelDensity(_) | SVStat::Aggregate(_)
+                    )
+                {
+                    return Err(SVError::InvalidConfiguration {
+                        message: format!(
+                            "`{}` does not accept observation weights; only Bin, KernelDensity and Aggregate(Mean, Sum) do",
+                            self.kind().as_str()
+                        ),
+                    });
+                }
+                match self {
+                    SVStat::Bin(options) => sv_apply_bin(options, &input),
+                    SVStat::Count(options) => sv_apply_count(options, &input),
+                    SVStat::Aggregate(options) => sv_apply_aggregate(options, &input),
+                    SVStat::Percentile(options) => sv_apply_percentile(options, &input),
+                    SVStat::KernelDensity(options) => sv_apply_kernel_density(options, &input),
+                    SVStat::EmpiricalCdf(options) => sv_apply_empirical_cdf(options, &input),
+                    SVStat::Fit(options) => sv_apply_fit(options, &input),
+                }
             },
         )
     }

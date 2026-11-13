@@ -83,8 +83,9 @@ zero-weight observation, so it never changes a weighted result.
 A negative weight is an error naming the operation and the observation
 position (`SVError::NegativeWeight`); a non-finite weight is
 `SVError::NonFiniteValue`; a weight column whose length differs from the value
-column is `SVError::MismatchedLengths`. All-ones weights reproduce the
-unweighted result exactly.
+column is `SVError::MismatchedStatisticLengths` at the kernel and
+`SVError::MismatchedLengths` when a recipe resolves the columns at build time.
+All-ones weights reproduce the unweighted result exactly.
 
 ### Representation parity
 

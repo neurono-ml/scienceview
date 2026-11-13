@@ -498,3 +498,40 @@ fn a_non_finite_series_code_is_rejected() {
         }
     );
 }
+
+#[test]
+fn a_weighted_series_column_keeps_each_weight_with_its_observation_after_omission() {
+    const DIRTY_VALUES: [f64; 6] = [1.0, 2.0, f64::NAN, 3.0, 4.0, 5.0];
+    const DIRTY_WEIGHTS: [f64; 6] = [1.0, 1.0, 99.0, 1.0, 1.0, 1.0];
+    const DIRTY_SERIES: [f64; 6] = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0];
+    const CLEAN_VALUES: [f64; 5] = [1.0, 2.0, 3.0, 4.0, 5.0];
+    const CLEAN_WEIGHTS: [f64; 5] = [1.0, 1.0, 1.0, 1.0, 1.0];
+    const CLEAN_SERIES: [f64; 5] = [0.0, 0.0, 1.0, 1.0, 1.0];
+    let dirty = SVTestSource {
+        value: SVColumnView::Dense(&DIRTY_VALUES),
+        series: Some(SVColumnView::Dense(&DIRTY_SERIES)),
+        weight: Some(SVColumnView::Dense(&DIRTY_WEIGHTS)),
+    };
+    let clean = SVTestSource {
+        value: SVColumnView::Dense(&CLEAN_VALUES),
+        series: Some(SVColumnView::Dense(&CLEAN_SERIES)),
+        weight: Some(SVColumnView::Dense(&CLEAN_WEIGHTS)),
+    };
+    let scene = |source: &dyn crate::sv_data::SVDataSource| {
+        sv_build(source, |builder| {
+            builder.series("series").weight("weight").bin_count(2)
+        })
+        .compose()
+        .expect("the weighted series composes")
+    };
+
+    assert_eq!(
+        crate::sv_recipes::sv_distribution::sv_histogram_plot::test_support::sv_scene_to_svg(
+            &scene(&dirty)
+        ),
+        crate::sv_recipes::sv_distribution::sv_histogram_plot::test_support::sv_scene_to_svg(
+            &scene(&clean)
+        ),
+        "a dropped observation drops its own weight, not a neighbour's"
+    );
+}

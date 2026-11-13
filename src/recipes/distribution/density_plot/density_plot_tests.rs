@@ -1079,3 +1079,58 @@ fn a_weighted_grouped_column_keeps_each_weight_with_its_series() {
             });
     }
 }
+
+#[test]
+fn a_sparse_weight_column_in_a_grouped_curve_matches_its_dense_equivalent() {
+    const STORED_INDICES: [usize; 7] = [0, 1, 2, 4, 5, 6, 7];
+    const STORED_VALUES: [f64; 7] = [2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0];
+    const DENSE_EQUIVALENT: [f64; 8] = [2.0, 2.0, 2.0, 0.0, 1.0, 1.0, 1.0, 1.0];
+    let sparse_weight = SVTestSource {
+        value: SVTestView::Dense(&VALUES),
+        series: Some(SVTestView::Dense(&SERIES)),
+        weight: Some(SVTestView::Sparse {
+            indices: &STORED_INDICES,
+            values: &STORED_VALUES,
+            length: VALUES.len(),
+        }),
+        reads: None,
+    };
+    let dense_weight = SVTestSource {
+        value: SVTestView::Dense(&VALUES),
+        series: Some(SVTestView::Dense(&SERIES)),
+        weight: Some(SVTestView::Dense(&DENSE_EQUIVALENT)),
+        reads: None,
+    };
+    let sparse = SVDensityPlot::new()
+        .data_source(&sparse_weight)
+        .value("value")
+        .series("series")
+        .weight("weight")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the sparse weighted grouped configuration is complete")
+        .rendering()
+        .expect("the sparse weighted grouped curves draw");
+    let dense = SVDensityPlot::new()
+        .data_source(&dense_weight)
+        .value("value")
+        .series("series")
+        .weight("weight")
+        .bandwidth(0.5)
+        .grid_count(129)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the dense weighted grouped configuration is complete")
+        .rendering()
+        .expect("the dense weighted grouped curves draw");
+
+    for (sparse_curve, dense_curve) in sparse.curves().iter().zip(dense.curves().iter()) {
+        sparse_curve
+            .density()
+            .iter()
+            .zip(dense_curve.density())
+            .for_each(|(sparse, dense)| assert!((sparse - dense).abs() < 1e-12));
+    }
+}

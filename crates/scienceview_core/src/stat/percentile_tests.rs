@@ -140,3 +140,17 @@ fn a_non_finite_observation_is_rejected_with_its_position() {
         }
     );
 }
+
+#[test]
+fn a_configured_weight_column_is_rejected_instead_of_ignored() {
+    let values = [1.0, 2.0, 3.0];
+    let weights = [1.0, 1.0, 1.0];
+    let error = SVStat::percentile(SVPercentileOptions::new())
+        .apply(
+            SVStatInput::new(SVColumnView::Dense(&values))
+                .with_weights(SVColumnView::Dense(&weights)),
+        )
+        .expect_err("percentiles do not accept weights");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
