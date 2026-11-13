@@ -8,11 +8,11 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVCountPlot` SHALL be produced by exactly the composition `data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge] -> [SVScale] -> SVMark::Bar` and SHALL expose the configuration surface recorded in its FDR.
+`SVCountPlot` SHALL be produced by exactly the composition `data -> [SVStat::Count] -> (count per category) -> [SVMove::Stack | Dodge] -> [SVScale] -> SVMark::Bar` when several series are arranged, and SHALL expose the configuration surface recorded in its FDR. The default `SVCountMultiple::Layer` draws every series full width without a move; it is the documented default form of the same composition.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
-- **THEN** it draws the documented default form
+- **THEN** it draws the documented layered form, with no move applied
 
 #### Scenario: Explicit option
 - **WHEN** an option is set explicitly
