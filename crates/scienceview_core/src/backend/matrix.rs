@@ -67,7 +67,10 @@ pub const fn sv_backend_capabilities(backend_kind: SVBackendKind) -> SVBackendCa
     match backend_kind {
         // Self-contained output: a file is all it produces.
         SVBackendKind::Svg => SVBackendCapabilities::export_only(),
-        SVBackendKind::Html => SVBackendCapabilities::new(false, false, false, false, true, false),
+        // A self-contained page: it exports, accepts a streaming snapshot,
+        // delivers gesture actions and updates in place, but it hosts no
+        // script engine and presents no window.
+        SVBackendKind::Html => SVBackendCapabilities::new(true, false, true, true, true, false),
         // Terminal: interactive and updated in place, no export, no scripting.
         SVBackendKind::Tui => SVBackendCapabilities::new(true, false, true, true, false, true),
         // Window and embedded surfaces host events, scripts, streams and

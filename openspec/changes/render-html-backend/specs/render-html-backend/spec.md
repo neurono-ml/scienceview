@@ -32,9 +32,13 @@ A state change SHALL update the existing document rather than reload it.
 
 ### Requirement: The model remains the authority
 
-The embedded runtime SHALL forward gestures to the model and apply the returned deltas, and SHALL NOT maintain an independent figure state.
+The embedded runtime SHALL forward gestures to the host as actions, SHALL apply only the view transform those actions imply, and SHALL NOT re-derive figure geometry or maintain a copy of the figure data.
 
 #### Scenario: Interaction
-- **WHEN** the user pans the figure
-- **THEN** the gesture becomes an action, the model produces a delta, and the document applies it
+- **WHEN** the user pans or zooms the figure
+- **THEN** the runtime dispatches the gesture as an action the host page can observe and moves the canvas view transform, while the model-rendered markup stays untouched
+
+#### Scenario: Host-authored update
+- **WHEN** the host model answers an action with a new figure state
+- **THEN** the document applies that state in place as a new model-rendered payload
 

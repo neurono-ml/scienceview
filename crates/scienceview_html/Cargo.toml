@@ -9,5 +9,14 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/scienceview_html"
 
+[dependencies]
+scienceview_core = { path = "../scienceview_core", version = "0.1.0" }
+scienceview_svg = { path = "../scienceview_svg", version = "0.1.0" }
+scienceview_theme = { path = "../scienceview_theme", version = "0.1.0" }
+
+[dev-dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }
+
 [lints]
 workspace = true

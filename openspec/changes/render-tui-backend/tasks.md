@@ -2,21 +2,22 @@
 
 ## Cell rasterizer
 
-- [ ] Write the failing tests for snapping and partial blocks.
-- [ ] Implement the rasterizer over the layout tree.
+- [x] Write the failing tests for snapping and partial blocks.
+- [x] Implement the rasterizer over the layout tree.
 
 ## Marks and decorations
 
-- [ ] Write the failing snapshot tests for each mark and decoration.
-- [ ] Implement the cell approximations.
+- [x] Write the failing snapshot tests for each mark and decoration.
+- [x] Implement the cell approximations.
 
 ## Clock
 
-- [ ] Write the failing test for elapsed-time advancement.
-- [ ] Implement the tick loop.
+- [x] Write the failing test for elapsed-time advancement.
+- [x] Implement the tick loop.
 
 ## Acceptance
 
-- [ ] Add the example, generated figure and book chapter (book branch).
-- [ ] Run the four gates and open the ADR issue.
-
+- [x] Add the headless example (`crates/scienceview_tui/examples/terminal_frame.rs`)
+  and the book chapter (book branch). A terminal frame is text, not a vector
+  document, so this change generates no SVG figure under `docs/figures/`.
+- [x] Run the four gates and open the ADR issue.
