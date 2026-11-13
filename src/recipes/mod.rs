@@ -11,6 +11,9 @@
 #[path = "distribution/mod.rs"]
 pub mod sv_distribution;
 
+#[path = "multivariate/mod.rs"]
+pub mod sv_multivariate;
+
 #[path = "matrix/mod.rs"]
 pub mod sv_matrix;
 

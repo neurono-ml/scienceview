@@ -5,11 +5,11 @@
 | Id | FDR-143 |
 | Name | `SVSplomPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch42-splom-plot.md`](../../src/development-explained/ch42-splom-plot.md) |
+| Example program | [`examples/splom_plot.rs`](../../../examples/splom_plot.rs) |
 
 ## Purpose
 
@@ -94,12 +94,38 @@ Consumes `mark.palette`, `mark.size`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The grid has one cell per variable pair, with the diagonal showing the
-      univariate distribution.
+- [x] The grid has one cell per variable pair, with the diagonal showing the
+      univariate distribution. Covered by
+      `the_default_composition_draws_every_pair_and_the_diagonal`,
+      `a_density_diagonal_changes_the_rendered_document` and
+      `an_empty_diagonal_draws_no_diagonal_primitives`.
 - [ ] The same observation is identifiable across cells, so a highlight
-      follows it.
-- [ ] The upper and lower triangles can be enabled independently.
-- [ ] Dense, sparse and streaming inputs give the same matrix.
+      follows it. The observations are shared and keep one index in every
+      cell, but the highlight surface is deferred to the interactivity wave.
+- [x] The upper and lower triangles can be enabled independently. Covered by
+      `the_triangles_are_independently_switchable` and
+      `the_diagonal_can_be_switched_off`.
+- [x] Dense, sparse and streaming inputs give the same matrix. Covered by
+      `dense_sparse_and_streaming_inputs_draw_the_same_scene`,
+      `a_sparse_input_is_never_densified` and
+      `a_sparse_input_with_implicit_zeros_keeps_its_logical_observations`.
+
+## Implementation notes
+
+- The grid is solved through `sv_layout`: one row node per variable, one cell
+  node per pair, and every backend receives the same solved rectangles.
+- `scale_mode` selects between a domain per variable (`Independent`, the
+  reference-library behaviour) and one domain common to all variables
+  (`Shared`).
+- `missing_value_policy` drops or rejects a non-finite observation in every
+  cell at once. A dropped observation produces a shorter filtered copy; an
+  untouched sparse column is never expanded.
+- The diagonal composes `SVStat::Bin` (histogram) or
+  `SVStat::KernelDensity` (density) with the bar or area mark; no statistic is
+  reimplemented.
+- `render()` dispatches on the configured kind: SVG document, native frame, or
+  a typed `UnsupportedBackendCapability` error. Transition and animation
+  wiring is deferred; the geometry is transition-ready.
 
 ## Open questions
 

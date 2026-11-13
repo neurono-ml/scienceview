@@ -5,22 +5,24 @@
 | Id | FDR-144 |
 | Name | `SVPairPlot` |
 | Family | Multivariate |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [ch43 — Pair plot](../../src/development-explained/ch43-pair-plot.md) |
+| Example program | [`examples/pair_plot.rs`](../../../examples/pair_plot.rs) |
 
 ## Purpose
 
-`SVPairPlot` is the categorical scatterplot matrix: a grid whose cells show
-the relationship between every pair of variables, with the categories of a
-third variable distinguished by colour, and the diagonal showing the
+`SVPairPlot` is the pair scatterplot matrix: a grid whose cells show the
+relationship between every pair of continuous variables, with the categories of
+a third variable distinguished by colour, and the diagonal showing the
 distribution of each variable per category.
 
 It differs from `SVSplomPlot` in the way seaborn's `pairplot` differs from
 plotly's `splom`: seaborn's is designed for categorical data, with dodging,
-jitter and per-category distributions on the diagonal.
+jitter and per-category distributions on the diagonal. This change implements
+the continuous-variable form; the nominal-variable form is a documented
+follow-up.
 
 ## Sources
 
@@ -35,20 +37,33 @@ jitter and per-category distributions on the diagonal.
 
 ```
 data -> [no stat] -> values
-     -> [SVMove::Dodge (+ Jitter) within each cell]
-     -> [SVScale per axis] -> SVMark::Dot, one cell per pair
+     -> [SVMove::Jitter or Dodge within each cell]
+     -> [SVScale per axis] -> SVMark::Dot (or a chart-owned hexbin/binned-contour cell), one cell per pair
 ```
 
+The off-diagonal cell also accepts a chart-owned hexagonal lattice (hexbin) or a
+chart-owned binned contour. Both are geometry composed from the closed kernels —
+`SVStat::Bin` for the edges and counts, the scale kernel for the placement — not
+new kernel variants (patterns P5). This mirrors the geometry the `SVHexbinPlot`
+and `SVDensityContourPlot` recipes already own; those recipes compose their own
+figure, so they cannot be delegated a single pair cell while keeping the shared
+per-variable domain.
+
 The diagonal uses the distribution recipe appropriate to the variable type:
-a histogram for a continuous variable, a count plot for a categorical one.
+a density estimate (`Auto`, the implemented choice) or a histogram for a
+continuous variable. Categorical variables and their count-plot diagonal are
+deferred to a follow-up: the current data boundary resolves numeric columns.
 
 ## Data contract
 
 | Column | Role | Type | Required |
 |---|---|---|---|
-| `x_variables` | the horizontal axes | continuous or nominal | at least one |
-| `y_variables` | the vertical axes | continuous or nominal | at least one |
-| `hue` | the grouping, by colour | nominal | no |
+| `x_variables` | the horizontal axes | continuous | at least one |
+| `y_variables` | the vertical axes | continuous | at least one |
+| `hue` | the grouping, by colour | nominal, encoded numerically | no |
+
+Nominal variables (and a count-plot diagonal for them) are a documented
+follow-up, not part of this change.
 
 Accepted representations: dense, sparse, streaming.
 
@@ -60,29 +75,44 @@ Accepted representations: dense, sparse, streaming.
 
 | Channel | Encodes | Scale |
 |---|---|---|
-| x, y within a cell | two of the variables | `Continuous` or `Nominal` |
-| point colour | `hue` | `Nominal` |
+| x, y within a cell | two of the variables | `Continuous` |
+| point colour | `hue` | group palette |
 | diagonal cell | the distribution of one variable | per variable type |
+| hexbin / contour cell | local observation density | continuous colour scale |
 
 ## Configuration
 
 | Option | Type | Default | Source |
 |---|---|---|---|
+| `variables` | `&[&str]` | every `X`/`Y` column | convenience |
 | `x_variables` | `Vec<SVColumnRef>` | all continuous | seaborn |
-| `y_variables` | `Vec<SVColumnRef>` | all continuous | seaborn |
+| `y_variables` | `Vec<SVColumnRef>` | the `x_variables` list | seaborn |
 | `hue` | `Option<SVColumnRef>` | `None` | seaborn |
-| `diag_kind` | `SVDiagonalKind` | `Auto` | seaborn |
-| `diag_kind` for continuous | `SVDiagonalContinuous` | `Kde` | seaborn `diag_kind='kde'` |
-| `diag_kind` for categorical | `SVDiagonalCategorical` | `Count` | seaborn |
+| `diagonal_kind` | `SVPairDiagonalKind` | `Auto` → `Density` | seaborn |
+| `off_diagonal_kind` | `SVPairOffDiagonalKind` | `Scatter` | seaborn `kind` |
 | `marker` | `SVDotShape` | `Circle` | seaborn |
 | `jitter` | `Option<SVMove>` | `None` | seaborn |
-| `dodge` | `bool` | `true` | seaborn |
-| `palette` | `SVPaletteRef` | theme `mark.palette` | seaborn |
+| `alpha` | `f32` | `0.85` | seaborn |
+| `missing_value_policy` | `SVPairMissingValuePolicy` | `Omit` | seaborn `dropna` |
+| `title` | `Option<String>` | `None` | — |
+| `backend` | `SVBackendKind` | required | — |
+
+Implemented surface: `variables`, `x_variables`, `y_variables`, `hue`,
+`diagonal_kind`, `off_diagonal_kind`, `marker`, `jitter` (accepting `Jitter` and
+`Dodge`), `alpha`, `missing_value_policy`, `title`, `backend` and
+`execution_mode`. The FDR's `dodge` boolean is replaced by the explicit
+`jitter(...)` displacement (a continuous axis has no categorical slot to dodge
+into). `palette` is not yet a builder option: the hue palette is the built-in
+scale palette, and a theme-aware palette override is a follow-up. The
+categorical diagonal forms (`SVDiagonalCategorical`) are deferred with nominal
+variables.
 
 ## Theme
 
-Consumes `mark.palette`, `mark.size`, `text.*`, axis tokens. The `hue`
-palette is a theme token, so the whole matrix is restyled by a theme change.
+Consumes the built-in decoration style (`text.*` and axis tokens) for the outer
+axes, cell frames, title and legend. The `hue` palette is currently the built-in
+scale palette rather than a theme token; a theme-aware `palette(...)` override
+is a follow-up, so the FDR's `palette` row is not yet exposed.
 
 ## Temporal
 
@@ -92,6 +122,10 @@ palette is a theme token, so the whole matrix is restyled by a theme change.
 | point colour | interpolates |
 | diagonal distribution | re-computed per frame |
 | hue added | the points split and re-colour |
+
+Transition and animation wiring is deferred to the transition integration; the
+composed geometry is transition-ready and this change claims no transition
+test.
 
 ## Backend notes
 
@@ -106,10 +140,21 @@ palette is a theme token, so the whole matrix is restyled by a theme change.
 
 ## Acceptance
 
-- [ ] The grid has one cell per pair of variables.
-- [ ] The diagonal shows a distribution appropriate to the variable type.
-- [ ] The `hue` grouping is consistent across cells and the diagonal.
-- [ ] Dense, sparse and streaming inputs give the same matrix.
+- [x] The grid has one cell per pair of variables.
+  Evidence: `pair_plot_tests::the_default_build_takes_every_continuous_column`
+  asserts nine cells for three variables.
+- [x] The diagonal shows the distribution the configuration selects.
+  Evidence: `pair_plot_tests::the_diagonal_kind_changes_the_output` and the
+  density/histogram cells composed in `diagonal.rs`.
+- [x] The `hue` grouping is consistent across the scatter cells, the diagonal
+  and the legend. Evidence:
+  `pair_plot_tests::hue_groups_the_marks_and_the_diagonal` and
+  `pair_plot_tests::a_missing_hue_stays_aligned_with_its_observation`. The
+  hexbin and binned-contour forms encode observation density through a
+  continuous colour scale instead of the hue palette.
+- [x] Dense, sparse and streaming inputs give the same matrix.
+  Evidence: `parity_tests::dense_sparse_and_streaming_inputs_draw_the_same_grid`
+  and `parity_tests::every_off_diagonal_kind_is_representation_parity`.
 
 ## Open questions
 
