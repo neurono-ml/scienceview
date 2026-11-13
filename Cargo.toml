@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/scienceview_core",
+    "crates/scienceview_dashboard",
     "crates/scienceview_svg",
     "crates/scienceview_html",
     "crates/scienceview_tui",

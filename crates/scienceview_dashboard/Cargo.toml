@@ -1,0 +1,27 @@
+[package]
+name = "scienceview_dashboard"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "dashboard composition for scienceview: grids, shared sources and linked selections."
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/scienceview_dashboard"
+
+[dependencies]
+scienceview_core = { path = "../scienceview_core", version = "0.1.0" }
+scienceview_svg = { path = "../scienceview_svg", version = "0.1.0" }
+scienceview_html = { path = "../scienceview_html", version = "0.1.0", optional = true }
+
+[features]
+default = []
+# An HTML-capable path around the same self-contained SVG document.
+render-html = ["dep:scienceview_html"]
+
+[dev-dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "registry", "std"] }
+
+[lints]
+workspace = true
