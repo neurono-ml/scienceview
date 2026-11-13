@@ -87,7 +87,7 @@ impl SVBoxenRenderOutput {
     }
 
     /// Whether the summary came from a streaming window and is therefore an
-    /// approximation of the full data (FDR-116).
+    /// approximation of the full data (FDR-118).
     pub fn is_approximate(&self) -> bool {
         self.is_approximate
     }

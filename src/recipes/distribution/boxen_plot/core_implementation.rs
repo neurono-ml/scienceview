@@ -16,7 +16,7 @@ use super::output::SVBoxenRenderOutput;
 use super::scales::{SVBoxenDomain, sv_boxen_plot_area, sv_build_boxen_scales};
 use super::statistics::sv_summarize_boxen;
 
-/// The boxen plot: the five-number summary of each category (FDR-116).
+/// The boxen plot: the nest of letter values of each category (FDR-118).
 ///
 /// Built only by [`SVBoxenPlotBuilder`](super::SVBoxenPlotBuilder), which requires
 /// an explicit backend. The built value carries the backend kind, the execution

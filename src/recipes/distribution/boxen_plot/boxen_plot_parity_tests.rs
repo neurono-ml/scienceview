@@ -1,4 +1,4 @@
-//! Dense, sparse and streaming input produce the same summary (FDR-116).
+//! Dense, sparse and streaming input produce the same summary (FDR-118).
 
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVColumnView, SVSparseView, SVStreamingView};
