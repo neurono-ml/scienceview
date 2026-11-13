@@ -317,6 +317,23 @@ fn a_horizontal_orientation_swaps_the_axes() {
 }
 
 #[test]
+fn the_default_bin_count_follows_the_available_plot_width() {
+    let source = sv_dense_source();
+    let scene = SVHistogramPlot::builder()
+        .data_source(&source)
+        .value("value")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the default configuration is complete")
+        .compose()
+        .expect("the default histogram composes");
+
+    // The plot is 468 logical pixels wide and the recipe spends 14 pixels per
+    // bin, clamped to 4..=40: round(468 / 14) == 33.
+    assert_eq!(scene.number_of_bins(), 33);
+}
+
+#[test]
 fn non_finite_values_are_omitted_by_default_and_reported_on_request() {
     const WITH_MISSING: [f64; 4] = [1.0, f64::NAN, 2.0, 3.0];
     let source = SVTestSource::dense(&WITH_MISSING);

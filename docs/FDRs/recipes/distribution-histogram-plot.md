@@ -5,11 +5,11 @@
 | Id | FDR-111 |
 | Name | `SVHistogramPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 22 — Histograms](../../src/development-explained/ch22-histogram-plot.md) |
+| Example program | [`examples/histogram_plot.rs`](../../../examples/histogram_plot.rs) |
 
 ## Purpose
 
@@ -111,15 +111,22 @@ observations arrive, and the bin boundaries stay put.
 
 ## Acceptance
 
-- [ ] The bin edges follow the requested count, width or explicit edges.
-- [ ] `normalise` yields counts, probabilities or densities that sum or
-      integrate as documented.
-- [ ] `cumulative` yields a monotone non-decreasing series.
-- [ ] Dense, sparse and streaming inputs give the same histogram for the same
-      data, within the documented tolerance.
+- [x] The bin edges follow the requested count, width or explicit edges. The
+      companion tests cover the count, width and explicit-edge modes.
+- [x] `normalise` yields counts, probabilities or densities that sum or
+      integrate as documented. Probability sums to one; density integrates to
+      one over the bin widths.
+- [x] `cumulative` yields a monotone non-decreasing series.
+- [x] Dense, sparse and streaming inputs give the same histogram for the same
+      data, within the documented tolerance. The parity tests compare the
+      serialized SVG byte for byte.
 - [ ] A streaming histogram updates in place, without redrawing the whole
-      figure.
-- [ ] The number of bins adapts to the space available, per `layout-engine`.
+      figure. *Deferred:* `update` recomposes the current window; a
+      backend-incremental bin update belongs to the transition/streaming
+      integration.
+- [x] The number of bins adapts to the space available, per `layout-engine`.
+      With no boundary option the recipe derives the count from the plot
+      extent at 14 pixels per bin.
 
 ## Open questions
 
