@@ -60,6 +60,20 @@
   by `the_complementary_curve_descends_from_one`.
 - [x] Transition and animation wiring is deferred; the recipe claims only
   transition-ready geometry, as recorded by the integration note.
+- [x] The step is expanded once in (value, probability) space and the channels
+  are swapped for horizontal orientation, so the curve starts at probability
+  zero on the minimum observation instead of inventing an observation at value
+  zero. Covered by `horizontal_orientation_expands_the_same_step_vertices` and
+  `a_complementary_horizontal_curve_starts_at_one_on_the_minimum`.
+- [x] An empty or all-missing column reports the recipe's own
+  `EmptyInput { operation: "ecdf_plot" }` instead of leaking the kernel's
+  operation name. Covered by `an_empty_column_is_an_empty_input` and
+  `an_all_missing_column_is_an_empty_input`.
+- [x] Degenerate samples are covered: `one_observation_rises_to_one_at_its_only_value`
+  and `all_equal_observations_produce_one_riser`.
+- [x] The observability tests retry the span capture, so the process-wide
+  tracing interest cache rebuilt by sibling test modules cannot make them
+  flaky.
 
 ## 7. Acceptance
 

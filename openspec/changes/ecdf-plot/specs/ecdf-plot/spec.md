@@ -10,6 +10,11 @@
 
 `SVECDFPlot` SHALL be produced by exactly the composition `data -> [SVStat::EmpiricalCdf] -> (values, cumulative probability) -> [no move] -> [SVScale] -> SVMark::Line (step geometry)` and SHALL expose the configuration surface recorded in its FDR.
 
+The step is expanded exactly once in (value, probability) space and the two
+channels are swapped for horizontal orientation, so both orientations draw the
+same mirrored curve and every segment is a run at constant probability or a
+riser at constant observation.
+
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
 - **THEN** it draws the documented default form
@@ -20,7 +25,13 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVECDFPlot` SHALL consume `value`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVECDFPlot` SHALL consume `value`, `series` and, per its FDR, `weight`, with the roles and types recorded there, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+
+The `weight` column is deferred: `SVStat::EmpiricalCdf` does not consume
+observation weights, and patterns P5 forbids a recipe from reimplementing a
+kernel. A weighted ECDF requires a core change to the stat capability first;
+until then the recipe exposes `value` and `series` only. An empty or all-missing
+column is rejected with `EmptyInput { operation: "ecdf_plot" }`.
 
 #### Scenario: Documented columns
 - **WHEN** the documented columns are supplied
