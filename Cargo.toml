@@ -65,6 +65,10 @@ name = "ecdf_plot"
 required-features = ["render-svg"]
 
 [[example]]
+name = "box_plot"
+required-features = ["render-svg"]
+
+[[example]]
 name = "regression_plot"
 path = "examples/regression_plot.rs"
 required-features = ["render-svg"]

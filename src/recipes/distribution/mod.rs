@@ -6,6 +6,12 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "box_plot/mod.rs"]
+pub mod sv_box_plot;
+pub use sv_box_plot::{
+    SVBoxPlot, SVBoxPlotBuilder, SVBoxRenderOutput, SVBoxSummary, SVWhiskerRule,
+};
+
 #[path = "density_contour_plot/mod.rs"]
 pub mod sv_density_contour_plot;
 pub use sv_density_contour_plot::{
