@@ -2,56 +2,74 @@
 
 ## 1. Module, builder and composition
 
-- [ ] Write the failing tests first: the chart builds with its documented
-  defaults, and each option changes the output.
-- [ ] Create `src/recipes/matrix/clustered_heatmap_plot/{mod.rs, builder.rs,
+- [x] Write the failing tests first: the chart builds with its documented
+  defaults, the supplied order moves the cells, and the dendrograms reproduce
+  the supplied merge distances.
+- [x] Create `src/recipes/matrix/clustered_heatmap_plot/{mod.rs, builder.rs,
   core_implementation.rs}` following patterns.md P3; `mod.rs` is a pure
   dispatcher.
-- [ ] Implement the builder state machine, the required `backend(...)` and the
-  default `execution_mode(...)`, with `SVClusteredHeatmapPlot` carrying its configured kind.
-- [ ] Wire the composition `data -> [SVStat::Aggregate (matrix)] -> matrix -> [clustering: reorder rows and columns] -> [SVScale::Continuous over a colour map] -> SVMark::Image + dendrogram marks` through the core kernels.
+- [x] Implement the supplied-clustering builder: required `backend(...)`,
+  default `execution_mode(...)`, required `row_order(...)` and
+  `column_order(...)`, optional `row_linkage(...)` / `column_linkage(...)`,
+  and `SVClusteredHeatmapPlot` carrying its configured kind.
+- [x] Wire the composition `data -> [SVStat::Aggregate (matrix)] -> matrix +
+  supplied orders and trees -> [validate] -> [SVScale::Continuous over a colour
+  map] -> SVMark::Image (cells) + supplied dendrogram paths`.
+- [x] Add the typed `SVError::InvalidClusterTree` variant naming the axis and
+  merge position.
 
-## 2. Data contract and parity
+## 2. Data contract and validation
 
-- [ ] Write the failing parity test: dense, sparse and streaming input of the
-  same data produce the same marks within the documented tolerance.
-- [ ] Implement the column resolution and the explicit error for a missing or
+- [x] Write the failing tests: a sparse value column is read in place, a
+  streaming source is rejected up front, and a dense matrix and a long table
+  paint the same cells.
+- [x] Implement the column resolution and the explicit error for a missing or
   mistyped column.
-- [ ] Verify a sparse input is never densified and a streaming input never
-  blocks; assert the window behaviour where the recipe depends on it.
+- [x] Validate the supplied order and tree per axis: leaves exactly once,
+  indices in range and earlier, finite non-decreasing distances, consistent
+  leaf counts, permutation order and matching length.
+- [x] Verify a sparse input is never densified and a streaming input is
+  rejected with `UnsupportedRepresentation` plus the snapshot alternative.
 
 ## 3. Concurrency and observability
 
-- [ ] Write the failing concurrency test for rendering the same figure from
+- [x] Write the failing concurrency test for rendering the same figure from
   several threads.
-- [ ] Assert the operation span carries the backend kind, the representation
-  and the point count.
+- [x] Assert the operation span carries the backend kind, the representation
+  and the drawn cell count.
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/clustered_heatmap_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/clustered_heatmap_plot.svg` with `cargo run --example clustered_heatmap_plot` and
-  verify the `figures` gate reports no drift.
+- [x] Add `examples/clustered_heatmap_plot.rs` with a small deterministic
+  matrix and a hand-written, commented merge tree.
+- [x] Generate `docs/figures/clustered_heatmap_plot.svg` with
+  `cargo run --example clustered_heatmap_plot --features render-svg` and verify
+  the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
-  chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/clustered_heatmap_plot.svg` and embed it in the
-  chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [ ] Add the chapter `ch54-clustered-heatmap-plot.md` under
+  `docs/src/development-explained/`.
+- [ ] Mirror the figure into `docs/src/assets/clustered_heatmap_plot.svg` and
+  embed it in the chapter with an SVG diagram.
+- [ ] Register the chapter in `docs/src/SUMMARY.md`, update
+  `maintaining.md` and `docs/src/examples.md`, and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
-- [ ] Change `docs/FDRs/matrix-clustered-heatmap-plot.md` status to `shipped`, linking the
-  example and the chapter.
+- [x] Rewrite `docs/FDRs/recipes/matrix-clustered-heatmap-plot.md` to the
+  supplied-clustering contract and set the status to `shipped`, ticking only
+  tested acceptance items.
 - [ ] Add the `CHANGELOG.md` entry.
 
-## 7. Acceptance
+## 7. Gates and review
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
-  `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
-  figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
+- [ ] Run the gates locally: `cargo fmt --all --check`,
+  `cargo clippy --workspace --all-targets -- -D warnings`,
+  `cargo test --workspace --all-targets`, doctests and the figures drift check,
+  plus the `--all-features` variants.
+- [x] Open the ADR issue and reference it from the three PRs with a closing
+  keyword.
 - [ ] Trigger the independent acceptance review against
-  `docs/FDRs/matrix-clustered-heatmap-plot.md` before opening the code PR.
+  `docs/FDRs/recipes/matrix-clustered-heatmap-plot.md` before opening the code
+  PR.
