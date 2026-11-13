@@ -22,6 +22,7 @@ cargo run --example strip_plot --features render-svg
 cargo run --example histogram_plot --features render-svg
 cargo run --example line_plot
 cargo run --example density_plot --features render-svg
+cargo run --example hexbin_plot --features render-svg
 ```
 
 The `figures` job of the code pipeline reruns these commands and fails on any
