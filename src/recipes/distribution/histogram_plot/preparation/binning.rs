@@ -117,7 +117,11 @@ fn sv_apply_bin(
     group: &SVObservationGroup<'_>,
 ) -> Result<crate::sv_stat::SVBinResult, SVError> {
     let view = group.storage.view()?;
-    match SVStat::bin(options.clone()).apply(SVStatInput::new(view))? {
+    let mut input = SVStatInput::new(view);
+    if let Some(weight) = group.weight_view()? {
+        input = input.with_weights(weight);
+    }
+    match SVStat::bin(options.clone()).apply(input)? {
         SVStatResult::Bins(bins) => Ok(bins),
         other => Err(SVError::InvalidConfiguration {
             message: format!(

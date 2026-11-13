@@ -18,6 +18,7 @@ pub(crate) const SERIES: [f64; 8] = [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0];
 pub(crate) struct SVTestSource<'a> {
     pub(crate) value: SVColumnView<'a>,
     pub(crate) series: Option<SVColumnView<'a>>,
+    pub(crate) weight: Option<SVColumnView<'a>>,
 }
 
 impl SVTestSource<'_> {
@@ -25,6 +26,7 @@ impl SVTestSource<'_> {
         SVTestSource {
             value: SVColumnView::Dense(value),
             series: None,
+            weight: None,
         }
     }
 }
@@ -38,6 +40,9 @@ impl SVDataSource for SVTestSource<'_> {
         let view = match name {
             "value" => self.value,
             "series" => self.series.ok_or_else(|| SVError::ColumnNotFound {
+                name: name.to_string(),
+            })?,
+            "weight" => self.weight.ok_or_else(|| SVError::ColumnNotFound {
                 name: name.to_string(),
             })?,
             _ => {
@@ -58,6 +63,7 @@ pub(crate) fn sv_series_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Dense(&VALUES),
         series: Some(SVColumnView::Dense(&SERIES)),
+        weight: None,
     }
 }
 
@@ -68,6 +74,7 @@ pub(crate) fn sv_sparse_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Sparse(sparse),
         series: None,
+        weight: None,
     }
 }
 
@@ -78,6 +85,18 @@ pub(crate) fn sv_sparse_series_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Sparse(sparse),
         series: Some(SVColumnView::Dense(&SERIES)),
+        weight: None,
+    }
+}
+
+/// Weights that double every observation.
+pub(crate) const WEIGHTS: [f64; 8] = [1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0];
+
+pub(crate) fn sv_weighted_source() -> SVTestSource<'static> {
+    SVTestSource {
+        value: SVColumnView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVColumnView::Dense(&WEIGHTS)),
     }
 }
 
@@ -85,6 +104,7 @@ pub(crate) fn sv_streaming_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Streaming(SVStreamingView::new(&VALUES, 8, 0)),
         series: None,
+        weight: None,
     }
 }
 
@@ -92,6 +112,7 @@ pub(crate) fn sv_streaming_series_source() -> SVTestSource<'static> {
     SVTestSource {
         value: SVColumnView::Streaming(SVStreamingView::new(&VALUES, 8, 0)),
         series: Some(SVColumnView::Streaming(SVStreamingView::new(&SERIES, 8, 0))),
+        weight: None,
     }
 }
 

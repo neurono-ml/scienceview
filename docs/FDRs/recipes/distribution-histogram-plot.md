@@ -46,11 +46,15 @@ Accepted representations: dense, sparse, streaming. For a streaming source the
 bins are computed over the rolling window. The in-place update of the drawn
 bars is deferred (see Temporal and Acceptance).
 
-Weighted binning is deferred: the shipped `SVStat::Bin` kernel does not consume
-observation weights, so a configured `weight` is rejected at build time with a
-configuration error that names the kernel gap. The recipe never reimplements
-weighted binning; it belongs to a change of the `statistical-transforms`
-capability.
+Weighted binning is supported: a configured `weight` column is carried through
+`SVHistogramConfiguration` into `SVStat::Bin`, aligned with the value column
+after series splitting and missing-value omission. The weight column may be
+dense, sparse or streaming, is resolved once and is never densified; a sparse
+implicit zero is a zero-weight observation. Count, probability and density
+normalisation divide by the total weight, and all-ones weights reproduce the
+unweighted bins exactly. Negative, non-finite or wrong-length weights are typed
+errors naming the operation and position. The recipe never reimplements the
+weighted fold — the kernel owns it (patterns.md P5).
 
 ### Match key
 

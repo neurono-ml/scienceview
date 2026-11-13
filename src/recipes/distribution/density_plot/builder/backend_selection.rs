@@ -21,6 +21,7 @@ impl<'values> SVDensityPlotBuilder<'values, SVWithoutBackend> {
             data_source: self.data_source,
             value: self.value,
             series: self.series,
+            weight: self.weight,
             bandwidth: self.bandwidth,
             bandwidth_adjustment: self.bandwidth_adjustment,
             kernel: self.kernel,

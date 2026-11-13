@@ -16,6 +16,7 @@ pub(crate) struct SVDensityPlotConfiguration<'values> {
     pub(crate) data_source: &'values dyn SVDataSource,
     pub(crate) value: &'values str,
     pub(crate) series: Option<&'values str>,
+    pub(crate) weight: Option<&'values str>,
     pub(crate) bandwidth: Option<f64>,
     pub(crate) bandwidth_adjustment: f64,
     pub(crate) kernel: SVKernelShape,

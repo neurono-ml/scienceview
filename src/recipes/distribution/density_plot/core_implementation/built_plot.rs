@@ -63,6 +63,11 @@ impl<'values> SVDensityPlot<'values> {
         self.configuration.series
     }
 
+    /// Returns the optional observation-weight column name.
+    pub fn weight_column_name(&self) -> Option<&str> {
+        self.configuration.weight
+    }
+
     /// Returns the explicit bandwidth, or `None` when the rule of thumb applies.
     pub fn bandwidth_value(&self) -> Option<f64> {
         self.configuration.bandwidth

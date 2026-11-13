@@ -86,6 +86,7 @@ fn a_sparse_input_with_implicit_zeros_matches_its_dense_equivalent() {
     let sparse_source = SVTestSource {
         value: SVColumnView::Sparse(sparse),
         series: None,
+        weight: None,
     };
     let dense_source = SVTestSource::dense(&DENSE);
 
@@ -111,6 +112,7 @@ fn a_sparse_non_finite_value_is_omitted_like_its_dense_equivalent() {
     let sparse_source = SVTestSource {
         value: SVColumnView::Sparse(sparse),
         series: None,
+        weight: None,
     };
     let dense_source = SVTestSource::dense(&DENSE);
 
@@ -140,10 +142,12 @@ fn a_sparse_series_non_finite_value_is_omitted_like_its_dense_equivalent() {
     let sparse_source = SVTestSource {
         value: SVColumnView::Sparse(sparse),
         series: Some(SVColumnView::Dense(&SERIES)),
+        weight: None,
     };
     let dense_source = SVTestSource {
         value: SVColumnView::Dense(&DENSE),
         series: Some(SVColumnView::Dense(&SERIES)),
+        weight: None,
     };
 
     let dense = sv_scene_to_svg(
@@ -222,4 +226,47 @@ fn a_missing_optional_series_column_fails_with_an_explicit_error() {
             name: "absent".to_string()
         }
     );
+}
+
+#[test]
+fn weighted_dense_sparse_and_streaming_inputs_draw_the_same_scene() {
+    use super::test_support::{VALUES, WEIGHTS};
+    let dense_source = SVTestSource {
+        value: SVColumnView::Dense(&VALUES),
+        series: None,
+        weight: Some(SVColumnView::Dense(&WEIGHTS)),
+    };
+    const INDICES: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+    let sparse =
+        SVSparseView::new(&INDICES, &VALUES, VALUES.len()).expect("the sparse view is valid");
+    let sparse_source = SVTestSource {
+        value: SVColumnView::Sparse(sparse),
+        series: None,
+        weight: Some(SVColumnView::Dense(&WEIGHTS)),
+    };
+    let streaming_source = SVTestSource {
+        value: SVColumnView::Streaming(crate::sv_data::SVStreamingView::new(&VALUES, 8, 0)),
+        series: None,
+        weight: Some(SVColumnView::Streaming(
+            crate::sv_data::SVStreamingView::new(&WEIGHTS, 8, 0),
+        )),
+    };
+    let scene = |source: &dyn SVDataSource| {
+        sv_scene_to_svg(
+            &SVHistogramPlot::builder()
+                .data_source(source)
+                .value("value")
+                .weight("weight")
+                .bin_count(3)
+                .backend(SVBackendKind::Svg)
+                .build()
+                .expect("the weighted configuration is complete")
+                .compose()
+                .expect("the weighted histogram renders"),
+        )
+    };
+
+    let dense = scene(&dense_source);
+    assert_eq!(dense, scene(&sparse_source), "dense and sparse agree");
+    assert_eq!(dense, scene(&streaming_source), "dense and streaming agree");
 }

@@ -219,3 +219,126 @@ fn a_non_finite_value_is_rejected() {
         }
     );
 }
+
+#[test]
+fn all_ones_weights_reproduce_the_unweighted_density_exactly() {
+    let values = [0.0, 1.5, 4.0];
+    let weights = [1.0; 3];
+    let options = SVKernelDensityOptions::new()
+        .bandwidth(1.0)
+        .grid_count(17)
+        .cut(2.0);
+
+    let unweighted = apply_density(options.clone(), dense(&values));
+    let weighted = apply_density(
+        options,
+        dense(&values).with_weights(SVColumnView::Dense(&weights)),
+    );
+
+    assert_eq!(weighted.density(), unweighted.density());
+}
+
+#[test]
+fn a_weighted_density_integrates_to_one() {
+    let values = [0.0, 2.0, 2.5];
+    let weights = [1.0, 3.0, 2.0];
+    let result = apply_density(
+        SVKernelDensityOptions::new()
+            .bandwidth(0.75)
+            .grid_count(2001)
+            .cut(5.0),
+        dense(&values).with_weights(SVColumnView::Dense(&weights)),
+    );
+
+    assert!((trapezoid_integral(&result) - 1.0).abs() < 1e-6);
+}
+
+#[test]
+fn weighted_sparse_implicit_zeros_use_their_own_weights() {
+    let indices = [2usize];
+    let values = [4.0];
+    let sparse = SVSparseView::new(&indices, &values, 4).expect("valid sparse storage");
+    let weights = [1.0, 2.0, 3.0, 4.0];
+
+    let sparse_result = apply_density(
+        SVKernelDensityOptions::new()
+            .bandwidth(1.0)
+            .grid_count(33)
+            .cut(2.0),
+        SVStatInput::new(SVColumnView::Sparse(sparse)).with_weights(SVColumnView::Dense(&weights)),
+    );
+    let dense_values = [0.0, 0.0, 4.0, 0.0];
+    let dense_result = apply_density(
+        SVKernelDensityOptions::new()
+            .bandwidth(1.0)
+            .grid_count(33)
+            .cut(2.0),
+        SVStatInput::new(SVColumnView::Dense(&dense_values))
+            .with_weights(SVColumnView::Dense(&weights)),
+    );
+
+    sparse_result
+        .density()
+        .iter()
+        .zip(dense_result.density())
+        .for_each(|(sparse, dense)| assert!((sparse - dense).abs() < 1e-12));
+}
+
+#[test]
+fn a_negative_weight_is_rejected_with_its_position() {
+    let weights = [1.0, -1.0];
+    let error = SVStat::kernel_density(SVKernelDensityOptions::new())
+        .apply(dense(&[0.0, 1.0]).with_weights(SVColumnView::Dense(&weights)))
+        .expect_err("weights cannot be negative");
+
+    assert_eq!(
+        error,
+        SVError::NegativeWeight {
+            operation: "kernel_density",
+            position: 1,
+        }
+    );
+}
+
+#[test]
+fn a_non_finite_weight_is_rejected_with_its_position() {
+    let weights = [1.0, f64::INFINITY];
+    let error = SVStat::kernel_density(SVKernelDensityOptions::new())
+        .apply(dense(&[0.0, 1.0]).with_weights(SVColumnView::Dense(&weights)))
+        .expect_err("a non-finite weight is invalid");
+
+    assert_eq!(
+        error,
+        SVError::NonFiniteValue {
+            operation: "kernel_density",
+            position: 1,
+        }
+    );
+}
+
+#[test]
+fn a_zero_weight_total_is_rejected() {
+    let weights = [0.0, 0.0];
+    let error = SVStat::kernel_density(SVKernelDensityOptions::new())
+        .apply(dense(&[0.0, 1.0]).with_weights(SVColumnView::Dense(&weights)))
+        .expect_err("a density needs positive total weight");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}
+
+#[test]
+fn a_weight_column_of_a_different_length_is_rejected() {
+    let weights = [1.0];
+    let error = SVStat::kernel_density(SVKernelDensityOptions::new())
+        .apply(dense(&[0.0, 1.0]).with_weights(SVColumnView::Dense(&weights)))
+        .expect_err("columns must agree in length");
+
+    assert_eq!(
+        error,
+        SVError::MismatchedStatisticLengths {
+            operation: "kernel_density",
+            first: 2,
+            second: 1,
+        }
+    );
+}

@@ -410,3 +410,19 @@ fn a_non_finite_value_observation_is_rejected_with_its_position() {
         }
     );
 }
+
+#[test]
+fn a_configured_weight_column_is_rejected_instead_of_ignored() {
+    let values = [1.0, 2.0, 3.0];
+    let independent = [0.0, 1.0, 2.0];
+    let weights = [1.0, 1.0, 1.0];
+    let error = SVStat::fit(SVFitOptions::new())
+        .apply(
+            SVStatInput::new(SVColumnView::Dense(&values))
+                .with_secondary(SVColumnView::Dense(&independent))
+                .with_weights(SVColumnView::Dense(&weights)),
+        )
+        .expect_err("a fit does not accept weights");
+
+    assert!(matches!(error, SVError::InvalidConfiguration { .. }));
+}

@@ -28,6 +28,7 @@ pub(super) struct SVHistogramConfiguration<'data> {
     pub(super) data_source: &'data dyn SVDataSource,
     pub(super) value: String,
     pub(super) series: Option<String>,
+    pub(super) weight: Option<String>,
     pub(super) series_labels: Vec<String>,
     pub(super) bin_count: Option<usize>,
     pub(super) bin_width: Option<f64>,

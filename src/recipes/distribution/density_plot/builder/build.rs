@@ -51,7 +51,10 @@ impl<'values> SVDensityPlotBuilder<'values, SVWithBackend> {
         sv_validate_line_width(self.line_width)?;
 
         let schema = data_source.schema();
-        for name in [Some(value), self.series].into_iter().flatten() {
+        for name in [Some(value), self.series, self.weight]
+            .into_iter()
+            .flatten()
+        {
             if schema.column(name).is_none() {
                 return Err(SVError::ColumnNotFound {
                     name: name.to_string(),
@@ -69,6 +72,7 @@ impl<'values> SVDensityPlotBuilder<'values, SVWithBackend> {
             data_source,
             value,
             series: self.series,
+            weight: self.weight,
             bandwidth: self.bandwidth,
             bandwidth_adjustment: self.bandwidth_adjustment,
             kernel: self.kernel,

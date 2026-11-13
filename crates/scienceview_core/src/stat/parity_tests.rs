@@ -86,3 +86,80 @@ fn a_sparse_count_never_densifies_its_input() {
     assert_eq!(result.categories(), &[0.0, 4.0, 6.0]);
     assert_eq!(result.counts(), &[8, 1, 1]);
 }
+
+const WEIGHTS: [f64; 9] = [2.0, 0.0, 1.0, 0.0, 3.0, 1.0, 0.0, 2.0, 1.0];
+
+fn weighted_bin_counts(value: SVColumnView<'_>, weight: SVColumnView<'_>) -> Vec<f64> {
+    match SVStat::bin(SVBinOptions::new().bin_edges(vec![0.0, 3.0, 6.0, 10.0]))
+        .apply(SVStatInput::new(value).with_weights(weight))
+        .expect("the weighted dataset is binnable")
+    {
+        SVStatResult::Bins(result) => result.counts().to_vec(),
+        other => panic!("the bin stat must produce bins, received {other:?}"),
+    }
+}
+
+#[test]
+fn weighted_binning_agrees_across_the_three_representations() {
+    let harness = SVRepresentationParityHarness::new(&DATASET);
+    let weight_indices = [0usize, 2, 4, 5, 7, 8];
+    let weight_values = [2.0, 1.0, 3.0, 1.0, 2.0, 1.0];
+    let sparse_weights =
+        SVSparseView::new(&weight_indices, &weight_values, WEIGHTS.len()).expect("valid weights");
+
+    let dense = weighted_bin_counts(harness.dense_view(), SVColumnView::Dense(&WEIGHTS));
+    let sparse = weighted_bin_counts(
+        SVColumnView::Sparse(harness.sparse_view().expect("valid sparse storage")),
+        SVColumnView::Sparse(sparse_weights),
+    );
+    let streaming = weighted_bin_counts(
+        SVColumnView::Streaming(crate::sv_data::SVStreamingView::new(&DATASET, 9, 0)),
+        SVColumnView::Streaming(crate::sv_data::SVStreamingView::new(&WEIGHTS, 9, 0)),
+    );
+
+    assert_eq!(dense, sparse);
+    assert_eq!(dense, streaming);
+}
+
+fn weighted_density(value: SVColumnView<'_>, weight: SVColumnView<'_>) -> Vec<f64> {
+    match SVStat::kernel_density(
+        crate::sv_stat::SVKernelDensityOptions::new()
+            .bandwidth(1.0)
+            .grid_count(25)
+            .cut(2.0),
+    )
+    .apply(SVStatInput::new(value).with_weights(weight))
+    .expect("the weighted dataset has a density")
+    {
+        SVStatResult::Density(result) => result.density().to_vec(),
+        other => panic!("the density stat must produce a density, received {other:?}"),
+    }
+}
+
+#[test]
+fn weighted_density_agrees_across_dense_and_sparse_representations() {
+    let harness = SVRepresentationParityHarness::new(&DATASET);
+    let weight_indices = [0usize, 2, 4, 5, 7, 8];
+    let weight_values = [2.0, 1.0, 3.0, 1.0, 2.0, 1.0];
+    let sparse_weights =
+        SVSparseView::new(&weight_indices, &weight_values, WEIGHTS.len()).expect("valid weights");
+
+    let dense = weighted_density(harness.dense_view(), SVColumnView::Dense(&WEIGHTS));
+    let sparse = weighted_density(
+        SVColumnView::Sparse(harness.sparse_view().expect("valid sparse storage")),
+        SVColumnView::Sparse(sparse_weights),
+    );
+    let streaming = weighted_density(
+        SVColumnView::Streaming(crate::sv_data::SVStreamingView::new(&DATASET, 9, 0)),
+        SVColumnView::Streaming(crate::sv_data::SVStreamingView::new(&WEIGHTS, 9, 0)),
+    );
+
+    dense
+        .iter()
+        .zip(sparse)
+        .for_each(|(dense, sparse)| assert!((dense - sparse).abs() < 1e-12));
+    dense
+        .iter()
+        .zip(streaming)
+        .for_each(|(dense, streaming)| assert!((dense - streaming).abs() < 1e-12));
+}
