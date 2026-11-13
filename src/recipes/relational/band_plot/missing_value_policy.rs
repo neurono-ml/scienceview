@@ -21,14 +21,6 @@ pub enum SVBandMissingValuePolicy {
 }
 
 impl SVBandMissingValuePolicy {
-    /// The policy name as written in errors and spans.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Omit => "Omit",
-            Self::Error => "Error",
-        }
-    }
-
     /// Reports a missing sample according to this policy.
     ///
     /// # Errors

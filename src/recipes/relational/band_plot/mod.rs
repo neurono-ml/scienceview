@@ -59,6 +59,9 @@ mod band_plot_derived_tests;
 #[cfg(test)]
 #[path = "band_plot_missing_tests.rs"]
 mod band_plot_missing_tests;
+#[cfg(all(test, feature = "render-native"))]
+#[path = "band_plot_native_tests.rs"]
+mod band_plot_native_tests;
 #[cfg(test)]
 #[path = "band_plot_observability_tests.rs"]
 mod band_plot_observability_tests;

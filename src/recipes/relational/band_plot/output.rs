@@ -3,7 +3,7 @@
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::SVRepresentation;
 use scienceview_core::sv_decoration::SVDecorationPrimitive;
-#[cfg(feature = "render-svg")]
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::{SVResolvedRectangle, SVViewport};
 use scienceview_core::sv_mark::SVMarkGeometry;
@@ -109,12 +109,11 @@ impl SVBandRenderOutput {
     #[cfg(feature = "render-svg")]
     pub fn to_svg(&self) -> Result<String, SVError> {
         if self.backend_kind != SVBackendKind::Svg {
-            return Err(SVError::InvalidConfiguration {
-                message: format!(
-                    "the `{}` backend has no band-plot serializer yet; select `Svg`",
-                    self.backend_kind
-                ),
-            });
+            return Err(sv_wrong_backend(
+                "SVG",
+                self.backend_kind,
+                SVBackendKind::Svg,
+            ));
         }
         let style = scienceview_core::sv_decoration::SVDecorationStyle::built_in();
         let mut document =
@@ -129,5 +128,49 @@ impl SVBandRenderOutput {
             document.push_decoration_primitives(std::slice::from_ref(primitive));
         }
         Ok(document.to_svg())
+    }
+
+    /// Rasterizes the result into one native frame.
+    ///
+    /// The frame is the very geometry the SVG serializer writes: the same mark
+    /// primitives and the same decoration primitives, drawn in the same order
+    /// into the native canvas. A backend configured for anything else is
+    /// rejected instead of being silently rendered as native (patterns P7).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SVError::InvalidConfiguration`] when the figure was configured
+    /// for a backend other than `Native`.
+    #[cfg(feature = "render-native")]
+    pub fn to_native_frame(&self) -> Result<scienceview_native::SVNativeFrame, SVError> {
+        if self.backend_kind != SVBackendKind::Native {
+            return Err(sv_wrong_backend(
+                "native",
+                self.backend_kind,
+                SVBackendKind::Native,
+            ));
+        }
+        let style = scienceview_core::sv_decoration::SVDecorationStyle::built_in();
+        let mut canvas = scienceview_native::SVRasterCanvas::new(&self.viewport);
+        canvas.fill(style.background());
+        for geometry in &self.geometries {
+            canvas.draw_mark_geometry(geometry);
+        }
+        canvas.draw_decoration_primitives(&self.decorations);
+        Ok(canvas.to_frame())
+    }
+}
+
+/// Builds the error of asking a serializer for the wrong configured backend.
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
+fn sv_wrong_backend(
+    serializer: &str,
+    configured: SVBackendKind,
+    required: SVBackendKind,
+) -> SVError {
+    SVError::InvalidConfiguration {
+        message: format!(
+            "the `{configured}` backend has no {serializer} serializer; this figure was configured for `{configured}`, and the {serializer} serializer requires `{required}`"
+        ),
     }
 }

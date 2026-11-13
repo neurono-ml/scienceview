@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use scienceview_core::sv_backend::{SVBackendKind, sv_verify_mark_supported};
+use scienceview_core::sv_backend::{SVBackendCapability, SVBackendKind, sv_verify_mark_supported};
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_mark::SVMarkKind;
@@ -116,28 +116,48 @@ impl<'values> SVBandPlot<'values> {
         ))
     }
 
-    /// Serializes the rendered bands as one self-contained SVG document.
+    /// Writes the rendered bands through the configured backend.
+    ///
+    /// `Svg` writes the self-contained document. `Native` declares no export
+    /// format, so asking it to save reports the missing capability instead of
+    /// writing an unrelated file. Every other kind is not a serializer of this
+    /// recipe and fails explicitly.
     ///
     /// # Errors
     ///
-    /// Returns the render errors, [`SVError::InvalidConfiguration`] when the
-    /// configured backend is not `Svg`, and the backend's own write error.
+    /// Returns the render errors, [`SVError::BackendUnavailable`] when the SVG
+    /// feature is not compiled, [`SVError::UnsupportedBackendCapability`] for
+    /// `Native` and [`SVError::InvalidConfiguration`] for a kind without a
+    /// band-plot serializer, plus the backend's own write error.
     pub fn save(&self, destination: &Path) -> Result<(), SVError> {
-        #[cfg(feature = "render-svg")]
-        {
-            let document = self.render()?.to_svg()?;
-            std::fs::write(destination, document).map_err(|error| SVError::BackendFailure {
+        match self.backend_kind {
+            SVBackendKind::Svg => {
+                #[cfg(feature = "render-svg")]
+                {
+                    let document = self.render()?.to_svg()?;
+                    std::fs::write(destination, document).map_err(|error| SVError::BackendFailure {
+                        backend_kind: self.backend_kind,
+                        operation: "save",
+                        message: error.to_string(),
+                    })
+                }
+                #[cfg(not(feature = "render-svg"))]
+                {
+                    let _ = destination;
+                    Err(SVError::BackendUnavailable {
+                        backend_kind: self.backend_kind,
+                    })
+                }
+            }
+            SVBackendKind::Native => Err(SVError::UnsupportedBackendCapability {
                 backend_kind: self.backend_kind,
-                operation: "save",
-                message: error.to_string(),
-            })
-        }
-        #[cfg(not(feature = "render-svg"))]
-        {
-            let _ = destination;
-            Err(SVError::BackendUnavailable {
-                backend_kind: self.backend_kind,
-            })
+                capability: SVBackendCapability::Export,
+            }),
+            other => Err(SVError::InvalidConfiguration {
+                message: format!(
+                    "the `{other}` backend has no band-plot serializer; select `Svg` or `Native`"
+                ),
+            }),
         }
     }
 }
