@@ -87,23 +87,17 @@ fn sv_require_role(
     })
 }
 
-/// Resolves the configuration into observations.
+/// Resolves the already-fetched column views into observations.
+///
+/// The composition owns the one snapshot per column and passes the same views
+/// to the jitter step, so a live source is read once per operation and the
+/// representation is dispatched once.
 pub(super) fn sv_resolve_strip_data(
+    value_view: SVColumnView<'_>,
+    category_view: SVColumnView<'_>,
+    series_view: Option<SVColumnView<'_>>,
     configuration: &SVStripConfiguration<'_>,
 ) -> Result<SVStripData, SVError> {
-    let mut value_snapshot = configuration.data_source.column(&configuration.value)?;
-    let mut category_snapshot = configuration.data_source.column(&configuration.category)?;
-    let mut series_snapshot = configuration
-        .series
-        .as_deref()
-        .map(|name| configuration.data_source.column(name))
-        .transpose()?;
-
-    let value_view = value_snapshot.column_view();
-    let category_view = category_snapshot.column_view();
-    let series_view = series_snapshot
-        .as_mut()
-        .map(|snapshot| snapshot.column_view());
     sv_require_same_length("value", value_view, "category", category_view)?;
     if let Some(series_view) = series_view {
         sv_require_same_length("value", value_view, "series", series_view)?;

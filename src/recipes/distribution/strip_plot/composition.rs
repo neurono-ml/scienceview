@@ -4,7 +4,7 @@ use super::configuration::{
     SV_STRIP_PLOT_HEIGHT, SV_STRIP_PLOT_LEFT, SV_STRIP_PLOT_TOP, SV_STRIP_PLOT_WIDTH,
     SV_STRIP_VIEWPORT_HEIGHT, SV_STRIP_VIEWPORT_WIDTH, SVStripConfiguration,
 };
-use super::data_contract::{SVStripData, sv_resolve_strip_data};
+use super::data_contract::sv_resolve_strip_data;
 use super::decorations::sv_strip_decorations;
 use super::geometry::{SVStripGeometryInput, sv_dot_geometries};
 use super::jitter::sv_jittered_categories;
@@ -26,8 +26,21 @@ pub(super) fn sv_compose_scene(
         SV_STRIP_PLOT_HEIGHT,
     );
 
-    let data = sv_resolve_strip_data(configuration)?;
-    let displaced_categories = sv_resolve_displaced_categories(configuration, &data)?;
+    let mut value_snapshot = configuration.data_source.column(&configuration.value)?;
+    let mut category_snapshot = configuration.data_source.column(&configuration.category)?;
+    let mut series_snapshot = configuration
+        .series
+        .as_deref()
+        .map(|name| configuration.data_source.column(name))
+        .transpose()?;
+    let value = value_snapshot.column_view();
+    let category = category_snapshot.column_view();
+    let series = series_snapshot
+        .as_mut()
+        .map(|snapshot| snapshot.column_view());
+
+    let data = sv_resolve_strip_data(value, category, series, configuration)?;
+    let displaced_categories = sv_jittered_categories(value, &data, configuration)?;
 
     let mut labels = sv_category_labels(&data.categories);
     if labels.is_empty() {
@@ -86,18 +99,4 @@ pub(super) fn sv_compose_scene(
         number_of_marks: data.observations.len(),
         orientation: configuration.orientation,
     })
-}
-
-/// Resolves the category column once more for the jitter kernel.
-///
-/// The observations already carry their category slot, but the move consumes a
-/// column whose length matches the data it displaces; the value column is the
-/// one the recipe already resolved.
-fn sv_resolve_displaced_categories(
-    configuration: &SVStripConfiguration<'_>,
-    data: &SVStripData,
-) -> Result<Vec<f64>, SVError> {
-    let mut value_snapshot = configuration.data_source.column(&configuration.value)?;
-    let value = value_snapshot.column_view();
-    sv_jittered_categories(value, data, configuration)
 }
