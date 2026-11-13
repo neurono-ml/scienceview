@@ -101,3 +101,9 @@ theme; ASCII-art diagrams are forbidden. A diagram is authored as Mermaid
 source and rendered to SVG, and the SVG is checked in under
 `docs/src/development-explained/assets/` so the book renders without a
 JavaScript dependency.
+
+Chapter 43 covers the pair-plot recipe, which solves a matrix of cells through
+the layout engine and gives every cell the shared domain of its row and column.
+It explains the schema-driven variable list, the density and histogram
+diagonals, the scatter, hexbin and density-contour off-diagonal forms, the hue
+grouping and the dense/sparse/streaming parity tests.
