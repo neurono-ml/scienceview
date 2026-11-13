@@ -29,8 +29,8 @@
 
 ## 4. Example and generated figure
 
-- [ ] Add `examples/histogram_plot.rs` demonstrating the documented configuration.
-- [ ] Generate `docs/figures/histogram_plot.svg` with `cargo run --example histogram_plot` and
+- [x] Add `examples/histogram_plot.rs` demonstrating the documented configuration.
+- [x] Generate `docs/figures/histogram_plot.svg` with `cargo run --example histogram_plot` and
   verify the `figures` gate reports no drift.
 
 ## 5. Book chapter (book branch)
