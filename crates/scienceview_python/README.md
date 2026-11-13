@@ -41,7 +41,11 @@ python -m pip install --force-reinstall target/wheels/scienceview-*.whl
 
 `maturin develop` installs the extension into the active virtual environment for
 iterative work. Maturin enables PyO3's `extension-module` behaviour for the
-wheel build itself; `pyproject.toml` only selects the `python` feature.
+wheel build itself; `pyproject.toml` only selects the `python` feature. The
+wheel is built for the interpreter that runs the build (PyO3 is used without
+the stable ABI), so build once per CPython version you publish for; the
+`requires-python` floor says which versions can build it, not that one wheel
+installs on all of them.
 
 ## Usage
 
