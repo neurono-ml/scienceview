@@ -111,3 +111,48 @@ fn render_span_records_backend_representation_and_points() {
     );
     assert_eq!(render.get("points").map(String::as_str), Some("3"));
 }
+
+#[test]
+fn render_span_counts_only_drawn_points() {
+    let x = [0.0, 1.0, 2.0];
+    let lower = [0.5, f64::NAN, 1.2];
+    let upper = [1.5, 2.2, 3.1];
+    let table = SVDataTable::builder()
+        .with_column("x", SVColumnRole::X, &x)
+        .with_column("lower", SVColumnRole::Y, &lower)
+        .with_column("upper", SVColumnRole::Y, &upper)
+        .build()
+        .expect("the columns share one length");
+    let plot = SVBandPlotBuilder::new()
+        .data_source(&table)
+        .x("x")
+        .lower("lower")
+        .upper("upper")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+
+    let recorder = SVRecorder::default();
+    let captured = recorder.clone();
+    tracing::callsite::rebuild_interest_cache();
+    tracing::subscriber::with_default(recorder, || {
+        tracing::callsite::rebuild_interest_cache();
+        let output = plot.render().expect("the band draws");
+        assert_eq!(output.number_of_points(), 2);
+    });
+
+    let spans = captured
+        .spans
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .clone();
+    let render = spans
+        .iter()
+        .find(|span| span.get("operation") == Some(&"render".to_string()))
+        .expect("the render operation emits a span");
+    assert_eq!(
+        render.get("points").map(String::as_str),
+        Some("2"),
+        "the span must count drawn vertices, not the omitted sample"
+    );
+}

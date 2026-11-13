@@ -1,10 +1,9 @@
 //! Reading, grouping and validating the columns the recipe consumes.
 
-use scienceview_core::sv_data::{SVColumnRole, SVColumnSnapshot, SVRepresentation, SVSourceSchema};
+use scienceview_core::sv_data::{SVColumnRole, SVColumnView, SVRepresentation, SVSourceSchema};
 use scienceview_core::sv_error::SVError;
 
 use super::configuration::{SVBandPlotConfiguration, sv_invalid};
-use super::data_contract::SVBandColumn;
 pub(crate) fn sv_validate_columns(
     configuration: &SVBandPlotConfiguration<'_>,
 ) -> Result<(), SVError> {
@@ -60,16 +59,41 @@ fn sv_require_role(
     }
 }
 
-pub(crate) fn sv_read_column(snapshot: &mut SVColumnSnapshot<'_>) -> Vec<f64> {
-    snapshot.column_view().dispatch(
-        |dense| dense.to_vec(),
-        |sparse| {
-            (0..sparse.length())
-                .map(|index| sparse.value_at(index).unwrap_or(0.0))
-                .collect()
-        },
-        |streaming| streaming.values().to_vec(),
+/// Returns the logical positions a band reads from `view`.
+///
+/// The decision is representation-aware: a dense column contributes every
+/// position, a sparse column contributes only its stored indices (the implicit
+/// zeros are never expanded into rows), and a streaming column contributes its
+/// current window. A sparse column of ten million logical values with three
+/// stored entries therefore yields three positions, not ten million.
+pub(crate) fn sv_positions(view: SVColumnView<'_>) -> Vec<usize> {
+    view.dispatch(
+        |dense| (0..dense.len()).collect(),
+        |sparse| sparse.indices().to_vec(),
+        |streaming| (0..streaming.length()).collect(),
     )
+}
+
+/// Counts the positions whose three band samples are all finite.
+///
+/// This is the number of vertices the composition actually draws: a missing
+/// sample splits the band and is not a drawn point, so the observation span
+/// never overstates the rendered size.
+pub(crate) fn sv_count_finite(
+    positions: &[usize],
+    x: SVColumnView<'_>,
+    lower: SVColumnView<'_>,
+    upper: SVColumnView<'_>,
+) -> usize {
+    positions
+        .iter()
+        .filter(|index| {
+            let index = **index;
+            x.value_at(index).is_some_and(f64::is_finite)
+                && lower.value_at(index).is_some_and(f64::is_finite)
+                && upper.value_at(index).is_some_and(f64::is_finite)
+        })
+        .count()
 }
 
 pub(crate) fn sv_group_rows(series: &[f64]) -> Vec<(f64, Vec<usize>)> {
@@ -84,17 +108,6 @@ pub(crate) fn sv_group_rows(series: &[f64]) -> Vec<(f64, Vec<usize>)> {
         }
     }
     groups
-}
-
-pub(crate) fn sv_owned_length(column: &SVBandColumn<'_>) -> usize {
-    match column {
-        SVBandColumn::Snapshot(_) => 0,
-        SVBandColumn::Owned(values) => values.len(),
-    }
-}
-
-pub(crate) fn sv_snapshot_length(snapshot: &mut SVColumnSnapshot<'_>) -> usize {
-    snapshot.column_view().length()
 }
 
 pub(crate) fn sv_widest<const COUNT: usize>(

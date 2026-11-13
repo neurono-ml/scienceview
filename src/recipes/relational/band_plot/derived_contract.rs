@@ -6,7 +6,7 @@ use scienceview_core::sv_stat::{
     SVAggregateMethod, SVAggregateOptions, SVStat, SVStatInput, SVStatResult,
 };
 
-use super::column_access::{sv_group_rows, sv_read_column, sv_series_name, sv_widest};
+use super::column_access::{sv_group_rows, sv_positions, sv_series_name, sv_widest};
 use super::configuration::{SVBandPlotConfiguration, sv_invalid};
 use super::data_contract::{SVBand, SVBandColumn, SVBandData};
 pub(crate) fn sv_resolve_derived<'values>(
@@ -29,9 +29,25 @@ pub(crate) fn sv_resolve_derived<'values>(
         None => sv_widest([x_snapshot.representation(), value_snapshot.representation()]),
     };
     let representation = representations;
-    let x_values = sv_read_column(&mut x_snapshot);
-    let values = sv_read_column(&mut value_snapshot);
-    let series_values = series_snapshot.as_mut().map(sv_read_column);
+    let x_view = x_snapshot.column_view();
+    let value_view = value_snapshot.column_view();
+    let series_view = series_snapshot.as_mut().map(|series| series.column_view());
+    let positions = sv_positions(x_view);
+
+    let x_values: Vec<f64> = positions
+        .iter()
+        .map(|row| x_view.value_at(*row).unwrap_or(f64::NAN))
+        .collect();
+    let values: Vec<f64> = positions
+        .iter()
+        .map(|row| value_view.value_at(*row).unwrap_or(f64::NAN))
+        .collect();
+    let series_values: Option<Vec<f64>> = series_view.map(|view| {
+        positions
+            .iter()
+            .map(|row| view.value_at(*row).unwrap_or(f64::NAN))
+            .collect()
+    });
 
     let stat = SVStat::aggregate(
         SVAggregateOptions::new()
@@ -68,7 +84,12 @@ pub(crate) fn sv_resolve_derived<'values>(
             lower.push(interval.lower());
             upper.push(interval.upper());
         }
-        number_of_points += x.len();
+        number_of_points += x
+            .iter()
+            .zip(&lower)
+            .zip(&upper)
+            .filter(|((x, lower), upper)| x.is_finite() && lower.is_finite() && upper.is_finite())
+            .count();
         if x.is_empty() {
             continue;
         }

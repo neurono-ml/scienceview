@@ -37,11 +37,14 @@ impl SVBandDomain {
 pub(crate) fn sv_band_domain(data: &mut SVBandData<'_>) -> Result<SVBandDomain, SVError> {
     let mut domain = SVBandDomain::empty();
     for band in &mut data.bands {
-        let length = band.x.view().length();
-        for index in 0..length {
-            let x = band.x.view().value_at(index).unwrap_or(f64::NAN);
-            let lower = band.lower.view().value_at(index).unwrap_or(f64::NAN);
-            let upper = band.upper.view().value_at(index).unwrap_or(f64::NAN);
+        let x_view = band.x.view();
+        let lower_view = band.lower.view();
+        let upper_view = band.upper.view();
+        let positions = super::column_access::sv_positions(x_view);
+        for index in positions {
+            let x = x_view.value_at(index).unwrap_or(f64::NAN);
+            let lower = lower_view.value_at(index).unwrap_or(f64::NAN);
+            let upper = upper_view.value_at(index).unwrap_or(f64::NAN);
             if x.is_finite() {
                 domain.x_minimum = domain.x_minimum.min(x);
                 domain.x_maximum = domain.x_maximum.max(x);

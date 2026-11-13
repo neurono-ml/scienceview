@@ -139,3 +139,22 @@ fn derived_streaming_window_is_approximate_and_matches_dense() {
     assert!(streaming_output.is_approximate());
     assert_close(&points(&dense), &points(&streaming_output));
 }
+
+#[test]
+fn derived_huge_sparse_input_aggregates_only_its_stored_entries() {
+    let logical_length = 10_000_000;
+    let indices = [0usize, 1, 2, 3, 4, 5];
+    let x = [0.0, 0.0, 1.0, 1.0, 2.0, 2.0];
+    let y = [1.0, 1.4, 2.0, 2.8, 3.0, 4.0];
+    let x_view = SVSparseView::new(&indices, &x, logical_length).expect("valid sparse view");
+    let y_view = SVSparseView::new(&indices, &y, logical_length).expect("valid sparse view");
+    let source = SVTestSource::new(vec![
+        ("x", SVColumnRole::X, SVColumnView::Sparse(x_view)),
+        ("y", SVColumnRole::Y, SVColumnView::Sparse(y_view)),
+    ]);
+
+    let output = derived_render(&source);
+
+    assert_eq!(output.number_of_points(), 3);
+    assert_eq!(points(&output).len(), 3 * 2);
+}

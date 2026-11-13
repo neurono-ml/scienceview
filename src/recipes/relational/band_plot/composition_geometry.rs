@@ -14,19 +14,19 @@ pub(crate) struct SVRun {
     pub(crate) upper: Vec<f64>,
 }
 pub(crate) fn sv_finite_runs(
+    positions: &[usize],
     x: SVColumnView<'_>,
     lower: SVColumnView<'_>,
     upper: SVColumnView<'_>,
     policy: SVBandMissingValuePolicy,
 ) -> Result<Vec<SVRun>, SVError> {
-    let length = x.length();
     let mut runs = Vec::new();
     let mut current = SVRun {
         x: Vec::new(),
         lower: Vec::new(),
         upper: Vec::new(),
     };
-    for index in 0..length {
+    for index in positions.iter().copied() {
         let sample = (
             x.value_at(index).unwrap_or(f64::NAN),
             lower.value_at(index).unwrap_or(f64::NAN),

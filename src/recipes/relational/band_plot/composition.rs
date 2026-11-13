@@ -36,7 +36,14 @@ pub(crate) fn sv_compose_band_geometries(
         sv_require_same_length(x.length(), lower.length())?;
         sv_require_same_length(x.length(), upper.length())?;
 
-        for run in sv_finite_runs(x, lower, upper, configuration.missing_value_policy)? {
+        let positions = super::column_access::sv_positions(x);
+        for run in sv_finite_runs(
+            &positions,
+            x,
+            lower,
+            upper,
+            configuration.missing_value_policy,
+        )? {
             sv_push_run_geometry(
                 &mut geometries,
                 &run,
