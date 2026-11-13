@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The band plot recipe `SVBandPlot` in `scienceview::recipes::relational`: the
+  filled region between two boundary lines, composed exactly as
+  `data -> [SVStat::Aggregate + error] -> (lower, upper) -> [SVScale] ->
+  SVMark::Ribbon`. The builder requires an explicit backend, defaults
+  `execution_mode` to `Automatic`, and accepts either explicit `lower`/`upper`
+  columns or a derived mode that aggregates a value column per `x` group with
+  `SVAggregateErrorKind` (standard deviation by default, or a centred
+  percentile interval selected with `confidence`). One optional `series`
+  column draws one band per series. Fill opacity, an optional dashed or solid
+  border, an optional centre line and an explicit `SVMissingValuePolicy`
+  (omit and split the band at a gap, or fail at build time) are part of the
+  surface. Dense, sparse and streaming input resolve once per operation,
+  sparse storage is never densified by the mark kernel and a streaming window
+  renders without blocking and reports `is_approximate`. The example
+  `examples/band_plot.rs` writes `docs/figures/band_plot.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
