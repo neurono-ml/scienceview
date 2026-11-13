@@ -37,7 +37,7 @@ data -> [no stat] -> raster -> [SVScale::Continuous over a colour map] -> SVMark
 |---|---|---|
 | Raster | a dense 2D array of intensities | rendered greyscale or through a colour map |
 | Colour raster | a dense 2D array of RGBA | rendered as is |
-| Encoded image | encoded bytes | rendered as an image resource |
+| Encoded image | encoded bytes | a backend concern, not decoded by the core (see Open questions) |
 
 Accepted representations: dense, sparse (a sparse raster is drawn with its
 missing pixels transparent), streaming (a window of frames).
