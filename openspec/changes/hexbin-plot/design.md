@@ -11,10 +11,13 @@ the core kernels already landed by the earlier waves, and touches nothing else.
 
 ### D1 — Composition
 
-The chart is exactly the composition
-`data -> [SVStat::Bin (2D, hexagonal lattice)] -> (cells, counts) -> [SVScale::Continuous over a colour map] -> SVMark::HexTile`. It introduces no new mark, stat, move or scale variant; if
-implementation reveals a missing variant, that is a change to the core
-capability first (patterns.md P5).
+The chart composes `data -> [hexagonal lattice owned by the recipe] ->
+(cells, counts) -> [SVScale::Continuous over a colour map] -> one path per
+hexagon`. The closed stat vocabulary has no bivariate hexagonal variant
+(patterns.md P5), so the lattice geometry lives in the recipe exactly as the
+density-contour recipe owns marching squares; positions come from the scale
+kernel, mean aggregation is delegated to `SVStat::Aggregate`, and no new mark,
+stat, move or scale variant is introduced.
 
 ### D2 — Data contract
 

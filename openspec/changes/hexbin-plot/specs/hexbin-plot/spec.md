@@ -8,11 +8,15 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVHexbinPlot` SHALL be produced by exactly the composition `data -> [SVStat::Bin (2D, hexagonal lattice)] -> (cells, counts) -> [SVScale::Continuous over a colour map] -> SVMark::HexTile` and SHALL expose the configuration surface recorded in its FDR.
+`SVHexbinPlot` SHALL be produced by exactly the composition `data -> [hexagonal lattice] -> (cells, counts) -> [SVScale::Continuous over a colour map] -> one path per hexagon` and SHALL expose the configuration surface recorded in its FDR. The closed stat vocabulary has no bivariate hexagonal variant, so the recipe owns the lattice geometry, exactly as the density-contour recipe owns its marching-squares pass; positions come from the scale kernel and mean aggregation is delegated to `SVStat::Aggregate`.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
-- **THEN** it draws the documented default form
+- **THEN** it draws the documented default form: one filled path per occupied hexagon, coloured by its count
+
+#### Scenario: Mean aggregation
+- **WHEN** the chart is configured with a value column and mean aggregation
+- **THEN** each hexagon's colour encodes the mean of that column through `SVStat::Aggregate`
 
 #### Scenario: Explicit option
 - **WHEN** an option is set explicitly
