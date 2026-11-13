@@ -58,7 +58,7 @@ jobs:
             exit 1
           fi
           for example in "${examples[@]}"; do
-            cargo run --example "$(basename "${example}" .rs)"
+            cargo run --example "$(basename "${example}" .rs)" --features render-svg
           done
       - name: The mirrored figures must match the code branch
         run: |
