@@ -12,6 +12,24 @@ released.
 
 ### Added
 
+- The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the point estimate of every category with its uncertainty, optionally joined
+  by a line. The chart is the composition of FDR-123 —
+  `data -> [SVStat::Aggregate + interval] -> (estimate, lower, upper) -> [SVMove::Dodge] -> [SVScale] -> SVMark::Dot + ErrorBar + optional Line` —
+  and its configuration surface is `category`, `value`, `series`, `estimator`,
+  `error`, `confidence_interval`, `ordering`, `missing_value_policy`, `orient`,
+  `marker`, `caps`, `cap_width`, `join`, `line_width`, `dash`, `colour`, the
+  titles and the viewport, with `backend(...)` required and `execution_mode`
+  defaulting to `Automatic`. The estimator and the interval come from
+  `SVStat::Aggregate` and are never reimplemented; `SVMove::Dodge` places
+  several series inside a category slot. A sparse column contributes only its
+  stored entries and a streaming column its current window; both are resolved
+  once per operation. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error instead of being ignored. Transition and animation
+  wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/point_plot.rs` writes
+  `docs/figures/point_plot.svg`.
 - The distributional recipe `SVCountPlot` (`scienceview::sv_recipes::sv_distribution`):
   the number of observations in every category, drawn as a bar. The chart is
   the composition of FDR-122 —
