@@ -2,7 +2,7 @@
 
 use super::SVScatterLegendPlacement;
 use super::channels::SVScatterSeriesGroup;
-use super::core_implementation::SVScatterConfiguration;
+use super::configuration::SVScatterConfiguration;
 use crate::sv_decoration::{
     SVAxis, SVAxisSide, SVAxisSpace, SVDecorationPrimitive, SVDecorationStyle, SVGrid, SVLegend,
     SVTitle, SVTitleRole,

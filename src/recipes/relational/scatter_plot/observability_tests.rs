@@ -1,7 +1,7 @@
 //! The one operation span a scatter render emits (patterns P8).
 
 use super::SVScatterPlot;
-use super::scatter_plot_tests::{sv_dense_source, sv_streaming_source};
+use super::test_support::{sv_dense_source, sv_streaming_source};
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::SVRepresentation;
 use std::collections::BTreeMap;

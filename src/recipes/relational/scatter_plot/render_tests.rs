@@ -1,6 +1,6 @@
 //! The optional backend surfaces: SVG and the native rasterizer.
 
-use super::scatter_plot_tests::{sv_build_default, sv_dense_source};
+use super::test_support::{sv_build_default, sv_dense_source};
 
 #[cfg(feature = "render-svg")]
 #[test]

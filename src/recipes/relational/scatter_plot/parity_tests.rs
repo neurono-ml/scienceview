@@ -1,19 +1,17 @@
 //! Representation parity, the data boundary and the streaming path.
 
 use super::SVScatterPlot;
-use super::scatter_plot_tests::{
+use super::test_support::{
     SVTestSource, sv_build_default, sv_dense_source, sv_scene_to_svg, sv_sparse_source,
     sv_streaming_source,
 };
 use crate::sv_backend::SVBackendKind;
 use crate::sv_data::{
     SVColumnSnapshot, SVColumnView, SVDataSource, SVDataTableBuilder, SVRepresentation,
-    SVSourceSchema, SVSparseView, SVStreamingView,
+    SVSourceSchema, SVSparseView,
 };
 use crate::sv_error::SVError;
 use crate::sv_mark::SVDotShape;
-use std::sync::mpsc;
-use std::time::Duration;
 
 const HORIZONTAL: [f64; 5] = [0.0, 1.0, 2.0, 3.0, 4.0];
 const VERTICAL: [f64; 5] = [1.0, 4.0, 2.0, 5.0, 3.0];
@@ -73,26 +71,6 @@ fn a_sparse_input_with_implicit_zeros_keeps_its_logical_points() {
         .render()
         .expect("implicit zeros stay logical points");
     assert_eq!(scene.number_of_marks(), DENSE_X.len());
-}
-
-#[test]
-fn a_streaming_input_returns_promptly_and_shows_the_window() {
-    let streaming_source = sv_streaming_source();
-    let plot = sv_build_default(&streaming_source);
-    assert_eq!(plot.representation(), SVRepresentation::Streaming);
-
-    let (sender, receiver) = mpsc::channel();
-    std::thread::scope(|scope| {
-        scope.spawn(|| {
-            let scene = plot.render().expect("the streaming window renders");
-            let _ = sender.send(scene.number_of_marks());
-        });
-    });
-
-    let points = receiver
-        .recv_timeout(Duration::from_secs(2))
-        .expect("the render must not block on the stream");
-    assert_eq!(points, HORIZONTAL.len());
 }
 
 #[test]
@@ -203,18 +181,26 @@ fn jitter_displaces_points_deterministically() {
 }
 
 #[test]
-fn a_streaming_scene_can_be_serialized_as_svg() {
-    let streaming_source = SVTestSource {
-        horizontal: SVColumnView::Streaming(SVStreamingView::new(&HORIZONTAL, 11, 3)),
-        vertical: SVColumnView::Streaming(SVStreamingView::new(&VERTICAL, 11, 3)),
-        series: None,
-        sizes: None,
-        colours: None,
-    };
-    let scene = sv_build_default(&streaming_source)
+fn jitter_rejects_a_sparse_column_instead_of_densifying_it() {
+    let source = sv_sparse_source();
+    let plot = SVScatterPlot::builder()
+        .data_source(&source)
+        .x("x")
+        .y("y")
+        .jitter(crate::sv_move::SVMove::jitter().seed(7).into())
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the jitter configuration is complete");
+    let error = plot
         .render()
-        .expect("the streaming scene renders");
-    let svg = sv_scene_to_svg(&scene);
-    assert!(svg.starts_with("<svg"));
-    assert!(svg.contains("<path"), "the marks are serialized");
+        .expect_err("jitter cannot displace a sparse column without densifying it");
+
+    assert!(matches!(
+        error,
+        SVError::UnsupportedRepresentation {
+            operation: "scatter_jitter",
+            representation: SVRepresentation::Sparse,
+            ..
+        }
+    ));
 }

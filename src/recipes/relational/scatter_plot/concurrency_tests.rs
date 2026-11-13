@@ -1,6 +1,6 @@
 //! Concurrent rendering of one scatter from several threads.
 
-use super::scatter_plot_tests::{sv_build_default, sv_dense_source, sv_scene_to_svg};
+use super::test_support::{sv_build_default, sv_dense_source, sv_scene_to_svg};
 
 #[test]
 fn several_threads_render_the_same_scatter_identically() {

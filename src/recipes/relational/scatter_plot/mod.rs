@@ -34,10 +34,15 @@
 //! ```
 
 mod builder;
+mod builder_options;
 mod channels;
+mod composition;
+mod composition_helpers;
+mod configuration;
 mod core_implementation;
 mod decorations;
 mod geometry;
+mod jitter;
 mod options;
 mod scene;
 
@@ -51,8 +56,14 @@ pub use core_implementation::SVScatterPlot;
 #[path = "concurrency_tests.rs"]
 mod concurrency_tests;
 #[cfg(test)]
+#[path = "large_scatter_tests.rs"]
+mod large_scatter_tests;
+#[cfg(test)]
 #[path = "observability_tests.rs"]
 mod observability_tests;
+#[cfg(test)]
+#[path = "option_tests.rs"]
+mod option_tests;
 #[cfg(test)]
 #[path = "parity_tests.rs"]
 mod parity_tests;
@@ -62,3 +73,9 @@ mod render_tests;
 #[cfg(test)]
 #[path = "scatter_plot_tests.rs"]
 mod scatter_plot_tests;
+#[cfg(test)]
+#[path = "streaming_tests.rs"]
+mod streaming_tests;
+#[cfg(test)]
+#[path = "test_support.rs"]
+mod test_support;
