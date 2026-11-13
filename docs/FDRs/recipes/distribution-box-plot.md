@@ -5,11 +5,11 @@
 | Id | FDR-116 |
 | Name | `SVBoxPlot` |
 | Family | Distributional |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Chapter 27 — Box plots](https://neurono-ml.github.io/scienceview/development-explained/ch27-box-plot.html) |
+| Example program | [`examples/box_plot.rs`](../../../examples/box_plot.rs) |
 
 ## Purpose
 
@@ -29,9 +29,14 @@ optionally with the outliers that fall outside the whiskers.
 ## Recipe
 
 ```
-data -> [SVStat::Aggregate (quantiles) + outlier extraction]
-     -> [SVMove::Dodge] -> [SVScale] -> SVMark::Box | SVMark::Dot (outliers)
+data -> [SVStat::Percentile + outlier extraction]
+     -> [SVMove::Dodge] -> [SVScale] -> SVMark::Ribbon | SVMark::Line | SVMark::Dot
 ```
+
+`SVMark::Box` is the FDR's shorthand for the box body. The mark vocabulary is
+closed and has no `Box` variant, so the body is the filled region between the
+quartiles (`SVMark::Ribbon`), the median/whiskers/caps are `SVMark::Line` and
+the outliers and mean are `SVMark::Dot`.
 
 ## Data contract
 
@@ -103,16 +108,25 @@ Consumes `mark.palette`, `text.*`, axis tokens.
 
 ## Acceptance
 
-- [ ] The five-number summary matches the estimator's definition for a known
-      dataset.
-- [ ] The whisker rule is applied as specified and the outliers are exactly
-      the points outside the whiskers.
-- [ ] Dense, sparse and streaming inputs give the same summary for the same
-      data.
-- [ ] Outliers are drawn as individual marks and can be toggled.
+- [x] The five-number summary matches the estimator's definition for a known
+      dataset (`box_plot_tests::default_summary_matches_the_percentile_estimator`).
+- [x] The whisker rule is applied as specified and the outliers are exactly
+      the points outside the whiskers
+      (`tukey_rule_marks_points_outside_the_fences_as_outliers`,
+      `min_max_rule_draws_the_extremes_and_no_outliers`,
+      `percentile_rule_uses_the_requested_percentiles`).
+- [x] Dense, sparse and streaming inputs give the same summary for the same
+      data (`box_plot_parity_tests::dense_sparse_and_streaming_agree`); the
+      sparse support is never densified and a streaming window reports
+      `is_approximate`.
+- [x] Outliers are drawn as individual marks and can be toggled
+      (`show_outliers_can_be_turned_off`,
+      `outlier_marker_changes_the_marker_shape`).
 
 ## Open questions
 
-- Should the box plot support a `notch` shape in every backend? *Open — the
-      notch requires a confidence interval on the median, which is an extra
-      statistical assumption.*
+- Should the box plot support a `notch` shape in every backend? *Resolved for
+      this recipe: `notch(true)` draws three stacked ribbon segments around the
+      median, using the conventional `1.58 · IQR / √n` half-width clamped to
+      half the interquartile range. The shape is backend-agnostic because it is
+      made of the same ribbon primitives as the plain box.*

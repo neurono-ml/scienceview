@@ -12,6 +12,30 @@ released.
 
 ### Added
 
+- The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
+  the five-number summary of every category, drawn as a box with whiskers,
+  median line and — optionally — the observations outside the whiskers. The
+  configuration surface follows FDR-116 — `value`, `category`, `series`,
+  `quartiles`, `whisker`, `whisker_range`, `show_outliers`, `outlier_marker`,
+  `notch`, `show_mean`, `width` and `orient` — and the builder requires an
+  explicit backend selection. The quartiles, median and percentile whiskers are
+  never reimplemented: `SVStat::Percentile` supplies them, while `SVWhiskerRule`
+  (`Tukey`, `MinMax`, `Percentile`) only selects which observations become the
+  whisker ends and which become outliers. `SVMove::Dodge` lays one box per
+  series inside a category. The box body is composed from `SVMark::Ribbon`
+  (three stacked segments when the notch is enabled), the median, whiskers and
+  caps from `SVMark::Line`, and the outliers and mean from `SVMark::Dot`; no
+  mark, stat, move or scale variant is added by the recipe. Both orientations
+  are supported. Dense, sparse and streaming columns resolve once per
+  operation; a sparse input contributes only its stored entries (a
+  million-logical column with five entries summarises five observations) and a
+  streaming window renders without blocking and reports `is_approximate`. The
+  composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred
+  to the transition integration; the geometry is transition-ready. The example
+  `examples/box_plot.rs` writes `docs/figures/box_plot.svg`.
+
 - The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
   a scatter overlaid with a fitted curve and, optionally, a confidence band.
   The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
