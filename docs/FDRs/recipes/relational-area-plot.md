@@ -44,7 +44,12 @@ cumulative sum of the previous ones.
 | `series` | one area each, stacked in this order | nominal | no |
 
 Accepted representations: dense, sparse, streaming (windowed, because
-stacking needs the group total).
+stacking needs the group total). A sparse column is never densified: the
+geometry reads its stored entries and, between them, only the two logical
+positions that border each implicit-zero run. The implicit zeros inside a run
+are collinear, so they add no pixel; a million-slot column with three stored
+values therefore draws seven vertices, not a million. A fully stored sparse
+column still agrees point-for-point with its dense twin.
 
 ### Match key
 
@@ -88,16 +93,46 @@ The stacking move makes this the clearest example of a transition that is
 about *position* rather than about data: when a series is added, every area
 above it moves, and the animation shows that movement.
 
+### In-place update is deferred
+
+The recipe exposes `render()` and `save()` only. It has no
+`update(appended_points)` method: an append-based update needs a mutable
+subscription to the live window plus the transition wiring that interpolates
+between frames, and neither is part of this change. Rendering a streaming
+source always recomputes the stack from the bounded window the source currently
+carries, so a caller that wants the newest window calls `render()` again. The
+in-place update path, including its observable append count, is deferred to the
+streaming/transition change once the recipe's windows are wired to the
+transition kernel.
+
+## Scene contract
+
+Every operation composes one backend-agnostic `SVAreaRendering`: the viewport,
+the background, and the primitives in final draw order — grid and frame, the
+area/ribbon/line marks, then axes and title. A serializer replays exactly those
+lists; it never re-derives a position and never receives another backend's
+bytes.
+
+`render()` dispatches on the configured `SVBackendKind`:
+
+| Kind | Serializer |
+|---|---|
+| `Svg` | `SVSvgDocument` (one closed `<path>` per area) |
+| `Native` | `SVRasterCanvas` (RGBA frame, filled polygon rasterization) |
+| every other kind | build-time `UnsupportedBackendCapability { capability: Export }`, because the recipe has no serializer for it yet |
+
+`save()` exports only the SVG document. The native backend presents a frame, so
+it reports the missing export capability instead of writing raw pixels under a
+document extension. `show()` has no recipe surface: the native backend's own
+present loop owns the window.
+
 ## Backend notes
 
 | Backend | Notes |
 |---|---|
-| `Svg` | one closed `<path>` per area |
-| `Html` | same |
-| `Native` / `Wasm` | filled polygon rasterization with even-odd winding |
-| `Tui` | filled cells with background colours, or a shaded character ramp |
-| `React` / `Vue` / `Angular` | one `<path>` per area |
-| `Tauri` / `Dioxus` | same as native |
+| `Svg` | shipped; one closed `<path>` per area |
+| `Native` | shipped; filled polygon rasterization through `SVRasterCanvas` |
+| `Html` / `Wasm` / `Tui` / `React` / `Vue` / `Angular` / `Tauri` / `Dioxus` | declared by the capability matrix, no recipe serializer yet; the build fails explicitly |
 
 ## Acceptance
 
@@ -108,6 +143,10 @@ above it moves, and the animation shows that movement.
       cumulative baseline is the upper boundary of the lower series.
 - [x] Dense, sparse and streaming inputs give the same areas.
       Evidence: `dense_sparse_and_streaming_representations_agree`.
+- [x] A sparse column is never densified, including a million-slot column with
+      three stored values.
+      Evidence: `a_million_logical_sparse_column_is_not_expanded` and
+      `a_million_logical_sparse_column_allocates_proportionally_to_its_stored_slots`.
 - [ ] An animated stack shows the areas sliding into their stacked positions.
       The render operation recomputes the stack and the areas take their new
       positions on each frame; the transition kernel owns the interpolation

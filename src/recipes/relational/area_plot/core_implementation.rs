@@ -152,26 +152,6 @@ impl<'values> SVAreaPlot<'values> {
         sv_serialize(self.backend_kind, &rendering)
     }
 
-    /// Re-renders the current window after `appended_points` new samples.
-    ///
-    /// # Errors
-    ///
-    /// Returns the composition and serializer errors.
-    pub fn update(&self, appended_points: usize) -> Result<SVRenderOutput, SVError> {
-        let prepared = sv_prepare_area(&self.configuration)?;
-        sv_run_operation(
-            "update",
-            self.backend_kind,
-            prepared.representation,
-            prepared.point_count,
-            || {
-                let _ = appended_points;
-                let rendering = sv_compose_area(&self.configuration, prepared)?;
-                sv_serialize(self.backend_kind, &rendering)
-            },
-        )
-    }
-
     /// Writes the figure to `destination`.
     ///
     /// Only the SVG backend exports a document. The native backend presents a
