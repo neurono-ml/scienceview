@@ -12,6 +12,25 @@ released.
 
 ### Added
 
+- The relational recipe `SVRegressionPlot` (`scienceview::sv_recipes::sv_relational`):
+  a scatter overlaid with a fitted curve and, optionally, a confidence band.
+  The configuration surface follows FDR-106 — `x`, `y`, `series`, `model`,
+  `order`, `confidence`, `show_points`, `show_fit`, `marker`, `line_width` —
+  and the builder requires an explicit backend selection. The fit is never
+  reimplemented: `SVStat::Fit` supplies the coefficients, the grid, the
+  predictions and the confidence bounds for the linear, polynomial,
+  logarithmic, exponential and power models. The recipe pairs the predictor and
+  the response once per operation, groups observations by `series` and fits one
+  model per group, drops non-finite pairs before calling the kernel, derives
+  the two domains from the points and the band, and composes `SVMark::Dot`,
+  `SVMark::Line` and `SVMark::Ribbon` over one axes and one legend. Dense,
+  sparse and streaming input agree within the documented tolerance; a sparse
+  pair is read through its stored support without materialising implicit zeros,
+  and a mismatched sparse support is rejected with the kernel's documented
+  alternative. `SVExtrapolationPolicy` clips the curve to an explicit visible
+  domain instead of inventing predictions beyond the fitted range. The new
+  example `examples/regression_plot.rs` generates
+  `docs/figures/regression_plot.svg`.
 - The band plot recipe `SVBandPlot` in
   `scienceview::sv_recipes::sv_relational::sv_band_plot`: the filled region
   between two boundary lines, composed exactly as

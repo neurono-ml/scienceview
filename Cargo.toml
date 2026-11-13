@@ -46,14 +46,19 @@ categories = ["visualization", "science"]
 name = "scienceview"
 path = "src/lib.rs"
 
-# Charts that call the public `to_svg()` serializer declare the backend
-# feature that compiles it as a required feature.
+# Charts that call the public serializers declare the backend feature that
+# compiles them as a required feature.
 [[example]]
 name = "scatter_plot"
 required-features = ["render-svg"]
 
 [[example]]
 name = "band_plot"
+required-features = ["render-svg"]
+
+[[example]]
+name = "regression_plot"
+path = "examples/regression_plot.rs"
 required-features = ["render-svg"]
 
 # The root package is a facade: it re-exports the core crate and every backend
@@ -117,4 +122,4 @@ workspace = true
 [dev-dependencies]
 scienceview_svg = { path = "crates/scienceview_svg", version = "0.1.0" }
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", default-features = false, features = ["registry", "std"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "registry", "std"] }

@@ -102,7 +102,7 @@ jobs:
           for example in "${examples[@]}"; do
             # Every example builds with the SVG backend feature enabled; an
             # example whose target declares `required-features` (the charts
-            # that call the public `to_svg`) needs it.
+            # that call the public serializers) needs it.
             cargo run --example "$(basename "${example}" .rs)" --features render-svg
           done
       - name: Checked-in figures must match tool output

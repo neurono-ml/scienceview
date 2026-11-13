@@ -1,0 +1,169 @@
+//! Column resolution and pairing at the data boundary.
+//!
+//! The recipe resolves every bound column once per operation (patterns.md P6),
+//! then pairs the predictor with the response. A pair whose predictor, response
+//! or group code is not finite is dropped and counted; the fit kernel therefore
+//! never receives a missing observation.
+//!
+//! Dense and streaming columns pair by logical position. A sparse column is
+//! accepted only when its stored support covers its whole logical length: an
+//! implicit zero is an observation, and dropping it would fit a different
+//! model than the dense twin of the same data. A view with implicit zeros is
+//! rejected with the kernel's documented alternative (dense or streaming
+//! columns), so the recipe never silently changes the question.
+
+use super::configuration::SVRegressionConfiguration;
+use super::sparse_pairing::{sv_pair_sparse, sv_sparse_alternative};
+use scienceview_core::sv_data::{SVColumnSnapshot, SVColumnView, SVDataSource, SVRepresentation};
+use scienceview_core::sv_error::SVError;
+
+/// The paired observations one operation reads from the source.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct SVResolvedInputs {
+    pub(crate) x: Vec<f64>,
+    pub(crate) y: Vec<f64>,
+    pub(crate) series: Option<Vec<f64>>,
+    pub(crate) representation: SVRepresentation,
+    pub(crate) dropped_pairs: usize,
+}
+
+impl SVResolvedInputs {
+    /// Returns the number of paired observations that remain.
+    pub(crate) fn point_count(&self) -> usize {
+        self.x.len()
+    }
+}
+
+/// Resolves and pairs every column the configuration names.
+///
+/// # Errors
+///
+/// Returns [`SVError::ColumnNotFound`] when a column disappeared between build
+/// and the operation, [`SVError::MismatchedStatisticLengths`] when paired
+/// columns disagree in length, and [`SVError::UnsupportedRepresentation`] for a
+/// sparse column whose support leaves implicit zeros, because fitting only the
+/// stored entries would not match the column's dense twin.
+pub(crate) fn sv_resolve_inputs(
+    source: &dyn SVDataSource,
+    configuration: &SVRegressionConfiguration,
+) -> Result<SVResolvedInputs, SVError> {
+    let x_name = configuration
+        .x
+        .as_deref()
+        .ok_or_else(|| SVError::InvalidConfiguration {
+            message: "a regression plot needs a predictor column".to_string(),
+        })?;
+    let y_name = configuration
+        .y
+        .as_deref()
+        .ok_or_else(|| SVError::InvalidConfiguration {
+            message: "a regression plot needs a response column".to_string(),
+        })?;
+
+    let mut x_snapshot = source.column(x_name)?;
+    let mut y_snapshot = source.column(y_name)?;
+    let mut series_snapshot = match configuration.series.as_deref() {
+        Some(name) => Some(source.column(name)?),
+        None => None,
+    };
+
+    let representation = sv_operation_representation(&mut x_snapshot, &mut y_snapshot);
+    let x_view = x_snapshot.column_view();
+    let y_view = y_snapshot.column_view();
+    let series_view = series_snapshot.as_mut().map(SVColumnSnapshot::column_view);
+
+    sv_pair_columns(x_view, y_view, series_view, representation)
+}
+
+/// Returns the representation an operation records.
+fn sv_operation_representation(
+    x: &mut SVColumnSnapshot<'_>,
+    y: &mut SVColumnSnapshot<'_>,
+) -> SVRepresentation {
+    if x.representation() == SVRepresentation::Sparse
+        || y.representation() == SVRepresentation::Sparse
+    {
+        SVRepresentation::Sparse
+    } else if x.representation() == SVRepresentation::Streaming
+        || y.representation() == SVRepresentation::Streaming
+    {
+        SVRepresentation::Streaming
+    } else {
+        SVRepresentation::Dense
+    }
+}
+
+/// Pairs the resolved views, never densifying a sparse column.
+fn sv_pair_columns(
+    x: SVColumnView<'_>,
+    y: SVColumnView<'_>,
+    series: Option<SVColumnView<'_>>,
+    representation: SVRepresentation,
+) -> Result<SVResolvedInputs, SVError> {
+    match (x.sparse_view(), y.sparse_view()) {
+        (Some(x_sparse), Some(y_sparse)) => {
+            sv_pair_sparse(*x_sparse, *y_sparse, series, representation)
+        }
+        (None, None) => sv_pair_contiguous(x, y, series, representation),
+        _ => Err(sv_sparse_alternative()),
+    }
+}
+
+/// Pairs dense or streaming columns by logical position.
+fn sv_pair_contiguous(
+    x: SVColumnView<'_>,
+    y: SVColumnView<'_>,
+    series: Option<SVColumnView<'_>>,
+    representation: SVRepresentation,
+) -> Result<SVResolvedInputs, SVError> {
+    if series.is_some_and(|view| view.representation() == SVRepresentation::Sparse) {
+        return Err(sv_sparse_alternative());
+    }
+
+    let x_values = x.dense_values()?;
+    let y_values = y.dense_values()?;
+    if x_values.len() != y_values.len() {
+        return Err(SVError::MismatchedStatisticLengths {
+            operation: "regression plot",
+            first: x_values.len(),
+            second: y_values.len(),
+        });
+    }
+    if let Some(view) = series {
+        if view.length() != x_values.len() {
+            return Err(SVError::MismatchedStatisticLengths {
+                operation: "regression plot",
+                first: x_values.len(),
+                second: view.length(),
+            });
+        }
+    }
+
+    let mut inputs = SVResolvedInputs {
+        x: Vec::with_capacity(x_values.len()),
+        y: Vec::with_capacity(x_values.len()),
+        series: series.map(|_| Vec::with_capacity(x_values.len())),
+        representation,
+        dropped_pairs: 0,
+    };
+
+    for (position, (x_value, y_value)) in x_values
+        .iter()
+        .copied()
+        .zip(y_values.iter().copied())
+        .enumerate()
+    {
+        let group = series.and_then(|view| view.value_at(position));
+        if x_value.is_finite() && y_value.is_finite() && group.is_none_or(f64::is_finite) {
+            inputs.x.push(x_value);
+            inputs.y.push(y_value);
+            if let (Some(groups), Some(group)) = (inputs.series.as_mut(), group) {
+                groups.push(group);
+            }
+        } else {
+            inputs.dropped_pairs += 1;
+        }
+    }
+
+    Ok(inputs)
+}

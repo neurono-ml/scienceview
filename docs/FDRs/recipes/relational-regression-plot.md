@@ -5,11 +5,11 @@
 | Id | FDR-106 |
 | Name | `SVRegressionPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [`ch21-regression-plot.md`](https://neurono-ml.github.io/scienceview/development-explained/ch21-regression-plot.html) |
+| Example program | [`examples/regression_plot.rs`](../../../examples/regression_plot.rs) |
 
 ## Purpose
 
@@ -51,9 +51,9 @@ unbounded stream is meaningless).
 ### Match key
 
 `Identity` on an identifier column when given; otherwise the points are not
-individually identifiable and the recipe animates the *fit* rather than the
-points. The recipe documents this: without a key, the scatter is redrawn and
-the fit line morphs.
+individually identifiable. The recipe does not carry an identity key or a
+transition surface in this change: both are deferred to the transition
+integration, and the points are redrawn statically.
 
 ## Visual channels
 
@@ -83,12 +83,19 @@ the fit line morphs.
 
 ## Theme
 
-Consumes `mark.palette`, `mark.size`, `mark.area_opacity`, `text.*`, axis
-tokens.
+Deferred. The recipe consumes `mark.palette`, `mark.size`, `mark.area_opacity`,
+`text.*` and axis tokens only through the built-in palette and decoration style;
+this change exposes no `theme(...)` setter, so the record must not claim a theme
+surface it does not wire. Theme wiring is deferred to the theme integration.
 
 ## Temporal
 
-| Property | Behaviour |
+Deferred to the transition integration. This change has no transition surface —
+no state, no transition registration, no per-frame callback — so the fit line,
+band and points are drawn statically. The table below records the intended
+behaviour for the change that adds transitions; it is not implemented here.
+
+| Property | Intended behaviour (deferred) |
 |---|---|
 | fit line | morphs — the coefficients interpolate, and the curve is recomputed per frame |
 | confidence band | morphs with the fit |
@@ -113,13 +120,79 @@ curve would pass through nonsense for a polynomial.
 
 ## Acceptance
 
-- [ ] The fitted curve reproduces the estimator's coefficients for a known
-      dataset.
-- [ ] A polynomial fit of order *n* is fitted, not interpolated through.
-- [ ] The confidence band matches the estimator's interval.
-- [ ] Dense, sparse and streaming inputs give the same fit for the same data.
+- [x] The fitted curve reproduces the estimator's coefficients for a known
+      dataset. `the_linear_fit_recovers_the_generating_line` and
+      `a_polynomial_order_is_fitted_not_interpolated` assert the kernel's
+      coefficients, not a recipe reimplementation.
+- [x] A polynomial fit of order *n* is fitted, not interpolated through.
+      `a_polynomial_order_is_fitted_not_interpolated` recovers the quadratic
+      coefficients and the 128-sample kernel grid.
+- [x] The confidence band matches the estimator's interval.
+      `the_confidence_band_is_the_kernel_interval` asserts that the recipe's
+      grid, predictions, lower and upper samples are the kernel's own values,
+      and that every prediction lies between its two bounds.
+- [x] Dense, sparse and streaming inputs give the same fit for the same data.
+      `dense_sparse_and_streaming_agree_within_the_tolerance` and
+      `a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows`
+      compare coefficients and predictions to `1e-9`, including explicit zero
+      observations. `a_sparse_column_with_implicit_zeros_is_rejected` and
+      `sparse_columns_with_different_supports_are_rejected` prove that a view
+      whose support leaves implicit zeros is refused with the documented
+      alternative instead of silently fitting fewer observations.
 - [ ] An animated model change morphs the curve through interpolated
-      coefficients, not through interpolated samples.
+      coefficients, not through interpolated samples. **Deferred to the
+      transition integration:** this change has no transition surface. The
+      recipe already exposes the kernel coefficients
+      (`SVRegressionSeriesFit::coefficients`) and the recomputed grid, so the
+      transition change can interpolate the coefficients and re-evaluate the
+      curve per frame without touching the recipe.
+
+## Implementation notes
+
+- **Weight is not exposed.** `SVStat::Fit` and `SVFitEstimator` consume no
+  observation-weight column, and patterns.md P5 forbids adding a kernel variant
+  inside a recipe. The FDR's `weight` row is therefore deferred to a core-stat
+  change; the recipe never silently ignores a weight column.
+- **`ci` is not exposed separately.** The band's shape is the kernel's
+  `confidence` parameter; a second interval selector would invent an interval
+  the kernel does not compute.
+- **Sparse pairing.** Implicit zeros are observations. The kernel rejects
+  sparse storage because fitting only the stored entries would describe a
+  different model from the dense twin of the same logical column. The recipe
+  therefore accepts a sparse pair only when every column's stored support
+  covers its whole logical length — the only case where the stored entries are
+  exactly the dense observation set — and rejects any view with implicit zeros
+  with `UnsupportedRepresentation` naming dense or streaming columns as the
+  alternative. No implicit zero is materialised, and no implicit-zero
+  observation is dropped silently.
+- **Extrapolation.** `SVExtrapolationPolicy::FitRange` draws the kernel grid
+  over the observations. `ClipToVisibleDomain` clips that grid to an explicit
+  visible domain; the recipe never evaluates a model outside the fitted range,
+  because that evaluation belongs to the fit kernel.
+- **Missing values.** A pair whose predictor, response or group code is not
+  finite is dropped and counted (`SVRegressionComposition::dropped_pairs`);
+  an input with no finite pair fails with `SVError::EmptyInput`.
+- **Theme is deferred.** The composed scene uses the built-in palette
+  (`sv_default_scale_palette`) and `SVDecorationStyle::built_in`; no
+  `theme(...)` setter exists in this change. The book's theme claim is removed
+  rather than left as an unwired surface.
+- **Transitions are deferred.** The recipe has no state machine, transition
+  registration or per-frame callback; the temporal table records the intended
+  behaviour for the transition integration. The acceptance bullet is unticked
+  accordingly.
+- **Backends and the recipe-level scene contract.** The recipe composes the
+  whole scene — paired observations, one fit per series, the two scales, the
+  ribbon, line and dot marks and their decorations — and hands it to the
+  backend serializer. The backend owns notation only; it never re-derives the
+  fit, the domains or the pairing. `render()` is the public path and always
+  records the configured kind in its span. SVG is the implemented composed
+  render path in this change; a different configured kind that passed the
+  build-time mark matrix is refused with
+  `SVError::UnsupportedBackendCapability` carrying that kind, never by drawing
+  nothing or mislabelling the output. The plot builds for every backend whose
+  mark matrix includes Dot, Line and Ribbon; each later backend change adds
+  only its own scene serialization.
+
 
 ## Open questions
 
