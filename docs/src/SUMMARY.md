@@ -28,4 +28,5 @@
 - [Chapter 21 — Regression: turning a cloud of points into a statement](development-explained/ch21-regression-plot.md)
 - [Chapter 22 — Histograms: counting the shape of a variable](development-explained/ch22-histogram-plot.md)
 - [Chapter 23 — Density plots: the shape of a distribution, smoothed](development-explained/ch23-density-plot.md)
+- [Chapter 24 — Density contours: drawing a joint distribution honestly](development-explained/ch24-density-contour-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)

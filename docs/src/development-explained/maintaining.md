@@ -40,6 +40,7 @@ examples.
 | 21 | `ch21-regression-plot.md` | Regression: the multi-mark recipe, the kernel-owned fit and confidence band, pairing across dense, sparse and streaming input, series grouping, extrapolation policy and the acceptance tests |
 | 22 | `ch22-histogram-plot.md` | The distributional histogram recipe: binning through `SVStat::Bin`, count/probability/density and cumulative heights, bin count/width/edge modes, series with common bins and common normalisation, stacking and dodging through `SVMove`, missing-value policy, representation parity including sparse implicit zeros, the bar/step/polygon elements, SVG and native dispatch, observability and the deferred weight and in-place streaming paths |
 | 23 | `ch23-density-plot.md` | Density plots: `SVStat::KernelDensity` with three kernel shapes, Silverman's bandwidth and `bandwidth_adjustment`, the fixed evaluation grid and `cut`, the `normalise` modes, series grouping, missing-value policy, sparse and streaming parity, SVG/native dispatch and the generated figure |
+| 24 | `ch24-density-contour-plot.md` | Density contours: the binned joint density over the bin kernel, marching squares and loop stitching, nested filled bands, the data boundary, backends and the acceptance tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
