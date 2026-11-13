@@ -70,6 +70,7 @@ examples.
 | 51 | `ch51-scripting-engines.md` | Scripts: behaviour edited while the program runs |
 | 52 | `ch52-python-bindings.md` | Python: binding a surface that is already proven |
 | 53 | `ch53-weighted-statistics.md` | Weights: when one observation counts for several |
+| 54 | `ch54-clustered-heatmap-plot.md` | Clustered heatmaps: rendering a supplied order and merge tree, the validation contract, the static-only streaming exception and the two dendrograms |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7

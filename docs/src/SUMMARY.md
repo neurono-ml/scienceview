@@ -58,4 +58,5 @@
 - [Chapter 51 — Scripts: behaviour edited while the program runs](development-explained/ch51-scripting-engines.md)
 - [Chapter 52 — Python: binding a surface that is already proven](development-explained/ch52-python-bindings.md)
 - [Chapter 53 — Weights: when one observation counts for several](development-explained/ch53-weighted-statistics.md)
+- [Chapter 54 — Clustered heatmaps: when the clustering is the input](development-explained/ch54-clustered-heatmap-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
