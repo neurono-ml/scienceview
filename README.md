@@ -144,7 +144,7 @@ standard-deviation interval per group, and the recipe fills the region between
 the two boundaries, one band per series:
 
 ```rust
-use scienceview::recipes::relational::SVBandPlotBuilder;
+use scienceview::sv_recipes::sv_relational::sv_band_plot::SVBandPlotBuilder;
 
 let plot = SVBandPlotBuilder::new()
     .data_source(&table)

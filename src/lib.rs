@@ -48,7 +48,8 @@ pub use scienceview_core::{
     sv_transition, sv_window,
 };
 
-pub mod recipes;
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;

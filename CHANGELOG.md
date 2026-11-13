@@ -21,7 +21,7 @@ released.
   `SVAggregateErrorKind` (standard deviation by default, or a centred
   percentile interval selected with `confidence`). One optional `series`
   column draws one band per series. Fill opacity, an optional dashed or solid
-  border, an optional centre line and an explicit `SVMissingValuePolicy`
+  border, an optional centre line and an explicit `SVBandMissingValuePolicy`
   (omit and split the band at a gap, or fail at build time) are part of the
   surface. Dense, sparse and streaming input resolve once per operation,
   sparse storage is never densified by the mark kernel and a streaming window

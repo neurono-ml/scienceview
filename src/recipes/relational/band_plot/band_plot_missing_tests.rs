@@ -4,7 +4,7 @@ use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_core::sv_error::SVError;
 
-use super::{SVBandPlotBuilder, SVMissingValuePolicy};
+use super::{SVBandMissingValuePolicy, SVBandPlotBuilder};
 
 #[test]
 fn missing_value_policy_omit_splits_the_band() {
@@ -46,7 +46,7 @@ fn missing_value_policy_error_rejects_the_render() {
         .x("x")
         .lower("lower")
         .upper("upper")
-        .missing_value_policy(SVMissingValuePolicy::Error)
+        .missing_value_policy(SVBandMissingValuePolicy::Error)
         .backend(SVBackendKind::Svg)
         .build()
         .expect("the configuration is complete")

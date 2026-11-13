@@ -6,7 +6,7 @@ use scienceview_core::sv_layout::SVViewport;
 use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 use scienceview_core::sv_stat::SVAggregateErrorKind;
 
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVBandMissingValuePolicy;
 
 /// One validated band-plot configuration.
 ///
@@ -27,7 +27,7 @@ pub(crate) struct SVBandPlotConfiguration<'values> {
     pub(crate) border: bool,
     pub(crate) dashed_borders: bool,
     pub(crate) centre_line: bool,
-    pub(crate) missing_value_policy: SVMissingValuePolicy,
+    pub(crate) missing_value_policy: SVBandMissingValuePolicy,
     pub(crate) title: Option<&'values str>,
     pub(crate) x_title: Option<&'values str>,
     pub(crate) y_title: Option<&'values str>,

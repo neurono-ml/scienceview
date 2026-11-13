@@ -5,7 +5,7 @@ use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_mark::{SVMarkGeometry, SVMarkPrimitive, SVMarkShape};
 
 use super::configuration::sv_invalid;
-use super::missing_value_policy::SVMissingValuePolicy;
+use super::missing_value_policy::SVBandMissingValuePolicy;
 
 /// A contiguous run of finite samples of one band.
 pub(crate) struct SVRun {
@@ -17,7 +17,7 @@ pub(crate) fn sv_finite_runs(
     x: SVColumnView<'_>,
     lower: SVColumnView<'_>,
     upper: SVColumnView<'_>,
-    policy: SVMissingValuePolicy,
+    policy: SVBandMissingValuePolicy,
 ) -> Result<Vec<SVRun>, SVError> {
     let length = x.length();
     let mut runs = Vec::new();

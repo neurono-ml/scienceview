@@ -12,7 +12,7 @@ use scienceview_core::sv_stat::SVAggregateErrorKind;
 
 use super::super::configuration::{SVBandPlotConfiguration, sv_invalid};
 use super::super::core_implementation::SVBandPlot;
-use super::super::missing_value_policy::SVMissingValuePolicy;
+use super::super::missing_value_policy::SVBandMissingValuePolicy;
 use super::validation::sv_validate_mode;
 
 /// Builds an [`SVBandPlot`].
@@ -35,7 +35,7 @@ pub struct SVBandPlotBuilder<'values, BackendState> {
     pub(super) border: bool,
     pub(super) dashed_borders: bool,
     pub(super) centre_line: bool,
-    pub(super) missing_value_policy: SVMissingValuePolicy,
+    pub(super) missing_value_policy: SVBandMissingValuePolicy,
     pub(super) title: Option<&'values str>,
     pub(super) x_title: Option<&'values str>,
     pub(super) y_title: Option<&'values str>,
@@ -64,7 +64,7 @@ impl SVBandPlotBuilder<'_, SVWithoutBackend> {
             border: false,
             dashed_borders: true,
             centre_line: false,
-            missing_value_policy: SVMissingValuePolicy::default(),
+            missing_value_policy: SVBandMissingValuePolicy::default(),
             title: None,
             x_title: None,
             y_title: None,

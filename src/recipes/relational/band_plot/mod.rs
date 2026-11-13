@@ -6,7 +6,7 @@
 //! mark, stat, move or scale variant (patterns P5).
 //!
 //! ```
-//! use scienceview::recipes::relational::SVBandPlotBuilder;
+//! use scienceview::sv_recipes::sv_relational::sv_band_plot::SVBandPlotBuilder;
 //! use scienceview_core::sv_backend::SVBackendKind;
 //! use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 //!
@@ -47,7 +47,7 @@ mod scales;
 
 pub use builder::SVBandPlotBuilder;
 pub use core_implementation::SVBandPlot;
-pub use missing_value_policy::SVMissingValuePolicy;
+pub use missing_value_policy::SVBandMissingValuePolicy;
 pub use output::SVBandRenderOutput;
 
 #[cfg(test)]

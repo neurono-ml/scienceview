@@ -6,7 +6,7 @@
 //! composes the bands, and the SVG document surface serializes the very
 //! geometry the recipe produced.
 
-use scienceview::recipes::relational::SVBandPlotBuilder;
+use scienceview::sv_recipes::sv_relational::sv_band_plot::SVBandPlotBuilder;
 use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_data::{SVColumnRole, SVDataTable};
 use scienceview_core::sv_layout::SVViewport;

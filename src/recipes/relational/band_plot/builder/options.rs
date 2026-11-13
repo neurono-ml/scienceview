@@ -6,7 +6,7 @@ use scienceview_core::sv_layout::SVViewport;
 use scienceview_core::sv_scale::{SVScaleKind, SVTemporalUnit};
 use scienceview_core::sv_stat::SVAggregateErrorKind;
 
-use super::super::missing_value_policy::SVMissingValuePolicy;
+use super::super::missing_value_policy::SVBandMissingValuePolicy;
 use super::builder_definition::SVBandPlotBuilder;
 
 impl<'values, BackendState> SVBandPlotBuilder<'values, BackendState> {
@@ -110,7 +110,7 @@ impl<'values, BackendState> SVBandPlotBuilder<'values, BackendState> {
 
     /// Chooses what happens to a non-finite sample.
     #[must_use]
-    pub fn missing_value_policy(mut self, missing_value_policy: SVMissingValuePolicy) -> Self {
+    pub fn missing_value_policy(mut self, missing_value_policy: SVBandMissingValuePolicy) -> Self {
         self.missing_value_policy = missing_value_policy;
         self
     }
