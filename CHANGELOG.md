@@ -29,6 +29,30 @@ released.
   fails with a typed error. Transition and animation wiring is deferred to the
   transition integration; the geometry is transition-ready. The example
   `examples/strip_plot.rs` writes `docs/figures/strip_plot.svg`.
+- The distributional recipe `SVBoxenPlot` (`scienceview::sv_recipes::sv_distribution`):
+  letter-value plots, a nest of nested quantile boxes that summarises a large
+  distribution with far fewer observations than a violin needs. The
+  configuration surface follows FDR-118 — `value`, `category`, `series`,
+  `depth`, `tail_rule`, `show_median`, `show_outliers`, `outlier_marker`,
+  `width` and `orient` — and the builder requires an explicit backend
+  selection. Every letter value comes from `SVStat::Percentile`; the recipe
+  never reimplements the estimator. `SVBoxenTailRule` selects the
+  tail-stopping rule (`Tukey`, Henderson's `floor(log2(n)) - 3`, is the
+  default; `Proportion` and `Full` are also available) and `depth` overrides
+  the derived nesting depth, which produces `2 * depth - 1` boxes. The central
+  box spans the interquartile range and every outer box narrows by half, so the
+  nest reads as a sequence of letter values. The boxes are `SVMark::Ribbon`
+  primitives, the median is `SVMark::Line`, the optional outliers are
+  `SVMark::Dot`, and `SVMove::Dodge` lays one nest per series inside a
+  category. Both orientations are supported. Dense, sparse and streaming
+  columns resolve once per operation; a sparse input contributes only its
+  stored entries and a streaming window renders without blocking and reports
+  `is_approximate`. The composed geometry serializes through `to_svg()` and,
+  with `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error instead of being ignored. Transition and animation
+  wiring is deferred to the transition integration; the geometry is
+  transition-ready. The example `examples/boxen_plot.rs` writes
+  `docs/figures/boxen_plot.svg`.
 
 - The distributional recipe `SVBoxPlot` (`scienceview::sv_recipes::sv_distribution`):
   the five-number summary of every category, drawn as a box with whiskers,
