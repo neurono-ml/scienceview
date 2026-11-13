@@ -48,6 +48,7 @@ examples.
 | 30 | `ch30-strip-plot.md` | Strip plots: the one-dimensional dot per observation, the keyed `SVMove::Jitter` displacement, orientation, series colours, marker size and alpha, the missing-value policy, sparse stored-entry semantics, SVG/native dispatch and the parity, concurrency and observability tests |
 | 31 | `ch31-swarm-plot.md` | Swarm plots: the collision-free `SVMove::Swarm` layout, the data-space marker extent that makes the kernel's test a pixel test, both orientations, series colours, the missing-value policy, sparse stored-entry semantics, parity, concurrency, the span and the SVG/native dispatch |
 | 32 | `ch32-bar-plot.md` | Bar plots: one aggregate per category through `SVStat::Aggregate`, the estimator and confidence surface, weights, dodge and stack through `SVMove`, ordering, missing-value policy, dense/sparse/streaming parity, SVG/native dispatch and the two explicitly deferred lines |
+| 33 | `ch33-count-plot.md` | Count plots: counting through `SVStat::Count`, the shared category axis across series, ordering rules, normalisation, stacking and dodging through `SVMove`, category labels, missing-value policy, sparse implicit zeros, streaming updates and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7

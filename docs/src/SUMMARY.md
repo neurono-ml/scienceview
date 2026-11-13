@@ -37,4 +37,5 @@
 - [Chapter 30 — Strip plots: every observation, never a summary](development-explained/ch30-strip-plot.md)
 - [Chapter 31 — Swarm plots: letting every point find its own space](development-explained/ch31-swarm-plot.md)
 - [Chapter 32 — Bar plots: saying one number about each category](development-explained/ch32-bar-plot.md)
+- [Chapter 33 — Count plots: how many observations fall into each category](development-explained/ch33-count-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
