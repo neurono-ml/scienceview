@@ -9,9 +9,12 @@ it stayed put until the next event and then changed all at once.
 `SVStepPlot` draws that truth. It is the relational recipe introduced by the
 `step-plot` change, specified by
 [`FDR-104`](../../FDRs/recipes/relational-step-plot.md) and implemented in
-`src/recipes/relational/step_plot/`. This chapter starts from zero — what a
-step is, why it needs its own geometry, what "dense, sparse and streaming"
-mean here — and then walks through the real code and its companion tests.
+`src/recipes/relational/step_plot/`. The public path is
+`scienceview::sv_recipes::sv_relational::sv_step_plot`: the folders keep their
+names and the module aliases carry the mandatory `sv_` prefix. This chapter
+starts from zero — what a step is, why it needs its own geometry, what "dense,
+sparse and streaming" mean here — and then walks through the real code and its
+companion tests.
 
 ![The step plot pipeline from source columns to SVG](assets/step-plot-pipeline.svg)
 
@@ -129,18 +132,32 @@ is no automatic backend. `execution_mode(...)` defaults to `Automatic`, the
 horizontal scale defaults to `Continuous` and accepts `Temporal`, and the built
 figure carries the configured kind so every operation can record it.
 
-`build()` is where every invalid configuration fails — before any pixel is
+`build()` is where every invalid **configuration** fails — before any pixel is
 drawn. It checks that the columns exist, that a numeric channel is not a
 `Label` column, that the columns share a length, that a configured stat is an
-aggregate, and that the line options are valid.
+aggregate, and that the line options are valid. It does not reject the
+configured backend: the composition is backend-neutral, so the scene can be
+hosted by any kind. Whether a serializer for that kind exists is decided per
+operation, not at build time.
 
 ## Composition, spans and the SVG document
 
 `compose()` reads the current window and returns an `SVStepPlotComposition`: the
 scales, the expanded vertices per series, the decoration primitives and the
-resolved viewport. It is backend-neutral, so a backend only serializes. `render`,
+resolved viewport. It is backend-neutral, so a backend only serializes. That is
+the recipe-level scene contract: every operation composes the same scene, then
+dispatches the serializer from the configured `SVBackendKind`. `render`,
 `update` and `save` each run inside one `scienceview.operation` span carrying the
-configured `backend.kind`, the `representation` and the `points` count.
+configured `backend.kind`, the `representation` and the number of observations
+the scene actually draws — not the logical column length. A sparse column with
+100k logical positions and two surviving samples reports `points = 2`.
+
+`update(appended_points)` documents how many samples the source appended since
+the previous render. This change owns no incremental buffer: the operation
+re-resolves the source and recomposes the current window, so an appended sample
+changes the output while the prior samples are preserved. An incremental append
+path is deferred to the transition integration, and the FDR keeps that
+acceptance item unticked until it exists.
 
 The SVG path pushes the composition's title and grid, then each mark geometry,
 then the axes and legend, into `SVSvgDocument` from `scienceview_svg`. That is
@@ -161,16 +178,19 @@ The companion tests are the executable specification:
 - `data_contract_tests::ordering_tests` covers ordering, the duplicate policy,
   aggregation, missing values and multi-series colouring.
 - `data_contract_tests::errors_tests` covers a missing column, a mistyped label
-  column, a non-aggregate stat, the missing backend and a backend this change
-  cannot serialize.
+  column, a non-aggregate stat, the missing backend and a configured kind
+  without a serializer, which fails at operation time with
+  `BackendUnavailable` instead of degrading to SVG.
 - `parity_tests::dense_sparse_and_streaming_agree` builds the same data in all
   three representations and compares the resulting series; the large-data test
   does the same for ten thousand samples.
 - `concurrency_tests::concurrent_compositions_agree` composes one figure from
   eight threads and compares every result.
-- `observability_tests` captures the real span fields through a subscriber.
+- `observability_tests` captures the real span fields through a subscriber,
+  including the drawn point count of a large sparse column.
 - `svg_tests` asserts a self-contained `<svg>` with a `<path>`, byte-identical
-  repeated renders, the update path and `save`.
+  repeated renders, a live append that `update` re-renders while preserving the
+  prior samples, and `save`.
 
 ## Roads not taken
 
@@ -185,8 +205,10 @@ The companion tests are the executable specification:
   the example uses the SVG document surface directly.
 
 This change ships the SVG path. The recipe-aware native, terminal and web
-backends arrive with their own changes; until then `build()` rejects a backend
-it cannot serialize instead of degrading silently.
+backends arrive with their own changes; until then an operation whose
+configured kind has no serializer returns the typed
+`SVError::BackendUnavailable` naming that kind, instead of degrading silently
+to SVG.
 
 ## What to remember
 

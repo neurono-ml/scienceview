@@ -143,7 +143,7 @@ value holds between samples, the riser sits at the next `x` (`After`), and one
 line is drawn per series:
 
 ```rust
-use scienceview::recipes::relational::step_plot::SVStepPlot;
+use scienceview::sv_recipes::sv_relational::sv_step_plot::SVStepPlot;
 
 let plot = SVStepPlot::builder()
     .data_source(&table)
