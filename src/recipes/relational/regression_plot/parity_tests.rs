@@ -140,7 +140,52 @@ fn dense_sparse_and_streaming_agree_within_the_tolerance() {
 }
 
 #[test]
-fn a_sparse_view_is_paired_through_its_stored_support_without_zeros() {
+fn a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows() {
+    // Positions 2 and 4 are logical zeros. A sparse view that stores them
+    // explicitly covers the whole logical length, so pairing its stored entries
+    // is the same observation set as the dense column.
+    let x = [1.0, 2.0, 0.0, 4.0, 0.0, 6.0];
+    let y = [2.0, 4.0, 1.0, 8.5, -0.5, 12.0];
+    let dense = SVPairedSource {
+        x: &x,
+        y: &y,
+        streaming: false,
+    };
+    let indices = [0, 1, 2, 3, 4, 5];
+    let sparse = SVSparsePairSource {
+        x_indices: &indices,
+        x_values: &x,
+        y_indices: &indices,
+        y_values: &y,
+        length: 6,
+    };
+
+    let dense_fit = chart(&dense).compose().expect("the dense fit runs");
+    let sparse_fit = chart(&sparse).compose().expect("the sparse fit runs");
+
+    assert_eq!(dense_fit.point_count(), 6);
+    assert_eq!(sparse_fit.point_count(), 6);
+    for (actual, expected) in sparse_fit.series()[0]
+        .coefficients()
+        .iter()
+        .zip(dense_fit.series()[0].coefficients())
+    {
+        assert!((actual - expected).abs() < 1.0e-9);
+    }
+    for (actual, expected) in sparse_fit.series()[0]
+        .predicted()
+        .iter()
+        .zip(dense_fit.series()[0].predicted())
+    {
+        assert!((actual - expected).abs() < 1.0e-9);
+    }
+}
+
+#[test]
+fn a_sparse_column_with_implicit_zeros_is_rejected() {
+    // The dense twin contains the same logical zeros; fitting only the four
+    // stored entries would silently produce a different line. The recipe
+    // refuses the view instead of changing the question.
     let x_indices = [0, 1, 3, 5];
     let x_values = [0.0, 1.0, 3.0, 5.0];
     let y_values = [1.0, 3.0, 7.0, 11.0];
@@ -152,12 +197,29 @@ fn a_sparse_view_is_paired_through_its_stored_support_without_zeros() {
         length: 6,
     };
 
-    let composition = chart(&source).compose().expect("the sparse fit runs");
+    assert_eq!(
+        chart(&source).compose(),
+        Err(SVError::UnsupportedRepresentation {
+            operation: "regression plot",
+            representation: SVRepresentation::Sparse,
+            alternative: "bind dense or streaming columns, or pre-aggregate the sparse view before fitting",
+        })
+    );
 
-    // Four stored observations, not six logical positions: the implicit zeros
-    // at positions 2 and 4 are never materialised.
-    assert_eq!(composition.point_count(), 4);
-    assert!((composition.series()[0].coefficients()[1] - 2.0).abs() < 1.0e-9);
+    let dense_x = [0.0, 1.0, 0.0, 3.0, 0.0, 5.0];
+    let dense_y = [1.0, 3.0, 0.0, 7.0, 0.0, 11.0];
+    let dense = SVPairedSource {
+        x: &dense_x,
+        y: &dense_y,
+        streaming: false,
+    };
+    let dense_fit = chart(&dense).compose().expect("the dense twin fits");
+    assert_eq!(dense_fit.point_count(), 6);
+    assert_ne!(
+        dense_fit.series()[0].coefficients()[1],
+        // The four-stored-entry slope the recipe would have produced silently.
+        2.0
+    );
 }
 
 #[test]

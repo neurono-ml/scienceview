@@ -5,12 +5,12 @@
 //! or group code is not finite is dropped and counted; the fit kernel therefore
 //! never receives a missing observation.
 //!
-//! Dense and streaming columns pair by logical position. Two sparse columns
-//! pair only when they share the identical stored support: the fit kernel
-//! rejects sparse storage because two independently sparse columns describe
-//! implicit zeros at different positions. Pairing the identical stored support
-//! keeps that guarantee — no implicit zero is materialised, and a mismatched
-//! support is rejected with the kernel's documented alternative.
+//! Dense and streaming columns pair by logical position. A sparse column is
+//! accepted only when its stored support covers its whole logical length: an
+//! implicit zero is an observation, and dropping it would fit a different
+//! model than the dense twin of the same data. A view with implicit zeros is
+//! rejected with the kernel's documented alternative (dense or streaming
+//! columns), so the recipe never silently changes the question.
 
 use super::configuration::SVRegressionConfiguration;
 use super::sparse_pairing::{sv_pair_sparse, sv_sparse_alternative};
@@ -41,7 +41,8 @@ impl SVResolvedInputs {
 /// Returns [`SVError::ColumnNotFound`] when a column disappeared between build
 /// and the operation, [`SVError::MismatchedStatisticLengths`] when paired
 /// columns disagree in length, and [`SVError::UnsupportedRepresentation`] for a
-/// sparse column that cannot be paired without materialising implicit zeros.
+/// sparse column whose support leaves implicit zeros, because fitting only the
+/// stored entries would not match the column's dense twin.
 pub(crate) fn sv_resolve_inputs(
     source: &dyn SVDataSource,
     configuration: &SVRegressionConfiguration,

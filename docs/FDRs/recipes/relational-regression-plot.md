@@ -124,12 +124,13 @@ curve would pass through nonsense for a polynomial.
       `the_confidence_band_brackets_the_curve` checks the kernel's lower and
       upper samples around every prediction.
 - [x] Dense, sparse and streaming inputs give the same fit for the same data.
-      `dense_sparse_and_streaming_agree_within_the_tolerance` compares
-      coefficients and predictions to `1e-9`;
-      `a_sparse_view_is_paired_through_its_stored_support_without_zeros`
-      proves implicit zeros are never materialised, and
-      `sparse_columns_with_different_supports_are_rejected` names the
-      documented alternative.
+      `dense_sparse_and_streaming_agree_within_the_tolerance` and
+      `a_fully_stored_sparse_pair_agrees_with_its_dense_twin_including_zero_rows`
+      compare coefficients and predictions to `1e-9`, including explicit zero
+      observations. `a_sparse_column_with_implicit_zeros_is_rejected` and
+      `sparse_columns_with_different_supports_are_rejected` prove that a view
+      whose support leaves implicit zeros is refused with the documented
+      alternative instead of silently fitting fewer observations.
 - [x] An animated model change morphs the curve through interpolated
       coefficients, not through interpolated samples. The recipe exposes the
       kernel coefficients (`SVRegressionSeriesFit::coefficients`) and the
@@ -147,11 +148,15 @@ curve would pass through nonsense for a polynomial.
 - **`ci` is not exposed separately.** The band's shape is the kernel's
   `confidence` parameter; a second interval selector would invent an interval
   the kernel does not compute.
-- **Sparse pairing.** The kernel rejects sparse storage because two
-  independently sparse columns describe implicit zeros at different positions.
-  The recipe accepts a sparse pair only when the stored support is identical,
-  pairs the stored entries, and rejects a mismatch with the same
-  `UnsupportedRepresentation` alternative. No implicit zero is materialised.
+- **Sparse pairing.** Implicit zeros are observations. The kernel rejects
+  sparse storage because fitting only the stored entries would describe a
+  different model from the dense twin of the same logical column. The recipe
+  therefore accepts a sparse pair only when every column's stored support
+  covers its whole logical length — the only case where the stored entries are
+  exactly the dense observation set — and rejects any view with implicit zeros
+  with `UnsupportedRepresentation` naming dense or streaming columns as the
+  alternative. No implicit zero is materialised, and no implicit-zero
+  observation is dropped silently.
 - **Extrapolation.** `SVExtrapolationPolicy::FitRange` draws the kernel grid
   over the observations. `ClipToVisibleDomain` clips that grid to an explicit
   visible domain; the recipe never evaluates a model outside the fitted range,

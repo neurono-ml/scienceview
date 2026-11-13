@@ -1,10 +1,18 @@
-//! Pairing sparse columns through their shared stored support.
+//! Pairing sparse columns whose stored support covers the logical length.
+//!
+//! A sparse view carries implicit zeros at every position it does not store.
+//! The fit kernel rejects sparse storage because those zeros are observations
+//! too: dropping them changes the fitted model rather than merely saving work.
+//! The recipe therefore accepts a sparse column only when its stored support
+//! covers the whole logical length — every position is explicit, so pairing the
+//! stored entries is exactly the dense observation set — and rejects any view
+//! with implicit zeros, naming the dense and streaming alternatives.
 
 use super::pairing::SVResolvedInputs;
 use scienceview_core::sv_data::{SVColumnView, SVRepresentation, SVSparseView};
 use scienceview_core::sv_error::SVError;
 
-/// Pairs two sparse columns that share their stored support exactly.
+/// Pairs two sparse columns whose support covers the logical length.
 pub(crate) fn sv_pair_sparse(
     x: SVSparseView<'_>,
     y: SVSparseView<'_>,
@@ -14,8 +22,24 @@ pub(crate) fn sv_pair_sparse(
     if series.is_some_and(|view| view.representation() == SVRepresentation::Sparse) {
         return Err(sv_sparse_alternative());
     }
-    if x.indices() != y.indices() {
+    if x.length() != y.length() {
+        return Err(SVError::MismatchedStatisticLengths {
+            operation: "regression plot",
+            first: x.length(),
+            second: y.length(),
+        });
+    }
+    if !sv_support_covers(&x) || !sv_support_covers(&y) {
         return Err(sv_sparse_alternative());
+    }
+    if let Some(view) = series {
+        if view.length() != x.length() {
+            return Err(SVError::MismatchedStatisticLengths {
+                operation: "regression plot",
+                first: x.length(),
+                second: view.length(),
+            });
+        }
     }
 
     let mut inputs = SVResolvedInputs {
@@ -41,6 +65,11 @@ pub(crate) fn sv_pair_sparse(
     }
 
     Ok(inputs)
+}
+
+/// Returns whether every logical position is stored explicitly.
+fn sv_support_covers(view: &SVSparseView<'_>) -> bool {
+    view.number_of_stored_values() == view.length()
 }
 
 /// Returns the kernel's documented sparse alternative.
