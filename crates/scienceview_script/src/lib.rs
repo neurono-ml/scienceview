@@ -22,7 +22,7 @@
 //! engine: either would add a heavy dependency to the default build. They are
 //! reference front-ends over a minimal, deterministic interpreter that accepts
 //! a documented subset of statement shapes — `dispatch`, `increment`, `log` and
-//! the four capability calls — in the surface syntax of each language. The
+//! the five capability calls — in the surface syntax of each language. The
 //! subset is enough to exercise the whole contract (parsing, deterministic
 //! dispatch, sandboxing, reload, bounded execution) with no external runtime.
 //! To run full-language scripts, implement [`SVScriptEngine`] over a real
