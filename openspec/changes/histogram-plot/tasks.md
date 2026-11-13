@@ -2,14 +2,14 @@
 
 ## 1. Module, builder and composition
 
-- [ ] Write the failing tests first: the chart builds with its documented
+- [x] Write the failing tests first: the chart builds with its documented
   defaults, and each option changes the output.
-- [ ] Create `src/recipes/distribution/histogram_plot/{mod.rs, builder.rs,
+- [x] Create `src/recipes/distribution/histogram_plot/{mod.rs, builder.rs,
   core_implementation.rs}` following patterns.md P3; `mod.rs` is a pure
   dispatcher.
-- [ ] Implement the builder state machine, the required `backend(...)` and the
+- [x] Implement the builder state machine, the required `backend(...)` and the
   default `execution_mode(...)`, with `SVHistogramPlot` carrying its configured kind.
-- [ ] Wire the composition `data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge] -> [SVScale x, y, colour] -> SVMark::Bar` through the core kernels.
+- [x] Wire the composition `data -> [SVStat::Bin] -> (edges, counts) -> [SVMove::Stack | Dodge] -> [SVScale x, y, colour] -> SVMark::Bar` through the core kernels.
 
 ## 2. Data contract and parity
 
