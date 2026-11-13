@@ -8,15 +8,19 @@
 
 ### Requirement: The chart is the specified composition
 
-`SVParallelCategoriesPlot` SHALL be produced by exactly the composition `data -> [no stat] -> values -> [SVScale per axis (nominal bands)] -> SVMark::Ribbon` and SHALL expose the configuration surface recorded in its FDR.
+`SVParallelCategoriesPlot` SHALL be produced by exactly the composition `data -> [SVStat::Count] -> category bands per axis -> [SVScale per axis (nominal bands)] -> SVMark::Ribbon` and SHALL expose the configuration surface recorded in its FDR. Identical combinations of categories on two adjacent axes SHALL be aggregated through `SVStat::Count`, and the ribbon slice thickness SHALL encode the aggregated count.
 
 #### Scenario: Default composition
 - **WHEN** the chart is built with its default configuration
-- **THEN** it draws the documented default form
+- **THEN** it draws one band axis per variable and one aggregated ribbon per observed adjacent-axis category pair
 
 #### Scenario: Explicit option
 - **WHEN** an option is set explicitly
 - **THEN** the rendered output reflects it
+
+#### Scenario: Aggregated ribbons
+- **WHEN** several observations share the same categories on two adjacent axes
+- **THEN** they produce one ribbon whose slice thickness is proportional to their count
 
 ### Requirement: The chart consumes its documented data contract
 

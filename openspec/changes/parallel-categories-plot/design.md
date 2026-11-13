@@ -27,7 +27,18 @@ P6).
 
 ribbon geometry: interpolates. ribbon colour: interpolates. a category appearing on an axis: the bands re-space and the ribbons re-shape.
 
-### D4 — Registration
+### D4 — Aggregation
+
+Every axis is counted once through `SVStat::Count`, which also applies the
+category order. A ribbon is not drawn per observation: the recipe derives one
+group code per observation from the two adjacent-axis category ranks (and the
+optional colour rank), counts that derived column through the same kernel, and
+draws one ribbon per observed combination. The slice thickness at each band is
+the ribbon's count divided by the total count on that side of the band, so the
+slices tile the band and encode the count. The recipe never counts observations
+itself.
+
+### D5 — Registration
 
 The chart is registered by appending one
 line to `src/recipes/multivariate/mod.rs`. No central registry exists, because a
