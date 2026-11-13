@@ -133,6 +133,26 @@ jobs:
           cargo build --workspace --all-targets
           cargo test --workspace --all-targets
 
+  wasm:
+    name: WebAssembly target (wasm32 build + clippy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install Rust 1.85 toolchain (clippy + wasm32 target)
+        uses: dtolnay/rust-toolchain@1.85
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: cargo clippy (wasm32)
+        run: cargo clippy -p scienceview_wasm --features wasm --all-targets --target wasm32-unknown-unknown -- -D warnings
+      - name: cargo build (wasm32)
+        run: cargo build -p scienceview_wasm --features wasm --target wasm32-unknown-unknown
+
   features:
     name: Optional features (clippy + tests, all features)
     runs-on: ubuntu-latest
