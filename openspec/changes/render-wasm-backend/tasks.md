@@ -7,8 +7,8 @@
 
 ## Clock and update
 
-- [ ] Write the failing test for paused playback and in-place update.
-- [ ] Implement the frame loop.
+- [x] Write the failing test for paused playback and in-place update.
+- [x] Implement the frame loop.
 
 ## Acceptance
 
