@@ -48,6 +48,14 @@ pub use scienceview_core::{
     sv_transition, sv_window,
 };
 
+// Chart recipes: the public chart surface composed from the closed kernels.
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
+
+pub use sv_recipes::sv_relational::{
+    SVStepDuplicatePolicy, SVStepPlot, SVStepPlotBuilder, SVStepPosition,
+};
+
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
 
