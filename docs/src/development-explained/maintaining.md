@@ -57,6 +57,7 @@ examples.
 | 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
 | 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
 | 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
+| 47 | `ch47-wasm-backend.md` | The WebAssembly canvas backend: reusing the native CPU rasterizer through `scienceview_native`, the `SVCanvasSurface` seam and its headless/browser implementations, the thread-local handle that keeps the backend `Send + Sync` without `unsafe`, the model-owned clock driven by `requestAnimationFrame`, the minimal binding surface, the capability row and the parity, refusal and observability tests |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
@@ -65,7 +66,7 @@ covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend, chapter 13 covers the transition kernel, chapter 14
 covers the animation timeline, chapter 15 covers the native backend and
-chapter 21 covers the regression recipe, each written by its own change. Later chapters are planned, one per capability of the
+chapter 21 covers the regression recipe and chapter 47 covers the WebAssembly backend, each written by its own change. Later chapters are planned, one per capability of the
 chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
 covers the animation timeline, chapter 15 covers the native backend and chapter
 19 covers the first relational recipe, each written by its own change. Later
