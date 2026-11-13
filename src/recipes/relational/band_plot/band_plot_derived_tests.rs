@@ -5,7 +5,6 @@ use scienceview_core::sv_data::{
     SVColumnRole, SVColumnView, SVDataTable, SVSparseView, SVStreamingView,
 };
 use scienceview_core::sv_mark::{SVMarkShape, SVPathCommand};
-use scienceview_core::sv_stat::SVAggregateErrorKind;
 
 use super::SVBandPlotBuilder;
 use super::band_plot_test_support::{SVTestSource, assert_close};
@@ -61,11 +60,25 @@ fn confidence_selects_a_percentile_interval() {
         .expect("the configuration is complete")
         .render()
         .expect("the band draws");
+
     assert_eq!(output.number_of_points(), 2);
-    assert!(matches!(
-        SVAggregateErrorKind::Percentile(0.9),
-        SVAggregateErrorKind::Percentile(_)
-    ));
+    let plot = output.plot_area();
+    let y_range = plot.bottom() - plot.y;
+    // The centred 90% interval of [1, 2, 6] is (1.1, 5.6); of [2, 4, 9] it
+    // is (2.2, 8.5). The joint y domain is therefore 1.1 .. 8.5.
+    let scaled_y = |value: f64| plot.bottom() - ((value - 1.1) / 7.4) * y_range;
+    let drawn = points(&output);
+    for (x_position, lower, upper) in [(plot.x, 1.1, 5.6), (plot.right(), 2.2, 8.5)] {
+        for boundary in [lower, upper] {
+            let expected = (x_position, scaled_y(boundary));
+            assert!(
+                drawn.iter().any(|point| {
+                    (point.0 - expected.0).abs() < 1e-6 && (point.1 - expected.1).abs() < 1e-6
+                }),
+                "the percentile boundary {expected:?} is missing from {drawn:?}"
+            );
+        }
+    }
 }
 
 fn points(output: &super::SVBandRenderOutput) -> Vec<(f64, f64)> {

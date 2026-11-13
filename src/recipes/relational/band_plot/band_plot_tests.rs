@@ -203,8 +203,8 @@ fn invalid_x_scale_kind_fails_at_build_time() {
             .x_scale_kind(x_scale_kind)
             .backend(SVBackendKind::Svg)
             .build()
-            .err()
-            .expect("a categorical or boolean x axis cannot order a band");
+            .map(|_| ())
+            .expect_err("a categorical or boolean x axis cannot order a band");
         assert!(
             matches!(error, SVError::InvalidConfiguration { .. }),
             "expected an invalid configuration, received {error:?}"
@@ -267,8 +267,8 @@ fn a_missing_column_fails_at_build_time() {
         .lower("absent")
         .backend(SVBackendKind::Svg)
         .build()
-        .err()
-        .expect("a missing boundary column is a configuration error");
+        .map(|_| ())
+        .expect_err("a missing boundary column is a configuration error");
     assert!(matches!(error, SVError::ColumnNotFound { name } if name == "absent"));
 }
 
@@ -283,8 +283,8 @@ fn a_wrong_column_role_fails_at_build_time() {
     let error = explicit(&data)
         .backend(SVBackendKind::Svg)
         .build()
-        .err()
-        .expect("a grouping column cannot be a boundary");
+        .map(|_| ())
+        .expect_err("a grouping column cannot be a boundary");
     assert!(matches!(error, SVError::InvalidConfiguration { .. }));
     assert!(error.to_string().contains("lower"));
 }
