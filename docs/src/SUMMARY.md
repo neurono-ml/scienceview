@@ -21,4 +21,5 @@
 - [Chapter 14 — Animation: one clock, two keyframe sources](development-explained/ch14-animation-timeline.md)
 - [Chapter 15 — Native: drawing pixels yourself, without a GPU](development-explained/ch15-native-backend.md)
 - [Chapter 19 — Step plots: honesty about a value that does not interpolate](development-explained/ch19-step-plot.md)
+- [Chapter 20 — Band plots: filling the space between two lines](development-explained/ch20-band-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
