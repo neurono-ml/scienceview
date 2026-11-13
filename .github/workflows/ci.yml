@@ -141,11 +141,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Install Rust 1.85 toolchain (clippy + wasm32 target)
+      - name: Install Rust 1.85 toolchain (clippy)
         uses: dtolnay/rust-toolchain@1.85
         with:
           components: clippy
-          targets: wasm32-unknown-unknown
+      - name: Add the wasm32 target
+        run: rustup target add wasm32-unknown-unknown
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
       - name: cargo clippy (wasm32)
