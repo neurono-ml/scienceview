@@ -12,6 +12,8 @@ released.
 
 ### Added
 
+- The matrix recipe `SVDensityHeatmapPlot` (`scienceview::sv_recipes::sv_matrix`):
+
 - The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
   the point estimate of every category with its uncertainty, optionally joined
   by a line. The chart is the composition of FDR-123 —

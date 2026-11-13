@@ -1,7 +1,9 @@
 //! The backend writers of the density-heatmap scene.
 
 use super::definition::SVDensityHeatmapComposition;
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use crate::sv_backend::SVBackendKind;
+#[cfg(any(feature = "render-svg", feature = "render-native"))]
 use crate::sv_error::SVError;
 
 impl SVDensityHeatmapComposition {

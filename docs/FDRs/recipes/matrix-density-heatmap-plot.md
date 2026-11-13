@@ -5,11 +5,11 @@
 | Id | FDR-133 |
 | Name | `SVDensityHeatmapPlot` |
 | Family | Matrix and field |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | [Density heatmap plot](../src/development-explained/ch37-density-heatmap-plot.md) |
+| Example program | [`examples/density_heatmap_plot.rs`](../../../examples/density_heatmap_plot.rs) |
 
 ## Purpose
 
@@ -95,11 +95,22 @@ Consumes the continuous colour-map token, axis tokens, text tokens.
 
 ## Acceptance
 
-- [ ] The 2D binning matches the requested bin counts on each axis.
-- [ ] The colour bar spans the value domain.
-- [ ] Dense, sparse and streaming inputs give the same raster.
-- [ ] Empty bins are drawn as the map's lowest value, or transparent when
-      configured.
+- [x] The 2D binning matches the requested bin counts on each axis.
+      Evidence: `the_grid_dimensions_follow_the_requested_bin_counts` and
+      `observations_land_in_their_bins`.
+- [x] The colour bar spans the value domain.
+      Evidence: `the_colour_bar_is_a_configurable_decoration` and the
+      generated figure `docs/figures/density_heatmap_plot.svg`.
+- [x] Dense, sparse and streaming inputs give the same raster.
+      Evidence: `dense_sparse_and_streaming_agree_within_the_documented_tolerance`
+      and `dense_sparse_and_streaming_produce_the_same_cells`.
+- [x] Empty bins are drawn as the map's lowest value, or transparent when
+      configured. Evidence:
+      `empty_bins_default_to_the_lowest_colour_and_can_be_transparent`.
+- [x] Every cell is a coloured rectangle drawn from the continuous colour scale.
+      Evidence: `every_cell_is_a_rectangle_carrying_the_colour_scale_paint`.
+- [x] The chart renders on the SVG and native backends and fails explicitly on
+      any other kind. Evidence: `render_tests` and `observability_tests`.
 
 ## Open questions
 
