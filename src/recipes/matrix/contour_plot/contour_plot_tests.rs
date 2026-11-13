@@ -173,6 +173,87 @@ fn a_changed_colour_map_changes_the_line_colours() {
 }
 
 #[test]
+fn a_changed_line_width_changes_the_stroke_width() {
+    let source = sv_matrix_source();
+    let composition = sv_builder(&source)
+        .line_width(2.5)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+    let widths: Vec<f64> = sv_primitives(&composition)
+        .iter()
+        .map(|primitive| primitive.paint().stroke_width())
+        .filter(|width| *width > 0.0)
+        .collect();
+
+    assert!(!widths.is_empty());
+    assert!(widths.iter().all(|width| *width == 2.5));
+}
+
+#[test]
+fn a_colour_scale_transform_changes_the_level_colours() {
+    use crate::sv_scale::SVScaleTransform;
+
+    let source = sv_matrix_source();
+    let linear = sv_compose_default(&source);
+    let transformed = sv_builder(&source)
+        .colour_scale(SVScaleTransform::SquareRoot)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+
+    let first_stroke = |composition: &SVContourComposition| {
+        sv_primitives(composition)
+            .first()
+            .and_then(|primitive| primitive.paint().stroke())
+    };
+    assert_ne!(first_stroke(&linear), first_stroke(&transformed));
+}
+
+#[test]
+fn the_grid_count_changes_the_point_cloud_lattice() {
+    let source = sv_points_source();
+    let coarse = sv_points_builder(&source)
+        .grid_count(2)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+    let source = sv_points_source();
+    let fine = sv_points_builder(&source)
+        .grid_count(6)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+
+    assert_ne!(
+        coarse.field().number_of_columns(),
+        fine.field().number_of_columns()
+    );
+}
+
+#[test]
+fn the_title_and_axis_labels_reach_the_scene() {
+    let source = sv_matrix_source();
+    let scene = sv_builder(&source)
+        .title("Response surface")
+        .x_label("horizontal")
+        .y_label("vertical")
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+    let svg = super::test_support::sv_scene_to_svg(&scene);
+
+    assert!(svg.contains("Response surface"));
+    assert!(svg.contains("horizontal"));
+    assert!(svg.contains("vertical"));
+}
+
+#[test]
 fn a_matrix_range_places_the_axes() {
     let source = sv_matrix_source();
     let composition = sv_builder(&source)
@@ -189,7 +270,7 @@ fn a_matrix_range_places_the_axes() {
 }
 
 #[test]
-fn a_point_cloud_is_interpolated_through_the_bin_kernel() {
+fn a_point_cloud_is_binned_onto_a_grid_through_the_bin_kernel() {
     let source = sv_points_source();
     let composition = sv_points_builder(&source)
         .build()
@@ -201,6 +282,24 @@ fn a_point_cloud_is_interpolated_through_the_bin_kernel() {
     assert_eq!(composition.field().number_of_rows(), 3);
     assert_eq!(composition.field().value_at(1, 1), 4.0);
     assert!(composition.number_of_levels() >= 1);
+}
+
+#[test]
+fn a_point_cloud_cell_is_the_mean_aggregate_of_its_observations() {
+    const X: [f64; 6] = [0.0, 0.0, 1.0, 1.0, 2.0, 2.0];
+    const Y: [f64; 6] = [0.0, 0.0, 1.0, 1.0, 2.0, 2.0];
+    const VALUE: [f64; 6] = [1.0, 3.0, 2.0, 4.0, 5.0, 7.0];
+    let source = SVTestSource::points(&X, &Y, &VALUE);
+    let composition = sv_points_builder(&source)
+        .build()
+        .expect("the chart builds")
+        .compose()
+        .expect("composes");
+    let field = composition.field();
+
+    assert_eq!(field.value_at(0, 0), 2.0, "the two low values average");
+    assert_eq!(field.value_at(1, 1), 3.0, "the two middle values average");
+    assert_eq!(field.value_at(2, 2), 6.0, "the two high values average");
 }
 
 #[test]
