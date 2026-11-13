@@ -50,6 +50,7 @@ examples.
 | 32 | `ch32-bar-plot.md` | Bar plots: one aggregate per category through `SVStat::Aggregate`, the estimator and confidence surface, weights, dodge and stack through `SVMove`, ordering, missing-value policy, dense/sparse/streaming parity, SVG/native dispatch and the two explicitly deferred lines |
 | 33 | `ch33-count-plot.md` | Count plots: counting through `SVStat::Count`, the shared category axis across series, ordering rules, normalisation, stacking and dodging through `SVMove`, category labels, missing-value policy, sparse implicit zeros, streaming updates and the SVG/native dispatch |
 | 34 | `ch34-point-plot.md` | Point plots: one aggregate estimate per category and series through `SVStat::Aggregate`, the standard-deviation, standard-error and percentile intervals, capped error bars, dodging through `SVMove::Dodge`, the optional joining line, ordering, missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
+| 38 | `ch38-image-plot.md` | Image plots: a raster on its data extent through `SVMark::Image`, numeric fields mapped by `SVContinuousColourScale` and RGBA pixels drawn as stored, nearest and bilinear sampling, the extent and origin, equal and stretched aspect ratios, transparent and domain-lower missing pixels, dense/sparse/streaming parity, the PNG data URI and the native frame |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
