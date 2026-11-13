@@ -12,6 +12,22 @@ released.
 
 ### Added
 
+- The first relational recipe, `SVScatterPlot` (`scienceview::sv_recipes::sv_relational::sv_scatter_plot`):
+  the joint distribution of two continuous columns with optional `series`,
+  `colour` and `size` channels, a constant `alpha` for overplotting, a marker
+  shape, edge colour and width, the jitter and dodge displacement moves, and
+  axes, grid, title and legend. It composes the existing data, scale, move,
+  mark and decoration kernels — no kernel variant is added — resolves dense,
+  sparse and streaming columns once per operation without densifying or
+  blocking, and records the backend kind, representation and the point count
+  the current operation actually resolved in one operation span. `compose()`
+  returns a backend-agnostic `SVScatterScene`; `render()` dispatches through the
+  configured kind — the SVG document for `Svg`, the native frame for `Native`,
+  a typed capability error for a kind with no recipe serializer and
+  `BackendUnavailable` for a compiled-out backend — and each scene serializer
+  rejects a mismatched kind. A large scatter groups its circles into one
+  compound path per paint. The example `examples/scatter_plot.rs` calls the
+  public `to_svg()` method and generates `docs/figures/scatter_plot.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
