@@ -6,6 +6,12 @@
 //! P4). Recipe module names carry the `sv_` prefix so the family scope
 //! never collides.
 
+#[path = "pair_plot/mod.rs"]
+pub mod sv_pair_plot;
+pub use sv_pair_plot::{
+    SVPairFrame, SVPairPlot, SVPairPlotBuilder, SVPairRenderOutput, SVPairScene,
+};
+
 #[path = "parallel_categories_plot/mod.rs"]
 pub mod sv_parallel_categories_plot;
 pub use sv_parallel_categories_plot::{
