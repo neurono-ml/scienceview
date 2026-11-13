@@ -25,8 +25,11 @@ released.
   policy. Dense, sparse and streaming columns are accepted, each resolved once
   per operation, and the operation span records the backend kind, the
   representation and the point count. `rendering()` returns the ordered
-  backend-agnostic primitives; with `render-svg`, `render` and `save` serialize
-  them through the SVG document backend.
+  backend-agnostic scene; `render` dispatches it to the serializer of the
+  configured kind — the SVG document or the native raster frame — and fails
+  with a typed capability error for a kind the recipe does not serialize yet.
+  Sparse columns are never densified: only stored entries and the boundaries of
+  implicit-zero runs become vertices.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
