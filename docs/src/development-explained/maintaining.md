@@ -123,6 +123,12 @@ per variable pair and a univariate diagonal into a grid solved by the layout
 kernel: it explains the shared observations, the missing-value policy, the
 independent and common scale domains, the three diagonal modes, the colour
 grouping and the parity, concurrency and observability tests.
+Chapter 48 covers the React, Vue and Angular component backends, which wrap the
+SVG backend's inline markup in source text instead of shipping an npm package:
+it explains the shared property and event contract, the two escaping layers,
+the data snapshot that never densifies a sparse column, the update path through
+the `markup` property, and the golden, hostile-label, determinism,
+ten-thousand-point, concurrency and observability tests.
 
 Chapter 45 covers the HTML backend, the first document target with a clock: it
 explains why one self-contained page is the right unit for both a scientist and
