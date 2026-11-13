@@ -8342,6 +8342,11 @@ path = "examples/pair_plot.rs"
 required-features = ["render-svg"]
 
 [[example]]
+name = "wasm_backend"
+path = "examples/wasm_backend.rs"
+required-features = ["render-svg"]
+
+[[example]]
 name = "joint_plot"
 path = "examples/joint_plot.rs"
 required-features = ["render-svg"]
