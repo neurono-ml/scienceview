@@ -45,6 +45,7 @@ examples.
 | 26 | `ch26-rug-plot.md` | The distributional rug recipe: the one-dimensional marginal tick, the line-kernel segment composition, the value and depth scales, orientation and the axis margin, series colours, missing observations, sparse stored-entry semantics, the bounded compound path and the acceptance tests |
 | 27 | `ch27-box-plot.md` | Box plots: the percentile-owned five-number summary, the whisker rules, outliers as dots, notches, series dodging, dense/sparse/streaming parity and the SVG/native dispatch |
 | 28 | `ch28-violin-plot.md` | Violin plots: the kernel-density silhouette, bandwidth and adjustment, the Area/Count/Width scales, inner box and jittered sample points, split series, dense/sparse/streaming parity and the SVG/native dispatch |
+| 29 | `ch29-boxen-plot.md` | Boxen plots: a nest of letter values |
 | 30 | `ch30-strip-plot.md` | Strip plots: the one-dimensional dot per observation, the keyed `SVMove::Jitter` displacement, orientation, series colours, marker size and alpha, the missing-value policy, sparse stored-entry semantics, SVG/native dispatch and the parity, concurrency and observability tests |
 | 31 | `ch31-swarm-plot.md` | Swarm plots: the collision-free `SVMove::Swarm` layout, the data-space marker extent that makes the kernel's test a pixel test, both orientations, series colours, the missing-value policy, sparse stored-entry semantics, parity, concurrency, the span and the SVG/native dispatch |
 | 32 | `ch32-bar-plot.md` | Bar plots: one aggregate per category through `SVStat::Aggregate`, the estimator and confidence surface, weights, dodge and stack through `SVMove`, ordering, missing-value policy, dense/sparse/streaming parity, SVG/native dispatch and the two explicitly deferred lines |
@@ -52,52 +53,44 @@ examples.
 | 34 | `ch34-point-plot.md` | Point plots: one aggregate estimate per category and series through `SVStat::Aggregate`, the standard-deviation, standard-error and percentile intervals, capped error bars, dodging through `SVMove::Dodge`, the optional joining line, ordering, missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
 | 35 | `ch35-heatmap-plot.md` | Heatmaps: a rectangular matrix drawn as coloured cells through `SVStat::Aggregate` pivot, the continuous colour scale and its `SVColourBar`, annotations, row/column labels, the missing-cell policy, square cells and axis orientation, dense/sparse/streaming parity and the SVG/native dispatch |
 | 36 | `ch36-contour-plot.md` | Contours: a supplied scalar field read from a matrix or interpolated from a point cloud through `SVStat::Bin`, level count/range/size selection, marching squares and stitched closed regions, the `Lines`/`Filled` styles, the missing-value policy, sparse implicit zeros, streaming windows, labels, and the SVG/native dispatch |
+| 37 | `ch37-density-heatmap-plot.md` | Density heatmaps: the binned field, cell by cell |
 | 38 | `ch38-image-plot.md` | Image plots: a raster on its data extent through `SVMark::Image`, numeric fields mapped by `SVContinuousColourScale` and RGBA pixels drawn as stored, nearest and bilinear sampling, the extent and origin, equal and stretched aspect ratios, transparent and domain-lower missing pixels, dense/sparse/streaming parity, the PNG data URI and the native frame |
 | 39 | `ch39-hexbin-plot.md` | Hexbin plots: the pointy-top hexagonal lattice and its exact axial inverse, count and mean aggregation, grid size and extent, the minimum-count filter, the continuous colour scale and colour bar, the missing-value policy, dense/sparse/streaming parity and the SVG/native dispatch |
 | 40 | `ch40-parallel-coordinates-plot.md` | Parallel coordinates: one continuous scale per variable, nominal axis slots, `SVDimension` order/range/visibility/tint, one `SVMark::Line` polyline per observation, optional nominal colour grouping, shared or per-axis domain, the missing-value policies, dense/sparse/streaming parity and the SVG/native dispatch |
 | 41 | `ch41-parallel-categories-plot.md` | Parallel categories plots: one counted band axis per variable, aggregated ribbons between adjacent axes through `SVStat::Count`, count or category colouring, band gap and opacity, category ordering, label rotation, the missing-observation policy, dense/sparse/streaming parity, concurrency, the operation span and the SVG/native dispatch |
 | 42 | `ch42-splom-plot.md` | Scatterplot matrices: one scatter cell per variable pair, the shared observations and missing-value policy, per-variable and common scale domains, the `sv_layout` cell grid, histogram/density/empty diagonals, independent triangles, colour grouping and legend, dense/sparse/streaming parity, concurrent renders and the SVG/native dispatch |
+| 43 | `ch43-pair-plot.md` | Pair plots: every variable against every other |
+| 44 | `ch44-joint-plot.md` | Joint plots: two variables and their marginals, together |
+| 45 | `ch45-html-backend.md` | The HTML backend: a figure that lives in a page |
 | 46 | `ch46-tui-backend.md` | The terminal backend: the cell-grid viewport, snapping only at the end, braille dots, partial blocks, wide characters, three ANSI colour depths, the elapsed-time tick clock, resize handling, registry dispatch and the honest export refusal |
 | 47 | `ch47-wasm-backend.md` | The WebAssembly canvas backend: reusing the native CPU rasterizer through `scienceview_native`, the `SVCanvasSurface` seam and its headless/browser implementations, the thread-local handle that keeps the backend `Send + Sync` without `unsafe`, the model-owned clock driven by `requestAnimationFrame`, the minimal binding surface, the capability row and the parity, refusal and observability tests |
+| 48 | `ch48-framework-components.md` | Framework components: a figure that lives inside React, Vue and Angular |
+| 49 | `ch49-ui-kit-controls.md` | Controls: the figure listens without a user-interface toolkit |
+| 50 | `ch50-dashboard-composition.md` | Dashboards: many figures that behave as one |
+| 51 | `ch51-scripting-engines.md` | Scripts: behaviour edited while the program runs |
+| 52 | `ch52-python-bindings.md` | Python: binding a surface that is already proven |
+| 53 | `ch53-weighted-statistics.md` | Weights: when one observation counts for several |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
-covers the layout solver, chapter 8 covers the mark kernel, chapter 9
-covers the decoration surface, chapter 10 covers the statistical transform
-kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
-first rendering backend, chapter 13 covers the transition kernel, chapter 14
-covers the animation timeline, chapter 15 covers the native backend and
-chapter 21 covers the regression recipe and chapter 47 covers the WebAssembly backend, each written by its own change. Later chapters are planned, one per capability of the
-chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
-covers the animation timeline, chapter 15 covers the native backend and chapter
-19 covers the first relational recipe, each written by its own change. Later
-chapters are planned, one per capability of the
-`foundation-core-architecture` change — `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
-covers the animation timeline, chapter 15 covers the native backend, and
-chapters 16 to 22 cover the shipped recipes (scatter, line, area, step, band,
-regression and histogram), chapter 27 covers box plots and chapter 32 covers bar
-plots, each written by its own change. Later chapters are
-planned, one per capability of the
-`foundation-core-architecture` change —
+covers the layout solver, chapter 8 covers the mark kernel, chapter 9 covers
+the decoration surface, chapter 10 covers the statistical transform kernel,
+chapter 11 covers the positional-move kernel, chapter 12 covers the first
+rendering backend, chapter 13 covers the transition kernel, chapter 14 covers
+the animation timeline, chapter 15 covers the native backend, chapters 16 to
+21 cover the relational recipes, chapters 22 to 34 cover the distribution
+recipes, chapters 35 to 39 cover the matrix recipes, chapters 40 to 44 cover
+the multivariate recipes, chapters 45 to 48 cover the rendering backends,
+chapter 49 covers the control surface, chapter 50 covers dashboards, chapter
+51 covers scripting, chapter 52 covers the Python bindings and chapter 53
+covers observation weights, each written by its own change. Later chapters
+are planned, one per capability of the `foundation-core-architecture` change —
 `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 `backend-capabilities`, `theming`, `layout-engine`, `ui-kit`, `scripting` and
 `dashboard` — and are written as the corresponding implementation changes
 land, so that each one can walk through real code and real companion tests.
 The plan lives in
 `openspec/changes/foundation-core-architecture/documentation-plan.md`.
-
-Chapter 29 covers the boxen plot recipe, which nests letter values from the
-percentile kernel into `SVBoxenPlot`: it explains the depth rules, the nested
-widths and the sparse and streaming parity tests.
-
-Chapter 37 covers the density heatmap recipe, which asks the bin kernel for the
-two edge vectors, folds the observations through the aggregate kernel and
-paints one rectangle per cell over a continuous colour scale; it explains the
-normalisation choices, the empty-bin policy and the sparse and streaming
-parity tests.
-Chapter 35 covers the heatmap recipe, which turns a long table or a direct
-matrix into coloured cells through `SVStat::Aggregate` and draws the colour bar
-from the same continuous scale the cells use.
 
 ## Diagrams
 

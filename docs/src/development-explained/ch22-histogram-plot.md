@@ -64,11 +64,13 @@ let scene = SVHistogramPlot::builder()
 ```
 
 `value` is required. `series` is optional and gives one set of bins per
-distinct value. `weight` is part of the documented data contract but the
-shipped `SVStat::Bin` kernel does not consume observation weights; a configured
-weight therefore fails at `build` with a configuration error naming the kernel
-gap. The recipe never reimplements weighted binning — that is a follow-up
-change to the `statistical-transforms` capability.
+distinct value. `weight` is optional and names an observation weight column:
+the builder aligns it with the value column through series splitting and
+missing-value omission and hands it to `SVStat::Bin`, which owns the weighted
+fold. Count, probability and density heights then divide by the total weight,
+all-ones weights reproduce the unweighted bins exactly, and a negative,
+non-finite or misaligned weight column fails with a typed error naming the
+operation and position. Chapter 53 explains the kernel and the formulas.
 
 `build` resolves the columns once to validate that they exist and share a
 length, and records the number of observations. It performs **no** binning and
@@ -300,11 +302,8 @@ cannot drift from the tool.
 
 ## What is deferred
 
-Two boundaries are deliberately left open and recorded in the FDR:
+One boundary is deliberately left open and recorded in the FDR:
 
-- **Weights.** `SVStat::Bin` does not consume observation weights. The builder
-  accepts the option and rejects it with a typed error; adding weighted binning
-  is a change to the stat capability, not something a recipe may improvise.
 - **In-place streaming.** `update` recomposes the current window and returns
   the new artifact. A backend-incremental update that grows bars without
   redrawing the figure belongs to the streaming/transition integration, so the
