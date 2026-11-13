@@ -31,4 +31,5 @@
 - [Chapter 24 — Density contours: drawing a joint distribution honestly](development-explained/ch24-density-contour-plot.md)
 - [Chapter 25 — ECDF plots: describing a distribution without choosing a shape](development-explained/ch25-ecdf-plot.md)
 - [Chapter 26 — Rug plots: keeping the raw sample visible](development-explained/ch26-rug-plot.md)
+- [Chapter 27 — Box plots: five numbers that describe a whole distribution](development-explained/ch27-box-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)

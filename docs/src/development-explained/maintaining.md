@@ -43,6 +43,7 @@ examples.
 | 24 | `ch24-density-contour-plot.md` | Density contours: the binned joint density over the bin kernel, marching squares and loop stitching, nested filled bands, the data boundary, backends and the acceptance tests |
 | 25 | `ch25-ecdf-plot.md` | The ECDF recipe: the empirical cumulative distribution through `SVStat::EmpiricalCdf`, exact horizontal-then-vertical step geometry, normalisation and the derived survival curve, orientation, series grouping, missing values, non-densifying sparse reads, streaming windows and SVG/native serialization |
 | 26 | `ch26-rug-plot.md` | The distributional rug recipe: the one-dimensional marginal tick, the line-kernel segment composition, the value and depth scales, orientation and the axis margin, series colours, missing observations, sparse stored-entry semantics, the bounded compound path and the acceptance tests |
+| 27 | `ch27-box-plot.md` | Box plots: the percentile-owned five-number summary, the whisker rules, outliers as dots, notches, series dodging, dense/sparse/streaming parity and the SVG/native dispatch |
 
 Chapter 3 covers theming, chapter 4 covers the data boundary, chapter 5
 covers the figure substrate, chapter 6 covers the scale kernel, chapter 7
@@ -50,6 +51,13 @@ covers the layout solver, chapter 8 covers the mark kernel, chapter 9
 covers the decoration surface, chapter 10 covers the statistical transform
 kernel, chapter 11 covers the positional-move kernel, chapter 12 covers the
 first rendering backend, chapter 13 covers the transition kernel, chapter 14
+covers the animation timeline, chapter 15 covers the native backend and
+chapter 21 covers the regression recipe, each written by its own change. Later chapters are planned, one per capability of the
+chapter 20 covers the band plot recipe, each written by its own change. Later chapters are planned, one per capability of the
+covers the animation timeline, chapter 15 covers the native backend and chapter
+19 covers the first relational recipe, each written by its own change. Later
+chapters are planned, one per capability of the
+`foundation-core-architecture` change — `backend-selection`, `data-view-boundary`, `model-events`, `event-payloads`,
 covers the animation timeline, chapter 15 covers the native backend, and
 chapters 16 to 22 cover the shipped recipes (scatter, line, area, step, band,
 regression and histogram), each written by its own change. Later chapters are
