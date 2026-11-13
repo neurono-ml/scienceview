@@ -77,6 +77,36 @@ impl Subscriber for SVRecorder {
     fn exit(&self, _span: &Id) {}
 }
 
+/// Captures the spans one render emits.
+///
+/// The tracing interest cache is process-wide while the subscriber is
+/// thread-local, so a sibling test module rebuilding the cache between our
+/// rebuild and the render can drop the span. Retrying the capture makes the
+/// assertion independent of that unrelated race.
+fn sv_capture_render_spans(render: impl Fn()) -> Vec<BTreeMap<String, String>> {
+    for _ in 0..16 {
+        let recorder = SVRecorder::default();
+        let captured = recorder.clone();
+        tracing::callsite::rebuild_interest_cache();
+        tracing::subscriber::with_default(recorder, || {
+            tracing::callsite::rebuild_interest_cache();
+            render();
+        });
+        let spans = captured
+            .spans
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clone();
+        if spans
+            .iter()
+            .any(|span| span.get("operation") == Some(&"render".to_string()))
+        {
+            return spans;
+        }
+    }
+    panic!("the render operation emits a span");
+}
+
 #[test]
 fn render_span_records_backend_representation_and_points() {
     let _guard = sv_span_test_guard();
@@ -89,19 +119,9 @@ fn render_span_records_backend_representation_and_points() {
         .build()
         .expect("the configuration is complete");
 
-    let recorder = SVRecorder::default();
-    let captured = recorder.clone();
-    tracing::callsite::rebuild_interest_cache();
-    tracing::subscriber::with_default(recorder, || {
-        tracing::callsite::rebuild_interest_cache();
+    let spans = sv_capture_render_spans(|| {
         plot.render().expect("the curve draws");
     });
-
-    let spans = captured
-        .spans
-        .lock()
-        .unwrap_or_else(PoisonError::into_inner)
-        .clone();
     let render = spans
         .iter()
         .find(|span| span.get("operation") == Some(&"render".to_string()))
@@ -126,19 +146,9 @@ fn render_span_counts_only_finite_observations() {
         .build()
         .expect("the configuration is complete");
 
-    let recorder = SVRecorder::default();
-    let captured = recorder.clone();
-    tracing::callsite::rebuild_interest_cache();
-    tracing::subscriber::with_default(recorder, || {
-        tracing::callsite::rebuild_interest_cache();
+    let spans = sv_capture_render_spans(|| {
         plot.render().expect("the curve draws");
     });
-
-    let spans = captured
-        .spans
-        .lock()
-        .unwrap_or_else(PoisonError::into_inner)
-        .clone();
     let render = spans
         .iter()
         .find(|span| span.get("operation") == Some(&"render".to_string()))

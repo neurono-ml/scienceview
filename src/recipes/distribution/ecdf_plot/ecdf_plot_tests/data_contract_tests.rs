@@ -120,7 +120,22 @@ fn an_all_missing_column_is_an_empty_input() {
     assert_eq!(
         error,
         SVError::EmptyInput {
-            operation: "empirical_cdf"
+            operation: "ecdf_plot"
+        }
+    );
+}
+
+#[test]
+fn an_empty_column_is_an_empty_input() {
+    let values: [f64; 0] = [];
+    let table = SVTestSource::new().with_dense("value", SVColumnRole::Y, &values);
+    let error = build(&table)
+        .compose()
+        .expect_err("there is no curve of nothing");
+    assert_eq!(
+        error,
+        SVError::EmptyInput {
+            operation: "ecdf_plot"
         }
     );
 }

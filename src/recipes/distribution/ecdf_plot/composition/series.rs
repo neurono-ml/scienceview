@@ -84,7 +84,18 @@ impl SVEcdfSeries {
             curve.observation_count as f64
         };
         let start = if complementary { total } else { 0.0 };
-        let (horizontal, vertical) = sv_expand_step(&sample_horizontal, &sample_vertical, start);
+        // The step is always expanded in (value, probability) space, where the
+        // function genuinely is a step of the observation value: horizontal
+        // runs between observations and vertical risers at each observation.
+        // Swapping the two channels afterwards mirrors the same curve, so the
+        // start vertex lands on the probability channel either way instead of
+        // inventing an observation at value zero.
+        let (value_vertices, probability_vertices) =
+            sv_expand_step(&curve.values, &curve.probabilities, start);
+        let (horizontal, vertical) = match orientation {
+            SVBarOrientation::Vertical => (value_vertices, probability_vertices),
+            SVBarOrientation::Horizontal => (probability_vertices, value_vertices),
+        };
         let (key, label) = match curve.code {
             Some(code) => (format!("series-{code}"), format!("series {code}")),
             None => ("series".to_string(), "value".to_string()),
@@ -102,30 +113,36 @@ impl SVEcdfSeries {
     }
 }
 
-/// Expands breakpoints into explicit step vertices: horizontal, then vertical.
+/// Expands ordered breakpoints into explicit step vertices.
+///
+/// The first channel carries the observation value and the second the
+/// cumulative probability. The result starts on `start` at the minimum
+/// observation, then repeats each observation for the run and the riser, so
+/// every segment is either horizontal (constant probability) or vertical
+/// (constant observation).
 fn sv_expand_step(
-    horizontal_values: &[f64],
-    vertical_values: &[f64],
+    observed_values: &[f64],
+    probabilities: &[f64],
     start: f64,
 ) -> (Vec<f64>, Vec<f64>) {
-    let mut horizontal = Vec::with_capacity(horizontal_values.len().saturating_mul(2));
-    let mut vertical = Vec::with_capacity(horizontal_values.len().saturating_mul(2));
-    let Some((&first_horizontal, &first_vertical)) =
-        horizontal_values.first().zip(vertical_values.first())
+    let mut observed = Vec::with_capacity(observed_values.len().saturating_mul(2));
+    let mut cumulative = Vec::with_capacity(observed_values.len().saturating_mul(2));
+    let Some((&first_observed, &first_probability)) =
+        observed_values.first().zip(probabilities.first())
     else {
-        return (horizontal, vertical);
+        return (observed, cumulative);
     };
 
-    horizontal.push(first_horizontal);
-    vertical.push(start);
-    horizontal.push(first_horizontal);
-    vertical.push(first_vertical);
-    for index in 1..horizontal_values.len() {
-        let previous_vertical = vertical_values[index - 1];
-        horizontal.push(horizontal_values[index]);
-        vertical.push(previous_vertical);
-        horizontal.push(horizontal_values[index]);
-        vertical.push(vertical_values[index]);
+    observed.push(first_observed);
+    cumulative.push(start);
+    observed.push(first_observed);
+    cumulative.push(first_probability);
+    for index in 1..observed_values.len() {
+        let previous_probability = probabilities[index - 1];
+        observed.push(observed_values[index]);
+        cumulative.push(previous_probability);
+        observed.push(observed_values[index]);
+        cumulative.push(probabilities[index]);
     }
-    (horizontal, vertical)
+    (observed, cumulative)
 }

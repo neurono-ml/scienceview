@@ -52,6 +52,9 @@ fn sv_single_curve(
         .is_some_and(|sparse| sparse.values().iter().all(|value| value.is_finite()));
 
     if sparse_is_usable {
+        if value_view.length() == 0 {
+            return Err(sv_empty_input());
+        }
         let (values, probabilities) = sv_apply_kernel(plot, value_view)?;
         return Ok(SVEcdfCurve {
             code: None,
@@ -62,6 +65,9 @@ fn sv_single_curve(
     }
 
     let observed = sv_finite_values(value_view);
+    if observed.is_empty() {
+        return Err(sv_empty_input());
+    }
     let view = SVColumnView::Dense(&observed);
     let (values, probabilities) = sv_apply_kernel(plot, view)?;
     Ok(SVEcdfCurve {
@@ -70,6 +76,17 @@ fn sv_single_curve(
         probabilities: sv_complementary(plot, observed.len(), probabilities),
         values,
     })
+}
+
+/// The recipe's own empty-input error, before the kernel is asked for a curve
+/// that cannot exist.
+///
+/// The kernel names its own operation in `EmptyInput`; the recipe reports the
+/// chart operation instead, so callers see one consistent error surface.
+fn sv_empty_input() -> SVError {
+    SVError::EmptyInput {
+        operation: "ecdf_plot",
+    }
 }
 
 /// Partitions the observations by series and applies the kernel per group.

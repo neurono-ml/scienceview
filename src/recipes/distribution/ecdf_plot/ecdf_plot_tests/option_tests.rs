@@ -71,6 +71,33 @@ fn the_curve_reaches_one_at_the_maximum_and_is_a_step() {
 }
 
 #[test]
+fn one_observation_rises_to_one_at_its_only_value() {
+    let values = [7.0];
+    let table = source(&values);
+    let composition = build(&table).compose().expect("the curve composes");
+    let series = &composition.series()[0];
+
+    assert_eq!(series.sample_horizontal(), &[7.0]);
+    assert_eq!(series.sample_vertical(), &[1.0]);
+    assert_eq!(series.horizontal(), &[7.0, 7.0]);
+    assert_eq!(series.vertical(), &[0.0, 1.0]);
+}
+
+#[test]
+fn all_equal_observations_produce_one_riser() {
+    let values = [5.0, 5.0, 5.0];
+    let table = source(&values);
+    let composition = build(&table).compose().expect("the curve composes");
+    let series = &composition.series()[0];
+
+    assert_eq!(series.sample_horizontal(), &[5.0]);
+    assert_eq!(series.sample_vertical(), &[1.0]);
+    assert_eq!(series.horizontal(), &[5.0, 5.0]);
+    assert_eq!(series.vertical(), &[0.0, 1.0]);
+    assert_eq!(composition.point_count(), 3);
+}
+
+#[test]
 fn normalise_off_reaches_the_observation_count() {
     let table = source(&VALUES);
     let plot = SVECdfPlot::builder()
@@ -122,6 +149,45 @@ fn horizontal_orientation_swaps_the_two_channels() {
     );
     assert_eq!(composition.series()[0].sample_vertical(), &[1.0, 2.0, 3.0]);
     assert_eq!(composition.horizontal_scale_kind(), SVScaleKind::Continuous);
+}
+
+#[test]
+fn horizontal_orientation_expands_the_same_step_vertices() {
+    let table = source(&VALUES);
+    let plot = SVECdfPlot::builder()
+        .data_source(&table)
+        .value("value")
+        .orient(SVBarOrientation::Horizontal)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    let composition = plot.compose().expect("the curve composes");
+    let series = &composition.series()[0];
+
+    // Mirroring the vertical curve swaps the channels, so the risers run along
+    // the probability channel at a constant observation and the runs sit at a
+    // constant probability. The curve still starts at probability zero on the
+    // minimum observation, never at value zero.
+    assert_eq!(series.horizontal(), &[0.0, 0.25, 0.25, 0.5, 0.5, 1.0]);
+    assert_eq!(series.vertical(), &[1.0, 1.0, 2.0, 2.0, 3.0, 3.0]);
+}
+
+#[test]
+fn a_complementary_horizontal_curve_starts_at_one_on_the_minimum() {
+    let table = source(&VALUES);
+    let plot = SVECdfPlot::builder()
+        .data_source(&table)
+        .value("value")
+        .orient(SVBarOrientation::Horizontal)
+        .complementary(true)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the configuration is complete");
+    let composition = plot.compose().expect("the curve composes");
+    let series = &composition.series()[0];
+
+    assert_eq!(series.horizontal(), &[1.0, 0.75, 0.75, 0.5, 0.5, 0.0]);
+    assert_eq!(series.vertical(), &[1.0, 1.0, 2.0, 2.0, 3.0, 3.0]);
 }
 
 #[test]
