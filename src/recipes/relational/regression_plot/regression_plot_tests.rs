@@ -317,3 +317,59 @@ fn option_setters_reach_the_configuration() {
     assert_eq!(configuration.visible_x_domain(), Some((0.5, 3.5)));
     assert_eq!(chart.backend_kind(), SVBackendKind::Svg);
 }
+
+#[test]
+fn every_documented_model_fits_through_the_recipe() {
+    let x: [f64; 5] = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let power: Vec<f64> = x.iter().map(|value| 2.0 * value.powf(1.5)).collect();
+    let logarithmic: Vec<f64> = x.iter().map(|value| 1.0 + 2.0 * value.ln()).collect();
+    let exponential: Vec<f64> = x.iter().map(|value| 2.0 * (0.5 * value).exp()).collect();
+    let linear: Vec<f64> = x.iter().map(|value| 1.0 + 2.0 * value).collect();
+    let polynomial: Vec<f64> = x.iter().map(|value| value * value).collect();
+
+    let cases = [
+        (SVFitModel::Linear, &linear),
+        (SVFitModel::Polynomial, &polynomial),
+        (SVFitModel::Logarithmic, &logarithmic),
+        (SVFitModel::Exponential, &exponential),
+        (SVFitModel::Power, &power),
+    ];
+    for (model, y) in cases {
+        let data = table(&x, y);
+        let chart = SVRegressionPlotBuilder::new()
+            .data_source(&data)
+            .x("x")
+            .y("y")
+            .model(model)
+            .order(2)
+            .backend(SVBackendKind::Svg)
+            .build()
+            .expect("the configuration is valid");
+        let composition = chart.compose().expect("the fit runs");
+        assert_eq!(
+            composition.series()[0].coefficients().len(),
+            if model == SVFitModel::Polynomial {
+                3
+            } else {
+                2
+            }
+        );
+        assert!(
+            composition.series()[0]
+                .predicted()
+                .iter()
+                .all(|value| value.is_finite())
+        );
+    }
+}
+
+#[test]
+fn a_large_dataset_composes_with_the_kernel() {
+    let x: Vec<f64> = (0..10_000).map(|index| index as f64 / 100.0).collect();
+    let y: Vec<f64> = x.iter().map(|value| 1.0 + 2.0 * value).collect();
+    let data = table(&x, &y);
+
+    let composition = plot(&data).compose().expect("the large fit runs");
+    assert_eq!(composition.point_count(), 10_000);
+    assert!((composition.series()[0].coefficients()[1] - 2.0).abs() < 1.0e-9);
+}
