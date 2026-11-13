@@ -53,5 +53,18 @@
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
 - [x] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/recipes/distribution-strip-plot.md` before opening the code PR.
+
+## Review notes
+
+The independent review compared the implementation with FDR-119, the change
+spec and `patterns.md`. The displacement is the core `SVMove::Jitter` (no second
+jitter path), the data boundary dispatches once per operation and never
+densifies a sparse column, and the span carries the configured kind, the
+representation and the resolved point count. Two documented scope choices are
+recorded: transition and animation wiring is deferred to the transition
+integration, while the geometry is transition-ready and the offset is keyed by
+the mark identity; and the FDR's `(+ Dodge)` in the recipe line is not exposed
+because the FDR configuration surface defines no dodge option, so a `series`
+column colours the dots within one shared category slot.
