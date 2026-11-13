@@ -122,3 +122,11 @@ per variable pair and a univariate diagonal into a grid solved by the layout
 kernel: it explains the shared observations, the missing-value policy, the
 independent and common scale domains, the three diagonal modes, the colour
 grouping and the parity, concurrency and observability tests.
+
+Chapter 45 covers the HTML backend, the first document target with a clock: it
+explains why one self-contained page is the right unit for both a scientist and
+a dashboard, how the compiled theme becomes overridable custom properties, how
+the embedded payload keeps the Rust model the authority, how an update replaces
+only the payload element, how gestures become actions and view deltas, and how
+the golden, determinism, concurrency, 10k-point and observability tests make
+those claims executable.
