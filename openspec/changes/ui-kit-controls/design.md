@@ -23,6 +23,14 @@ Play, pause, step and scrub read and write the animation playback state.
 
 Controls consume the same tokens as the marks.
 
+### D5 — Scripts are payload consumers
+
+A control carries a script source and every subscriber receives the same
+`SVControlEvent` payloads. Executing the source belongs to the scripting engine
+(`scripting-engines`, wave 8); this change delivers the contract, not an
+interpreter. The alternative — embedding a script runtime in the core — would
+break the dependency-light core and duplicate the scripting capability.
+
 ## Risks / Trade-offs
 
 - The action vocabulary can grow ad hoc; a new core action must be justified by reuse across the kit and the dashboard.
