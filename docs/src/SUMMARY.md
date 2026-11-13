@@ -53,4 +53,5 @@
 - [Chapter 46 — Terminal: drawing a figure on a character grid](development-explained/ch46-tui-backend.md)
 - [Chapter 47 — WebAssembly: the same renderer, in a browser tab](development-explained/ch47-wasm-backend.md)
 - [Chapter 48 — Framework components: a figure inside React, Vue and Angular](development-explained/ch48-framework-components.md)
+- [Chapter 49 — Controls: the figure listens without a user-interface toolkit](development-explained/ch49-ui-kit-controls.md)
 - [Maintaining this book](development-explained/maintaining.md)

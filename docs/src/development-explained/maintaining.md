@@ -123,6 +123,13 @@ per variable pair and a univariate diagonal into a grid solved by the layout
 kernel: it explains the shared observations, the missing-value policy, the
 independent and common scale domains, the three diagonal modes, the colour
 grouping and the parity, concurrency and observability tests.
+
+Chapter 49 covers the control kit: why controls are model objects rather than
+artists, the closed action vocabulary shared with third-party widgets, the pure
+reducer with its transform-aware zoom and clamped bounds, the event payloads
+that carry both the previous and the current value, playback bound to the
+animation timeline, gestures as a data table, and the parity, determinism and
+concurrency tests that make the contract executable.
 Chapter 48 covers the React, Vue and Angular component backends, which wrap the
 SVG backend's inline markup in source text instead of shipping an npm package:
 it explains the shared property and event contract, the two escaping layers,
