@@ -12,6 +12,50 @@ released.
 
 ### Added
 
+- The dashboard composition crate (`scienceview_dashboard`): a grid of rows,
+  columns and spans whose cells are solved through `sv_layout`; shared
+  `SVDataSource` registrations read by several panels without copying; linked
+  selections expressed as derived filters over the shared source, exposed to the
+  host and bounded by a cascade depth budget so a cycle stops with a typed
+  error; coordinated zoom, pan, range and panel actions routed by linked axis
+  identifier; and one deterministic, accessible self-contained SVG document
+  with every panel embedded as a nested inline SVG (plus the opt-in
+  `render-html` page). The example composes three real scatter recipes over one
+  table and writes `docs/figures/dashboard.svg`.
+- The interactive control kit (`scienceview_core::sv_control`): controls are
+  model objects, never artists, that dispatch one closed action vocabulary
+  (`Zoom`, `Pan`, `Reset`, `ToggleSeries`, `SetSeriesVisibility`, `SetRange`,
+  `SelectRegion`, `ClearSelection`, `SetPlayback`, `Custom`) and are applied by
+  a pure `SVControlState` reducer to axis domains, series visibility, the
+  selection and the animation timeline. `SVControl` carries a label, a size,
+  in-frame or host placement, a theme-resolved style, an enabled flag and
+  bounds; the builder validates the configuration and `sv_standard_controls`
+  returns the specification minimum, with `sv_playback_controls` for play,
+  pause, seek, step and speed. Zoom and pan work in the scale transform's
+  space (a logarithmic axis zooms symmetrically) and every domain stays clamped
+  to its registered bounds; axis bounds derive from a `SVColumnView` in one
+  dispatch, so dense, sparse and streaming inputs agree and sparse storage is
+  never densified. Events carry the origin and the previous and current value
+  in a canonical textual form; `SVControlSession` owns the optional timeline and
+  the subscriber registry, and gestures are a data table from keyboard or
+  pointer input to actions. A third-party widget implements `SVControlSurface`
+  and behaves exactly like a built-in control. There is no wall clock, and the
+  parity, determinism and concurrency tests ship with the module.
+- The React, Vue and Angular rendering backends (`scienceview_react`,
+  `scienceview_vue`, `scienceview_angular`, features `render-react`,
+  `render-vue` and `render-angular`). Each backend emits a self-contained
+  component source string — JSX, a Vue single-file component or an Angular
+  `@Component` class — that embeds the inline SVG markup produced by the SVG
+  backend together with the figure data, a theme object and the action event.
+  The three wrappers share one contract: properties `data`, `markup`, `theme`
+  and `title`, and the `scienceview-action` event carrying `select` and `zoom`.
+  The component replaces its markup through the `markup` property, so the
+  output of `update` applies without remounting. Sparse data is embedded as
+  index/value pairs and never densified. No npm dependency is used at build
+  time: the crate only writes source text. Golden component sources, hostile
+  label escaping, determinism, ten-thousand-point output, concurrency,
+  capability and observability tests cover each backend.
+
 - The WebAssembly canvas backend `scienceview_wasm` (`SVBackendKind::Wasm`):
   the browser target compiles the from-scratch CPU rasterizer of
   `scienceview_native` instead of reimplementing rendering in JavaScript, so a
@@ -32,14 +76,76 @@ released.
   256-colour or 16-colour depth. `SVTickClock` advances animation by elapsed
   time with a bounded tick rate, `SVTuiBackend::render_frame_for_terminal`
   re-solves the layout on resize, and `SVTerminalSession` presents the frame
-  through ratatui and crossterm behind the optional `terminal` feature. The
-  backend declares events, streaming, in-place update and presentation, and
-  refuses `save`/export with the typed missing-capability error.
+  through ratatui and crossterm behind the optional `terminal` feature (the
+  default build pulls neither dependency). The backend declares events,
+  streaming, in-place update and presentation, and refuses `save`/export with
+  the typed missing-capability error; the frame's `to_text`/`to_ansi` values are
+  the caller-side capture path. Golden-frame, colour-mapping, degenerate-size,
+  wide-character, 10k-point, concurrency, capability and span tests cover it.
+- The HTML rendering backend `scienceview_html`, selected with
+  `SVBackendKind::Html` and the `render-html` feature: one self-contained
+  document with the compiled theme stylesheet, the SVG figure and a small
+  inline runtime, so the page renders and updates with no network access and
+  no new dependency. `render` and `save` write the page; `update` returns only
+  the payload element, which the runtime applies in place without reloading or
+  losing the host page's view state; `show` reports the missing presentation
+  capability. The `Html` capability row now declares export, streaming, gesture
+  events and in-place update (transition support follows), while scripting and
+  presentation stay unsupported. Dense, sparse and streaming snapshots are
+  embedded in the representation they arrive in. The example
+  `crates/scienceview_html/examples/offline_document.rs` prints an offline page.
 - The multivariate recipe `SVJointPlot` (`scienceview::sv_recipes::sv_multivariate`):
-  two variables shown together with the marginal distribution of each, on the
-  top and the right, sharing the central scales. It composes the scatter mark,
-  the hexbin and density-contour recipes, `SVStat::Fit`, `SVStat::Bin` and
-  `SVStat::KernelDensity`, and solves its three panels through `sv_layout`.
+  two variables shown together with the marginal distribution of each — a
+  central bivariate panel (scatter, hexbin, density contour or regression)
+  with a histogram, density curve or rug on the top and the right, all sharing
+  the central scales. The chart is the composition of FDR-145 —
+  `data -> [no stat] -> values -> central cell -> marginal cells ->
+  [shared SVScale per axis] -> three panels sharing a layout` — and its
+  configuration surface is `x`, `y`, `series`, `kind`, `marginal_kind`,
+  `marker`, `alpha`, `regression_model`, `missing_value_policy`, the titles,
+  with `backend(...)` required and `execution_mode` defaulting to `Automatic`.
+  The central panel reuses the scatter mark, the hexbin recipe, the density
+  contour recipe and the fit kernel; the marginals reuse `SVStat::Bin`,
+  `SVStat::KernelDensity` and the bar and line marks; the three panel
+  rectangles are solved by `sv_layout`. Dense, sparse and streaming inputs
+  agree, a sparse column is never densified and a streaming window renders
+  without blocking. The scene serializes through `to_svg()` and, with
+  `render-native`, through `to_native_frame()`; any other configured kind
+  fails with a typed error. Transition and animation wiring is deferred to the
+  transition integration; the geometry is transition-ready. The example
+  `examples/joint_plot.rs` writes `docs/figures/joint_plot.svg`.
+- The multivariate recipe `SVPairPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  a pair grid over a variable list, with one cell per pair, shared per-variable
+  domains, optional `hue` grouping, a configurable diagonal (density or
+  histogram) and a configurable off-diagonal shape (scatter, hexbin or a binned
+  density contour). The chart follows FDR-144 and composes only the closed
+  kernels: dot, bar and line marks, `SVStat::Bin` and `SVStat::KernelDensity`,
+  the scale kernel and the layout engine's grid. The hexbin lattice and the
+  binned-contour pass are chart-owned geometry, recorded as a trade-off in
+  ADR #182 (they mirror the geometry the hexbin and KDE contour recipes own).
+  Dense, sparse and streaming
+  input produce the same grid; the missing-value policy is explicit. The
+  example `examples/pair_plot.rs` writes `docs/figures/pair_plot.svg`.
+  Transition and animation wiring is deferred; the geometry is
+  transition-ready.
+- The multivariate recipe `SVSplomPlot` (`scienceview::sv_recipes::sv_multivariate`):
+  a scatterplot matrix over two or more continuous variables — one scatter cell
+  per variable pair and a univariate distribution on the diagonal (histogram by
+  default, kernel density or empty on request), with the observations shared
+  across every cell. The chart is the composition of FDR-143 —
+  `data -> [SVStat for the diagonal only] -> values -> [SVScale per axis] ->
+  SVMark::Dot per cell` — and its configuration surface is `variables`,
+  `colour` (nominal grouping), `diagonal`, `marker`, `size`, `opacity`,
+  `scale_mode` (per-variable `Independent` or common `Shared`), `cell_aspect`,
+  `show_upper`, `show_lower`, `show_diagonal`, `missing_value_policy`, `title`
+  and the backend, with `backend(...)` required and `execution_mode` defaulting
+  to `Automatic`. The grid is solved through `sv_layout`; dense, sparse and
+  streaming variables render the same matrix, a sparse column is never
+  densified, and a streaming window never blocks. The scene serializes through
+  `to_svg()` and, with `render-native`, through `to_native_frame()`; any other
+  kind fails with a typed error. Transition and animation wiring is deferred to
+  the transition integration; the geometry is transition-ready. The example
+  `examples/splom_plot.rs` writes `docs/figures/splom_plot.svg`.
 - The multivariate recipe `SVParallelCategoriesPlot`
   (`scienceview::sv_recipes::sv_multivariate`): a set of categorical axes whose
   observations become aggregated ribbons between adjacent axes. The chart is
@@ -61,6 +167,27 @@ released.
   the geometry is transition-ready. The example
   `examples/parallel_categories_plot.rs` writes
   `docs/figures/parallel_categories_plot.svg`.
+- The multivariate recipe `SVParallelCoordinatesPlot`
+  (`scienceview::sv_recipes::sv_multivariate`): many observations drawn as
+  polylines through one vertical axis per continuous variable. The chart is the
+  composition of FDR-141 —
+  `data -> [no stat] -> values -> [one line per observation] -> [SVScale per axis] -> SVMark::Line` —
+  and its configuration surface is `variables`, `colour`, `line_width`,
+  `opacity`, `dimensions` (`SVDimension` range, visibility and axis tint),
+  `range`, `label_angle`, `axis_label`, `normalization`, `missing`, the title
+  and `backend(...)`, with `execution_mode` defaulting to `Automatic`. Every
+  visible variable receives its own continuous `SVScale` and axis order comes
+  from `variables` or `dimensions`. Each observation is an `SVMark::Line`
+  polyline; the optional colour column is a nominal grouping, and missing values
+  follow a gap, bridge, drop-observation or error policy. Dense, sparse and
+  streaming inputs produce the same polylines; a sparse column is read through
+  `value_at` and never densified, and a streaming window never blocks. The
+  composed scene serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error. Transition and animation wiring is deferred to the transition
+  integration; the geometry is transition-ready. The example
+  `examples/parallel_coordinates_plot.rs` writes
+  `docs/figures/parallel_coordinates_plot.svg`.
 - The matrix recipe `SVHexbinPlot` (`scienceview::sv_recipes::sv_matrix`):
   two continuous variables binned into a pointy-top hexagonal lattice and each
   occupied cell drawn as one filled path, coloured by its count. The chart is
