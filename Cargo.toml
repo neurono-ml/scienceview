@@ -12,6 +12,7 @@ members = [
     "crates/scienceview_angular",
     "crates/scienceview_tauri",
     "crates/scienceview_dioxus",
+    "crates/scienceview_script",
     "crates/scienceview_theme",
 ]
 
@@ -8389,6 +8390,9 @@ wasm = ["dep:scienceview_wasm", "scienceview_wasm/wasm"]
 streaming = ["scienceview_core/streaming"]
 # Live updates over Tokio watch channels.
 streaming-tokio = ["dep:tokio", "scienceview_core/streaming-tokio"]
+# Runtime scripting: Lua and TypeScript/JavaScript engines over the control
+# action vocabulary, host-side by default and sandboxed.
+scripting = ["dep:scienceview_script"]
 
 [dependencies]
 scienceview_core = { path = "crates/scienceview_core", version = "0.1.0" }
@@ -8409,6 +8413,7 @@ scienceview_vue = { path = "crates/scienceview_vue", version = "0.1.0", optional
 scienceview_angular = { path = "crates/scienceview_angular", version = "0.1.0", optional = true }
 scienceview_tauri = { path = "crates/scienceview_tauri", version = "0.1.0", optional = true }
 scienceview_dioxus = { path = "crates/scienceview_dioxus", version = "0.1.0", optional = true }
+scienceview_script = { path = "crates/scienceview_script", version = "0.1.0", optional = true }
 
 [lints]
 workspace = true

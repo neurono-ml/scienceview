@@ -52,6 +52,9 @@ pub mod sv_recipes;
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
 
+#[cfg(feature = "scripting")]
+pub use scienceview_script;
+
 #[cfg(feature = "render-angular")]
 pub use scienceview_angular;
 #[cfg(feature = "render-dioxus")]
