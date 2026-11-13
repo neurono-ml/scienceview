@@ -34,6 +34,28 @@ line to `src/recipes/relational/mod.rs`. No central registry exists, because a
 central registry would serialise every recipe change against every other one
 (patterns.md P4).
 
+### D5 — Step geometry belongs to the recipe
+
+The core line mark exposes width, dash, join, cap, colour, opacity and
+simplification, but no step option. Patterns.md P5 forbids a recipe from adding
+a mark variant, so the recipe expands the requested position into explicit
+vertices and hands them to the existing `SVMark::Line`. This keeps the closed
+kernel vocabulary intact and makes the corners ordinary line vertices for the
+transition kernel.
+
+### D6 — SVG is the one serializer in this change
+
+The recipe returns a backend-neutral `SVStepPlotComposition` (scales, expanded
+vertices, decoration primitives). This change serializes it through the real
+`scienceview_svg` document surface under the `render-svg` feature. A backend
+without a recipe-aware serializer is rejected at build time with
+`SVError::InvalidConfiguration`, never degraded silently; the later backend
+changes add their own recipe-aware path.
+
+The FDR's provisional `where` column duplicated the `step` direction and is
+folded into `SVStepPosition`; the three positions (`Before`, `After`, `Center`)
+carry the complete pre/post/mid geometry.
+
 ## Open Questions
 
 - Should a step chart carry an explicit `interval` column so that each step spans a real duration rather than being centred on its sample? *Open — it matters for sampled signals and would change the `x` mapping.*

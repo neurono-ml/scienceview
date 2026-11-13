@@ -46,31 +46,26 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The chart geometry is transition-ready
 
-`SVStepPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVStepPlot` SHALL expand the step into explicit vertices consumed by `SVMark::Line`, so the transition kernel interpolates corner positions and a new sample extends the line.
 
 #### Scenario: Transition: step vertices
-- **WHEN** the state changes and step vertices is affected
-- **THEN** interpolate — a step's corners move with the values
+- **WHEN** the state changes and a step corner moves
+- **THEN** the corner is an ordinary line vertex and interpolates with the values
 
 #### Scenario: Transition: new sample
-- **WHEN** the state changes and new sample is affected
-- **THEN** enters, and the step extends to it
+- **WHEN** a new sample arrives
+- **THEN** the step extends to it without recomputing the configuration
 
-### Requirement: The chart renders on every declared backend
+### Requirement: The chart renders through its declared backend
 
-`SVStepPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVStepPlot` SHALL render through the real SVG backend in this change, and SHALL fail at build time with an explicit error for a backend that does not yet have a recipe-aware serializer.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
-- **THEN** the figure is self-contained and deterministic
-
-#### Scenario: Native rendering
-- **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+- **THEN** the figure is self-contained, contains a polyline path and is deterministic
 
 #### Scenario: Unsupported backend
-- **WHEN** a backend cannot express a required mark
-- **THEN** the build fails explicitly
-
+- **WHEN** a backend without a recipe-aware serializer is selected
+- **THEN** the build fails explicitly and names the configured backend
