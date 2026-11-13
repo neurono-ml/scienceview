@@ -14,7 +14,7 @@ the core kernels already landed by the earlier waves, and touches nothing else.
 ### D1 — Composition
 
 The chart is exactly the composition
-`data -> [SVStat::Aggregate (grid interpolation)] -> scalar field -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area`. It introduces no new mark, stat, move or scale variant; if
+`data -> [SVStat::Bin (grid) + SVStat::Aggregate (cell mean)] -> scalar field -> [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area`. It introduces no new mark, stat, move or scale variant; if
 implementation reveals a missing variant, that is a change to the core
 capability first (patterns.md P5).
 
@@ -25,9 +25,12 @@ sparse and streaming representations are accepted; the recipe dispatches on the
 representation once per operation and never densifies or blocks (patterns.md
 P6).
 
-### D3 — Temporal behaviour
+### D3 — Temporal behaviour is deferred
 
-contour path: recomputed per frame and morphed by vertex order. colour: interpolates with the level. level set appearing or disappearing: enters or exits.
+This change wires no animation. The intended future behaviour — contour paths
+recomputed per frame and morphed by vertex order, colour interpolating with the
+level, a level set entering or exiting — is recorded as a design target in the
+FDR's Temporal section and in D8 below; no `update` surface ships here.
 
 ### D4 — Registration
 
@@ -52,7 +55,8 @@ layouts reach it:
   zero and is never materialised.
 - **Points** — `x`, `y` and `value` columns of equal length are binned on both
   axes through `SVStat::Bin` (`grid_count` cells per axis, default 64), and each
-  cell holds the mean of the values that fall in it.
+  cell holds the mean of the values that fall in it, computed by
+  `SVStat::Aggregate`.
 
 `SVContourMissingPolicy` decides what a non-finite matrix sample means: `Omit`
 fills it from its finite orthogonal neighbours (then the finite mean, then
@@ -90,8 +94,19 @@ animation wiring ships in this change.
 ### Review
 
 Acceptance against `docs/FDRs/matrix-contour-plot.md` was performed by the
-implementing agent; the independent review is left to the batch integrator.
+implementing agent and then by an independent reviewer (see below).
 Test evidence: `contour_plot_tests` (defaults, every option, the explicit error
 surface), `parity_tests` (dense/sparse/streaming, sparse implicit zeros,
 streaming window), `concurrency_tests`, `observability_tests` and `render_tests`
 (SVG and native typed dispatch).
+
+## Independent review
+
+The independent review of 2026-11-13 found the recorded composition was not the
+shipped one: the recipe computed the cell mean itself while the FDR named
+`SVStat::Aggregate`. The review delegated that mean to the aggregate kernel, moved
+the field resolution out of the `preparation` folder dispatcher (patterns P3),
+made the Temporal section and this design state that transitions are deferred,
+and corrected the FDR/spec acceptance wording from "interpolated" to "binned".
+The density-contour sibling is still untouched; the duplication of the contour
+geometry remains explicit in the FDR's open question and in D6.
