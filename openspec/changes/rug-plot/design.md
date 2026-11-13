@@ -41,8 +41,10 @@ and carries no borrowed data, so a transition can interpolate its two endpoints
 by the FDR's match key (`Index`). Actually wiring the transition kernel into the
 recipe operations is deferred to the later integration change that adds
 transition support to every recipe, exactly as the other wave-6 recipes do;
-this change claims transition-ready geometry only and does not tick the
-transition scenario in the spec.
+this change claims transition-ready geometry only. The temporal requirement is
+therefore left to that integration change instead of being asserted by this
+delta, so the capability never claims transition support the code does not
+ship.
 
 ### D6 — Orientation and the margin
 
