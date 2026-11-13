@@ -20,15 +20,19 @@
 
 ### Requirement: The chart consumes its documented data contract
 
-`SVCountPlot` SHALL consume `category`, `series`, `weight`, with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind.
+`SVCountPlot` SHALL consume `category` and `series` with the roles and types recorded in its FDR, and SHALL reject a configuration whose columns are missing or of the wrong kind. `weight` is part of the recorded surface but the shipped `SVStat::Count` kernel does not consume weights: the builder SHALL reject a configured `weight` with a typed configuration error naming the kernel gap, and weighted counting SHALL NOT be reimplemented in the recipe.
 
 #### Scenario: Documented columns
-- **WHEN** the documented columns are supplied
+- **WHEN** the documented `category` and `series` columns are supplied
 - **THEN** the chart builds and renders
 
 #### Scenario: Missing column
 - **WHEN** a required column is missing
 - **THEN** the build fails with an explicit configuration error
+
+#### Scenario: Weighted counting deferred
+- **WHEN** a weight column is configured
+- **THEN** the build fails with a typed configuration error naming the missing kernel support
 
 ### Requirement: Representations are equivalent
 
@@ -46,17 +50,22 @@
 - **WHEN** a streaming input is supplied
 - **THEN** the render returns promptly and shows the current window
 
-### Requirement: The chart transitions as specified
+### Requirement: The geometry is transition-ready
 
-`SVCountPlot` SHALL support state transitions with the temporal behaviour recorded in its FDR.
+`SVCountPlot` SHALL produce backend-agnostic geometry whose bar height and
+colour carry the properties the transition kernel interpolates, and SHALL keep
+the category as the match key so a reordering state change can slide the bars.
+This change ships no animation driver: the driver and the animated reordering
+and entry behaviour belong to the transition integration change and are not
+claimed here.
 
-#### Scenario: Transition: bar height
-- **WHEN** the state changes and bar height is affected
-- **THEN** interpolates
+#### Scenario: Transition-ready bar height
+- **WHEN** the same figure is rendered for two states
+- **THEN** the bar geometry exposes the height as an interpolable value
 
-#### Scenario: Transition: new category
-- **WHEN** the state changes and new category is affected
-- **THEN** enters
+#### Scenario: Transition-ready identity
+- **WHEN** the same figure is rendered for two states
+- **THEN** the category remains the match key of every bar
 
 ### Requirement: The chart renders on every declared backend
 
