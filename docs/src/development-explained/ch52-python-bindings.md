@@ -91,9 +91,9 @@ into one buffer. The binding keeps the representations instead.
   values densely and sparsely and asserts that both scatter documents are byte
   identical.
 - `StreamingColumn(capacity=...)` owns a bounded `SVRollingWindow`. `push`
-  appends samples and advances the sequence number; a read borrows the current
-  window and never waits. Pushing more than the capacity drops the oldest
-  sample, and `dropped_samples` reports how many.
+  appends samples and advances the sequence number; a read takes the retained
+  window under the window lock and never waits for a producer. Pushing more than
+  the capacity drops the oldest sample, and `dropped_samples` reports how many.
 
 ```python
 live = sv.StreamingColumn(capacity=128)
@@ -104,11 +104,15 @@ live.push([4.0, 5.0])      # the producer advances
 figure.update(appended_points=2)
 ```
 
-Streaming data cannot be sent to an export-only backend such as SVG: the core
-capability matrix rejects it with `SVBackendError`, exactly as it rejects the
-same combination in Rust. The streaming tests therefore use the recipe paths
-that compose a scene from a window, and the generic figure path exposes the
-backend's own `update`.
+The two entry points differ here, and the difference is real. The generic
+`figure()` path declares `requires_streaming` and asks the backend for its own
+in-place update; an export-only backend such as SVG does not implement that
+capability, so the core capability matrix rejects it with `SVBackendError`,
+exactly as it rejects the same combination in Rust. A recipe such as
+`scatter_plot()` instead composes a scene from the current window on every
+render, which is why the example and the streaming tests use it with
+`backend="svg"` and why `update()` there re-renders the advanced window rather
+than calling a backend update.
 
 ## Errors are values, all the way to Python
 
@@ -119,9 +123,9 @@ not strings:
 | --- | --- |
 | `MissingBackendSelection` | `SVBackendSelectionError` |
 | `MissingDataSource`, column/length/sparse failures | `SVDataError` |
-| `InvalidConfiguration`, unsupported representation | `SVConfigurationError` |
+| `InvalidConfiguration`, unsupported representation, control and dashboard-grid failures | `SVConfigurationError` |
 | backend unavailable, missing capability, backend failure | `SVBackendError` |
-| script, control and dashboard failures | `SVScriptError` |
+| scripting failures | `SVScriptError` |
 
 All of them inherit `SVBindingError`, so a coarse `except SVBindingError` still
 catches everything. The class hierarchy is the reason a caller can distinguish
@@ -145,6 +149,17 @@ same reducer a Rust widget uses.
 
 The figure below is not drawn by hand: `examples/python_bindings.py` builds it
 through the installed wheel and writes it to `docs/figures/python_bindings.svg`.
+The Rust figures job cannot rerun a Python program, so this one is regenerated
+deliberately:
+
+```sh
+maturin build --release              # in crates/scienceview_python
+python -m pip install --force-reinstall target/wheels/scienceview-*.whl
+python examples/python_bindings.py   # rewrites docs/figures/python_bindings.svg
+```
+
+Running those three commands reproduces the committed figure byte for byte;
+the mirrored copy under `docs/src/assets/` is the same file.
 
 ```python
 figure = sv.scatter_plot(
