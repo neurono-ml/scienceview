@@ -62,8 +62,23 @@ pub(crate) fn sv_resolve_derived<'values>(
         None => vec![(f64::NAN, (0..x_values.len()).collect())],
     };
     for (series_code, rows) in groups {
-        let group_x: Vec<f64> = rows.iter().map(|row| x_values[*row]).collect();
-        let group_y: Vec<f64> = rows.iter().map(|row| values[*row]).collect();
+        let mut group_x: Vec<f64> = Vec::with_capacity(rows.len());
+        let mut group_y: Vec<f64> = Vec::with_capacity(rows.len());
+        for row in rows {
+            let x_value = x_values[row];
+            let y_value = values[row];
+            if !x_value.is_finite() || !y_value.is_finite() {
+                configuration
+                    .missing_value_policy
+                    .report(value_name, positions[row])?;
+                continue;
+            }
+            group_x.push(x_value);
+            group_y.push(y_value);
+        }
+        if group_x.is_empty() {
+            continue;
+        }
         let input = SVStatInput::new(SVColumnView::Dense(&group_y))
             .with_groups(SVColumnView::Dense(&group_x));
         let SVStatResult::Groups(result) = stat.apply(input)? else {
