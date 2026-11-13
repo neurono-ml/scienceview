@@ -44,7 +44,16 @@ support is rejected with the kernel's documented `UnsupportedRepresentation`
 alternative. Streaming input is read from its bounded window and reported as
 windowed.
 
-### D6 — Deferred options
+### D6 — Backend scope
+
+The composed SVG path lands in this change. Native and every later backend
+build-validate the composed marks now and gain their own composed render path
+in a later backend change; until then the render operation reports the missing
+capability explicitly. Rendering a composed recipe through `SVRenderRequest`
+would require the backend to understand three marks and the fit, which is a
+backend change, not a recipe one.
+
+### D7 — Deferred options
 
 The FDR lists `weight` and `ci`, but the closed fit kernel consumes neither an
 observation-weight column nor an interval selector. Adding either inside the

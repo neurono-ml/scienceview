@@ -58,17 +58,17 @@
 - **WHEN** the state changes and points is affected
 - **THEN** redraw unless an identity key is available
 
-### Requirement: The chart renders on every declared backend
+### Requirement: The chart renders through the backend it selects
 
-`SVRegressionPlot` SHALL render on the SVG and native backends, and on every later backend that declares support for its marks and decorations.
+`SVRegressionPlot` SHALL render through the SVG backend in this change and SHALL build for every backend whose mark matrix declares support for `Dot`, `Line` and `Ribbon`. A backend whose composed render path is not implemented yet SHALL refuse the operation explicitly instead of drawing nothing.
 
 #### Scenario: SVG rendering
 - **WHEN** the chart is rendered as SVG
 - **THEN** the figure is self-contained and deterministic
 
-#### Scenario: Native rendering
-- **WHEN** the chart is rendered natively
-- **THEN** the frame matches the SVG within rasterization differences
+#### Scenario: Non-SVG backend
+- **WHEN** the chart is built for a backend that supports its marks but whose composed render path has not landed
+- **THEN** the render operation fails with an explicit missing-capability error
 
 #### Scenario: Unsupported backend
 - **WHEN** a backend cannot express a required mark
