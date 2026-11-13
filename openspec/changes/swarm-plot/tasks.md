@@ -35,11 +35,11 @@
 
 ## 5. Book chapter (book branch)
 
-- [ ] Create the documentation branch from `docs/documentations` and add the
+- [x] Create the documentation branch from `docs/documentations` and add the
   chapter under `docs/src/`.
-- [ ] Mirror the figure into `docs/src/assets/swarm_plot.svg` and embed it in the
+- [x] Mirror the figure into `docs/src/assets/swarm_plot.svg` and embed it in the
   chapter.
-- [ ] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
+- [x] Register the chapter in `docs/src/SUMMARY.md` and verify `mdbook build`.
 
 ## 6. FDR and changelog
 
@@ -49,9 +49,20 @@
 
 ## 7. Acceptance
 
-- [ ] Run the four gates locally: `cargo fmt --all --check`,
+- [x] Run the four gates locally: `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets`, `cargo test --workspace`, and the
   figures check.
-- [ ] Open the ADR issue and reference it from both PRs with a closing keyword.
-- [ ] Trigger the independent acceptance review against
+- [x] Open the ADR issue (#120) and reference it from both PRs with a closing keyword.
+- [x] Trigger the independent acceptance review against
   `docs/FDRs/distribution-swarm-plot.md` before opening the code PR.
+
+## Review notes
+
+The acceptance review compared the implementation with FDR-120 and
+`patterns.md` and found no unmet requirement. Two documented choices are worth
+recording: the swarm move works in value-axis units, so the recipe derives its
+`marker_extent` and `width` from the solved scales (the design's implementation
+notes explain the conversion); and a sparse value column contributes exactly
+its stored entries, matching the box and rug recipes, so the parity test uses a
+dense column storing the same entries. Transition wiring is deferred and the
+geometry is claimed as transition-ready only.
