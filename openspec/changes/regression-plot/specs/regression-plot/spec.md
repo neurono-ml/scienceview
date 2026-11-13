@@ -32,15 +32,23 @@
 
 ### Requirement: Representations are equivalent
 
-`SVRegressionPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream.
+`SVRegressionPlot` SHALL accept dense, sparse and streaming input, SHALL dispatch on the representation once per operation, SHALL never densify a sparse input and SHALL never block on a stream. A sparse column SHALL be accepted only when its stored support covers its whole logical length; a view with implicit zeros SHALL be rejected with `UnsupportedRepresentation` naming the dense and streaming alternatives, because fitting only the stored entries would not match the column's dense twin.
 
 #### Scenario: Dense sparse and streaming agree
 - **WHEN** the same data is presented as dense, sparse and streaming
 - **THEN** the output agrees within the documented tolerance
 
 #### Scenario: Sparse is not densified
-- **WHEN** a sparse input is supplied
+- **WHEN** a sparse input is supplied with every logical position stored
 - **THEN** the marks are computed without expanding the data
+
+#### Scenario: Sparse implicit zeros are rejected
+- **WHEN** a sparse column leaves any logical position unstored
+- **THEN** the operation fails with `UnsupportedRepresentation`, naming dense and streaming columns as the alternative
+
+#### Scenario: Dense and sparse twins agree
+- **WHEN** a sparse column stores every logical position, including explicit zero values, and its dense twin carries the same values
+- **THEN** both fits produce the same coefficients and predictions
 
 #### Scenario: Streaming does not block
 - **WHEN** a streaming input is supplied

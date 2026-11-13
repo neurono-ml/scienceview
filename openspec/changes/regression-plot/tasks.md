@@ -65,3 +65,27 @@
 - [x] Align the spec delta's data contract with the deferred `weight` option,
   so the normative requirements no longer promise a column the closed fit
   kernel cannot consume.
+
+## 9. Review fixes
+
+- [x] Reject a sparse view whose support leaves implicit zeros with
+  `UnsupportedRepresentation`, naming the dense and streaming alternatives;
+  accept a sparse view only when every logical position is stored. Add
+  dense-vs-sparse parity tests with explicit zero observations and the
+  rejection path.
+- [ ] Tick the temporal requirements only when a transition surface exists, or
+  defer them in the FDR.
+- [ ] Replace the claimed-but-hardcoded theme consumption with `theme(...)`
+  wiring or an explicit deferral in the FDR.
+- [ ] Split `regression_plot_tests.rs` into a `regression_plot_tests/` folder
+  module.
+- [ ] Route the example through the public `render()`/`save()`, gate it on
+  `render-svg`, regenerate the figure and compare it to the checked-in copy.
+- [ ] Document the recipe-level scene contract and test the typed error for an
+  unavailable backend kind.
+- [ ] Strengthen the tests: model-specific coefficients and a band compared to
+  the kernel's interval values.
+- [ ] Rename the module path to `sv_recipes::sv_relational::sv_regression_plot`
+  and update every path in code, examples, README and the book.
+- [ ] Update the book imports and claims; keep the composition diagram valid;
+  `mdbook build docs` green.
