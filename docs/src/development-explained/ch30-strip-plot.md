@@ -78,8 +78,11 @@ phase, and the offset comes back in slot units (the move's category slot is
 
 The slot column keeps the representation of the value column. For a sparse
 value column the recipe builds a sparse slot view over the same stored indices,
-so a column with a million logical positions and two stored entries jitters two
-entries and allocates nothing per logical row. That is what
+so a column with a million logical positions and two stored entries hands the
+kernel only those two values and those two slots. The only per-logical-row
+allocation left is the group-key word the move request requires (four bytes per
+logical position); no value, slot or offset is materialised for an unstored
+entry. That is what
 `parity_tests::a_huge_sparse_column_marks_only_its_stored_entries` protects.
 
 ## Orientation without a second kernel
