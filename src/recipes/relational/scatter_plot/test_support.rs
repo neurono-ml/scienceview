@@ -120,7 +120,7 @@ pub(crate) fn sv_build_default(source: &dyn SVDataSource) -> SVScatterPlot<'_> {
 }
 
 pub(crate) fn sv_scene_to_svg(
-    scene: &crate::recipes::relational::scatter_plot::SVScatterScene,
+    scene: &crate::sv_recipes::sv_relational::sv_scatter_plot::SVScatterScene,
 ) -> String {
     let mut document = scienceview_svg::SVSvgDocument::new(scene.viewport())
         .with_title(scene.title().unwrap_or("scatter plot"))
@@ -135,7 +135,7 @@ pub(crate) fn sv_scene_to_svg(
 }
 
 pub(crate) fn sv_scene_text(
-    scene: &crate::recipes::relational::scatter_plot::SVScatterScene,
+    scene: &crate::sv_recipes::sv_relational::sv_scatter_plot::SVScatterScene,
 ) -> String {
     scene
         .decoration_primitives_before_marks()

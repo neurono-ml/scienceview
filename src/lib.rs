@@ -49,7 +49,12 @@ pub use scienceview_core::{
 };
 
 /// Charts built by composing the core kernels.
-pub mod recipes;
+///
+/// The public name is prefixed; the folder stays `recipes/` through the
+/// `#[path]` attribute. The tree is
+/// `sv_recipes -> sv_relational -> sv_scatter_plot`.
+#[path = "recipes/mod.rs"]
+pub mod sv_recipes;
 
 #[cfg(feature = "theme")]
 pub use scienceview_theme;

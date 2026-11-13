@@ -7,7 +7,7 @@
 //! backend-agnostic [`SVScatterScene`].
 //!
 //! ```
-//! use scienceview::recipes::relational::scatter_plot::SVScatterPlot;
+//! use scienceview::sv_recipes::sv_relational::sv_scatter_plot::SVScatterPlot;
 //! use scienceview::sv_backend::SVBackendKind;
 //! use scienceview::sv_data::SVDataTableBuilder;
 //! use scienceview::sv_data::SVColumnRole;
