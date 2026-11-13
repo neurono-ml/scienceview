@@ -47,4 +47,5 @@
 - [Chapter 40 — Parallel coordinates: many variables, one polyline per observation](development-explained/ch40-parallel-coordinates-plot.md)
 - [Chapter 41 — Parallel categories plots: reading combinations of categories](development-explained/ch41-parallel-categories-plot.md)
 - [Chapter 42 — Scatterplot matrices: reading every pair at once](development-explained/ch42-splom-plot.md)
+- [Chapter 43 — Pair plots: every variable against every other](development-explained/ch43-pair-plot.md)
 - [Maintaining this book](development-explained/maintaining.md)
