@@ -179,9 +179,12 @@ figure = sv.scatter_plot(
 ## Packaging and the tests that keep it honest
 
 `pyproject.toml` selects maturin and the `python` feature; maturin enables PyO3's
-`extension-module` behaviour itself. A wheel is built with `maturin build --release`; `maturin develop` installs into a
-virtual environment. The extension module is named `scienceview`, so `import
-scienceview` reaches the binding.
+`extension-module` behaviour itself. A wheel is built with
+`maturin build --release`; `maturin develop` installs into a virtual
+environment. The extension module is named `scienceview`, so `import
+scienceview` reaches the binding. PyO3 is used without the stable ABI, so a
+wheel belongs to the CPython version that built it; `requires-python` is the
+floor for building, not a promise that one artifact installs on every version.
 
 The interpreter tests are gated twice — by the `python-tests` feature and by the
 `SCIENCEVIEW_PYTHON_TESTS` environment variable — so the default workspace test
