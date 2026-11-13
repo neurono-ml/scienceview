@@ -27,6 +27,40 @@ released.
   serializer returns the typed `BackendUnavailable` error, and
   `examples/step_plot.rs` produces `docs/figures/step_plot.svg`.
 
+- The relational recipe `SVAreaPlot` in `scienceview::sv_recipes::sv_relational::sv_area_plot`: an
+  area chart that fills the region between an ordered boundary and a baseline.
+  The builder requires an explicit backend and defaults to
+  `SVExecutionMode::Automatic`; it exposes `x`, `y`, an optional `series`,
+  `stack`, `baseline` (`Zero`, `Minimum`, `Maximum` or `Value`), `opacity`,
+  `line`, `interpolate` and a missing-value policy, plus axis titles, scale kind
+  and viewport. Non-stacked areas close against the configured baseline with
+  `SVMark::Area`; stacked areas use `SVMove::Stack` and draw the region between
+  the cumulative baseline and the cumulative top with `SVMark::Ribbon`. A
+  non-finite sample is omitted and splits the area, or rejected under the strict
+  policy. Dense, sparse and streaming columns are accepted, each resolved once
+  per operation, and the operation span records the backend kind, the
+  representation and the point count. `rendering()` returns the ordered
+  backend-agnostic scene; `render` dispatches it to the serializer of the
+  configured kind — the SVG document or the native raster frame — and fails
+  with a typed capability error for a kind the recipe does not serialize yet.
+  Sparse columns are never densified: only stored entries and the boundaries of
+  implicit-zero runs become vertices.
+- The first relational recipe, `SVScatterPlot` (`scienceview::sv_recipes::sv_relational::sv_scatter_plot`):
+  the joint distribution of two continuous columns with optional `series`,
+  `colour` and `size` channels, a constant `alpha` for overplotting, a marker
+  shape, edge colour and width, the jitter and dodge displacement moves, and
+  axes, grid, title and legend. It composes the existing data, scale, move,
+  mark and decoration kernels — no kernel variant is added — resolves dense,
+  sparse and streaming columns once per operation without densifying or
+  blocking, and records the backend kind, representation and the point count
+  the current operation actually resolved in one operation span. `compose()`
+  returns a backend-agnostic `SVScatterScene`; `render()` dispatches through the
+  configured kind — the SVG document for `Svg`, the native frame for `Native`,
+  a typed capability error for a kind with no recipe serializer and
+  `BackendUnavailable` for a compiled-out backend — and each scene serializer
+  rejects a mismatched kind. A large scatter groups its circles into one
+  compound path per paint. The example `examples/scatter_plot.rs` calls the
+  public `to_svg()` method and generates `docs/figures/scatter_plot.svg`.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A
