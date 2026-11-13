@@ -73,12 +73,26 @@
 - [x] Prove stacking tiles: `the_stacked_areas_tile_against_the_cumulative_baseline`
   asserts that the upper area's baseline is the lower area's top, instead of
   only counting primitives.
-- [ ] Close the P6 density gap: `sv_read_column` expands a sparse column into a
-  `Vec<f64>`, so the recipe currently densifies a sparse input even though the
-  `data-view-boundary` spec and patterns.md P6 forbid it. Needs either a truly
-  non-densifying preparation or a spec delta agreed across the recipe family
-  (`band_plot` shares the same helper).
-- [ ] Split the modules that exceed 200 lines into folder modules (P3):
-  `builder.rs`, `core_implementation.rs`, `preparation.rs` and `rendering.rs`.
-- [ ] Reduce the change history to one commit per task: the first implementation
-  landed 18 checked tasks in two commits.
+- [x] Close the P6 density gap: the preparation resolves each column once into
+  a representation-aware accessor and builds only the vertices the geometry
+  needs. `a_million_logical_sparse_column_is_not_expanded`,
+  `a_stacked_million_logical_sparse_column_is_bounded` and
+  `a_million_logical_sparse_column_allocates_proportionally_to_its_stored_slots`
+  cover the sparse paths, and the strict policy still rejects a non-finite
+  stored value while stacking.
+- [x] Split the modules that exceed 200 lines into folder modules (P3):
+  `builder/`, `core_implementation/`, `preparation/` and `rendering/`, each
+  with a pure `mod.rs` dispatcher.
+- [x] Dispatch `render()` on the configured kind: the SVG document and the
+  native raster frame replay the same `SVAreaRendering` scene, and a kind with
+  no serializer fails at build with `UnsupportedBackendCapability`. `save()`
+  exports only SVG because the native backend presents a frame; the
+  recipe-level scene contract is recorded in the FDR.
+- [x] Remove `update(appended_points)` instead of ignoring its argument, and
+  record the in-place update deferral in FDR-103, the design and this spec.
+- [x] Rename the public modules to `sv_recipes::sv_relational::sv_area_plot`
+  through `#[path]`, and qualify the missing-value policy as
+  `SVAreaMissingValuePolicy` so the family re-export cannot collide.
+- [x] Keep the follow-up commits scoped to one review blocker each; the first
+  implementation history is unchanged because rewriting merged history is not
+  a follow-up.

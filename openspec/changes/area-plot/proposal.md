@@ -30,7 +30,8 @@ None.
 
 ## Impact
 
-- New module `src/recipes/relational/area_plot/`.
+- New module `src/recipes/relational/area_plot/`, exposed as
+  `sv_recipes::sv_relational::sv_area_plot` through `#[path]`.
 - New example `examples/area_plot.rs` and generated figure
   `docs/figures/area_plot.svg`.
 - One registration line in `src/recipes/relational/mod.rs`, owned by the
