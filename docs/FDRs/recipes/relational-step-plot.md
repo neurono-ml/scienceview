@@ -71,6 +71,7 @@ Accepted representations: dense, sparse, streaming.
 | `markers` | `bool` | `true` | bokeh `Step` draws markers by default |
 | `aggregate` | `Option<SVStat>` | `None` | — |
 | `duplicate_policy` | `SVStepDuplicatePolicy` | `LastWins` | — |
+| `x_scale` | `SVScaleKind` | `Continuous` | the `x` type is continuous or temporal |
 
 `SVStepPosition` has the values `Before`, `After` and `Center`. The three
 values fully express the pre/post/mid geometry, so the provisional

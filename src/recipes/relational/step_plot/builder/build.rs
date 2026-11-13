@@ -37,6 +37,7 @@ impl<'source> SVStepPlotBuilder<'source> {
             markers: self.markers,
             aggregate: self.aggregate,
             viewport: self.viewport,
+            x_scale_kind: self.x_scale_kind,
             title: self.title,
             backend_kind,
             execution_mode: self.execution_mode,

@@ -76,6 +76,7 @@ fn a_sparse_column_keeps_its_stored_entries() {
     let composition = build(&table).compose().expect("the sparse plot composes");
     assert_eq!(composition.representation(), SVRepresentation::Sparse);
     assert_eq!(composition.point_count(), 2);
+    assert_eq!(composition.series()[0].sample_horizontal().len(), 2);
     assert_eq!(composition.series()[0].horizontal().len(), 3);
 }
 

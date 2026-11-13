@@ -6,6 +6,7 @@ use scienceview_core::sv_data::SVDataSource;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::{SVLength, SVViewport};
 use scienceview_core::sv_mark::SVDashPattern;
+use scienceview_core::sv_scale::SVScaleKind;
 use scienceview_core::sv_stat::SVStat;
 
 /// Builds an [`SVStepPlot`](super::super::SVStepPlot).
@@ -26,6 +27,7 @@ pub struct SVStepPlotBuilder<'source> {
     pub(super) markers: bool,
     pub(super) aggregate: Option<SVStat>,
     pub(super) viewport: SVViewport,
+    pub(super) x_scale_kind: SVScaleKind,
     pub(super) title: Option<String>,
     pub(super) backend_kind: Option<SVBackendKind>,
     pub(super) execution_mode: SVExecutionMode,
@@ -46,6 +48,7 @@ impl SVStepPlotBuilder<'_> {
             markers: true,
             aggregate: None,
             viewport: SVViewport::new(640.0, 400.0),
+            x_scale_kind: SVScaleKind::Continuous,
             title: None,
             backend_kind: None,
             execution_mode: SVExecutionMode::default(),

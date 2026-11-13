@@ -9,7 +9,7 @@ use super::definition::SVStepPlot;
 use scienceview_core::sv_decoration::SVDecorationStyle;
 use scienceview_core::sv_error::SVError;
 use scienceview_core::sv_layout::{SVResolvedRectangle, SVViewport};
-use scienceview_core::sv_scale::{SVScale, SVScaleBuilder, SVScaleKind, sv_default_scale_palette};
+use scienceview_core::sv_scale::{SVScale, SVScaleBuilder, sv_default_scale_palette};
 
 const PLOT_LEFT: f64 = 72.0;
 const PLOT_TOP: f64 = 56.0;
@@ -72,6 +72,8 @@ impl SVStepPlot<'_> {
                 key,
                 label,
                 colour: palette.colour_at_index(index),
+                sample_horizontal: points.iter().map(|point| point.0).collect(),
+                sample_vertical: points.iter().map(|point| point.1).collect(),
                 horizontal,
                 vertical,
             });
@@ -88,11 +90,11 @@ impl SVStepPlot<'_> {
         let (vertical_lower, vertical_upper) = sv_padded_domain(vertical_minimum, vertical_maximum);
         let plot_area = sv_plot_area(self.viewport);
 
-        let horizontal_scale: SVScale<'static> = SVScaleBuilder::new(SVScaleKind::Continuous)
+        let horizontal_scale: SVScale<'static> = SVScaleBuilder::new(self.x_scale_kind)
             .domain(horizontal_lower, horizontal_upper)
             .range(plot_area.x, plot_area.right())
             .build()?;
-        let vertical_scale: SVScale<'static> = SVScaleBuilder::new(SVScaleKind::Continuous)
+        let vertical_scale: SVScale<'static> = SVScaleBuilder::new(self.x_scale_kind)
             .domain(vertical_lower, vertical_upper)
             .range(plot_area.bottom(), plot_area.y)
             .build()?;
@@ -100,11 +102,11 @@ impl SVStepPlot<'_> {
         // The axis kernel measures a scale in plot-local coordinates and adds
         // the plot origin when it places a tick, so the decoration scales span
         // `0..extent` while the mark scales span the absolute plot rectangle.
-        let axis_horizontal: SVScale<'static> = SVScaleBuilder::new(SVScaleKind::Continuous)
+        let axis_horizontal: SVScale<'static> = SVScaleBuilder::new(self.x_scale_kind)
             .domain(horizontal_lower, horizontal_upper)
             .range(0.0, plot_area.width)
             .build()?;
-        let axis_vertical: SVScale<'static> = SVScaleBuilder::new(SVScaleKind::Continuous)
+        let axis_vertical: SVScale<'static> = SVScaleBuilder::new(self.x_scale_kind)
             .domain(vertical_lower, vertical_upper)
             .range(plot_area.height, 0.0)
             .build()?;

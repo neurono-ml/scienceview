@@ -6,6 +6,7 @@ use scienceview_core::sv_backend::SVBackendKind;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::{SVLength, SVViewport};
 use scienceview_core::sv_mark::SVDashPattern;
+use scienceview_core::sv_scale::SVScaleKind;
 use scienceview_core::sv_stat::SVStat;
 
 impl SVStepPlotBuilder<'_> {
@@ -79,6 +80,13 @@ impl SVStepPlotBuilder<'_> {
     #[must_use]
     pub fn viewport(mut self, viewport: SVViewport) -> Self {
         self.viewport = viewport;
+        self
+    }
+
+    /// Chooses the kind of the horizontal scale (`Continuous` or `Temporal`).
+    #[must_use]
+    pub fn x_scale(mut self, x_scale_kind: SVScaleKind) -> Self {
+        self.x_scale_kind = x_scale_kind;
         self
     }
 

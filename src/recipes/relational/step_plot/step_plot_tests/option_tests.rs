@@ -7,6 +7,7 @@ use scienceview_core::sv_data::SVColumnRole;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::SVLength;
 use scienceview_core::sv_mark::SVDashPattern;
+use scienceview_core::sv_scale::SVScaleKind;
 
 const HORIZONTAL: [f64; 3] = [1.0, 2.0, 3.0];
 const VERTICAL: [f64; 3] = [10.0, 20.0, 30.0];
@@ -119,6 +120,31 @@ fn line_width_and_dash_reach_the_mark_paint() {
     let paint = geometries[0].primitives()[0].paint();
     assert_eq!(paint.stroke_width(), 3.0);
     assert_eq!(paint.dash(), &SVDashPattern::Dashed);
+}
+
+#[test]
+fn markers_sit_on_the_samples_not_the_expanded_corners() {
+    let table = source(&HORIZONTAL, &VERTICAL);
+    let composition = build(&table).compose().expect("the plot composes");
+    assert_eq!(composition.series()[0].sample_horizontal(), &HORIZONTAL[..]);
+
+    let geometries = composition.mark_geometries().expect("lines and dots");
+    assert_eq!(geometries[1].primitives().len(), HORIZONTAL.len());
+}
+
+#[test]
+fn a_temporal_x_scale_is_accepted() {
+    let table = source(&HORIZONTAL, &VERTICAL);
+    let plot = SVStepPlot::builder()
+        .data_source(&table)
+        .x("time")
+        .y("value")
+        .x_scale(SVScaleKind::Temporal)
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("a temporal x axis is documented");
+    assert_eq!(plot.x_scale_kind(), SVScaleKind::Temporal);
+    assert!(plot.compose().is_ok());
 }
 
 #[test]

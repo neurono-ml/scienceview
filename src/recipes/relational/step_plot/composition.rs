@@ -9,12 +9,14 @@ use scienceview_core::sv_mark::{
 };
 use scienceview_core::sv_scale::{SVColour, SVScale};
 
-/// One step line: its identity, colour and expanded vertices.
+/// One step line: its identity, colour, sample positions and expanded vertices.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SVStepSeries {
     pub(super) key: String,
     pub(super) label: String,
     pub(super) colour: SVColour,
+    pub(super) sample_horizontal: Vec<f64>,
+    pub(super) sample_vertical: Vec<f64>,
     pub(super) horizontal: Vec<f64>,
     pub(super) vertical: Vec<f64>,
 }
@@ -33,6 +35,16 @@ impl SVStepSeries {
     /// Returns the series colour.
     pub fn colour(&self) -> SVColour {
         self.colour
+    }
+
+    /// Returns the ordered sample positions, before the step expansion.
+    pub fn sample_horizontal(&self) -> &[f64] {
+        &self.sample_horizontal
+    }
+
+    /// Returns the ordered sample values, before the step expansion.
+    pub fn sample_vertical(&self) -> &[f64] {
+        &self.sample_vertical
     }
 
     /// Returns the expanded horizontal vertices, in data space.
@@ -117,7 +129,8 @@ impl SVStepPlotComposition {
     }
 
     /// Produces one geometry per step line, plus one dot geometry per line
-    /// when markers are enabled.
+    /// when markers are enabled. Markers sit on the samples, never on the
+    /// expanded corners.
     ///
     /// # Errors
     ///
@@ -136,12 +149,13 @@ impl SVStepPlotComposition {
                 line = line.dash(dash.clone());
             }
             let mark: SVMark = line.into();
-            let request = self.sv_request(series, &theme);
+            let request = self.sv_request(&series.horizontal, &series.vertical, &theme);
             geometries.push(mark.geometry(&request)?);
 
             if self.markers {
                 let dot: SVMark = SVMark::dot().colour(series.colour).into();
-                let request = self.sv_request(series, &theme);
+                let request =
+                    self.sv_request(&series.sample_horizontal, &series.sample_vertical, &theme);
                 geometries.push(dot.geometry(&request)?);
             }
         }
@@ -149,14 +163,15 @@ impl SVStepPlotComposition {
         Ok(geometries)
     }
 
-    fn sv_request<'series, 'scale>(
+    fn sv_request<'values, 'scale>(
         &'scale self,
-        series: &'series SVStepSeries,
+        horizontal: &'values [f64],
+        vertical: &'values [f64],
         theme: &SVMarkTheme,
-    ) -> SVMarkRequest<'series, 'scale> {
+    ) -> SVMarkRequest<'values, 'scale> {
         SVMarkRequest::new(
-            SVColumnView::Dense(&series.horizontal),
-            SVColumnView::Dense(&series.vertical),
+            SVColumnView::Dense(horizontal),
+            SVColumnView::Dense(vertical),
             &self.horizontal_scale,
             &self.vertical_scale,
             self.plot_area,

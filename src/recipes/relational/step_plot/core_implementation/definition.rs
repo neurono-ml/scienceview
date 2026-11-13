@@ -7,6 +7,7 @@ use scienceview_core::sv_data::SVDataSource;
 use scienceview_core::sv_figure::SVExecutionMode;
 use scienceview_core::sv_layout::{SVLength, SVViewport};
 use scienceview_core::sv_mark::SVDashPattern;
+use scienceview_core::sv_scale::SVScaleKind;
 use scienceview_core::sv_stat::SVStat;
 
 /// A step plot ready to render.
@@ -25,6 +26,7 @@ pub struct SVStepPlot<'source> {
     pub(crate) markers: bool,
     pub(crate) aggregate: Option<SVStat>,
     pub(crate) viewport: SVViewport,
+    pub(crate) x_scale_kind: SVScaleKind,
     pub(crate) title: Option<String>,
     pub(crate) backend_kind: SVBackendKind,
     pub(crate) execution_mode: SVExecutionMode,
@@ -81,6 +83,11 @@ impl SVStepPlot<'_> {
     /// The logical canvas size.
     pub fn viewport(&self) -> SVViewport {
         self.viewport
+    }
+
+    /// The kind of the horizontal scale.
+    pub fn x_scale_kind(&self) -> SVScaleKind {
+        self.x_scale_kind
     }
 
     /// The figure title, when one was configured.

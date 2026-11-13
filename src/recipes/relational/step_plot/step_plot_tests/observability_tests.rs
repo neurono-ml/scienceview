@@ -131,3 +131,86 @@ fn render_records_the_configured_kind_representation_and_points() {
         operations[0]
     );
 }
+
+#[test]
+fn a_streaming_render_records_the_streaming_representation() {
+    let _guard = SV_SPAN_TEST_LOCK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    tracing::callsite::rebuild_interest_cache();
+
+    let horizontal = [1.0, 2.0, 3.0];
+    let vertical = [10.0, 20.0, 30.0];
+    let table = SVTestSource::new()
+        .with_column(
+            "x",
+            SVColumnRole::X,
+            super::test_sources::SVTestColumn::Streaming(&horizontal, 7),
+        )
+        .with_column(
+            "y",
+            SVColumnRole::Y,
+            super::test_sources::SVTestColumn::Streaming(&vertical, 7),
+        );
+    let plot = SVStepPlot::builder()
+        .data_source(&table)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the streaming configuration builds");
+
+    let recorder = SVSpanRecorder::default();
+    let subscriber = Registry::default().with(recorder.clone());
+    tracing::subscriber::with_default(subscriber, || {
+        let _ = plot.render();
+    });
+
+    let spans = recorder.captured();
+    let operations: Vec<_> = spans
+        .iter()
+        .filter(|span| span.get("operation").is_some_and(|name| name == "render"))
+        .collect();
+    assert_eq!(operations.len(), 1, "{spans:?}");
+    assert_eq!(operations[0]["representation"], "Streaming");
+    assert_eq!(operations[0]["points"], "3");
+}
+
+#[test]
+fn a_failing_composition_still_emits_the_operation_span() {
+    let _guard = SV_SPAN_TEST_LOCK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    tracing::callsite::rebuild_interest_cache();
+
+    let empty: [f64; 0] = [];
+    let table = SVTestSource::new()
+        .with_dense("x", SVColumnRole::X, &empty)
+        .with_dense("y", SVColumnRole::Y, &empty);
+    let plot = SVStepPlot::builder()
+        .data_source(&table)
+        .x("x")
+        .y("y")
+        .backend(SVBackendKind::Svg)
+        .build()
+        .expect("the empty configuration builds");
+
+    let recorder = SVSpanRecorder::default();
+    let subscriber = Registry::default().with(recorder.clone());
+    tracing::subscriber::with_default(subscriber, || {
+        let _ = plot.render();
+    });
+
+    let spans = recorder.captured();
+    let operations: Vec<_> = spans
+        .iter()
+        .filter(|span| span.get("operation").is_some_and(|name| name == "render"))
+        .collect();
+    assert_eq!(operations.len(), 1, "one operation span: {spans:?}");
+    assert_eq!(operations[0]["points"], "0");
+    assert!(
+        operations[0]["outcome"].contains("needs at least one observation"),
+        "{:?}",
+        operations[0]
+    );
+}
