@@ -12,6 +12,25 @@ released.
 
 ### Added
 
+- The matrix recipe `SVContourPlot` (`scienceview::sv_recipes::sv_matrix`):
+  contour lines and filled bands over a supplied two-dimensional scalar field.
+  The chart is the composition of FDR-132 —
+  `data -> [SVStat::Aggregate (grid interpolation)] -> scalar field ->
+  [contour extraction] -> [SVScale x, y, colour] -> SVMark::Line | SVMark::Area` —
+  and its configuration surface is `value`, `matrix(rows, columns)`, `x`, `y`,
+  `x_range`, `y_range`, `grid_count`, `levels`, `level_range`, `level_size`,
+  `style`, `colour_map`, `colour_scale`, `line_width`, `labels`,
+  `missing_policy`, the titles and the viewport, with `backend(...)` required and
+  `execution_mode` defaulting to `Automatic`. A matrix column is read directly
+  onto a lattice and a point cloud is binned on both axes through `SVStat::Bin`;
+  the marching-squares extraction lives in the recipe's `geometry` submodule
+  because the closed stat vocabulary has no contour variant. Sparse input is
+  never densified and a streaming input is read from its current window. The
+  composed geometry serializes through `to_svg()` and, with `render-native`,
+  through `to_native_frame()`; any other configured kind fails with a typed
+  error instead of being ignored. Transition and animation wiring is deferred;
+  the geometry is transition-ready. The example `examples/contour_plot.rs`
+  writes `docs/figures/contour_plot.svg`.
 - The distributional recipe `SVPointPlot` (`scienceview::sv_recipes::sv_distribution`):
   the point estimate of every category with its uncertainty, optionally joined
   by a line. The chart is the composition of FDR-123 —
