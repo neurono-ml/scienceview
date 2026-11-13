@@ -78,7 +78,7 @@ impl<'data> SVScatterPlotBuilder<'data> {
     /// Returns [`SVError::MissingDataSource`] or
     /// [`SVError::MissingBackendSelection`] for a required step, a
     /// configuration error for a missing column name, an impossible option or a
-    /// non-jitter move, [`SVError::ColumnNotFound`] for a column the source does
+    /// move other than `Jitter` and `Dodge`, [`SVError::ColumnNotFound`] for a column the source does
     /// not expose, [`SVError::MismatchedLengths`] when the columns disagree and
     /// [`SVError::UnsupportedMark`] when the backend cannot draw dots.
     pub fn build(self) -> Result<SVScatterPlot<'data>, SVError> {

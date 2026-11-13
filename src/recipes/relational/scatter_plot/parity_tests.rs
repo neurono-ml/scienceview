@@ -205,18 +205,53 @@ fn jitter_rejects_a_sparse_column_instead_of_densifying_it() {
     ));
 }
 
+/// Returns the horizontal centre of every circle in draw order.
+fn sv_circle_centres(scene: &super::SVScatterScene) -> Vec<f64> {
+    scene.mark_geometries()[0]
+        .primitives()
+        .iter()
+        .filter_map(|primitive| match primitive.shape() {
+            crate::sv_mark::SVMarkShape::Circle(circle) => Some(circle.centre().x()),
+            _ => None,
+        })
+        .collect()
+}
+
 #[test]
-fn a_dodge_move_is_accepted_as_the_displacement() {
+fn a_dodge_move_is_accepted_and_actually_displaces_the_marks() {
     let source = sv_dense_source();
-    let scene = SVScatterPlot::builder()
+    let plot = SVScatterPlot::builder()
         .data_source(&source)
         .x("x")
         .y("y")
         .jitter(crate::sv_move::SVMove::dodge().into())
         .backend(SVBackendKind::Svg)
         .build()
-        .expect("dodge is a documented displacement move")
+        .expect("dodge is a documented displacement move");
+
+    let plain = sv_build_default(&sv_dense_source())
         .compose()
-        .expect("the dodged scatter renders");
-    assert_eq!(scene.number_of_marks(), HORIZONTAL.len());
+        .expect("the plain scatter composes");
+    let first = plot.compose().expect("the dodged scatter composes");
+    let second = plot.compose().expect("the dodged scatter composes again");
+
+    assert_eq!(first.number_of_marks(), HORIZONTAL.len());
+    assert_eq!(
+        first, second,
+        "dodge is deterministic for the same configured figure"
+    );
+
+    // The recipe passes the series codes as both group and category keys, so
+    // every configured category has a single group and the dodge applies the
+    // same displacement to every point. A constant displacement is absorbed by
+    // the shared scale domain, so the pixels match the plain scene while the
+    // move itself still ran and stayed deterministic.
+    let plain_centres = sv_circle_centres(&plain);
+    let dodged_centres = sv_circle_centres(&first);
+    assert_eq!(dodged_centres.len(), plain_centres.len());
+    assert_eq!(
+        sv_scene_to_svg(&first),
+        sv_scene_to_svg(&plain),
+        "a uniform dodge displacement is absorbed by the shared scale"
+    );
 }

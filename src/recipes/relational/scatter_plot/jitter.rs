@@ -1,19 +1,20 @@
-//! The jitter move applied to the horizontal column.
+//! The displacement moves applied to the horizontal column.
 //!
-//! Jitter is the one move FDR-101 accepts. The displacement comes from the
-//! move kernel; the displaced values are materialised because a mark consumes
-//! one column, never a displacement beside a column.
+//! FDR-101 accepts the two displacement moves, `Jitter` and `Dodge`. The
+//! displacement comes from the move kernel; the displaced values are
+//! materialised because a mark consumes one column, never a displacement
+//! beside a column.
 
 use crate::sv_data::{SVColumnView, SVRepresentation};
 use crate::sv_error::SVError;
 use crate::sv_move::{SVMove, SVMoveRequest, SVMoveSequence};
 
-/// Applies the jitter move to the horizontal column.
+/// Applies the configured displacement move to the horizontal column.
 ///
-/// Jitter is the one move a scatter accepts (FDR-101). The move kernel produces
-/// the displacement from the mark key, so a re-render is deterministic; the
-/// displaced values are materialised because a mark consumes one column, never
-/// a displacement beside a column.
+/// A scatter accepts `Jitter` and `Dodge` (FDR-101); `build` rejects every
+/// other move. The move kernel produces the displacement from the mark key, so
+/// a re-render is deterministic; the displaced values are materialised because
+/// a mark consumes one column, never a displacement beside a column.
 pub(super) fn sv_jittered_horizontal(
     horizontal: SVColumnView<'_>,
     series: Option<SVColumnView<'_>>,
