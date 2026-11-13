@@ -118,8 +118,9 @@ dots.
 horizontally; `Horizontal` puts them on the vertical axis and swarms vertically.
 The recipe lays the data out once and only reassigns which axis receives the
 category position and which receives the value. The two orientation tests read
-the dot centres back and prove that the category coordinate stays constant while
-the value coordinate changes, and vice versa.
+the dot centres back and prove that the category coordinate is constant within
+a category in both orientations and that the two orientations place the
+categories on different axes.
 
 ## The data boundary, once per operation
 
