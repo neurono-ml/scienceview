@@ -51,9 +51,9 @@ unbounded stream is meaningless).
 ### Match key
 
 `Identity` on an identifier column when given; otherwise the points are not
-individually identifiable and the recipe animates the *fit* rather than the
-points. The recipe documents this: without a key, the scatter is redrawn and
-the fit line morphs.
+individually identifiable. The recipe does not carry an identity key or a
+transition surface in this change: both are deferred to the transition
+integration, and the points are redrawn statically.
 
 ## Visual channels
 
