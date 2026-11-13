@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="240" viewBox="0 0 960 240" role="img" aria-label="The step plot pipeline from source columns to SVG">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#59636e"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="240" rx="18" fill="#f6f8fb"/>
+  <text x="480" y="38" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#1f2328">SVStepPlot: one data-space pipeline, one backend-neutral picture</text>
+
+  <g font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">
+    <rect x="24" y="82" width="150" height="76" rx="12" fill="#e3f2fd" stroke="#118ab2" stroke-width="2"/>
+    <text x="99" y="112" font-weight="700" fill="#0b3c5d">SVDataSource</text>
+    <text x="99" y="132" fill="#0b3c5d">x, y, series</text>
+    <text x="99" y="148" fill="#0b3c5d">dense · sparse · stream</text>
+
+    <rect x="214" y="82" width="150" height="76" rx="12" fill="#fff4e6" stroke="#f4a261" stroke-width="2"/>
+    <text x="289" y="112" font-weight="700" fill="#6b3a12">SVStat::Aggregate</text>
+    <text x="289" y="132" fill="#6b3a12">optional, groups by x</text>
+    <text x="289" y="148" fill="#6b3a12">duplicates collapse</text>
+
+    <rect x="404" y="82" width="150" height="76" rx="12" fill="#eef7ee" stroke="#2a9d8f" stroke-width="2"/>
+    <text x="479" y="112" font-weight="700" fill="#12403a">order and dedupe</text>
+    <text x="479" y="132" fill="#12403a">sort by x</text>
+    <text x="479" y="148" fill="#12403a">LastWins · FirstWins</text>
+
+    <rect x="594" y="82" width="150" height="76" rx="12" fill="#f3e8fd" stroke="#8338ec" stroke-width="2"/>
+    <text x="669" y="112" font-weight="700" fill="#4a1d96">expand step vertices</text>
+    <text x="669" y="132" fill="#4a1d96">Before · After · Center</text>
+    <text x="669" y="148" fill="#4a1d96">explicit corners</text>
+
+    <rect x="784" y="82" width="150" height="76" rx="12" fill="#fde8ef" stroke="#ef4766" stroke-width="2"/>
+    <text x="859" y="112" font-weight="700" fill="#6b0f2a">SVMark::Line</text>
+    <text x="859" y="132" fill="#6b0f2a">SVScale x and y</text>
+    <text x="859" y="148" fill="#6b0f2a">SVSvgDocument</text>
+  </g>
+
+  <g stroke="#59636e" stroke-width="2" marker-end="url(#arrow)">
+    <line x1="174" y1="120" x2="208" y2="120"/>
+    <line x1="364" y1="120" x2="398" y2="120"/>
+    <line x1="554" y1="120" x2="588" y2="120"/>
+    <line x1="744" y1="120" x2="778" y2="120"/>
+  </g>
+
+  <text x="480" y="206" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#59636e">The recipe reads each column once, keeps sparse storage sparse, never blocks on a stream, and hands owned vertices to the closed line mark.</text>
+</svg>

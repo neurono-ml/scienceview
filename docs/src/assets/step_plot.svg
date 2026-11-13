@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" role="img" aria-label="Temperature held between samples">
+  <title>Temperature held between samples</title>
+  <desc>Two sampled sensor traces drawn as step plots by scienceview</desc>
+  <rect x="0" y="0" width="640" height="400" fill="#ffffff"/>
+  <text x="320" y="30.4" font-family="system-ui" font-size="16" font-weight="700" text-anchor="middle" fill="#1f2328">Temperature held between samples</text>
+  <line x1="72" y1="56" x2="72" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="121.455" y1="56" x2="121.455" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="170.909" y1="56" x2="170.909" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="220.364" y1="56" x2="220.364" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="269.818" y1="56" x2="269.818" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="319.273" y1="56" x2="319.273" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="368.727" y1="56" x2="368.727" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="418.182" y1="56" x2="418.182" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="467.636" y1="56" x2="467.636" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="517.091" y1="56" x2="517.091" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="566.545" y1="56" x2="566.545" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="616" y1="56" x2="616" y2="344" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="66.473" x2="616" y2="66.473" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="92.655" x2="616" y2="92.655" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="118.836" x2="616" y2="118.836" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="145.018" x2="616" y2="145.018" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="171.2" x2="616" y2="171.2" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="197.382" x2="616" y2="197.382" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="223.564" x2="616" y2="223.564" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="249.745" x2="616" y2="249.745" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="275.927" x2="616" y2="275.927" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="302.109" x2="616" y2="302.109" stroke="#d1d9e0" stroke-width="1"/>
+  <line x1="72" y1="328.291" x2="616" y2="328.291" stroke="#d1d9e0" stroke-width="1"/>
+  <path d="M 72 171.2 L 121.455 171.2 L 121.455 171.2 L 170.909 171.2 L 170.909 131.927 L 220.364 131.927 L 220.364 131.927 L 269.818 131.927 L 269.818 92.655 L 319.273 92.655 L 319.273 56 L 368.727 56 L 368.727 56 L 418.182 56 L 418.182 71.709 L 467.636 71.709 L 467.636 105.745 L 517.091 105.745 L 517.091 105.745 L 566.545 105.745 L 566.545 129.309 L 616 129.309 L 616 129.309" fill="none" stroke="#0969da" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="round"/>
+  <path d="M 72 171.2 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 121.455 171.2 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 121.455 171.2 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 170.909 171.2 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 170.909 131.927 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 220.364 131.927 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 220.364 131.927 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 269.818 131.927 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 269.818 92.655 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 319.273 92.655 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 319.273 56 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 368.727 56 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 368.727 56 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 418.182 56 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 418.182 71.709 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 467.636 71.709 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 467.636 105.745 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 517.091 105.745 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 517.091 105.745 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 566.545 105.745 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 566.545 129.309 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 616 129.309 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 616 129.309 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z" fill="#0969da"/>
+  <path d="M 72 328.291 L 121.455 328.291 L 121.455 344 L 170.909 344 L 170.909 344 L 220.364 344 L 220.364 302.109 L 269.818 302.109 L 269.818 302.109 L 319.273 302.109 L 319.273 228.8 L 368.727 228.8 L 368.727 194.764 L 418.182 194.764 L 418.182 194.764 L 467.636 194.764 L 467.636 218.327 L 517.091 218.327 L 517.091 252.364 L 566.545 252.364 L 566.545 252.364 L 616 252.364 L 616 283.782" fill="none" stroke="#1a7f37" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="round"/>
+  <path d="M 72 328.291 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 121.455 328.291 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 121.455 344 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 170.909 344 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 170.909 344 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 220.364 344 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 220.364 302.109 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 269.818 302.109 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 269.818 302.109 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 319.273 302.109 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 319.273 228.8 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 368.727 228.8 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 368.727 194.764 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 418.182 194.764 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 418.182 194.764 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 467.636 194.764 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 467.636 218.327 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 517.091 218.327 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 517.091 252.364 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 566.545 252.364 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 566.545 252.364 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 616 252.364 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z M 616 283.782 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0 Z" fill="#1a7f37"/>
+  <line x1="72" y1="344" x2="616" y2="344" stroke="#59636e" stroke-width="1"/>
+  <text x="344" y="392" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#1f2328">time</text>
+  <line x1="72" y1="344" x2="72" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="72" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">0</text>
+  <line x1="121.455" y1="344" x2="121.455" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="121.455" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">1</text>
+  <line x1="170.909" y1="344" x2="170.909" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="170.909" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">2</text>
+  <line x1="220.364" y1="344" x2="220.364" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="220.364" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">3</text>
+  <line x1="269.818" y1="344" x2="269.818" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="269.818" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">4</text>
+  <line x1="319.273" y1="344" x2="319.273" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="319.273" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">5</text>
+  <line x1="368.727" y1="344" x2="368.727" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="368.727" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">6</text>
+  <line x1="418.182" y1="344" x2="418.182" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="418.182" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">7</text>
+  <line x1="467.636" y1="344" x2="467.636" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="467.636" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">8</text>
+  <line x1="517.091" y1="344" x2="517.091" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="517.091" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">9</text>
+  <line x1="566.545" y1="344" x2="566.545" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="566.545" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">10</text>
+  <line x1="616" y1="344" x2="616" y2="348" stroke="#59636e" stroke-width="1"/>
+  <text x="616" y="370" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#59636e">11</text>
+  <line x1="72" y1="56" x2="72" y2="344" stroke="#59636e" stroke-width="1"/>
+  <text x="49" y="200" font-family="system-ui" font-size="10" font-weight="400" text-anchor="middle" fill="#1f2328" transform="rotate(-90 49 200)">temperature</text>
+  <line x1="72" y1="66.473" x2="68" y2="66.473" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="73.473" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">22</text>
+  <line x1="72" y1="92.655" x2="68" y2="92.655" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="99.655" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">21</text>
+  <line x1="72" y1="118.836" x2="68" y2="118.836" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="125.836" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">20</text>
+  <line x1="72" y1="145.018" x2="68" y2="145.018" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="152.018" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">19</text>
+  <line x1="72" y1="171.2" x2="68" y2="171.2" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="178.2" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">18</text>
+  <line x1="72" y1="197.382" x2="68" y2="197.382" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="204.382" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">17</text>
+  <line x1="72" y1="223.564" x2="68" y2="223.564" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="230.564" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">16</text>
+  <line x1="72" y1="249.745" x2="68" y2="249.745" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="256.745" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">15</text>
+  <line x1="72" y1="275.927" x2="68" y2="275.927" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="282.927" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">14</text>
+  <line x1="72" y1="302.109" x2="68" y2="302.109" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="309.109" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">13</text>
+  <line x1="72" y1="328.291" x2="68" y2="328.291" stroke="#59636e" stroke-width="1"/>
+  <text x="48" y="335.291" font-family="system-ui" font-size="10" font-weight="400" text-anchor="start" fill="#59636e">12</text>
+  <rect x="530.4" y="70.4" width="12" height="12" fill="#0969da"/>
+  <rect x="530.4" y="70.4" width="12" height="12" fill="none" stroke="#59636e" stroke-width="1"/>
+  <text x="546.4" y="84.8" font-family="system-ui" font-size="12" font-weight="400" text-anchor="start" fill="#1f2328">series 0</text>
+  <rect x="530.4" y="95.2" width="12" height="12" fill="#1a7f37"/>
+  <rect x="530.4" y="95.2" width="12" height="12" fill="none" stroke="#59636e" stroke-width="1"/>
+  <text x="546.4" y="109.6" font-family="system-ui" font-size="12" font-weight="400" text-anchor="start" fill="#1f2328">series 1</text>
+</svg>
