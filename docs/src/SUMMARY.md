@@ -49,4 +49,5 @@
 - [Chapter 42 — Scatterplot matrices: reading every pair at once](development-explained/ch42-splom-plot.md)
 - [Chapter 43 — Pair plots: every variable against every other](development-explained/ch43-pair-plot.md)
 - [Chapter 44 — Joint plots: two variables and their marginals, together](development-explained/ch44-joint-plot.md)
+- [Chapter 45 — The HTML backend: a figure that lives in a page](development-explained/ch45-html-backend.md)
 - [Maintaining this book](development-explained/maintaining.md)
