@@ -64,7 +64,7 @@ is the grid position.
 | `value` | `SVColumnRef` | — | seaborn |
 | `series` | `Option<SVColumnRef>` | `None` | seaborn, plotly |
 | `bandwidth` | `Option<f64>` | `None` — rule of thumb | seaborn `bw_adjust` |
-| `bw_adjust` | `f64` | `1.0` | seaborn |
+| `bandwidth_adjustment` (`bw_adjust` in seaborn) | `f64` | `1.0` | seaborn |
 | `kernel` | `SVKernelShape` | `Gaussian` | seaborn |
 | `grid_count` | `usize` | `256` | — |
 | `cut` | `f64` | `3.0` | seaborn `cut` |
@@ -103,7 +103,7 @@ Consumes `mark.palette`, `mark.area_opacity`, `text.*`, axis tokens.
       `large_data_is_estimated_over_the_fixed_grid` (trapezoid integral within
       `1e-3`, the kernel's documented tolerance).
 - [x] The bandwidth follows the rule of thumb when not given, and scales
-      linearly with `bw_adjust`.
+      linearly with `bandwidth_adjustment`.
       Evidence: `the_bandwidth_follows_the_rule_of_thumb_and_scales_with_the_adjustment`
       and `an_explicit_bandwidth_is_used_verbatim`.
 - [x] A sparse input is never densified; the kernel works from the sparse
