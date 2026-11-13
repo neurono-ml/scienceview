@@ -12,6 +12,21 @@ released.
 
 ### Added
 
+- The relational recipe `SVAreaPlot` in `scienceview::recipes::relational`: an
+  area chart that fills the region between an ordered boundary and a baseline.
+  The builder requires an explicit backend and defaults to
+  `SVExecutionMode::Automatic`; it exposes `x`, `y`, an optional `series`,
+  `stack`, `baseline` (`Zero`, `Minimum`, `Maximum` or `Value`), `opacity`,
+  `line`, `interpolate` and a missing-value policy, plus axis titles, scale kind
+  and viewport. Non-stacked areas close against the configured baseline with
+  `SVMark::Area`; stacked areas use `SVMove::Stack` and draw the region between
+  the cumulative baseline and the cumulative top with `SVMark::Ribbon`. A
+  non-finite sample is omitted and splits the area, or rejected under the strict
+  policy. Dense, sparse and streaming columns are accepted, each resolved once
+  per operation, and the operation span records the backend kind, the
+  representation and the point count. `rendering()` returns the ordered
+  backend-agnostic primitives; with `render-svg`, `render` and `save` serialize
+  them through the SVG document backend.
 - The native rendering backend `scienceview_native`: a from-scratch CPU
   renderer that implements `SVRenderBackend` for `SVBackendKind::Native` and
   registers itself in the `SVBackendRegistry`. It is split in two layers. A

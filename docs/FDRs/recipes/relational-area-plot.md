@@ -5,11 +5,11 @@
 | Id | FDR-103 |
 | Name | `SVAreaPlot` |
 | Family | Relational |
-| Status | planned |
+| Status | shipped |
 | Layer | Recipe |
 | Core | [core-mark](../core/core-mark.md), [core-stat](../core/core-stat.md), [core-move](../core/core-move.md), [core-scale](../core/core-scale.md), [core-transition](../core/core-transition.md), [core-animation](../core/core-animation.md) |
-| Public chapter | _pending_ |
-| Example program | _pending_ |
+| Public chapter | `docs/src/development-explained/ch18-area-plot.md` |
+| Example program | `examples/area_plot.rs` |
 
 ## Purpose
 
@@ -101,10 +101,28 @@ above it moves, and the animation shows that movement.
 
 ## Acceptance
 
-- [ ] Areas are drawn against the configured baseline.
-- [ ] With stacking enabled, the areas tile without gaps or overlaps.
-- [ ] Dense, sparse and streaming inputs give the same areas.
+- [x] Areas are drawn against the configured baseline.
+      Evidence: `the_configured_baseline_moves_the_area`.
+- [x] With stacking enabled, the areas tile without gaps or overlaps.
+      Evidence: `the_stacked_areas_tile_against_the_cumulative_baseline`; the
+      cumulative baseline is the upper boundary of the lower series.
+- [x] Dense, sparse and streaming inputs give the same areas.
+      Evidence: `dense_sparse_and_streaming_representations_agree`.
 - [ ] An animated stack shows the areas sliding into their stacked positions.
+      The render operation recomputes the stack and the areas take their new
+      positions on each frame; the transition kernel owns the interpolation
+      between frames, which this recipe does not yet wire.
+
+## Amendment
+
+The recipe shipped with one composition correction. `SVMark::Area` closes
+against a scalar baseline (`Zero`, `Minimum`, `Maximum` or `Value`), so it
+cannot express the per-point cumulative baseline a stack produces. A stacked
+area therefore composes `SVMark::Ribbon` between the cumulative baseline and
+the cumulative top produced by `SVMove::Stack`; a non-stacked area composes
+`SVMark::Area` against the configured baseline. The stack itself is never
+reimplemented. A per-point baseline on the area mark would be a core change
+with its own spec delta.
 
 ## Open questions
 

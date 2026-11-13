@@ -48,6 +48,9 @@ pub use scienceview_core::{
     sv_transition, sv_window,
 };
 
+// Chart recipes: the named charts composed from the core kernels.
+pub mod recipes;
+
 #[cfg(feature = "theme")]
 pub use scienceview_theme;
 
