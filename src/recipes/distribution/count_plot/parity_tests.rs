@@ -143,6 +143,7 @@ fn a_streaming_input_returns_promptly_and_shows_the_window() {
     assert_eq!(bars, 3);
 }
 
+#[cfg(feature = "render-svg")]
 #[test]
 fn a_streaming_update_recomposes_the_current_window_promptly() {
     let source = sv_streaming_source();
